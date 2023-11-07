@@ -24,7 +24,7 @@ The Chalkboard library is a JavaScript namespace that provides a plethora of bot
 # Installation
 If your JavaScript project is being run within an HTML page, you can import the Chalkboard library to it with this line:
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.0.0/Chalkboard.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.0.0/src/Chalkboard.min.js"></script>
 ```
 Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) and put the relevant files in your project's directory.
 
