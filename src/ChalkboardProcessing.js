@@ -1046,8 +1046,11 @@ var Chalkboard = {
             }
             return result / arr.length;
         },
+        error: function(arr) {
+            return Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length);
+        },
         confidenceInterval: function(arr) {
-            return [Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)), Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))];
+            return [Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)), Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))];
         },
         change: function(initialArr, finalArr) {
             var result = [];
@@ -1068,6 +1071,31 @@ var Chalkboard = {
                 }
             }
             return (result / arr.length) * 100;
+        },
+        convolution: function(arr1, arr2) {
+            var result = [];
+            for(var i = 0; i < arr1.length + arr2.length - 1; i++) {
+                var sum = 0;
+                for(var j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
+                    sum += arr1[j] * arr2[i - j];
+                }
+                result.push(sum);
+            }
+            return result;
+        },
+        correlation: function(arr1, arr2) {
+            var result = [];
+            for(let i = 0; i < arr1.length + arr2.length - 1; i++) {
+                var sum = 0;
+                for(let j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
+                    sum += arr1[j] * arr2[arr2.length - 1 - i + j];
+                }
+                result.push(sum);
+            }
+            return result;
+        },
+        autocorrelation: function(arr) {
+            return Chalkboard.stat.correlation(arr, arr);
         },
         chiSquared: function(observedArr, expectedArr) {
             var result = [];
