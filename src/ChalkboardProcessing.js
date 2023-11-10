@@ -160,8 +160,15 @@ var Chalkboard = {
             if(func.type === "expl") {
                 var f = Chalkboard.real.parse("x => " + func.definition);
                 return f(val);
+            } else if(func.type === "pola") {
+                var r = Chalkboard.real.parse("O => " + func.definition);
+                return r(val);
+            } else if(func.type === "para") {
+                var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
+                return Chalkboard.vec2.new(x(val), y(val));
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
             }
         },
         pow: function(base, num) {
@@ -542,20 +549,6 @@ var Chalkboard = {
             domain = domain || [-10, 10];
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
-            var f;
-            var r;
-            var x;
-            var y;
-            if(func.type === "expl") {
-                f = Chalkboard.real.parse("x => " + func.definition);
-            } else if(func.type === "pola") {
-                r = Chalkboard.real.parse("O => " + func.definition);
-            } else if(func.type === "para") {
-                x = Chalkboard.real.parse("t => " + func.definition[0]);
-                y = Chalkboard.real.parse("t => " + func.definition[1]);
-            } else {
-                return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", or \"para\".";
-            }
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -563,14 +556,18 @@ var Chalkboard = {
             stroke(rgb[0], rgb[1], rgb[2]);
             beginShape();
             if(func.type === "expl") {
+                var f = Chalkboard.real.parse("x => " + func.definition);
                 for(var i = domain[0] / scl; i <= domain[1] / scl; i++) {
                     vertex(i, -f(i * scl) / scl);
                 }
             } else if(func.type === "pola") {
+                var r = Chalkboard.real.parse("O => " + func.definition);
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(r(i * scl) / scl * Chalkboard.trig.cos(i * scl), -r(i * scl) / scl * Chalkboard.trig.sin(i * scl));
                 }
             } else if(func.type === "para") {
+                var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(x(i * scl) / scl, -y(i * scl) / scl);
                 }
@@ -1985,25 +1982,22 @@ var Chalkboard = {
             }
         },
         fxdx: function(func, a, b) {
+            var integrand;
             if(func.type === "expl") {
-                var f = Chalkboard.real.parse("x => " + func.definition);
-                var step = (b - a) / 1000000;
-                var sum = f(a) + f(b);
-                for(var i = 1; i < 1000000; i++) {
-                    var x = a + i * step;
-                    sum += i % 2 === 0 ? 2 * f(x) : 4 * f(x);
-                }
-                return (step / 3) * sum;
+                integrand = Chalkboard.real.parse("x => " + func.definition);
+            } else if(func.type === "pola") {
+                integrand = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
+            } else if(func.type === "para") {
+                integrand = Chalkboard.real.parse("t => " + "Math.sqrt(((" + func.definition[0] + ") * (" + func.definition[0] + ")) + ((" + func.definition[1] + ") * (" + func.definition[1] + ")))");
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
             }
-        },
-        rOdO: function(func, a, b) {
-            if(func.type === "pola") {
-                return Chalkboard.calc.fxdx(Chalkboard.real.function(("((" + func.definition + ") * (" + func.definition + ")) / 2").replace(/O/g, "x")), a, b);
-            } else {
-                return "TypeError: Parameter \"func\" must be of type \"pola\".";
+            var step = (b - a) / 1000000;
+            var sum = integrand(a) + integrand(b);
+            for(var i = 1; i < 1000000; i++) {
+                sum += i % 2 === 0 ? 2 * integrand(a + i * step) : 4 * integrand(a + i * step);
             }
+            return (step / 3) * sum;
         },
         extrema: function(func, domain) {
             var result = [];
