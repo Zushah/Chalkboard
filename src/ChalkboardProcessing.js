@@ -1564,35 +1564,41 @@ var Chalkboard = {
                 return undefined;
             }
         },
+        cofactor: function(matr, row, col) {
+            return matr.slice(0, row - 1).concat(matr.slice(row)).map(function(row) {
+                return row.slice(0, col - 1).concat(row.slice(col));
+            });
+        },
+        adjugate: function(matr, row, col) {
+            return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
+        },
         det: function(matr) {
+            var result = 0;
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 if(Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
                 } else if(Chalkboard.matr.rows(matr) === 2) {
                     return (matr[0][0] * matr[1][1]) - (matr[0][1] * matr[1][0]);
-                } else if(Chalkboard.matr.rows(matr) === 3) {
-                    return (matr[0][0] * matr[1][1] * matr[2][2]) + (matr[0][1] * matr[1][2] * matr[2][0]) + (matr[0][2] * matr[1][0] * matr[2][1]) - (matr[0][2] * matr[1][1] * matr[2][0]) - (matr[0][1] * matr[1][0] * matr[2][2]) - (matr[0][0] * matr[1][2] * matr[2][1]);
                 } else {
-                    return undefined;
+                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        var cofactor = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 1, i + 1));
+                        result += i % 2 === 0 ? cofactor : -cofactor;
+                    }
+                    return result;
                 }
             } else {
                 return undefined;
             }
         },
         transpose: function(matr) {
-            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                if(Chalkboard.matr.rows(matr) === 1) {
-                    return Chalkboard.matr.new([matr[0][0]]);
-                } else if(Chalkboard.matr.rows(matr) === 2) {
-                    return Chalkboard.matr.new([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
-                } else if(Chalkboard.matr.rows(matr) === 3) {
-                    return Chalkboard.matr.new([matr[0][0], matr[1][0], matr[2][0]], [matr[0][1], matr[1][1], matr[2][0]], [matr[0][2], matr[1][2], matr[2][2]]);
-                } else if(Chalkboard.matr.rows(matr) === 4) {
-                    return Chalkboard.matr.new([matr[0][0], matr[1][0], matr[2][0], matr[3][0]], [matr[0][1], matr[1][1], matr[2][1], matr[3][1]], [matr[0][2], matr[1][2], matr[2][2], matr[3][2]], [matr[0][3], matr[1][3], matr[2][3], matr[3][3]]);
+            var result = [];
+            for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
+                result.push([]);
+                for(let j = 0; j < Chalkboard.matr.rows(matr); j++) {
+                    result[i].push(matr[j][i]);
                 }
-            } else {
-                return undefined;
             }
+            return result;
         },
         invert: function(matr) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
@@ -1982,11 +1988,12 @@ var Chalkboard = {
             if(func.type === "expl") {
                 var f = Chalkboard.real.parse("x => " + func.definition);
                 var step = (b - a) / 1000000;
-                var riemann = (f(a) + f(b)) / 2;
-                for(var i = 0; i < 1000000; i++) {
-                    riemann += f(a + step * i);
+                var sum = f(a) + f(b);
+                for(var i = 1; i < 1000000; i++) {
+                    var x = a + i * step;
+                    sum += i % 2 === 0 ? 2 * f(x) : 4 * f(x);
                 }
-                return riemann * step;
+                return (step / 3) * sum;
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\".";
             }
