@@ -641,6 +641,48 @@ var Chalkboard = {
             popMatrix();
             return "The convolution of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
+        correlation: function(func_1, func_2, scl, rgb, domain, origin, weight, res) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            noFill();
+            strokeWeight(weight);
+            stroke(rgb[0], rgb[1], rgb[2]);
+            beginShape();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                vertex(i, -Chalkboard.calc.correlation(func_1, func_2, i * scl) / scl);
+            }
+            endShape();
+            popMatrix();
+            return "The cross-correlation of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        autocorrelation: function(func, scl, rgb, domain, origin, weight, res) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            noFill();
+            strokeWeight(weight);
+            stroke(rgb[0], rgb[1], rgb[2]);
+            beginShape();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                vertex(i, -Chalkboard.calc.autocorrelation(func, i * scl) / scl);
+            }
+            endShape();
+            popMatrix();
+            return "The autocorrelation of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
         Laplace: function(func, scl, rgb, domain, origin, weight, res) {
             scl = scl || 1;
             scl /= 100;
@@ -1973,12 +2015,19 @@ var Chalkboard = {
             }
         },
         dfdx: function(func, val) {
+            var h = 0.000000001;
             if(func.type === "expl") {
                 var f = Chalkboard.real.parse("x => " + func.definition);
-                var h = 0.000000001;
                 return (f(val + h) - f(val)) / h;
+            } else if(func.type === "pola") {
+                var r = Chalkboard.real.parse("O => " + func.definition);
+                return (r(val + h) - r(val)) / h;
+            } else if(func.type === "para") {
+                var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
+                return Chalkboard.vec2.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
             }
         },
         fxdx: function(func, a, b) {
@@ -2013,6 +2062,12 @@ var Chalkboard = {
         },
         convolution: function(func_1, func_2, val) {
             return Chalkboard.calc.fxdx(Chalkboard.real.function("(" + func_1.definition + ") * (" + func_2.definition.replace(/x/g, "(" + val + " - x)") + ")"), -100, 100);
+        },
+        correlation: function(func_1, func_2, val) {
+            return Chalkboard.calc.fxdx(Chalkboard.real.function("(" + func_1.definition + ") * (" + func_2.definition.replace(/x/g, "(" + val + " + x)") + ")"), -100, 100);
+        },
+        autocorrelation: function(func, val) {
+            return Chalkboard.calc.correlation(func, func, val);
         },
         Laplace: function(func, val) {
             if(val > 0) {

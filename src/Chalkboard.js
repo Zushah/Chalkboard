@@ -667,6 +667,48 @@ var Chalkboard = {
             context.restore();
             return "The convolution of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
+        correlation: function(func_1, func_2, scl, rgb, domain, origin, weight, res, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            context = context || ctx;
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.lineWidth = weight;
+            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+            context.beginPath();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                context.lineTo(i, -Chalkboard.calc.correlation(func_1, func_2, i * scl) / scl);
+            }
+            context.stroke();
+            context.restore();
+            return "The cross-correlation of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        autocorrelation: function(func, scl, rgb, domain, origin, weight, res, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            context = context || ctx;
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.lineWidth = weight;
+            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+            context.beginPath();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * scl) / scl);
+            }
+            context.stroke();
+            context.restore();
+            return "The autocorrelation of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
         Laplace: function(func, scl, rgb, domain, origin, weight, res, context) {
             scl = scl || 1;
             scl /= 100;
@@ -2058,6 +2100,12 @@ var Chalkboard = {
         },
         convolution: function(func_1, func_2, val) {
             return Chalkboard.calc.fxdx(Chalkboard.real.function("(" + func_1.definition + ") * (" + func_2.definition.replace(/x/g, "(" + val + " - x)") + ")"), -100, 100);
+        },
+        correlation: function(func_1, func_2, val) {
+            return Chalkboard.calc.fxdx(Chalkboard.real.function("(" + func_1.definition + ") * (" + func_2.definition.replace(/x/g, "(" + val + " + x)") + ")"), -100, 100);
+        },
+        autocorrelation: function(func, val) {
+            return Chalkboard.calc.correlation(func, func, val);
         },
         Laplace: function(func, val) {
             if(val > 0) {
