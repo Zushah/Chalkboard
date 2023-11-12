@@ -50,12 +50,12 @@ var Chalkboard = {
             return inf + Math.random() * (sup - inf);
         },
         factorial: function(num) {
-            var n = 1;
-            for(var i = 1; i <= num; i++) {
-                n *= i;
-            }
-            i--;
             if(num >= 0) {
+                var n = 1;
+                for(var i = 1; i <= num; i++) {
+                    n *= i;
+                }
+                i--;
                 return n;
             } else if(num < 0) {
                 return undefined;
@@ -77,17 +77,56 @@ var Chalkboard = {
             return Chalkboard.numb.factorial(n) / Chalkboard.numb.factorial(n - r);
         },
         prime: function(num) {
-            for(var i = 2, n = Math.sqrt(num); i <= n; i++) {
+            if(num === 2) {
+                return 2;
+            }
+            var n = 1;
+            var prime = 3;
+            while(n < num) {
+                if(Chalkboard.numb.isPrime(prime)) {
+                    n++;
+                }
+                if(n < num) {
+                    prime += 2;
+                }
+            }
+            return prime;
+        },
+        isPrime: function(num) {
+            for(var i = 2; i <= Chalkboard.real.sqrt(num); i++) {
                 if(num % i === 0) {
                     return false;
                 }
             }
             return num > 1;
         },
+        nextPrime: function(num) {
+            var result = num + 1;
+            while(!Chalkboard.numb.isPrime(result)) {
+                result++;
+            }
+            return result;
+        },
+        primeGap: function(inf, sup) {
+            var prime = null;
+            var gap = 0;
+            for(var i = inf; i <= sup; i++) {
+                if(Chalkboard.numb.isPrime(i)) {
+                    if(prime !== null) {
+                        var temp = i - prime;
+                        if(temp > gap) {
+                            gap = temp;
+                        }
+                    }
+                    prime = i;
+                }
+            }
+            return gap;
+        },
         primeArr: function(inf, sup) {
             var result = [];
             for(var i = inf; i <= sup; i++) {
-                if(Chalkboard.numb.prime(i)) {
+                if(Chalkboard.numb.isPrime(i)) {
                     result.push(i);
                 }
             }
@@ -99,7 +138,7 @@ var Chalkboard = {
         compositeArr: function(inf, sup) {
             var result = [];
             for(var i = inf; i <= sup; i++) {
-                if(!Chalkboard.numb.prime(i)) {
+                if(!Chalkboard.numb.isPrime(i)) {
                     result.push(i);
                 }
             }
@@ -107,6 +146,32 @@ var Chalkboard = {
         },
         compositeCount: function(inf, sup) {
             return Chalkboard.numb.compositeArr(inf, sup).length;
+        },
+        factors: function(num) {
+            var result = [];
+            while(num % 2 === 0) {
+                result.push(2);
+                num /= 2;
+            }
+            for(let i = 3; i <= Chalkboard.real.sqrt(num); i += 2) {
+                while(num % i === 0) {
+                    result.push(i);
+                    num /= i;
+                }
+            }
+            if(num > 2) {
+                result.push(num);
+            }
+            return result;
+        },
+        divisors: function(num) {
+            var result = [];
+            for(let i = 1; i <= num; i++) {
+                if(num % i === 0) {
+                    result.push(i);
+                }
+            }
+            return result;
         },
         sgn: function(num) {
             if(num < 0) {
@@ -133,11 +198,24 @@ var Chalkboard = {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
         },
         Fibonacci: function(num) {
-            if(num < 2) {
-                return num;
-            } else {
-                return Chalkboard.numb.Fibonacci(num - 1) + Chalkboard.numb.Fibonacci(num - 2);
+            var sequence = [0, 1];
+            if(sequence[num] === undefined) {
+                sequence.push(Chalkboard.numb.Fibonacci(num - 1) + sequence[num - 2]);
             }
+            return sequence[num];
+        },
+        Gaussian: function(height, mean, deviation) {
+            var u, v, s;
+            while(true) {
+                u = Chalkboard.numb.random(-1, 1);
+                v = Chalkboard.numb.random(-1, 1);
+                s = u * u + v * v;
+                if(s < 1 && s !== 0) {
+                    break;
+                }
+            }
+            var z = u * Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(s) / s);
+            return z * height * deviation + mean;
         }
     },
     real: {
@@ -1147,8 +1225,8 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        Gaussian: function(height, position, deviation) {
-            return Chalkboard.real.function(height.toString() + " * Math.exp(-((x - " + position.toString() + ") * (x - " + position.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
+        Gaussian: function(height, mean, deviation) {
+            return Chalkboard.real.function(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
         }
     },
     vec2: {
