@@ -1,6 +1,6 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./src/logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
     <a href="https://www.github.com/Zushah/Chalkboard/commits"><img src="https://img.shields.io/github/last-commit/Zushah/Chalkboard" alt="Last commit"></a>
     <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard?path=build"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="jsDelivr traffic"></a>
     <br>
@@ -19,14 +19,14 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was created by [Zushah](https://www.github.com/Zushah) during 2022 and 2023. As of [version 1.0.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0), Chalkboard has 324 different commands. The library is not only available for standard JavaScript but also for [Proccesing.js](https://www.processing.org/) (compatible with the [Khan Academy editor](https://www.khanacademy.org/computer-programming/new/pjs)), as well. Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was created by [Zushah](https://www.github.com/Zushah) during 2022 and 2023. As of [version 1.1.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0), Chalkboard has 339 different commands. The library is not only available for standard JavaScript but also for [Proccesing.js](https://www.processing.org/) (compatible with the [Khan Academy editor](https://www.khanacademy.org/computer-programming/new/pjs)), as well. Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
 
 # Installation
-If your JavaScript project is being run within an HTML page, you can import the Chalkboard library to it with this line:
+If your JavaScript project is being run within an HTML webpage, you can import the latest version of the Chalkboard library into it with this line:
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.0.0/src/Chalkboard.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.1.0/src/Chalkboard.min.js"></script>
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0) and put the relevant files in your project's directory.
 
 More methods and details about installing Chalkboard can be read [here](https://zushah.github.io/Chalkboard/installation.html).
 

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.0.0 Example Program: Hyperbolic Functions
+    Version 1.1.0 Example Program: Hyperbolic Functions
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

@@ -1,17 +1,17 @@
 /*
-    Chalkboard
-    Version 1.0.0 released 11/06/2023
+    The Chalkboard Library
+    Version 1.1.0 released 11/13/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0
+    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0
     Documentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/
 */
 var Chalkboard = {
     README: function() {
-        console.log("Chalkboard\nVersion 1.0.0 released 11/06/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a collection of JavaScript code that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.1.0 released 11/13/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
     },
     LOGO: function(x, y, s) {
         x = x || width / 2;
