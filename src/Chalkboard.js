@@ -462,22 +462,6 @@ var Chalkboard = {
                 return comp.a.toString() + " - " + Math.abs(comp.b).toString() + "i";
             }
         },
-        display: function(comp, scl, rgb, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgb = rgb || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.fillStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.ellipse(comp.a / scl, -comp.b / scl, weight, weight, 0, 0, Chalkboard.PI(2));
-            context.fill();
-            context.restore();
-            return "Chalkboard.comp " + Chalkboard.comp.toString(comp) + " has been displayed at the point (" + (origin[0] + comp.a / scl) + ", " + (origin[1] - comp.b / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
-        },
         print: function(comp) {
             console.log(Chalkboard.comp.toString(comp));
         }
@@ -681,6 +665,84 @@ var Chalkboard = {
             context.stroke();
             context.restore();
             return "The function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        comp: function(comp, scl, rgb, origin, weight, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 5;
+            context = context || ctx;
+            context.fillStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.beginPath();
+            context.ellipse(comp.a / scl, -comp.b / scl, weight, weight, 0, 0, Chalkboard.PI(2));
+            context.fill();
+            context.restore();
+            return "The complex number " + Chalkboard.comp.toString(comp) + " has been plotted at the point (" + (origin[0] + comp.a / scl) + ", " + (origin[1] - comp.b / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        vec2: function(vec2, scl, rgb, origin, weight, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 5;
+            context = context || ctx;
+            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+            context.lineWidth = weight;
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo(vec2.x / scl, -vec2.y / scl);
+            context.stroke();
+            context.restore();
+            return "The vector " + Chalkboard.vec2.toString(vec2) + "has been plotted at the point (" + (origin[0] + vec2.x / scl) + ", " + (origin[1] - vec2.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        vec3: function(vec3, scl, rgb, origin, weight, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 5;
+            context = context || ctx;
+            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
+            context.lineWidth = weight;
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.beginPath();
+            context.moveTo(0, 0);
+            context.lineTo((vec3.x / scl) / (vec3.z * 0.25 + 1), (-vec3.y / scl) / (vec3.z * 0.25 + 1));
+            context.stroke();
+            context.restore();
+            return "The vector " + Chalkboard.vec3.toString(vec3) + "has been plotted at the point (" + (origin[0] + vec3.x / scl) + ", " + (origin[1] - vec3.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        matr: function(matr, scl, rgb, origin, weight, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 2;
+            var plotposx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
+            var plotnegx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
+            var plotposy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
+            var plotnegy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
+            for(var i = -10; i <= 10; i++) {
+                Chalkboard.vec2.plot(plotposx, scl, rgb, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
+                Chalkboard.vec2.plot(plotnegx, scl, rgb, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
+                Chalkboard.vec2.plot(plotposy, scl, rgb, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
+                Chalkboard.vec2.plot(plotnegy, scl, rgb, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
+            }
+            var plotposaxisx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
+            var plotnegaxisx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
+            var plotposaxisy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
+            var plotnegaxisy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
+            Chalkboard.vec2.plot(plotposaxisx, scl, rgb, origin, weight, context);
+            Chalkboard.vec2.plot(plotnegaxisx, scl, rgb, origin, weight, context);
+            Chalkboard.vec2.plot(plotposaxisy, scl, rgb, origin, weight, context);
+            Chalkboard.vec2.plot(plotnegaxisy, scl, rgb, origin, weight, context);
+            return "The matrix has been plotted with its origin at the point (" + origin[0] + ", " + origin[1] + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
         dfdx: function(func, scl, rgb, domain, origin, weight, res, context) {
             scl = scl || 1;
@@ -1368,24 +1430,6 @@ var Chalkboard = {
         toString: function(vec2) {
             return "(" + vec2.x.toString() + ", " + vec2.y.toString() + ")";
         },
-        display: function(vec2, scl, rgb, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgb = rgb || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
-            context.lineWidth = weight;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.lineTo(vec2.x / scl, -vec2.y / scl);
-            context.stroke();
-            context.restore();
-            return "Chalkboard.vec2 " + Chalkboard.vec2.toString(vec2) + "has been displayed at the point (" + (origin[0] + vec2.x / scl) + ", " + (origin[1] - vec2.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
-        },
         print: function(vec2) {
             console.log(Chalkboard.vec2.toString(vec2));
         }
@@ -1510,24 +1554,6 @@ var Chalkboard = {
         },
         toString: function(vec3) {
             return "(" + vec3.x.toString() + ", " + vec3.y.toString() + ", " + vec3.z.toString() + ")";
-        },
-        display: function(vec3, scl, rgb, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgb = rgb || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.strokeStyle = "rgb(" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ")";
-            context.lineWidth = weight;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.lineTo((vec3.x / scl) / (vec3.z * 0.25 + 1), (-vec3.y / scl) / (vec3.z * 0.25 + 1));
-            context.stroke();
-            context.restore();
-            return "Chalkboard.vec3 " + Chalkboard.vec3.toString(vec3) + "has been displayed at the point (" + (origin[0] + vec3.x / scl) + ", " + (origin[1] - vec3.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
         print: function(vec3) {
             console.log(Chalkboard.vec3.toString(vec3));
@@ -2069,32 +2095,6 @@ var Chalkboard = {
             } else {
                 return undefined;
             }
-        },
-        display: function(matr, scl, rgb, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgb = rgb || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            var displayposx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
-            var displaynegx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
-            var displayposy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
-            var displaynegy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
-            for(var i = -10; i <= 10; i++) {
-                Chalkboard.vec2.display(displayposx, scl, rgb, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
-                Chalkboard.vec2.display(displaynegx, scl, rgb, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
-                Chalkboard.vec2.display(displayposy, scl, rgb, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
-                Chalkboard.vec2.display(displaynegy, scl, rgb, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
-            }
-            var displayposaxisx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
-            var displaynegaxisx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
-            var displayposaxisy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
-            var displaynegaxisy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
-            Chalkboard.vec2.display(displayposaxisx, scl, rgb, origin, weight, context);
-            Chalkboard.vec2.display(displaynegaxisx, scl, rgb, origin, weight, context);
-            Chalkboard.vec2.display(displayposaxisy, scl, rgb, origin, weight, context);
-            Chalkboard.vec2.display(displaynegaxisy, scl, rgb, origin, weight, context);
-            return "Chalkboard.matr has been displayed with its origin at the point (" + origin[0] + ", " + origin[1] + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
         print: function(matr) {
             console.log(Chalkboard.matr.toString(matr));
