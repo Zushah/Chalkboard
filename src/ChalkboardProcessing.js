@@ -153,7 +153,7 @@ var Chalkboard = {
                 result.push(2);
                 num /= 2;
             }
-            for(let i = 3; i <= Chalkboard.real.sqrt(num); i += 2) {
+            for(var i = 3; i <= Chalkboard.real.sqrt(num); i += 2) {
                 while(num % i === 0) {
                     result.push(i);
                     num /= i;
@@ -166,7 +166,7 @@ var Chalkboard = {
         },
         divisors: function(num) {
             var result = [];
-            for(let i = 1; i <= num; i++) {
+            for(var i = 1; i <= num; i++) {
                 if(num % i === 0) {
                     result.push(i);
                 }
@@ -196,6 +196,13 @@ var Chalkboard = {
         },
         map: function(num, range1, range2) {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
+        },
+        binomial: function(n, k) {
+            if(k === 0 || k === n) {
+                return 1;
+            } else {
+                return Chalkboard.numb.binomial(n - 1, k - 1) + Chalkboard.numb.binomial(n - 1, k);
+            }
         },
         Fibonacci: function(num) {
             var sequence = [0, 1];
@@ -1256,9 +1263,9 @@ var Chalkboard = {
         },
         correlation: function(arr1, arr2) {
             var result = [];
-            for(let i = 0; i < arr1.length + arr2.length - 1; i++) {
+            for(var i = 0; i < arr1.length + arr2.length - 1; i++) {
                 var sum = 0;
-                for(let j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
+                for(var j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
                     sum += arr1[j] * arr2[arr2.length - 1 - i + j];
                 }
                 result.push(sum);
@@ -1737,7 +1744,7 @@ var Chalkboard = {
             var result = [];
             for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
                 result.push([]);
-                for(let j = 0; j < Chalkboard.matr.rows(matr); j++) {
+                for(var j = 0; j < Chalkboard.matr.rows(matr); j++) {
                     result[i].push(matr[j][i]);
                 }
             }
@@ -1745,13 +1752,30 @@ var Chalkboard = {
         },
         invert: function(matr) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                if(Chalkboard.matr.rows(matr) === 2) {
-                    return Chalkboard.matr.new([(1 / Chalkboard.matr.det(matr)) * matr[1][1], (1 / Chalkboard.matr.det(matr)) * -matr[0][1]], [(1 / Chalkboard.matr.det(matr)) * -matr[1][0], (1 / Chalkboard.matr.det(matr)) * matr[0][0]]);
-                } else if(Chalkboard.matr.rows(matr) === 3) {
-                    return Chalkboard.matr.new([(1 / Chalkboard.matr.det(matr)) * ((matr[1][1] * matr[2][2]) - (matr[1][2] * matr[2][1])), (1 / Chalkboard.matr.det(matr)) * -((matr[0][1] * matr[2][2]) - (matr[0][2] * matr[2][1])), (1 / Chalkboard.matr.det(matr)) * ((matr[0][1] * matr[1][2]) - (matr[0][2] * matr[1][1]))], [(1 / Chalkboard.matr.det(matr)) * -((matr[1][0] * matr[2][2]) - (matr[1][2] * matr[2][0])), (1 / Chalkboard.matr.det(matr)) * ((matr[0][0] * matr[2][2]) - (matr[0][2] * matr[2][0])), (1 / Chalkboard.matr.det(matr)) * -((matr[0][0] * matr[1][2]) - (matr[0][2] * matr[1][0]))], [(1 / Chalkboard.matr.det(matr)) * ((matr[1][0] * matr[2][1]) - (matr[1][1] * matr[2][0])), (1 / Chalkboard.matr.det(matr)) * -((matr[0][0] * matr[2][1]) - (matr[0][1] * matr[2][0])), (1 / Chalkboard.matr.det(matr)) * ((matr[0][0] * matr[1][1]) - (matr[0][1] * matr[1][0]))]);
-                } else {
-                    return undefined;
+                var result = [];
+                var augmented = [];
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
+                    augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
                 }
+                for(var row = 0; row < Chalkboard.matr.rows(matr); row++) {
+                    var diagonal = augmented[row][row];
+                    for(var col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
+                        augmented[row][col] /= diagonal;
+                    }
+                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        if(i !== row) {
+                            var coeff = augmented[i][row];
+                            for(var j = 0; j < 2 * Chalkboard.matr.cols(matr); j++) {
+                                augmented[i][j] -= coeff * augmented[row][j];
+                            }
+                        }
+                    }
+                }
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
+                }
+                return result;
             } else {
                 return undefined;
             }
@@ -1935,6 +1959,57 @@ var Chalkboard = {
                 return Chalkboard.matr.new([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num]);
             } else if(Chalkboard.matr.rows(matr) === 4) {
                 return Chalkboard.matr.new([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num], [matr[3][0] * num, matr[3][1] * num, matr[3][2] * num, matr[3][3] * num]);
+            } else {
+                return undefined;
+            }
+        },
+        reduce: function(matr) {
+            var lead = 0;
+            for(var row = 0; row < Chalkboard.matr.rows(matr); row++) {
+                if(lead >= Chalkboard.matr.cols(matr)) {
+                    break;
+                }
+                var i = row;
+                while(matr[i][lead] === 0) {
+                    i++;
+                    if(i === Chalkboard.matr.rows(matr)) {
+                        i = row;
+                        lead++;
+                        if(Chalkboard.matr.cols(matr) === lead) {
+                            return matr;
+                        }
+                    }
+                }
+                var temp = matr[i];
+                matr[i] = matr[row];
+                matr[row] = temp;
+                var scl = matr[row][lead];
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    matr[row][j] /= scl;
+                }
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    if(i !== row) {
+                        var coeff = matr[i][lead];
+                        for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                            matr[i][j] -= coeff * matr[row][j];
+                        }
+                    }
+                }
+                lead++;
+            }
+            return matr;
+        },
+        solve: function(matr_A, matr_B) {
+            if(Chalkboard.matr.rows(matr_A) === Chalkboard.matr.cols(matr_A)) {
+                if(Chalkboard.matr.rows(matr_A) === Chalkboard.matr.rows(matr_B)) {
+                    if(Chalkboard.matr.det(matr_A) !== 0) {
+                        return Chalkboard.matr.mul(Chalkboard.matr.invert(matr_A), matr_B);
+                    } else {
+                        return undefined;
+                    }
+                } else {
+                    return undefined;
+                }
             } else {
                 return undefined;
             }
