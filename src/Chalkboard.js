@@ -1463,10 +1463,7 @@ var Chalkboard = {
             return Chalkboard.vec3.new(vec3_normalized.x * num, vec3_normalized.y * num, vec3_normalized.z * num);
         },
         ang: function(vec3) {
-            return [Chalkboard.vec3.angcos(vec3).alpha, Chalkboard.vec3.angcos(vec3).beta, Chalkboard.vec3.angcos(vec3).gamma];
-        },
-        angcos: function(vec3) {
-            return {alpha: Math.acos(vec3.x / Chalkboard.vec3.mag(vec3)), beta: Math.acos(vec3.y / Chalkboard.vec3.mag(vec3)), gamma: Math.acos(vec3.z / Chalkboard.vec3.mag(vec3))};
+            return [Math.acos(vec3.x / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.y / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.z / Chalkboard.vec3.mag(vec3))];
         },
         slope: function(vec3) {
             return vec3.z / Chalkboard.real.sqrt((vec3.x * vec3.x) + (vec3.y * vec3.y));
@@ -1588,10 +1585,7 @@ var Chalkboard = {
             return Chalkboard.vec4.new(vec4_normalized.x * num, vec4_normalized.y * num, vec4_normalized.z * num, vec4_normalized.w * num);
         },
         ang: function(vec4) {
-            return [Chalkboard.vec4.angcos(vec4).alpha, Chalkboard.vec4.angcos(vec4).beta, Chalkboard.vec4.angcos(vec4).gamma, Chalkboard.vec4.angcos(vec4).delta];
-        },
-        angcos: function(vec4) {
-            return {alpha: Math.acos(vec4.x / Chalkboard.vec4.mag(vec4)), beta: Math.acos(vec4.y / Chalkboard.vec4.mag(vec4)), gamma: Math.acos(vec4.z / Chalkboard.vec4.mag(vec4)), delta: Math.acos(vec4.w / Chalkboard.vec4.mag(vec4))};
+            return [Math.acos(vec4.x / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.y / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.z / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.w / Chalkboard.vec4.mag(vec4))];
         },
         slope: function(vec4) {
             return vec4.w / Chalkboard.real.sqrt((vec4.x * vec4.x) + (vec4.y * vec4.y) + (vec4.z * vec4.z));
@@ -1777,6 +1771,47 @@ var Chalkboard = {
             } else {
                 return undefined;
             }
+        },
+        trace: function(matr) {
+            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+                var result = 0;
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result += matr[i][i];
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
+        rank: function(matr) {
+            return Chalkboard.matr.reduce(matr).filter(function (row) {
+                return row.some(function (element) {
+                    return element !== 0;
+                });
+            }).length;
+        },
+        rowspace: function(matr) {
+            return Chalkboard.matr.reduce(matr).filter(function (row) {
+                return row.some(function (element) {
+                    return element !== 0;
+                });
+            });
+        },
+        colspace: function(matr) {
+            return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
+        },
+        nullspace: function(matr) {
+            var augmented = matr.map(function (row) {
+                return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
+            });
+            var reduced = Chalkboard.matr.reduce(augmented);
+            return reduced.filter(function (row) {
+                return row.slice(0, Chalkboard.matr.rows(matr)).every(function (element) {
+                    return element === 0;
+                });
+            }).map(function (row) {
+                return row.slice(Chalkboard.matr.rows(matr));
+            });
         },
         transpose: function(matr) {
             var result = [];
