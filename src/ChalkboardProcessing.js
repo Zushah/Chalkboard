@@ -1670,40 +1670,43 @@ var Chalkboard = {
             return [Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)];
         },
         empty: function(dimension) {
-            if(dimension === 1) {
-                return Chalkboard.matr.new([]);
-            } else if(dimension === 2) {
-                return Chalkboard.matr.new([], []);
-            } else if(dimension === 3) {
-                return Chalkboard.matr.new([], [], []);
-            } else if(dimension === 4) {
-                return Chalkboard.matr.new([], [], [], []);
+            if(Number.isInteger(dimension) && dimension > 0) {
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < dimension; i++) {
+                    result.push([]);
+                    for(var j = 0; j < dimension; j++) {
+                        result[i].push(null);
+                    }
+                }
+                return result;
             } else {
                 return undefined;
             }
         },
         identity: function(dimension) {
-            if(dimension === 1) {
-                return Chalkboard.matr.new([1]);
-            } else if(dimension === 2) {
-                return Chalkboard.matr.new([1, 0], [0, 1]);
-            } else if(dimension === 3) {
-                return Chalkboard.matr.new([1, 0, 0], [0, 1, 0], [0, 0, 1]);
-            } else if(dimension === 4) {
-                return Chalkboard.matr.new([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]);
+            if(Number.isInteger(dimension) && dimension > 0) {
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < dimension; i++) {
+                    result.push(Array(dimension).fill(0));
+                    result[i][i] = 1;
+                }
+                return result;
             } else {
                 return undefined;
             }
         },
         random: function(dimension, inf, sup) {
-            if(dimension === 1) {
-                return Chalkboard.matr.new([Chalkboard.numb.random(inf, sup)]);
-            } else if(dimension === 2) {
-                return Chalkboard.matr.new([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
-            } else if(dimension === 3) {
-                return Chalkboard.matr.new([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
-            } else if(dimension === 4) {
-                return Chalkboard.matr.new([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+            if(Number.isInteger(dimension) && dimension > 0) {
+                inf = inf || 0;
+                sup = sup || 1;
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < dimension; i++) {
+                    result.push([]);
+                    for(var j = 0; j < dimension; j++) {
+                        result[i].push(Chalkboard.numb.random(inf, sup));
+                    }
+                }
+                return result;
             } else {
                 return undefined;
             }
@@ -1994,6 +1997,25 @@ var Chalkboard = {
                 return Chalkboard.matr.new([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num]);
             } else if(Chalkboard.matr.rows(matr) === 4) {
                 return Chalkboard.matr.new([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num], [matr[3][0] * num, matr[3][1] * num, matr[3][2] * num, matr[3][3] * num]);
+            } else {
+                return undefined;
+            }
+        },
+        pow: function(matr, num) {
+            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+                if(Number.isInteger(num) && num >= 0) {
+                    if(num === 0) {
+                        return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
+                    } else {
+                        var result = matr;
+                        for(var i = 1; i < num; i++) {
+                            result = Chalkboard.matr.mul(matr, result);
+                        }
+                        return result;
+                    }
+                } else {
+                    return undefined;
+                }
             } else {
                 return undefined;
             }
