@@ -47,6 +47,8 @@ var Chalkboard = {
     },
     numb: {
         random: function(inf, sup) {
+            inf = inf || 0;
+            sup = sup || 0;
             return inf + Math.random() * (sup - inf);
         },
         factorial: function(num) {
@@ -213,7 +215,7 @@ var Chalkboard = {
         },
         Gaussian: function(height, mean, deviation) {
             var u, v, s;
-            while(true) {
+            while(typeof x === "undefined") {
                 u = Chalkboard.numb.random(-1, 1);
                 v = Chalkboard.numb.random(-1, 1);
                 s = u * u + v * v;
@@ -1309,7 +1311,7 @@ var Chalkboard = {
         },
         magset: function(vec2, num) {
             var vec2_normalized = Chalkboard.vec2.normalize(vec2);
-            return Chalkboard.vec3.new(vec2_normalized.x * num, vec2_normalized.y * num, vec2_normalized.z * num);
+            return Chalkboard.vec2.new(vec2_normalized.x * num, vec2_normalized.y * num);
         },
         ang: function(vec2) {
             return Chalkboard.trig.arctan(vec2.y / vec2.x);
@@ -1353,10 +1355,7 @@ var Chalkboard = {
         rotate2D: function(vec2, rad) {
             return Chalkboard.vec2.new(vec2.x * Chalkboard.trig.cos(rad) - vec2.y * Chalkboard.trig.sin(rad), vec2.y * Chalkboard.trig.cos(rad) + vec2.x * Chalkboard.trig.sin(rad));
         },
-        addScl: function(vec2, num) {
-            return Chalkboard.vec2.new(vec2.x + num, vec2.y + num);
-        },
-        mulScl: function(vec2, num) {
+        scl: function(vec2, num) {
             return Chalkboard.vec2.new(vec2.x * num, vec2.y * num);
         },
         add: function(vec2_1, vec2_2) {
@@ -1373,9 +1372,6 @@ var Chalkboard = {
         },
         cross: function(vec2_1, vec2_2) {
             return Chalkboard.vec3.new(0, 0, (vec2_1.x * vec2_2.y) - (vec2_1.y * vec2_2.x));
-        },
-        fromNumber: function(num) {
-            return Chalkboard.vec2.new(num, 0);
         },
         fromAngle: function(rad) {
             return Chalkboard.vec2.new(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
@@ -1472,10 +1468,7 @@ var Chalkboard = {
         rotatez: function(vec3, rad) {
             return Chalkboard.vec3.new(vec3.x * Chalkboard.trig.cos(rad) - vec3.y * Chalkboard.trig.sin(rad), vec3.y * Chalkboard.trig.cos(rad) + vec3.x * Chalkboard.trig.sin(rad), vec3.z);
         },
-        addScl: function(vec3, num) {
-            return Chalkboard.vec3.new(vec3.x + num, vec3.y + num, vec3.z + num);
-        },
-        mulScl: function(vec3, num) {
+        scl: function(vec3, num) {
             return Chalkboard.vec3.new(vec3.x * num, vec3.y * num, vec3.z * num);
         },
         add: function(vec3_1, vec3_2) {
@@ -1582,10 +1575,7 @@ var Chalkboard = {
         angBtwn: function(vec4_1, vec4_2) {
             return Math.acos((Chalkboard.vec4.dot(vec4_1, vec4_2)) / (Chalkboard.vec4.mag(vec4_1) * Chalkboard.vec4.mag(vec4_2)));
         },
-        addScl: function(vec4, num) {
-            return Chalkboard.vec4.new(vec4.x + num, vec4.y + num, vec4.z + num, vec4.w + num);
-        },
-        mulScl: function(vec4, num) {
+        scl: function(vec4, num) {
             return Chalkboard.vec4.new(vec4.x * num, vec4.y * num, vec4.z * num, vec4.w * num);
         },
         add: function(vec4_1, vec4_2) {
@@ -1628,15 +1618,7 @@ var Chalkboard = {
     },
     matr: {
         new: function(matrix) {
-            matrix = Array.from(arguments);
-            for(var i = 0; i < matrix.length; i++) {
-                for(var j = 0; j < matrix[i].length; j++) {
-                    if(Number.isNaN(matrix[i][j])) {
-                        matrix[i].splice(matrix[i].indexOf(matrix[i][j]), 1);
-                    }
-                }
-            }
-            return matrix;
+            return Array.from(arguments);
         },
         rows: function(matr) {
             return matr.length;
@@ -1687,7 +1669,7 @@ var Chalkboard = {
             }
         },
         cofactor: function(matr, row, col) {
-            return matr.slice(0, row - 1).concat(matr.slice(row)).map(function(row) {
+            return matr.slice(0, row - 1).concat(matr.slice(row)).map(function (row) {
                 return row.slice(0, col - 1).concat(row.slice(col));
             });
         },
@@ -1695,8 +1677,8 @@ var Chalkboard = {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         },
         det: function(matr) {
-            var result = 0;
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+                var result = 0;
                 if(Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
                 } else if(Chalkboard.matr.rows(matr) === 2) {
@@ -1754,19 +1736,19 @@ var Chalkboard = {
             });
         },
         transpose: function(matr) {
-            var result = [];
+            var result = Chalkboard.matr.new();
             for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                result.push([]);
+                result[i] = [];
                 for(var j = 0; j < Chalkboard.matr.rows(matr); j++) {
-                    result[i].push(matr[j][i]);
+                    result[i][j] = matr[j][i];
                 }
             }
             return result;
         },
         invert: function(matr) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                var result = [];
-                var augmented = [];
+                var result = Chalkboard.matr.new();
+                var augmented = Chalkboard.matr.new();
                 for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
                     augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
@@ -1858,7 +1840,9 @@ var Chalkboard = {
             } else if(vec.type === "vec3") {
                 return Chalkboard.matr.new([1, 0, 0, vec.x], [0, 1, 0, vec.y], [0, 0, 1, vec.z], [0, 0, 0, 1]);
             } else if(vec.type === "vec4") {
-                return undefined;
+                return Chalkboard.matr.new([1, 0, 0, 0, vec.x], [0, 1, 0, 0, vec.y], [0, 0, 1, 0, vec.z], [0, 0, 0, 1, vec.w], [0, 0, 0, 0, 1]);
+            } else {
+                return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
         rotater2D: function(rad) {
@@ -1915,7 +1899,7 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        mulScl: function(matr, num) {
+        scl: function(matr, num) {
             var result = Chalkboard.matr.new();
             for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
@@ -2027,92 +2011,33 @@ var Chalkboard = {
         },
         toArray: function(matr) {
             var result = [];
-            if(Chalkboard.matr.rows(matr) === 1) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[0][i]);
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result.push(matr[i][j]);
                 }
-                return result;
-            } else if(Chalkboard.matr.rows(matr) === 2) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[0][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[1][i]);
-                }
-                return result;
-            } else if(Chalkboard.matr.rows(matr) === 3) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[0][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[1][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[2][i]);
-                }
-                return result;
-            } else if(Chalkboard.matr.rows(matr) === 4) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[0][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[1][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[2][i]);
-                }
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    result.push(matr[3][i]);
-                }
-                return result;
-            } else {
-                return undefined;
             }
+            return result;
         },
         toString: function(matr) {
-            var row1 = [];
-            var row2 = [];
-            var row3 = [];
-            var row4 = [];
-            if(Chalkboard.matr.rows(matr) === 1) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    row1.push(matr[0][i]);
+            var result = "";
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result += "[ ";
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result += matr[i][j].toString() + " ";
                 }
-                row1 = row1.join(" ");
-                return "[ " + row1 + " ]";
-            } else if(Chalkboard.matr.rows(matr) === 2) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    row1.push(matr[0][i]);
-                    row2.push(matr[1][i]);
-                }
-                row1 = row1.join(" ");
-                row2 = row2.join(" ");
-                return "[ " + row1 + " ]\n[ " + row2 + " ]";
-            } else if(Chalkboard.matr.rows(matr) === 3) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    row1.push(matr[0][i]);
-                    row2.push(matr[1][i]);
-                    row3.push(matr[2][i]);
-                }
-                row1 = row1.join(" ");
-                row2 = row2.join(" ");
-                row3 = row3.join(" ");
-                return "[ " + row1 + " ]\n[ " + row2 + " ]\n[ " + row3 + " ]";
-            } else if(Chalkboard.matr.rows(matr) === 4) {
-                for(var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                    row1.push(matr[0][i]);
-                    row2.push(matr[1][i]);
-                    row3.push(matr[2][i]);
-                    row4.push(matr[3][i]);
-                }
-                row1 = row1.join(" ");
-                row2 = row2.join(" ");
-                row3 = row3.join(" ");
-                row4 = row4.join(" ");
-                return "[ " + row1 + " ]\n[ " + row2 + " ]\n[ " + row3 + " ]\n[ " + row4 + " ]";
-            } else {
-                return undefined;
+                result = result.trimEnd() + " ]\n";
             }
+            return result;
+        },
+        toObject: function(matr) {
+            var result = {};
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result["i" + (i + 1)] = {};
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
+                }
+            }
+            return result;
         },
         print: function(matr) {
             console.log(Chalkboard.matr.toString(matr));
