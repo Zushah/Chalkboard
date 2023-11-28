@@ -1793,6 +1793,21 @@ var Chalkboard = {
                 }
                 for(var row = 0; row < Chalkboard.matr.rows(matr); row++) {
                     var diagonal = augmented[row][row];
+                    if (diagonal === 0) {
+                        // find row w/ maximum absolute value in this column
+                        var max = row;
+                        for (var i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
+                            if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
+                                max = i;
+                            }
+                        }
+                        // swap rows
+                        var temp = augmented[row];
+                        augmented[row] = augmented[max];
+                        augmented[max] = temp;
+                        
+                        diagonal = augmented[row][row];
+                    }
                     for(var col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
                         augmented[row][col] /= diagonal;
                     }
