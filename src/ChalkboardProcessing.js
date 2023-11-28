@@ -399,8 +399,7 @@ var Chalkboard = {
             return (comp.a * comp.a) + (comp.b * comp.b);
         },
         magset: function(comp, num) {
-            var normalized = Chalkboard.comp.normalize(comp);
-            return Chalkboard.comp.new(normalized.a * num, normalized.b * num);
+            return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num);
         },
         arg: function(comp) {
             return Chalkboard.trig.arctan(comp.b / comp.a);
@@ -440,6 +439,9 @@ var Chalkboard = {
         },
         conjugate: function(comp) {
             return Chalkboard.comp.new(comp.a, -comp.b);
+        },
+        scl: function(comp, num) {
+            return Chalkboard.comp.new(comp.a * num, comp.b * num);
         },
         add: function(comp_1, comp_2) {
             return Chalkboard.comp.new(comp_1.a + comp_2.a, comp_1.b + comp_2.b);
@@ -484,8 +486,7 @@ var Chalkboard = {
             return (quat.a * quat.a) + (quat.b * quat.b) + (quat.c * quat.c) + (quat.d * quat.d);
         },
         magset: function(quat, num) {
-            var quat_normalized = Chalkboard.quat.normalize(quat);
-            return Chalkboard.quat.new(quat_normalized.a * num, quat_normalized.b * num, quat_normalized.c * num, quat_normalized.d * num);
+            return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
         },
         average: function(quat) {
             return (quat.a + quat.b + quat.c + quat.d) / 4;
@@ -519,6 +520,9 @@ var Chalkboard = {
         },
         distsq: function(quat_1, quat_2) {
             return ((quat_2.a - quat_1.a) * (quat_2.a - quat_1.a)) + ((quat_2.b - quat_1.b) * (quat_2.b - quat_1.b)) + ((quat_2.c - quat_1.c) * (quat_2.c - quat_1.c)) + ((quat_2.d - quat_1.d) * (quat_2.d - quat_1.d));
+        },
+        scl: function(quat, num) {
+            return Chalkboard.quat.new(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
         },
         add: function(quat_1, quat_2) {
             return Chalkboard.quat.new(quat_1.a + quat_2.a, quat_1.b + quat_2.b, quat_1.c + quat_2.c, quat_1.d + quat_2.d);
@@ -677,7 +681,28 @@ var Chalkboard = {
             translate(origin[0], origin[1]);
             line(0, 0, vec2.x / scl, -vec2.y / scl);
             popMatrix();
-            return "The vector " + Chalkboard.vec2.toString(vec2) + "has been plotted at the point (" + (origin[0] + vec2.x / scl) + ", " + (origin[1] - vec2.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+            return "The vector " + Chalkboard.vec2.toString(vec2) + " has been plotted at the point (" + (origin[0] + vec2.x / scl) + ", " + (origin[1] - vec2.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+        },
+        field: function(vec2field, scl, rgb, domain, origin, weight, res) {
+            scl = scl || 1;
+            scl /= 100;
+            rgb = rgb || [0, 0, 0];
+            domain = domain || [[-10, 10], [-10, 10]];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 5;
+            res = res || 25;
+            stroke(rgb[0], rgb[1], rgb[2]);
+            strokeWeight(weight);
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            for(var i = domain[0][0] / scl; i < domain[0][1] / scl; i += res) {
+                for(var j = domain[1][0] / scl; j < domain[1][1] / scl; j += res) {
+                    var v = Chalkboard.vec2.fieldval(vec2field, Chalkboard.vec2.new(i, j));
+                    line(i, j, i + v.x, j + v.y);
+                }
+            }
+            popMatrix();
+            return "The vector field (" + vec2field.x + ", " + vec2field.y + ") has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for (x, y) ∈ [" + domain[0][0] + ", " + domain[0][1] + "]×[" + domain[1][0] + ", " + domain[1][1] + "]  with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
         vec3: function(vec3, scl, rgb, origin, weight) {
             scl = scl || 1;
@@ -691,7 +716,7 @@ var Chalkboard = {
             translate(origin[0], origin[1]);
             line(0, 0, (vec3.x / scl) / (vec3.z * 0.25 + 1), (-vec3.y / scl) / (vec3.z * 0.25 + 1));
             popMatrix();
-            return "The vector " + Chalkboard.vec3.toString(vec3) + "has been plotted at the point (" + (origin[0] + vec3.x / scl) + ", " + (origin[1] - vec3.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
+            return "The vector " + Chalkboard.vec3.toString(vec3) + " has been plotted at the point (" + (origin[0] + vec3.x / scl) + ", " + (origin[1] - vec3.y / scl) + ") with the RGB color (" + rgb[0] + ", " + rgb[1] + ", " + rgb[2] + ").";
         },
         matr: function(matr, scl, rgb, origin, weight) {
             scl = scl || 1;
@@ -1310,8 +1335,7 @@ var Chalkboard = {
             return (vec2.x * vec2.x) + (vec2.y * vec2.y);
         },
         magset: function(vec2, num) {
-            var vec2_normalized = Chalkboard.vec2.normalize(vec2);
-            return Chalkboard.vec2.new(vec2_normalized.x * num, vec2_normalized.y * num);
+            return Chalkboard.vec2.scl(Chalkboard.vec2.normalize(vec2), num);
         },
         ang: function(vec2) {
             return Chalkboard.trig.arctan(vec2.y / vec2.x);
@@ -1395,6 +1419,14 @@ var Chalkboard = {
         toString: function(vec2) {
             return "(" + vec2.x.toString() + ", " + vec2.y.toString() + ")";
         },
+        field: function(x, y) {
+            return {x: x, y: y, type: "vec2field"};
+        },
+        fieldval: function(vec2field, vec2) {
+            var p = Chalkboard.real.parse("(x, y) => " + vec2field.x),
+                q = Chalkboard.real.parse("(x, y) => " + vec2field.y);
+            return Chalkboard.vec2.new(p(vec2.x, vec2.y), q(vec2.x, vec2.y));
+        },
         print: function(vec2) {
             console.log(Chalkboard.vec2.toString(vec2));
         }
@@ -1417,8 +1449,7 @@ var Chalkboard = {
             return (vec3.x * vec3.x) + (vec3.y * vec3.y) + (vec3.z * vec3.z);
         },
         magset: function(vec3, num) {
-            var vec3_normalized = Chalkboard.vec3.normalize(vec3);
-            return Chalkboard.vec3.new(vec3_normalized.x * num, vec3_normalized.y * num, vec3_normalized.z * num);
+            return Chalkboard.vec3.scl(Chalkboard.vec3.normalize(vec3), num);
         },
         ang: function(vec3) {
             return [Math.acos(vec3.x / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.y / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.z / Chalkboard.vec3.mag(vec3))];
@@ -1514,6 +1545,15 @@ var Chalkboard = {
         toString: function(vec3) {
             return "(" + vec3.x.toString() + ", " + vec3.y.toString() + ", " + vec3.z.toString() + ")";
         },
+        field: function(x, y, z) {
+            return {x: x, y: y, z: z, type: "vec3field"};
+        },
+        fieldval: function(vec3field, vec3) {
+            var p = Chalkboard.real.parse("(x, y, z) => " + vec3field.x),
+                q = Chalkboard.real.parse("(x, y, z) => " + vec3field.y),
+                r = Chalkboard.real.parse("(x, y, z) => " + vec3field.z);
+            return Chalkboard.vec3.new(p(vec3.x, vec3.y, vec3.z), q(vec3.x, vec3.y, vec3.z), r(vec3.x, vec3.y, vec3.z));
+        },
         print: function(vec3) {
             console.log(Chalkboard.vec3.toString(vec3));
         }
@@ -1536,8 +1576,7 @@ var Chalkboard = {
             return (vec4.x * vec4.x) + (vec4.y * vec4.y) + (vec4.z * vec4.z) + (vec4.w * vec4.w);
         },
         magset: function(vec4, num) {
-            var vec4_normalized = Chalkboard.vec4.normalize(vec4);
-            return Chalkboard.vec4.new(vec4_normalized.x * num, vec4_normalized.y * num, vec4_normalized.z * num, vec4_normalized.w * num);
+            return Chalkboard.vec4.scl(Chalkboard.vec4.normalize(vec4), num);
         },
         ang: function(vec4) {
             return [Math.acos(vec4.x / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.y / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.z / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.w / Chalkboard.vec4.mag(vec4))];
@@ -1611,6 +1650,16 @@ var Chalkboard = {
         },
         toString: function(vec4) {
             return "(" + vec4.x.toString() + ", " + vec4.y.toString() + ", " + vec4.z.toString() + ", " + vec4.w.toString() + ")";
+        },
+        field: function(x, y, z, w) {
+            return {x: x, y: y, z: z, w: w, type: "vec4field"};
+        },
+        fieldval: function(vec4field, vec4) {
+            var p = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.x),
+                q = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.y),
+                r = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.z),
+                s = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.w);
+            return Chalkboard.vec4.new(p(vec4.x, vec4.y, vec4.z, vec4.w), q(vec4.x, vec4.y, vec4.z, vec4.w), r(vec4.x, vec4.y, vec4.z, vec4.w), s(vec4.x, vec4.y, vec4.z, vec4.w));
         },
         print: function(vec4) {
             console.log(Chalkboard.vec4.toString(vec4));
@@ -1755,6 +1804,18 @@ var Chalkboard = {
                 }
                 for(var row = 0; row < Chalkboard.matr.rows(matr); row++) {
                     var diagonal = augmented[row][row];
+                    if(diagonal === 0) {
+                        var max = row;
+                        for(var i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
+                            if(Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
+                                max = i;
+                            }
+                        }
+                        var temp = augmented[row];
+                        augmented[row] = augmented[max];
+                        augmented[max] = temp;
+                        diagonal = augmented[row][row];
+                    }
                     for(var col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
                         augmented[row][col] /= diagonal;
                     }
