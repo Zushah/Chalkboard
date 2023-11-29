@@ -2210,6 +2210,87 @@ var Chalkboard = {
             }
             return (step / 3) * sum;
         },
+        grad: function(vecfield, vec) {
+            var h = 0.000000001;
+            if(vecfield.type === "vec2field") {
+                var p = Chalkboard.real.parse("(x, y) => " + vecfield.x),
+                    q = Chalkboard.real.parse("(x, y) => " + vecfield.y);
+                var dpdx = (p(vec.x + h, vec.y) - p(vec.x, vec.y)) / h,
+                    dqdy = (q(vec.x, vec.y + h) - q(vec.x, vec.y)) / h;
+                return Chalkboard.vec2.new(dpdx, dqdy);
+            } else if(vecfield.type === "vec3field") {
+                var p = Chalkboard.real.parse("(x, y, z) => " + vecfield.x),
+                    q = Chalkboard.real.parse("(x, y, z) => " + vecfield.y),
+                    r = Chalkboard.real.parse("(x, y, z) => " + vecfield.z);
+                var dpdx = (p(vec.x + h, vec.y, vec.z) - p(vec.x, vec.y, vec.z)) / h,
+                    dqdy = (q(vec.x, vec.y + h, vec.z) - q(vec.x, vec.y, vec.z)) / h,
+                    drdz = (r(vec.x, vec.y, vec.z + h) - r(vec.x, vec.y, vec.z)) / h;
+                return Chalkboard.vec3.new(dpdx, dqdy, drdz);
+            } else if(vecfield.type === "vec4field") {
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.x),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.y),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.z),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.w);
+                var dpdx = (p(vec.x + h, vec.y, vec.z, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
+                    dqdy = (q(vec.x, vec.y + h, vec.z, vec.w) - q(vec.x, vec.y, vec.z, vec.w)) / h,
+                    drdz = (r(vec.x, vec.y, vec.z + h, vec.w) - r(vec.x, vec.y, vec.z, vec.w)) / h,
+                    dsdw = (s(vec.x, vec.y, vec.z, vec.w + h) - s(vec.x, vec.y, vec.z, vec.w)) / h;
+                return Chalkboard.vec4.new(dpdx, dqdy, drdz, dsdw);
+            } else {
+                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\", \"vec3field\", or \"vec4field\".";
+            }
+        },
+        div: function(vecfield, vec) {
+            if(vecfield.type === "vec2field") {
+                return Chalkboard.calc.grad(vecfield, vec).x + Chalkboard.calc.grad(vecfield, vec).y;
+            } else if(vecfield.type === "vec3field") {
+                return Chalkboard.calc.grad(vecfield, vec).x + Chalkboard.calc.grad(vecfield, vec).y + Chalkboard.calc.grad(vecfield, vec).z;
+            } else if(vecfield.type === "vec4field") {
+                return Chalkboard.calc.grad(vecfield, vec).x + Chalkboard.calc.grad(vecfield, vec).y + Chalkboard.calc.grad(vecfield, vec).z + Chalkboard.calc.grad(vecfield, vec).w;
+            } else {
+                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\", \"vec3field\", or \"vec4field\".";
+            }
+        },
+        curl: function(vecfield, vec) {
+            var h = 0.000000001;
+            if(vecfield.type === "vec2field") {
+                var p = Chalkboard.real.parse("(x, y) => " + vecfield.x),
+                    q = Chalkboard.real.parse("(x, y) => " + vecfield.y);
+                var dpdy = (p(vec.x, vec.y + h) - p(vec.x, vec.y)) / h,
+                    dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h;
+                return Chalkboard.vec3.new(0, 0, dqdx - dpdy);
+            } else if(vecfield.type === "vec3field") {
+                var p = Chalkboard.real.parse("(x, y, z) => " + vecfield.x),
+                    q = Chalkboard.real.parse("(x, y, z) => " + vecfield.y),
+                    r = Chalkboard.real.parse("(x, y, z) => " + vecfield.z);
+                var dpdy = (p(vec.x, vec.y + h, vec.z) - p(vec.x, vec.y, vec.z)) / h,
+                    dpdz = (p(vec.x, vec.y, vec.z + h) - p(vec.x, vec.y, vec.z)) / h,
+                    dqdx = (q(vec.x + h, vec.y, vec.z) - q(vec.x, vec.y, vec.z)) / h,
+                    dqdz = (q(vec.x, vec.y, vec.z + h) - q(vec.x, vec.y, vec.z)) / h,
+                    drdx = (r(vec.x + h, vec.y, vec.z) - r(vec.x, vec.y, vec.z)) / h,
+                    drdy = (r(vec.x, vec.y + h, vec.z) - r(vec.x, vec.y, vec.z)) / h;
+                return Chalkboard.vec3.new(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
+            } else {
+                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\" or \"vec3field\".";
+            }
+        },
+        frdt: function(func, vec2field, a, b) {
+            if(func.type === "para") {
+                var sum = 0;
+                var step = (b - a) / 10000;
+                var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
+                var p = Chalkboard.real.parse("(x, y) => " + vec2field.x),
+                    q = Chalkboard.real.parse("(x, y) => " + vec2field.y);
+                for(var t = a; t <= b; t += step) {
+                    var drdt = Chalkboard.calc.dfdx(func, t);
+                    sum += (p(x(t), y(t)) * drdt.x) + (q(x(t), y(t)) * drdt.y);
+                }
+                return sum * step;
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"para\".";
+            }
+        },
         extrema: function(func, domain) {
             var result = [];
             for(var i = domain[0]; i <= domain[1]; i++) {
