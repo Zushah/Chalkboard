@@ -241,8 +241,10 @@ var Chalkboard = {
                 return {definition: definition, type: type};
             } else if(type === "para") {
                 return {definition: [definition[0], definition[1]], type: type};
+            } else if(type === "mult") {
+                return {definition: definition, type: type};
             } else {
-                return "TypeError: Parameter \"type\" must be either \"expl\", \"pola\", or \"para\".";
+                return "TypeError: Parameter \"type\" must be either \"expl\", \"pola\", \"para\", or \"mult\".";
             }
         },
         parse: function(str) {
@@ -259,8 +261,11 @@ var Chalkboard = {
                 var x = Chalkboard.real.parse("t => " + func.definition[0]),
                     y = Chalkboard.real.parse("t => " + func.definition[1]);
                 return Chalkboard.vec2.new(x(val), y(val));
+            } else if(func.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + func.definition);
+                return f(val[0], val[1]);
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", \"para\", or \"mult\".";
             }
         },
         pow: function(base, num) {
@@ -2210,11 +2215,23 @@ var Chalkboard = {
             }
             return (step / 3) * sum;
         },
-        grad: function(vecfield, vec) {
+        dfdv: function(func, vec_pos, vec_dir) {
+            if(func.type === "mult") {
+                return Chalkboard.vec2.dot(Chalkboard.calc.grad(func, vec_pos), Chalkboard.vec2.normalize(vec_dir));
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"mult\".";
+            }
+        },
+        grad: function(funcORvecfield, vec) {
             var h = 0.000000001;
-            if(vecfield.type === "vec2field") {
-                var p = Chalkboard.real.parse("(x, y) => " + vecfield.p),
-                    q = Chalkboard.real.parse("(x, y) => " + vecfield.q);
+            if(funcORvecfield.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + funcORvecfield.definition);
+                var dfdx = (f(vec.x + h, vec.y) - f(vec.x, vec.y)) / h,
+                    dfdy = (f(vec.x, vec.y + h) - f(vec.x, vec.y)) / h;
+                return Chalkboard.vec2.new(dfdx, dfdy);
+            } else if(funcORvecfield.type === "vec2field") {
+                var p = Chalkboard.real.parse("(x, y) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + funcORvecfield.q);
                 var dpdx = (p(vec.x + h, vec.y) - p(vec.x, vec.y)) / h,
                     dpdy = (p(vec.x, vec.y + h) - p(vec.x, vec.y)) / h,
                     dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h;
@@ -2222,9 +2239,9 @@ var Chalkboard = {
                 return Chalkboard.matr.new([dpdx, dpdy],
                                            [dqdx, dqdy]);
             } else if(vecfield.type === "vec3field") {
-                var p = Chalkboard.real.parse("(x, y, z) => " + vecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z) => " + vecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z) => " + vecfield.r);
+                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.r);
                 var dpdx = (p(vec.x + h, vec.y, vec.z) - p(vec.x, vec.y, vec.z)) / h,
                     dpdy = (p(vec.x, vec.y + h, vec.z) - p(vec.x, vec.y, vec.z)) / h,
                     dpdz = (p(vec.x, vec.y, vec.z + h) - p(vec.x, vec.y, vec.z)) / h,
@@ -2238,10 +2255,10 @@ var Chalkboard = {
                                            [dqdx, dqdy, dqdz],
                                            [drdx, drdy, drdz]);
             } else if(vecfield.type === "vec4field") {
-                var p = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.r),
-                    s = Chalkboard.real.parse("(x, y, z, w) => " + vecfield.s);
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.q),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.r),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.s);
                 var dpdx = (p(vec.x + h, vec.y, vec.z, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
                     dpdy = (p(vec.x, vec.y + h, vec.z, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
                     dpdz = (p(vec.x, vec.y, vec.z + h, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
@@ -2263,7 +2280,7 @@ var Chalkboard = {
                                            [drdx, drdy, drdz, drdw],
                                            [dsdx, dsdy, dsdz, dsdw]);
             } else {
-                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\", \"vec3field\", or \"vec4field\".";
+                return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
             }
         },
         div: function(vecfield, vec) {
@@ -2296,19 +2313,40 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\" or \"vec3field\".";
             }
         },
-        frdt: function(func, vec2field, a, b) {
-            if(func.type === "para") {
-                var sum = 0;
-                var step = (b - a) / 10000;
-                var x = Chalkboard.real.parse("t => " + func.definition[0]),
-                    y = Chalkboard.real.parse("t => " + func.definition[1]);
-                var p = Chalkboard.real.parse("(x, y) => " + vec2field.p),
-                    q = Chalkboard.real.parse("(x, y) => " + vec2field.q);
-                for(var t = a; t <= b; t += step) {
-                    var drdt = Chalkboard.calc.dfdx(func, t);
-                    sum += (p(x(t), y(t)) * drdt.x) + (q(x(t), y(t)) * drdt.y);
+        fxydxdy: function(func, a, b, c, d) {
+            if(func.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + func.definition);
+                var result = 0;
+                var dx = (b - a) / 10000,
+                    dy = (d - c) / 10000;
+                for(var x = a; x <= b; x += dx) {
+                    for(var y = c; y <= d; y += dy) {
+                        var z = f(x, y);
+                        result += z;
+                    }
                 }
-                return sum * step;
+                return result * dx * dy;
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"mult\".";
+            }
+        },
+        frdt: function(funcORvecfield, func, a, b) {
+            if(func.type === "para") {
+                var result = 0;
+                var dt = (b - a) / 10000;
+                if(funcORvecfield.type === "mult") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.vec2.toArray(Chalkboard.real.val(func, t))) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
+                } else if(funcORvecfield.type === "vec2field") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
+                } else {
+                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\" or \"vec2field\".";
+                }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"para\".";
             }
