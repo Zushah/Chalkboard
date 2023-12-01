@@ -976,11 +976,27 @@ var Chalkboard = {
                 c = ((a * a) / 2) + 0.5;
             return a + ", " + b + ", " + c;
         },
-        dist2D: function(p1, p2) {
-            return Math.sqrt(((p2[0] - p1[0]) * (p2[0] - p1[0])) + ((p2[1] - p1[1]) * (p2[1] - p1[1])));
+        dist: function(p1, p2) {
+            if(p1.length === p2.length) {
+                return Chalkboard.real.sqrt(p1.map(function (coord, i) {
+                    return (coord - p2[i]) * (coord - p2[i]);
+                }).reduce(function (sum, val) {
+                    return sum + val;
+                }, 0));
+            } else {
+                return undefined;
+            }
         },
-        dist3D: function(p1, p2) {
-            return Math.sqrt(((p2[0] - p1[0]) * (p2[0] - p1[0])) + ((p2[1] - p1[1]) * (p2[1] - p1[1])) + ((p2[2] - p1[2]) * (p2[2] - p1[2])));
+        distsq: function(p1, p2) {
+            if(p1.length === p2.length) {
+                return p1.map(function (coord, i) {
+                    return (coord - p2[i]) * (coord - p2[i]);
+                }).reduce(function (sum, val) {
+                    return sum + val;
+                }, 0);
+            } else {
+                return undefined;
+            }
         },
         circleP: function(r) {
             return 2 * Chalkboard.PI() * r;
@@ -1453,9 +1469,6 @@ var Chalkboard = {
         angBtwn: function(vec2_1, vec2_2) {
             return Math.acos((Chalkboard.vec2.dot(vec2_1, vec2_2)) / (Chalkboard.vec2.mag(vec2_1) * Chalkboard.vec2.mag(vec2_2)));
         },
-        rotate2D: function(vec2, rad) {
-            return Chalkboard.vec2.new(vec2.x * Chalkboard.trig.cos(rad) - vec2.y * Chalkboard.trig.sin(rad), vec2.y * Chalkboard.trig.cos(rad) + vec2.x * Chalkboard.trig.sin(rad));
-        },
         scl: function(vec2, num) {
             return Chalkboard.vec2.new(vec2.x * num, vec2.y * num);
         },
@@ -1473,6 +1486,12 @@ var Chalkboard = {
         },
         cross: function(vec2_1, vec2_2) {
             return Chalkboard.vec3.new(0, 0, (vec2_1.x * vec2_2.y) - (vec2_1.y * vec2_2.x));
+        },
+        proj: function(vec2_1, vec2_2) {
+            return Chalkboard.vec2.scl(vec2_2, Chalkboard.vec2.dot(vec2_1, vec2_2) / Chalkboard.vec2.dot(vec2_2, vec2_2));
+        },
+        oproj: function(vec2_1, vec2_2) {
+            return Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.proj(vec2_1, vec2_2));
         },
         fromAngle: function(rad) {
             return Chalkboard.vec2.new(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
@@ -1567,15 +1586,6 @@ var Chalkboard = {
         angBtwn: function(vec3_1, vec3_2) {
             return Math.acos((Chalkboard.vec3.dot(vec3_1, vec3_2)) / (Chalkboard.vec3.mag(vec3_1) * Chalkboard.vec3.mag(vec3_2)));
         },
-        rotatex: function(vec3, rad) {
-            return Chalkboard.vec3.new(vec3.x, vec3.y * Chalkboard.trig.cos(rad) - vec3.z * Chalkboard.trig.sin(rad), vec3.z * Chalkboard.trig.cos(rad) + vec3.y * Chalkboard.trig.sin(rad));
-        },
-        rotatey: function(vec3, rad) {
-            return Chalkboard.vec3.new(vec3.x * Chalkboard.trig.cos(rad) - vec3.y * Chalkboard.trig.sin(rad), vec3.y, vec3.z * Chalkboard.trig.cos(rad) + vec3.x * Chalkboard.trig.sin(rad));
-        },
-        rotatez: function(vec3, rad) {
-            return Chalkboard.vec3.new(vec3.x * Chalkboard.trig.cos(rad) - vec3.y * Chalkboard.trig.sin(rad), vec3.y * Chalkboard.trig.cos(rad) + vec3.x * Chalkboard.trig.sin(rad), vec3.z);
-        },
         scl: function(vec3, num) {
             return Chalkboard.vec3.new(vec3.x * num, vec3.y * num, vec3.z * num);
         },
@@ -1599,6 +1609,12 @@ var Chalkboard = {
         },
         vectorTriple: function(vec3_1, vec3_2, vec3_3) {
             return Chalkboard.vec3.cross(vec3_1, Chalkboard.vec3.cross(vec3_2, vec3_3));
+        },
+        proj: function(vec3_1, vec3_2) {
+            return Chalkboard.vec3.scl(vec3_2, Chalkboard.vec3.dot(vec3_1, vec3_2) / Chalkboard.vec3.dot(vec3_2, vec3_2));
+        },
+        oproj: function(vec3_1, vec3_2) {
+            return Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.proj(vec3_1, vec3_2));
         },
         fromAngles: function(rad1, rad2) {
             return Chalkboard.vec3.new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
@@ -1705,6 +1721,12 @@ var Chalkboard = {
         },
         dot: function(vec4_1, vec4_2) {
             return (vec4_1.x * vec4_2.x) + (vec4_1.y * vec4_2.y) + (vec4_1.z * vec4_2.z) + (vec4_1.w * vec4_2.w);
+        },
+        proj: function(vec4_1, vec4_2) {
+            return Chalkboard.vec4.scl(vec4_2, Chalkboard.vec4.dot(vec4_1, vec4_2) / Chalkboard.vec4.dot(vec4_2, vec4_2));
+        },
+        oproj: function(vec4_1, vec4_2) {
+            return Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.proj(vec4_1, vec4_2));
         },
         fromVector: function(vec3) {
             return Chalkboard.vec4.new(vec3.x, vec3.y, vec3.z, 0);
@@ -1983,14 +2005,15 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
-        rotater2D: function(rad) {
-            return Chalkboard.matr.new([Chalkboard.trig.cos(rad), -Chalkboard.trig.sin(rad)], [Chalkboard.trig.sin(rad), Chalkboard.trig.cos(rad)]);
-        },
-        rotater3D: function(radx, rady, radz) {
-            var matr_x = Chalkboard.matr.new([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
-            var matr_y = Chalkboard.matr.new([Chalkboard.trig.cos(rady), 0, Chalkboard.trig.sin(rady)], [0, 1, 0], [-Chalkboard.trig.sin(rady), 0, Chalkboard.trig.cos(rady)]);
-            var matr_z = Chalkboard.matr.new([Chalkboard.trig.cos(radz), -Chalkboard.trig.sin(radz), 0], [Chalkboard.trig.sin(radz), Chalkboard.trig.cos(radz), 0], [0, 0, 1]);
-            return Chalkboard.matr.mul(matr_x, Chalkboard.matr.mul(matr_y, matr_z));
+        rotater: function(radx, rady, radz) {
+            if(rady === undefined && radz === undefined) {
+                return Chalkboard.matr.new([Chalkboard.trig.cos(rad), -Chalkboard.trig.sin(rad)], [Chalkboard.trig.sin(rad), Chalkboard.trig.cos(rad)]);
+            } else {
+                var matr_x = Chalkboard.matr.new([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
+                    matr_y = Chalkboard.matr.new([Chalkboard.trig.cos(rady), 0, Chalkboard.trig.sin(rady)], [0, 1, 0], [-Chalkboard.trig.sin(rady), 0, Chalkboard.trig.cos(rady)]),
+                    matr_z = Chalkboard.matr.new([Chalkboard.trig.cos(radz), -Chalkboard.trig.sin(radz), 0], [Chalkboard.trig.sin(radz), Chalkboard.trig.cos(radz), 0], [0, 0, 1]);
+                return Chalkboard.matr.mul(matr_x, Chalkboard.matr.mul(matr_y, matr_z));
+            }
         },
         add: function(matr_1, matr_2) {
             if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
