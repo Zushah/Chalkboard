@@ -1509,6 +1509,12 @@ var Chalkboard = {
         toComplex: function(vec2) {
             return Chalkboard.comp.new(vec2.x, vec2.y);
         },
+        toPolar: function(vec2) {
+            return Chalkboard.vec2.new(Chalkboard.vec2.mag(vec2), Chalkboard.vec2.ang(vec2));
+        },
+        toBipolar: function(vec2) {
+            return Chalkboard.vec2.new((vec2.x + 1) * (vec2.x + 1) + (vec2.y * vec2.y), (vec2.x - 1) * (vec2.x - 1) + (vec2.y * vec2.y));
+        },
         toArray: function(vec2) {
             return [vec2.x, vec2.y];
         },
@@ -1632,6 +1638,12 @@ var Chalkboard = {
                 return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
             }
         },
+        toCylindrical: function(vec3) {
+            return Chalkboard.vec3.new(Chalkboard.vec2.mag(vec3), Chalkboard.vec2.ang(vec3), vec3.z);
+        },
+        toSpherical: function(vec3) {
+            return Chalkboard.vec3.new(Chalkboard.vec3.mag(vec3), Chalkboard.vec2.ang(vec3), Chalkboard.vec3.ang(vec3)[2]);
+        },
         toArray: function(vec3) {
             return [vec3.x, vec3.y, vec3.z];
         },
@@ -1743,6 +1755,12 @@ var Chalkboard = {
         },
         toQuaternion: function(vec4) {
             return Chalkboard.quat.new(vec4.x, vec4.y, vec4.z, vec4.w);
+        },
+        toHypercylindrical: function(vec4) {
+            return Chalkboard.vec4.new(Chalkboard.vec3.mag(vec4), Chalkboard.vec2.ang(vec4), Chalkboard.vec3.ang(vec4)[2], vec4.w);
+        },
+        toHyperspherical: function(vec4) {
+            return Chalkboard.vec4.new(Chalkboard.vec4.mag(vec4), Chalkboard.vec2.ang(vec4), Chalkboard.vec3.ang(vec4)[2], Chalkboard.vec4.ang(vec4)[3]);
         },
         toArray: function(vec4) {
             return [vec4.x, vec4.y, vec4.z, vec4.w];
