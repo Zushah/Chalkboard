@@ -220,7 +220,7 @@ var Chalkboard = {
         },
         Gaussian: function(height, mean, deviation) {
             var u, v, s;
-            while(typeof x === "undefined") {
+            for(;;) {
                 u = Chalkboard.numb.random(-1, 1);
                 v = Chalkboard.numb.random(-1, 1);
                 s = u * u + v * v;
@@ -1250,12 +1250,27 @@ var Chalkboard = {
         range: function(arr) {
             return Chalkboard.stat.max(arr) - Chalkboard.stat.min(arr);
         },
-        mean: function(arr) {
+        mean: function(arr, type) {
+            type = type || "arithmetic";
             var result = 0;
-            for(var i = 0; i < arr.length; i++) {
-                result += arr[i];
+            if(type === "arithmetic") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += arr[i];
+                }
+                return result / arr.length;
+            } else if(type === "geometric") {
+                for(var i = 0; i < arr.length; i++) {
+                    result *= arr[i];
+                }
+                return Chalkboard.real.nrt(Math.abs(result), arr.length);
+            } else if(type === "harmonic") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += 1 / arr[i];
+                }
+                return arr.length / result;
+            } else {
+                return "TypeError: Parameter \"type\" must be \"arithmetic\", \"geometric\", or \"harmonic\".";
             }
-            return result / arr.length;
         },
         median: function(arr) {
             var temp = arr.slice().sort(function(a, b) {
@@ -2215,22 +2230,33 @@ var Chalkboard = {
             }
         },
         fxdx: function(func, a, b) {
-            var integrand;
-            if(func.type === "expl") {
-                integrand = Chalkboard.real.parse("x => " + func.definition);
-            } else if(func.type === "pola") {
-                integrand = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
+            if(func.type === "expl" || func.type === "pola") {
+                var f;
+                if(func.type === "expl") {
+                    f = Chalkboard.real.parse("x => " + func.definition);
+                } else if(func.type === "pola") {
+                    f = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
+                }
+                var fx = f(a) + f(b);
+                var dx = (b - a) / 1000000;
+                for(var i = 1; i < 1000000; i++) {
+                    fx += i % 2 === 0 ? 2 * f(a + i * dx) : 4 * f(a + i * dx);
+                }
+                return (fx * dx) / 3;
             } else if(func.type === "para" && func.definition.length === 2) {
-                integrand = Chalkboard.real.parse("t => " + "Math.sqrt(((" + func.definition[0] + ") * (" + func.definition[0] + ")) + ((" + func.definition[1] + ") * (" + func.definition[1] + ")))");
+                var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
+                var xt = x(a) + x(b),
+                    yt = y(a) + y(b);
+                var dt = (b - a) / 1000000;
+                for(var i = 1; i < 1000000; i++) {
+                    xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
+                    yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
+                }
+                return Chalkboard.vec2.new((xt * dt) / 3, (yt * dt) / 3);
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
             }
-            var step = (b - a) / 1000000;
-            var sum = integrand(a) + integrand(b);
-            for(var i = 1; i < 1000000; i++) {
-                sum += i % 2 === 0 ? 2 * integrand(a + i * step) : 4 * integrand(a + i * step);
-            }
-            return (step / 3) * sum;
         },
         dfdv: function(func, vec_pos, vec_dir) {
             if(func.type === "mult") {
@@ -2443,7 +2469,7 @@ var Chalkboard = {
             }
             return result;
         },
-        average: function(func, a, b) {
+        mean: function(func, a, b) {
             return (Chalkboard.calc.fxdx(func, a, b)) / (b - a);
         },
         convolution: function(func_1, func_2, val) {
