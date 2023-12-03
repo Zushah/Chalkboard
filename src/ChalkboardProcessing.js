@@ -234,12 +234,14 @@ var Chalkboard = {
                 return {definition: definition, type: type};
             }  else if(type === "pola") {
                 return {definition: definition, type: type};
-            } else if(type === "para") {
+            } else if(type === "curv") {
                 return definition.length === 2 ? {definition: [definition[0], definition[1]], type: type} : {definition: [definition[0], definition[1], definition[2]], type: type};
+            } else if(type === "surf") {
+                return {definition: [definition[0], definition[1], definition[2]], type: type};
             } else if(type === "mult") {
                 return {definition: definition, type: type};
             } else {
-                return "TypeError: Parameter \"type\" must be either \"expl\", \"pola\", \"para\", or \"mult\".";
+                return "TypeError: Parameter \"type\" must be either \"expl\", \"pola\", \"curv\", \"surf\", or \"mult\".";
             }
         },
         parse: function(str) {
@@ -252,21 +254,26 @@ var Chalkboard = {
             } else if(func.type === "pola") {
                 var r = Chalkboard.real.parse("O => " + func.definition);
                 return r(val);
-            } else if(func.type === "para") {
+            } else if(func.type === "curv") {
                 if(func.definition.length === 2) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
                     return Chalkboard.vec2.new(x(val), y(val));
                 } else if(func.definition.length === 3) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]),
+                        z = Chalkboard.real.parse("t => " + func.definition[2]);
+                    return Chalkboard.vec3.new(x(val), y(val), z(val));
+                }
+            } else if(func.type === "surf") {
+                var x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
+                    y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
+                    z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
                     if(val.type === "vec2") {
-                        var x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
-                            y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
-                            z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
                         return Chalkboard.vec3.new(x(val.x, val.y), y(val.x, val.y), z(val.x, val.y));
                     } else {
                         return "TypeError: Parameter \"val\" must be of type \"vec2\".";
                     }
-                }
             } else if(func.type === "mult") {
                 if(val.type === "vec2") {
                     var f = Chalkboard.real.parse("(x, y) => " + func.definition);
@@ -275,7 +282,7 @@ var Chalkboard = {
                     return "TypeError: Parameter \"val\" must be of type \"vec2\".";
                 }
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", \"para\", or \"mult\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", \"curv\", \"surf\", or \"mult\".";
             }
         },
         pow: function(base, num) {
@@ -660,14 +667,14 @@ var Chalkboard = {
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(r(i * scl) / scl * Chalkboard.trig.cos(i * scl), -r(i * scl) / scl * Chalkboard.trig.sin(i * scl));
                 }
-            } else if(func.type === "para") {
+            } else if(func.type === "curv") {
                 var x = Chalkboard.real.parse("t => " + func.definition[0]),
                     y = Chalkboard.real.parse("t => " + func.definition[1]);
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(x(i * scl) / scl, -y(i * scl) / scl);
                 }
             } else {
-                return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", or \"para\".";
+                return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", or \"curv\".";
             }
             endShape();
             popMatrix();
@@ -2238,53 +2245,104 @@ var Chalkboard = {
             } else if(func.type === "pola") {
                 var r = Chalkboard.real.parse("O => " + func.definition);
                 return (r(val + h) - r(val)) / h;
-            } else if(func.type === "para" && func.definition.length === 2) {
-                var x = Chalkboard.real.parse("t => " + func.definition[0]),
-                    y = Chalkboard.real.parse("t => " + func.definition[1]);
-                return Chalkboard.vec2.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
+            } else if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]);
+                    return Chalkboard.vec2.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
+                } else if(func.definition.length === 3) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]),
+                        z = Chalkboard.real.parse("t => " + func.definition[2]);
+                    return Chalkboard.vec3.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h, (z(val + h) - z(val)) / h);
+                }
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"curv\".";
             }
         },
-        fxdx: function(func, a, b) {
-            if(func.type === "expl" || func.type === "pola") {
-                var f;
-                if(func.type === "expl") {
-                    f = Chalkboard.real.parse("x => " + func.definition);
-                } else if(func.type === "pola") {
-                    f = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
+        d2fdx2: function(func, val) {
+            var h = 0.000000001;
+            if(func.type === "expl") {
+                var f = Chalkboard.real.parse("x => " + func.definition);
+                return (f(val + h) - 2 * f(val) + f(val - h)) / (h * h);
+            } else if(func.type === "pola") {
+                var r = Chalkboard.real.parse("O => " + func.definition);
+                return (r(val + h) - 2 * r(val) + r(val - h)) / (h * h);
+            } else if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]);
+                    return Chalkboard.vec2.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h));
+                } else if(func.definition.length === 3) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]),
+                        z = Chalkboard.real.parse("t => " + func.definition[2]);
+                    return Chalkboard.vec3.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h), (z(val + h) - 2 * z(val) + z(val - h)) / (h * h));
                 }
-                var fx = f(a) + f(b);
-                var dx = (b - a) / 1000000;
-                for(var i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f(a + i * dx) : 4 * f(a + i * dx);
-                }
-                return (fx * dx) / 3;
-            } else if(func.type === "para" && func.definition.length === 2) {
-                var x = Chalkboard.real.parse("t => " + func.definition[0]),
-                    y = Chalkboard.real.parse("t => " + func.definition[1]);
-                var xt = x(a) + x(b),
-                    yt = y(a) + y(b);
-                var dt = (b - a) / 1000000;
-                for(var i = 1; i < 1000000; i++) {
-                    xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
-                    yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
-                }
-                return Chalkboard.vec2.new((xt * dt) / 3, (yt * dt) / 3);
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"curv\".";
             }
         },
-        dfdv: function(func, vec_pos, vec_dir) {
+        tangent: function(func, val) {
+            if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    return Chalkboard.vec2.normalize(Chalkboard.calc.dfdx(func, val));
+                } else if(func.definition.length === 3) {
+                    return Chalkboard.vec3.normalize(Chalkboard.calc.dfdx(func, val));
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
+            }
+        },
+        normal: function(func, val) {
+            if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    return Chalkboard.vec2.normalize(Chalkboard.calc.d2fdx2(func, val));
+                } else if(func.definition.length === 3) {
+                    return Chalkboard.vec3.normalize(Chalkboard.calc.d2fdx2(func, val));
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
+            }
+        },
+        binormal: function(func, val) {
+            if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    return Chalkboard.vec2.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
+                } else if(func.definition.length === 3) {
+                    return Chalkboard.vec3.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
+            }
+        },
+        dfdv: function(func, vec2_pos, vec2_dir) {
             if(func.type === "mult") {
-                return Chalkboard.vec2.dot(Chalkboard.calc.grad(func, vec_pos), Chalkboard.vec2.normalize(vec_dir));
+                return Chalkboard.vec2.dot(Chalkboard.calc.grad(func, vec2_pos), Chalkboard.vec2.normalize(vec2_dir));
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"mult\".";
+            }
+        },
+        dfrdt: function(func_1, func_2, val) {
+            if(func_1.type === "mult") {
+                if(func_2.type === "curv") {
+                    if(func.definition.length === 2) {
+                        var dfdx = Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val)).x,
+                            dfdy = Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val)).y,
+                            dxdt = Chalkboard.calc.dfdx(func_2, val).x,
+                            dydt = Chalkboard.calc.dfdx(func_2, val).y;
+                        return dfdx * dxdt + dfdy * dydt;
+                    }
+                } else {
+                    return "TypeError: Parameter \"func\" must be of type \"curv\".";
+                }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"mult\".";
             }
         },
         grad: function(funcORvecfield, vec) {
             var h = 0.000000001;
-            if(funcORvecfield.type === "para" && funcORvecfield.definition.length === 3) {
+            if(funcORvecfield.type === "surf") {
                 var x = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[1]),
                     z = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[2]);
@@ -2353,7 +2411,84 @@ var Chalkboard = {
                                            [drdx, drdy, drdz, drdw],
                                            [dsdx, dsdy, dsdz, dsdw]);
             } else {
-                return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
+                return "TypeError: Parameter \"funcORvecfield\" must be of type \"surf\", \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
+            }
+        },
+        grad2: function(funcORvecfield, vec) {
+            var h = 0.000000001;
+            if(funcORvecfield.type === "surf") {
+                var x = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[0]),
+                    y = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[1]),
+                    z = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[2]);
+                var d2xds2 = (x(vec.x + h, vec.y) - 2 * x(vec.x, vec.y) + x(vec.x - h, vec.y)) / (h * h),
+                    d2xdt2 = (x(vec.x, vec.y + h) - 2 * x(vec.x, vec.y) + x(vec.x, vec.y - h)) / (h * h),
+                    d2yds2 = (y(vec.x + h, vec.y) - 2 * y(vec.x, vec.y) + y(vec.x - h, vec.y)) / (h * h),
+                    d2ydt2 = (y(vec.x, vec.y + h) - 2 * y(vec.x, vec.y) + y(vec.x, vec.y - h)) / (h * h),
+                    d2zds2 = (z(vec.x + h, vec.y) - 2 * z(vec.x, vec.y) + z(vec.x - h, vec.y)) / (h * h), 
+                    d2zdt2 = (z(vec.x, vec.y + h) - 2 * z(vec.x, vec.y) + z(vec.x, vec.y - h)) / (h * h);
+                return Chalkboard.matr.new([d2xds2, d2xdt2],
+                                           [d2yds2, d2ydt2],
+                                           [d2zds2, d2zdt2]);
+            } else if(funcORvecfield.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + funcORvecfield.definition);
+                var d2fdx2 = (f(vec.x + h, vec.y) - 2 * f(vec.x, vec.y) + f(vec.x - h, vec.y)) / (h * h),
+                    d2fdy2 = (f(vec.x, vec.y + h) - 2 * f(vec.x, vec.y) + f(vec.x, vec.y - h)) / (h * h),
+                    d2fdxdy = (f(vec.x + h, vec.y + h) - f(vec.x + h, vec.y) - f(vec.x, vec.y + h) + f(vec.x, vec.y)) / (h * h),
+                    d2fdydx = (f(vec.x + h, vec.y + h) - f(vec.x, vec.y + h) - f(vec.x + h, vec.y) + f(vec.x, vec.y)) / (h * h);
+                return Chalkboard.matr.new([d2fdx2, d2fdxdy],
+                                           [d2fdydx, d2fdy2]);
+            } else if(funcORvecfield.type === "vec2field") {
+                var p = Chalkboard.real.parse("(x, y) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + funcORvecfield.q);
+                var d2pdx2 = (p(vec.x + h, vec.y) - 2 * p(vec.x, vec.y) + p(vec.x - h, vec.y)) / (h * h),
+                    d2pdy2 = (p(vec.x, vec.y + h) - 2 * p(vec.x, vec.y) + p(vec.x, vec.y - h)) / (h * h),
+                    d2qdx2 = (q(vec.x + h, vec.y) - 2 * q(vec.x, vec.y) + q(vec.x - h, vec.y)) / (h * h),
+                    d2qdy2 = (q(vec.x, vec.y + h) - 2 * q(vec.x, vec.y) + q(vec.x, vec.y - h)) / (h * h);
+                return Chalkboard.matr.new([d2pdx2, d2pdy2],
+                                           [d2qdx2, d2qdy2]);
+            } else if(funcORvecfield.type === "vec3field") {
+                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.r);
+                var d2pdx2 = (p(vec.x + h, vec.y, vec.z) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x - h, vec.y, vec.z)) / (h * h),
+                    d2pdy2 = (p(vec.x, vec.y + h, vec.z) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x, vec.y - h, vec.z)) / (h * h),
+                    d2pdz2 = (p(vec.x, vec.y, vec.z + h) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x, vec.y, vec.z - h)) / (h * h),
+                    d2qdx2 = (q(vec.x + h, vec.y, vec.z) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x - h, vec.y, vec.z)) / (h * h),
+                    d2qdy2 = (q(vec.x, vec.y + h, vec.z) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x, vec.y - h, vec.z)) / (h * h),
+                    d2qdz2 = (q(vec.x, vec.y, vec.z + h) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x, vec.y, vec.z - h)) / (h * h),
+                    d2rdx2 = (r(vec.x + h, vec.y, vec.z) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x - h, vec.y, vec.z)) / (h * h),
+                    d2rdy2 = (r(vec.x, vec.y + h, vec.z) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x, vec.y - h, vec.z)) / (h * h),
+                    d2rdz2 = (r(vec.x, vec.y, vec.z + h) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x, vec.y, vec.z - h)) / (h * h);
+                return Chalkboard.matr.new([d2pdx2, d2pdy2, d2pdz2],
+                                           [d2qdx2, d2qdy2, d2qdz2],
+                                           [d2rdx2, d2rdy2, d2rdz2]);
+            } else if(funcORvecfield.type === "vec4field") {
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.p),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.q),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.r),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.s);
+                var d2pdx2 = (p(vec.x + h, vec.y, vec.z, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
+                    d2pdy2 = (p(vec.x, vec.y + h, vec.z, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
+                    d2pdz2 = (p(vec.x, vec.y, vec.z + h, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
+                    d2pdw2 = (p(vec.x, vec.y, vec.z, vec.w + h) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
+                    d2qdx2 = (q(vec.x + h, vec.y, vec.z, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
+                    d2qdy2 = (q(vec.x, vec.y + h, vec.z, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
+                    d2qdz2 = (q(vec.x, vec.y, vec.z + h, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
+                    d2qdw2 = (q(vec.x, vec.y, vec.z, vec.w + h) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
+                    d2rdx2 = (r(vec.x + h, vec.y, vec.z, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
+                    d2rdy2 = (r(vec.x, vec.y + h, vec.z, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
+                    d2rdz2 = (r(vec.x, vec.y, vec.z + h, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
+                    d2rdw2 = (r(vec.x, vec.y, vec.z, vec.w + h) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
+                    d2sdx2 = (s(vec.x + h, vec.y, vec.z, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
+                    d2sdy2 = (s(vec.x, vec.y + h, vec.z, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
+                    d2sdz2 = (s(vec.x, vec.y, vec.z + h, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
+                    d2sdw2 = (s(vec.x, vec.y, vec.z, vec.w + h) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y, vec.z, vec.w - h)) / (h * h);
+                return Chalkboard.matr.new([d2pdx2, d2pdy2, d2pdz2, d2pdw2],
+                                           [d2qdx2, d2qdy2, d2qdz2, d2qdw2],
+                                           [d2rdx2, d2rdy2, d2rdz2, d2rdw2],
+                                           [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
+            } else {
+                return "TypeError: Parameter \"funcORvecfield\" must be of type \"surf\", \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
             }
         },
         div: function(vecfield, vec) {
@@ -2386,6 +2521,51 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\" or \"vec3field\".";
             }
         },
+        fxdx: function(func, a, b) {
+            if(func.type === "expl" || func.type === "pola") {
+                var f;
+                if(func.type === "expl") {
+                    f = Chalkboard.real.parse("x => " + func.definition);
+                } else if(func.type === "pola") {
+                    f = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
+                }
+                var fx = f(a) + f(b);
+                var dx = (b - a) / 1000000;
+                for(var i = 1; i < 1000000; i++) {
+                    fx += i % 2 === 0 ? 2 * f(a + i * dx) : 4 * f(a + i * dx);
+                }
+                return (fx * dx) / 3;
+            } else if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]);
+                    var xt = x(a) + x(b),
+                        yt = y(a) + y(b);
+                    var dt = (b - a) / 1000000;
+                    for(var i = 1; i < 1000000; i++) {
+                        xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
+                        yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
+                    }
+                    return Chalkboard.vec2.new((xt * dt) / 3, (yt * dt) / 3);
+                } else if(func.definition.length === 3) {
+                    var x = Chalkboard.real.parse("t => " + func.definition[0]),
+                        y = Chalkboard.real.parse("t => " + func.definition[1]),
+                        z = Chalkboard.real.parse("t => " + func.definition[2]);
+                    var xt = x(a) + x(b),
+                        yt = y(a) + y(b),
+                        zt = z(a) + z(b);
+                    var dt = (b - a) / 1000000;
+                    for(var i = 1; i < 1000000; i++) {
+                        xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
+                        yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
+                        zt += i % 2 === 0 ? 2 * z(a + i * dt) : 4 * z(a + i * dt);
+                    }
+                    return Chalkboard.vec3.new((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", or \"curv\".";
+            }
+        },
         fxydxdy: function(func, a, b, c, d) {
             if(func.type === "mult") {
                 var f = Chalkboard.real.parse("(x, y) => " + func.definition);
@@ -2403,7 +2583,7 @@ var Chalkboard = {
             }
         },
         frdt: function(funcORvecfield, func, a, b) {
-            if(func.type === "para") {
+            if(func.type === "curv") {
                 var result = 0;
                 var dt = (b - a) / 10000;
                 if(funcORvecfield.type === "mult") {
@@ -2420,61 +2600,73 @@ var Chalkboard = {
                     return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\" or \"vec2field\".";
                 }
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
             }
         },
         fds: function(func, a, b, c, d) {
-            if(func.type === "para") {
-                var result = 0;
-                var drdt, drds;
+            var result = 0;
+            var drdt, drds;
+            if(func.type === "curv") {
+                var dt = (b - a) / 10000;
                 if(func.definition.length === 2) {
-                    var dt = (b - a) / 10000;
                     for(var t = a; t <= b; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
                         result += Chalkboard.vec2.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
-                    var dt = (b - a) / 100,
-                        ds = (d - c) / 100;
-                    for(var s = c; s <= d; s += ds) {
-                        for(var t = a; t <= b; t += dt) {
-                            drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
-                            drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
-                            result += Chalkboard.vec3.mag(Chalkboard.vec3.cross(drds, drdt));
-                        }
+                    for(var t = a; t <= b; t += dt) {
+                        drdt = Chalkboard.calc.dfdx(func, t);
+                        result += Chalkboard.vec3.mag(drdt);
                     }
-                    return result * ds * dt;
+                    return result * dt;
                 }
+            } else if(func.type === "surf") {
+                var dt = (b - a) / 100,
+                    ds = (d - c) / 100;
+                for(var s = c; s <= d; s += ds) {
+                    for(var t = a; t <= b; t += dt) {
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
+                        result += Chalkboard.vec3.mag(Chalkboard.vec3.cross(drds, drdt));
+                    }
+                }
+                return result * ds * dt;
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
         fnds: function(vecfield, func, a, b, c, d) {
-            if(func.type === "para") {
-                var result = 0;
-                var drdt, drds;
+            var result = 0;
+            var drdt, drds;
+            if(func.type === "curv") {
+                var dt = (b - a) / 10000;
                 if(func.definition.length === 2) {
-                    var dt = (b - a) / 10000;
                     for(var t = a; t <= b; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
-                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.vec3.new(-drdt.y, drdt.x)) * Chalkboard.vec2.mag(drdt);
+                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.vec2.new(-drdt.y, drdt.x)) * Chalkboard.vec2.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
-                    var dt = (b - a) / 100,
-                        ds = (d - c) / 100;
-                    for(var s = c; s <= d; s += ds) {
-                        for(var t = a; t <= b; t += dt) {
-                            drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
-                            drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
-                            result += Chalkboard.vec3.scalarTriple(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, Chalkboard.vec2.new(s, t))), drds, drdt);
-                        }
+                    for(var t = a; t <= b; t += dt) {
+                        drdt = Chalkboard.calc.dfdx(func, t);
+                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.normal(func, t)) * Chalkboard.vec3.mag(drdt);
                     }
-                    return result * ds * dt;
+                    return result * dt;
                 }
+            } else if(func.type === "surf") {
+                var dt = (b - a) / 100,
+                    ds = (d - c) / 100;
+                for(var s = c; s <= d; s += ds) {
+                    for(var t = a; t <= b; t += dt) {
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
+                        result += Chalkboard.vec3.scalarTriple(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, Chalkboard.vec2.new(s, t))), drds, drdt);
+                    }
+                }
+                return result * ds * dt;
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"para\".";
+                return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
         extrema: function(func, domain) {
@@ -2488,6 +2680,21 @@ var Chalkboard = {
         },
         mean: function(func, a, b) {
             return (Chalkboard.calc.fxdx(func, a, b)) / (b - a);
+        },
+        curvature: function(func, val) {
+            if(func.type === "curv") {
+                if(func.definition.length === 2) {
+                    var dxdt = Chalkboard.calc.dfdx(func, val).x,
+                        dydt = Chalkboard.calc.dfdx(func, val).y,
+                        d2xdt2 = Chalkboard.calc.d2fdx2(func, val).x,
+                        d2ydt2 = Chalkboard.calc.d2fdx2(func, val).y;
+                    return Math.abs(dxdt * d2ydt2 - dydt * d2xdt2) / Math.sqrt((dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt));
+                } else if(func.definition.length === 3) {
+                    return Chalkboard.vec3.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vec3.mag(Chalkboard.calc.dfdx(func, val));
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
+            }
         },
         convolution: function(func_1, func_2, val) {
             return Chalkboard.calc.fxdx(Chalkboard.real.function("(" + func_1.definition + ") * (" + func_2.definition.replace(/x/g, "(" + val + " - x)") + ")"), -100, 100);
