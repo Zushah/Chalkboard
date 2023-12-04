@@ -1,17 +1,17 @@
 /*
     The Chalkboard Library
-    Version 1.2.0 released 11/27/2023
+    Version 1.3.0 released 12/04/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.2.0
+    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0
     Documentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.2.0 released 11/27/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.2.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.3.0 released 12/04/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
     },
     LOGO: function(x, y, s) {
         x = x || width / 2;
@@ -790,7 +790,28 @@ var Chalkboard = {
             }
             endShape();
             popMatrix();
-            return "The derivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return "The first-order derivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+        },
+        d2fdx2: function(func, scl, rgba, domain, origin, weight, res) {
+            scl = scl || 1;
+            scl /= 100;
+            rgba = rgba || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            noFill();
+            strokeWeight(weight);
+            stroke(rgba.length === 3 ? color(rgba[0], rgba[1], rgba[2]) : color(rgba[0], rgba[1], rgba[2], rgba[3]));
+            beginShape();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                vertex(i, -Chalkboard.calc.d2fdx2(func, i * scl) / scl);
+            }
+            endShape();
+            popMatrix();
+            return "The second-order derivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
         },
         fxdx: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -2261,7 +2282,7 @@ var Chalkboard = {
             }
         },
         d2fdx2: function(func, val) {
-            var h = 0.000000001;
+            var h = 0.00001;
             if(func.type === "expl") {
                 var f = Chalkboard.real.parse("x => " + func.definition);
                 return (f(val + h) - 2 * f(val) + f(val - h)) / (h * h);
@@ -2415,7 +2436,7 @@ var Chalkboard = {
             }
         },
         grad2: function(funcORvecfield, vec) {
-            var h = 0.000000001;
+            var h = 0.00001;
             if(funcORvecfield.type === "surf") {
                 var x = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[1]),

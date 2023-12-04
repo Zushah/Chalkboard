@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.2.0 Example Program: Quaternion Donut
+    Version 1.3.0 Example Program: Quaternion Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -27,7 +27,7 @@ function main() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Make the donut rotate with a rotation quaternion
-    var r = cb.quat.fromAxis(cb.vec3.new(1, 1, 1), theta);
+    var r = cb.quat.fromAxis(cb.vec3.normalize(cb.vec3.new(1, 1, 1)), theta);
     var qoints = [];  // We'll say that "qoints" are the new rotated points
     for(var i = 0; i < points.length; i++) {
         qoints.push(cb.quat.toRotation(r, points[i]));

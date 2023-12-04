@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.2.0 Example Program: Hyperbolic Functions
+    Version 1.3.0 Example Program: Hyperbolic Functions
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -18,7 +18,7 @@ function main() {
     cb.plot.xyplane(1, [0, 0, 0], [canvas.width / 2, canvas.height / 2], 2);
 
     // Plot the unit hyperbola with a parametric function (see: https://en.wikipedia.org/wiki/Hyperbola)
-    var f = cb.real.function(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "para");
+    var f = cb.real.function(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "curv");
     cb.plot.function(f, 1, [100, 100, 255], [0, 10], [canvas.width / 2, canvas.height / 2], 4);
     cb.plot.function(f, 1, [100, 100, 255], [-10, 0], [canvas.width / 2, canvas.height / 2], 4);
 
