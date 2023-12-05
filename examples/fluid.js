@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.3.0 Example Program: Fluid Flow
+    Version 1.3.1 Example Program: Fluid Flow
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -11,8 +11,7 @@ canvas.height = window.innerHeight;
 
 var cb = Chalkboard; // Initialize Chalkboard as cb
 
-// Vector field adapted from "Learning about Hamiltonian Monte Carlo" by @betanalpha and @rlmcelreath which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
-// Vector field defined as F(x, y) = (-y, -x/(1 + x^2)^2)
+// Vector field defined as F(x, y) = (-y, -x/(1 + x^2)^2), adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
 var F = cb.vec2.field("y", "-x / ((1 + x * x) * (1 + x * x))");
 
 // Basic particle system to simulate the fluid flow

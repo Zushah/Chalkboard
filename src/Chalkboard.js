@@ -1,17 +1,17 @@
 /*
     The Chalkboard Library
-    Version 1.3.0 released 12/04/2023
+    Version 1.3.1 released 12/04/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0
+    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1
     Documentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.3.0 released 11/04/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.3.1 released 12/04/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
     },
     LOGO: function(x, y, s, context) {
         x = x || canvas.width / 2;
@@ -2058,7 +2058,7 @@ var Chalkboard = {
                 return Chalkboard.matr.new([vec.x, 0, 0, 0], [0, vec.y, 0, 0], [0, 0, vec.z, 0], [0, 0, 0, vec.w]);
             }
         },
-        translater: function(vec) {
+        translator: function(vec) {
             if(vec.type === "vec2") {
                 return Chalkboard.matr.new([1, 0, vec.x], [0, 1, vec.y], [0, 0, 1]);
             } else if(vec.type === "vec3") {
@@ -2069,9 +2069,9 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
-        rotater: function(radx, rady, radz) {
+        rotator: function(radx, rady, radz) {
             if(rady === undefined && radz === undefined) {
-                return Chalkboard.matr.new([Chalkboard.trig.cos(rad), -Chalkboard.trig.sin(rad)], [Chalkboard.trig.sin(rad), Chalkboard.trig.cos(rad)]);
+                return Chalkboard.matr.new([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
             } else {
                 var matr_x = Chalkboard.matr.new([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
                     matr_y = Chalkboard.matr.new([Chalkboard.trig.cos(rady), 0, Chalkboard.trig.sin(rady)], [0, 1, 0], [-Chalkboard.trig.sin(rady), 0, Chalkboard.trig.cos(rady)]),
@@ -2428,11 +2428,11 @@ var Chalkboard = {
                     q = Chalkboard.real.parse("(x, y) => " + funcORvecfield.q);
                 var dpdx = (p(vec.x + h, vec.y) - p(vec.x, vec.y)) / h,
                     dpdy = (p(vec.x, vec.y + h) - p(vec.x, vec.y)) / h,
-                    dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h;
+                    dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h,
                     dqdy = (q(vec.x, vec.y + h) - q(vec.x, vec.y)) / h;
                 return Chalkboard.matr.new([dpdx, dpdy],
                                            [dqdx, dqdy]);
-            } else if(vecfield.type === "vec3field") {
+            } else if(funcORvecfield.type === "vec3field") {
                 var p = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.p),
                     q = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.q),
                     r = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.r);
@@ -2448,7 +2448,7 @@ var Chalkboard = {
                 return Chalkboard.matr.new([dpdx, dpdy, dpdz],
                                            [dqdx, dqdy, dqdz],
                                            [drdx, drdy, drdz]);
-            } else if(vecfield.type === "vec4field") {
+            } else if(funcORvecfield.type === "vec4field") {
                 var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.p),
                     q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.q),
                     r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.r),

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.3.0 Example Program: Matrix Donut
+    Version 1.3.1 Example Program: Matrix Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -39,7 +39,7 @@ function main() {
     ctx.restore();
 
     // Make the donut rotate with a rotation matrix
-    var r = cb.matr.rotater(cb.trig.toRad(1), cb.trig.toRad(1), cb.trig.toRad(1));
+    var r = cb.matr.rotator(cb.trig.toRad(1), cb.trig.toRad(1), cb.trig.toRad(1));
     for(var i = 0; i < points.length; i++) {
         var buffer = cb.vec3.toMatrix(points[i]);      // Create a buffer matrix which has the donut's points
         var rbuffer = cb.matr.mul(r, buffer);          // Multiply the rotation matrix with the buffer matrix

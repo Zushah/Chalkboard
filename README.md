@@ -1,12 +1,12 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./src/logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0" target="_blank"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
-    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard" target="_blank"><img src="https://www.codefactor.io/repository/github/zushah/chalkboard/badge" alt="CodeFactor grade"></a>
-    <a href="https://www.github.com/Zushah/Chalkboard/commits" target="_blank"><img src="https://img.shields.io/github/last-commit/Zushah/Chalkboard" alt="Last commit"></a>
-    <a href="https://github.com/Zushah/Chalkboard/blob/main/LICENSE" target="_blank"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="Minified size"></a>
-    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard?path=build" target="_blank"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="JSDelivr traffic"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
+    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://www.codefactor.io/repository/github/zushah/chalkboard/badge" alt="CodeFactor grade"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/commits"><img src="https://img.shields.io/github/last-commit/Zushah/Chalkboard" alt="Last commit"></a>
+    <a href="https://github.com/Zushah/Chalkboard/blob/main/LICENSE"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="Minified size"></a>
+    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard?path=build"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="JSDelivr traffic"></a>
     <br>
-    <a href="https://zushah.github.io/Chalkboard/home.html" target="_blank">https://zushah.github.io/Chalkboard/home.html</a>
+    <a href="https://zushah.github.io/Chalkboard/home.html">https://zushah.github.io/Chalkboard/home.html</a>
 </p>
 
 # Contents
@@ -21,14 +21,14 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0), Chalkboard has 380 different commands. The library is available for regular JavaScript as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.3.1](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1), Chalkboard has 380 different commands. The library is available for regular JavaScript as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
 
 # Installation
 If your JavaScript project is being run within an HTML webpage, you can import the latest version of the Chalkboard library into it with this line:
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.3.0/src/Chalkboard.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.3.1/src/Chalkboard.min.js"></script>
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) and put the relevant files in your project's directory.
 
 More methods and details about installing Chalkboard can be read [here](https://zushah.github.io/Chalkboard/installation.html).
 
