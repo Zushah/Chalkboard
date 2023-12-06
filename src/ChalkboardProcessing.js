@@ -968,22 +968,33 @@ var Chalkboard = {
         },
         dist: function(p1, p2) {
             if(p1.length === p2.length) {
-                return Chalkboard.real.sqrt(p1.map(function (coord, i) {
-                    return (coord - p2[i]) * (coord - p2[i]);
-                }).reduce(function (sum, val) {
-                    return sum + val;
-                }, 0));
+                var result = 0;
+                for(var i = 0; i < p1.length; i++) {
+                    result += (p1[i] - p2[i]) * (p1[i] - p2[i]);
+                }
+                return Chalkboard.real.sqrt(result);
             } else {
                 return undefined;
             }
         },
         distsq: function(p1, p2) {
             if(p1.length === p2.length) {
-                return p1.map(function (coord, i) {
-                    return (coord - p2[i]) * (coord - p2[i]);
-                }).reduce(function (sum, val) {
-                    return sum + val;
-                }, 0);
+                var result = 0;
+                for(var i = 0; i < p1.length; i++) {
+                    result += (p1[i] - p2[i]) * (p1[i] - p2[i]);
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
+        mid: function(p1, p2) {
+            if(p1.length === p2.length) {
+                var result = [];
+                for(var i = 0; i < p1.length; i++) {
+                    result[i] = (p1[i] + p2[i]) / 2;
+                }
+                return result;
             } else {
                 return undefined;
             }
@@ -1333,19 +1344,71 @@ var Chalkboard = {
         error: function(arr) {
             return Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length);
         },
+        skewness: function(arr) {
+            var result = 0;
+            var mean = Chalkboard.stat.mean(arr);
+            var deviation = Chalkboard.stat.deviation(arr);
+            for(var i = 0; i < arr.length; i++) {
+                result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
+            }
+            return result / ((arr.length - 1) * (deviation * deviation * deviation));
+        },
+        kurtosis: function(arr) {
+            var result = 0;
+            var mean = Chalkboard.stat.mean(arr);
+            var deviation = Chalkboard.stat.deviation(arr);
+            for(var i = 0; i < arr.length; i++) {
+                result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
+            }
+            return result / (deviation * deviation * deviation * deviation) - 3;
+        },
         confidenceInterval: function(arr) {
             return [Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)), Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))];
         },
-        change: function(initialArr, finalArr) {
+        eq: function(arr, num) {
             var result = [];
-            if(initialArr.length === finalArr.length) {
-                for(var i = 0; i < initialArr.length; i++) {
-                    result.push(Chalkboard.numb.change(initialArr[i], finalArr[i]));
+            for(var i = 0; i < arr.length; i++) {
+                if(arr[i] === num) {
+                    result.push(arr[i]);
                 }
-                return result;
-            } else {
-                return undefined;
             }
+            return result;
+        },
+        gt: function(arr, num) {
+            var result = [];
+            for(var i = 0; i < arr.length; i++) {
+                if(arr[i] > num) {
+                    result.push(arr[i]);
+                }
+            }
+            return result;
+        },
+        gte: function(arr, num) {
+            var result = [];
+            for(var i = 0; i < arr.length; i++) {
+                if(arr[i] >= num) {
+                    result.push(arr[i]);
+                }
+            }
+            return result;
+        },
+        lt: function(arr, num) {
+            var result = [];
+            for(var i = 0; i < arr.length; i++) {
+                if(arr[i] < num) {
+                    result.push(arr[i]);
+                }
+            }
+            return result;
+        },
+        lte: function(arr, num) {
+            var result = [];
+            for(var i = 0; i < arr.length; i++) {
+                if(arr[i] <= num) {
+                    result.push(arr[i]);
+                }
+            }
+            return result;
         },
         percentile: function(arr, num) {
             var result = 0;
@@ -1355,6 +1418,22 @@ var Chalkboard = {
                 }
             }
             return (result / arr.length) * 100;
+        },
+        quartile: function(arr, type) {
+            var temp = arr.slice().sort(function(a, b) {
+                return a - b;
+            });
+            var lo = temp.slice(0, Math.floor(temp.length / 2));
+            var hi = temp.slice(Math.ceil(temp.length / 2));
+            if(type === "Q1") {
+                return Chalkboard.stat.median(lo);
+            } else if(type === "Q2") {
+                return Chalkboard.stat.median(arr);
+            } else if(type === "Q3") {
+                return Chalkboard.stat.median(hi);
+            } else {
+                return "TypeError: Parameter \"type\" must be either \"Q1\", \"Q2\", or \"Q3\".";
+            }
         },
         convolution: function(arr1, arr2) {
             var result = [];
@@ -1380,6 +1459,17 @@ var Chalkboard = {
         },
         autocorrelation: function(arr) {
             return Chalkboard.stat.correlation(arr, arr);
+        },
+        change: function(initialArr, finalArr) {
+            var result = [];
+            if(initialArr.length === finalArr.length) {
+                for(var i = 0; i < initialArr.length; i++) {
+                    result.push(Chalkboard.numb.change(initialArr[i], finalArr[i]));
+                }
+                return result;
+            } else {
+                return undefined;
+            }
         },
         chiSquared: function(observedArr, expectedArr) {
             var result = [];
