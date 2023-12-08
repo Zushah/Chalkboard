@@ -199,6 +199,13 @@ var Chalkboard = {
         map: function(num, range1, range2) {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
         },
+        constrain: function(num, range) {
+            if(range === undefined) {
+                return Math.max(Math.min(num, 1), 0);
+            } else {
+                return Math.max(Math.min(num, range[1]), range[0]);
+            }
+        },
         binomial: function(n, k) {
             if(k === 0 || k === n) {
                 return 1;
@@ -470,6 +477,9 @@ var Chalkboard = {
         scl: function(comp, num) {
             return Chalkboard.comp.new(comp.a * num, comp.b * num);
         },
+        constrain: function(comp, range) {
+            return Chalkboard.comp.new(Chalkboard.numb.constrain(comp.a, range), Chalkboard.numb.constrain(comp.b, range));
+        },
         add: function(comp_1, comp_2) {
             return Chalkboard.comp.new(comp_1.a + comp_2.a, comp_1.b + comp_2.b);
         },
@@ -550,6 +560,9 @@ var Chalkboard = {
         },
         scl: function(quat, num) {
             return Chalkboard.quat.new(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
+        },
+        constrain: function(quat, range) {
+            return Chalkboard.quat.new(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
         },
         add: function(quat_1, quat_2) {
             return Chalkboard.quat.new(quat_1.a + quat_2.a, quat_1.b + quat_2.b, quat_1.c + quat_2.c, quat_1.d + quat_2.d);
@@ -1548,6 +1561,9 @@ var Chalkboard = {
         scl: function(vec2, num) {
             return Chalkboard.vec2.new(vec2.x * num, vec2.y * num);
         },
+        constrain: function(vec2, range) {
+            return Chalkboard.vec2.new(Chalkboard.numb.constrain(vec2.x, range), Chalkboard.numb.constrain(vec2.y, range));
+        },
         add: function(vec2_1, vec2_2) {
             return Chalkboard.vec2.new(vec2_1.x + vec2_2.x, vec2_1.y + vec2_2.y);
         },
@@ -1676,6 +1692,9 @@ var Chalkboard = {
         },
         scl: function(vec3, num) {
             return Chalkboard.vec3.new(vec3.x * num, vec3.y * num, vec3.z * num);
+        },
+        constrain: function(vec3, range) {
+            return Chalkboard.vec3.new(Chalkboard.numb.constrain(vec3.x, range), Chalkboard.numb.constrain(vec3.y, range), Chalkboard.numb.constrain(vec3.z, range));
         },
         add: function(vec3_1, vec3_2) {
             return Chalkboard.vec3.new(vec3_1.x + vec3_2.x, vec3_1.y + vec3_2.y, vec3_1.z + vec3_2.z);
@@ -1809,6 +1828,9 @@ var Chalkboard = {
         },
         scl: function(vec4, num) {
             return Chalkboard.vec4.new(vec4.x * num, vec4.y * num, vec4.z * num, vec4.w * num);
+        },
+        constrain: function(vec4, range) {
+            return Chalkboard.vec4.new(Chalkboard.numb.constrain(vec4.x, range), Chalkboard.numb.constrain(vec4.y, range), Chalkboard.numb.constrain(vec4.z, range), Chalkboard.numb.constrain(vec4.w, range));
         },
         add: function(vec4_1, vec4_2) {
             return Chalkboard.vec4.new(vec4_1.x + vec4_2.x, vec4_1.y + vec4_2.y, vec4_1.z + vec4_2.z, vec4_1.w + vec4_2.w);
@@ -2127,6 +2149,26 @@ var Chalkboard = {
                 return Chalkboard.matr.mul(matr_x, Chalkboard.matr.mul(matr_y, matr_z));
             }
         },
+        scl: function(matr, num) {
+            var result = Chalkboard.matr.new();
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result[i] = [];
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result[i][j] = matr[i][j] * num;
+                }
+            }
+            return result;
+        },
+        constrain: function(matr, range) {
+            var result = Chalkboard.matr.new();
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result[i] = [];
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result[i][j] = Chalkboard.numb.constrain(matr[i][j], range);
+                }
+            }
+            return result;
+        },
         add: function(matr_1, matr_2) {
             if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
                 var result = Chalkboard.matr.new();
@@ -2171,16 +2213,6 @@ var Chalkboard = {
             } else {
                 return undefined;
             }
-        },
-        scl: function(matr, num) {
-            var result = Chalkboard.matr.new();
-            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = matr[i][j] * num;
-                }
-            }
-            return result;
         },
         pow: function(matr, num) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
