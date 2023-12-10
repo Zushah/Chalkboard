@@ -479,6 +479,12 @@ var Chalkboard = {
         conjugate: function(comp) {
             return Chalkboard.comp.new(comp.a, -comp.b);
         },
+        dist: function(comp_1, comp_2) {
+            return Chalkboard.real.sqrt(((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b)));
+        },
+        distsq: function(comp_1, comp_2) {
+            return ((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b));
+        },
         scl: function(comp, num) {
             return Chalkboard.comp.new(comp.a * num, comp.b * num);
         },
@@ -1297,6 +1303,130 @@ var Chalkboard = {
             }
             return result;
         },
+        norm: function(arr) {
+            var result = 0;
+            for(var i = 0; i < arr.length; i++) {
+                result += arr[i] * arr[i];
+            }
+            return Chalkboard.real.sqrt(result);
+        },
+        normsq: function(arr) {
+            var result = 0;
+            for(var i = 0; i < arr.length; i++) {
+                result += arr[i] * arr[i];
+            }
+            return result;
+        },
+        normalize: function(arr) {
+            var result = [];
+            var norm = Chalkboard.stat.norm(arr);
+            for(var i = 0; i < arr.length; i++) {
+                result.push(arr[i] / norm);
+            }
+            return result;
+        },
+        constrain: function(arr, range) {
+            var result = [];
+            for(var i = 0; i < arr.length; i++) {
+                result.push(Chalkboard.numb.constrain(arr[i], range));
+            }
+            return result;
+        },
+        eq: function(arr, arrORnum) {
+            var result = [];
+            if(arrORnum.isArray()) {
+                if(arr.length === arrORnum.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(arr[i] === arrORnum[i]) {
+                            result.push(arr[i]);
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] === arrORnum) {
+                        result.push(arr[i]);
+                    }
+                }
+            }
+            return result;
+        },
+        gt: function(arr, arrORnum) {
+            var result = [];
+            if(arrORnum.isArray()) {
+                if(arr.length === arrORnum.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(arr[i] > arrORnum[i]) {
+                            result.push(arr[i]);
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] > arrORnum) {
+                        result.push(arr[i]);
+                    }
+                }
+            }
+            return result;
+        },
+        gte: function(arr, arrORnum) {
+            var result = [];
+            if(arrORnum.isArray()) {
+                if(arr.length === arrORnum.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(arr[i] >= arrORnum[i]) {
+                            result.push(arr[i]);
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] >= arrORnum) {
+                        result.push(arr[i]);
+                    }
+                }
+            }
+            return result;
+        },
+        lt: function(arr, arrORnum) {
+            var result = [];
+            if(arrORnum.isArray()) {
+                if(arr.length === arrORnum.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(arr[i] < arrORnum[i]) {
+                            result.push(arr[i]);
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] < arrORnum) {
+                        result.push(arr[i]);
+                    }
+                }
+            }
+            return result;
+        },
+        lte: function(arr, arrORnum) {
+            var result = [];
+            if(arrORnum.isArray()) {
+                if(arr.length === arrORnum.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(arr[i] <= arrORnum[i]) {
+                            result.push(arr[i]);
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] < arrORnum) {
+                        result.push(arr[i]);
+                    }
+                }
+            }
+            return result;
+        },
         max: function(arr) {
             var max = arr[0];
             for(var i = 0; i < arr.length; i++) {
@@ -1420,51 +1550,6 @@ var Chalkboard = {
         confidenceInterval: function(arr) {
             return [Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)), Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))];
         },
-        eq: function(arr, num) {
-            var result = [];
-            for(var i = 0; i < arr.length; i++) {
-                if(arr[i] === num) {
-                    result.push(arr[i]);
-                }
-            }
-            return result;
-        },
-        gt: function(arr, num) {
-            var result = [];
-            for(var i = 0; i < arr.length; i++) {
-                if(arr[i] > num) {
-                    result.push(arr[i]);
-                }
-            }
-            return result;
-        },
-        gte: function(arr, num) {
-            var result = [];
-            for(var i = 0; i < arr.length; i++) {
-                if(arr[i] >= num) {
-                    result.push(arr[i]);
-                }
-            }
-            return result;
-        },
-        lt: function(arr, num) {
-            var result = [];
-            for(var i = 0; i < arr.length; i++) {
-                if(arr[i] < num) {
-                    result.push(arr[i]);
-                }
-            }
-            return result;
-        },
-        lte: function(arr, num) {
-            var result = [];
-            for(var i = 0; i < arr.length; i++) {
-                if(arr[i] <= num) {
-                    result.push(arr[i]);
-                }
-            }
-            return result;
-        },
         percentile: function(arr, num) {
             var result = 0;
             for(var i = 0; i < arr.length; i++) {
@@ -1539,6 +1624,46 @@ var Chalkboard = {
         },
         Gaussian: function(height, mean, deviation) {
             return Chalkboard.real.function(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
+        },
+        toVector: function(arr, type) {
+            if(type === "vec2") {
+                return Chalkboard.vec2.new(arr[0], arr[1]);
+            } else if(type === "vec3") {
+                return Chalkboard.vec3.new(arr[0], arr[1], arr[2]);
+            } else if(type === "vec4") {
+                return Chalkboard.vec4.new(arr[0], arr[1], arr[2], arr[3]);
+            } else {
+                return "TypeError: Parameter \"type\" should be \"vec2\", \"vec3\", or \"vec4\".";
+            }
+        },
+        toMatrix: function(arr, rows, cols) {
+            var result = Chalkboard.matr.new();
+            var index = 0;
+            for(var i = 0; i < rows; i++) {
+                result[i] = [];
+                for(var j = 0; j < cols; j++) {
+                    if(index < arr.length) {
+                        result[i].push(arr[index]);
+                    } else {
+                        result[i].push(0);
+                    }
+                    index++;
+                }
+            }
+            return result;
+        },
+        toObject: function(arr) {
+            var result = {};
+            for(var i = 0; i < arr.length; i++) {
+                result["_" + arr[i]] = arr[i];
+            }
+            return result;
+        },
+        toString: function(arr) {
+            return "[" + arr.join(", ") + "]";
+        },
+        print: function(arr) {
+            console.log(Chalkboard.stat.toString(arr));
         }
     },
     vec2: {
@@ -2511,7 +2636,7 @@ var Chalkboard = {
         dfrdt: function(func_1, func_2, val) {
             if(func_1.type === "mult") {
                 if(func_2.type === "curv") {
-                    if(func.definition.length === 2) {
+                    if(func_2.definition.length === 2) {
                         var dfdx = Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val)).x,
                             dfdy = Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val)).y,
                             dxdt = Chalkboard.calc.dfdx(func_2, val).x,
@@ -2781,8 +2906,13 @@ var Chalkboard = {
                         result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
+                } else if(funcORvecfield.type === "vec3field") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
                 } else {
-                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\" or \"vec2field\".";
+                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", or \"vec3field\".";
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
