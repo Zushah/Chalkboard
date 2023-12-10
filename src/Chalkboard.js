@@ -77,6 +77,22 @@ var Chalkboard = {
         lcm: function(a, b) {
             return a * (b / Chalkboard.numb.gcd(a, b));
         },
+        sum: function(formula, inf, sup) {
+            var result = 0;
+            var f = Chalkboard.real.parse("n => " + formula);
+            for(var i = inf; i <= sup; i++) {
+                result += f(i);
+            }
+            return result;
+        },
+        mul: function(formula, inf, sup) {
+            var result = 1;
+            var f = Chalkboard.real.parse("n => " + formula);
+            for(var i = inf; i <= sup; i++) {
+                result *= f(i);
+            }
+            return result;
+        },
         combination: function(n, r) {
             return Chalkboard.numb.factorial(n) / (Chalkboard.numb.factorial(n - r) * Chalkboard.numb.factorial(r));
         },
@@ -441,7 +457,7 @@ var Chalkboard = {
             return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num);
         },
         arg: function(comp) {
-            return Chalkboard.trig.arctan(comp.b / comp.a);
+            return Chalkboard.trig.arctan2(comp.b, comp.a);
         },
         slope: function(comp) {
             return comp.b / comp.a;
@@ -1227,6 +1243,27 @@ var Chalkboard = {
         arctan: function(rad) {
             return Chalkboard.calc.fxdx(Chalkboard.real.function("1 / (1 + x * x)"), 0, rad);
         },
+        arctan2: function(y, x) {
+            if(x === 0) {
+                if(y > 0) {
+                    return Chalkboard.PI(1/2);
+                } else if(y < 0) {
+                    return Chalkboard.PI(-1/2);
+                } else {
+                    return 0;
+                }
+            } else {
+                if(x > 0 && y >= 0) {
+                    return Chalkboard.trig.arctan(Math.abs(y / x));
+                } else if(x < 0 && y >= 0) {
+                    return Chalkboard.PI() - Chalkboard.trig.arctan(Math.abs(y / x));
+                } else if(x < 0 && y < 0) {
+                    return -Chalkboard.PI() + Chalkboard.trig.arctan(Math.abs(y / x));
+                } else {
+                    return -Chalkboard.trig.arctan(Math.abs(y / x));
+                }
+            }
+        },
         arccsc: function(rad) {
             if(rad > 1) {
                 return Chalkboard.calc.fxdx(Chalkboard.real.function("1 / (x * Math.sqrt(x * x - 1))"), rad, 1000);
@@ -1687,7 +1724,7 @@ var Chalkboard = {
             return Chalkboard.vec2.scl(Chalkboard.vec2.normalize(vec2), num);
         },
         ang: function(vec2) {
-            return Chalkboard.trig.arctan(vec2.y / vec2.x);
+            return Chalkboard.trig.arctan2(vec2.y, vec2.x);
         },
         slope: function(vec2) {
             return vec2.y / vec2.x;
@@ -1751,6 +1788,18 @@ var Chalkboard = {
         },
         oproj: function(vec2_1, vec2_2) {
             return Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.proj(vec2_1, vec2_2));
+        },
+        reflect: function(vec2_1, vec2_2) {
+            return Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.scl(vec2_2, 2 * Chalkboard.vec2.dot(vec2_1, vec2_2)));
+        },
+        refract: function(vec2_1, vec2_2, refractiveIndex) {
+            if(refractiveIndex > 0) {
+                var perp = Chalkboard.vec2.scl(Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.scl(vec2_2, Chalkboard.vec2.dot(vec2_1, vec2_2))), refractiveIndex);
+                var parr = Chalkboard.vec2.scl(vec2_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec2.dot(vec2_1, vec2_2) * Chalkboard.vec2.dot(vec2_1, vec2_2)))));
+                return Chalkboard.vec2.add(perp, parr);
+            } else {
+                return undefined;
+            }
         },
         fromAngle: function(rad) {
             return Chalkboard.vec2.new(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
@@ -1890,6 +1939,18 @@ var Chalkboard = {
         oproj: function(vec3_1, vec3_2) {
             return Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.proj(vec3_1, vec3_2));
         },
+        reflect: function(vec3_1, vec3_2) {
+            return Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.scl(vec3_2, 2 * Chalkboard.vec3.dot(vec3_1, vec3_2)));
+        },
+        refract: function(vec3_1, vec3_2, refractiveIndex) {
+            if(refractiveIndex > 0) {
+                var perp = Chalkboard.vec3.scl(Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.scl(vec3_2, Chalkboard.vec3.dot(vec3_1, vec3_2))), refractiveIndex);
+                var parr = Chalkboard.vec3.scl(vec3_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec3.dot(vec3_1, vec3_2) * Chalkboard.vec3.dot(vec3_1, vec3_2)))));
+                return Chalkboard.vec3.add(perp, parr);
+            } else {
+                return undefined;
+            }
+        },
         fromAngles: function(rad1, rad2) {
             return Chalkboard.vec3.new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
         },
@@ -2016,6 +2077,18 @@ var Chalkboard = {
         },
         oproj: function(vec4_1, vec4_2) {
             return Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.proj(vec4_1, vec4_2));
+        },
+        reflect: function(vec4_1, vec4_2) {
+            return Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.scl(vec4_2, 2 * Chalkboard.vec4.dot(vec4_1, vec4_2)));
+        },
+        refract: function(vec4_1, vec4_2, refractiveIndex) {
+            if(refractiveIndex > 0) {
+                var perp = Chalkboard.vec4.scl(Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.scl(vec4_2, Chalkboard.vec4.dot(vec4_1, vec4_2))), refractiveIndex);
+                var parr = Chalkboard.vec4.scl(vec4_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec4.dot(vec4_1, vec4_2) * Chalkboard.vec4.dot(vec4_1, vec4_2)))));
+                return Chalkboard.vec4.add(perp, parr);
+            } else {
+                return undefined;
+            }
         },
         fromVector: function(vec3) {
             return Chalkboard.vec4.new(vec3.x, vec3.y, vec3.z, 0);
