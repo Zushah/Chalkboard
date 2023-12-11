@@ -1,4 +1,4 @@
-<p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./src/logo.png" width="50%"></a></p>
+<p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./assets/logo.png" width="50%"></a></p>
 <p align="center">
     <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
     <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://www.codefactor.io/repository/github/zushah/chalkboard/badge" alt="CodeFactor grade"></a>
@@ -21,14 +21,14 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.3.1](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1), Chalkboard has 380 different commands. The library is available for regular JavaScript as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.4.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0), Chalkboard has 422 different commands. The library is available for regular JavaScript as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
 
 # Installation
 If your JavaScript project is being run within an HTML webpage, you can import the latest version of the Chalkboard library into it with this line:
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.3.1/src/Chalkboard.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.4.0/src/Chalkboard.min.js"></script>
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0) and put the relevant files in your project's directory.
 
 More methods and details about installing Chalkboard can be read [here](https://zushah.github.io/Chalkboard/installation.html).
 
@@ -38,7 +38,7 @@ These are all thirteen Chalkboard categories with a brief description of what th
 - `real` - Real-valued function operations
 - `comp` - Complex number operations
 - `quat` - Quaternion operations
-- `plot` - Plotting functions and function operations
+- `plot` - Plotting functions, complex numbers, vectors, matrices, and statistical graphs
 - `geom` - Geometric formulae operations
 - `trig` - Trigonometric function operations
 - `stat` - Statistical array operations
@@ -46,7 +46,7 @@ These are all thirteen Chalkboard categories with a brief description of what th
 - `vec3` - Three-dimensional vector operations
 - `vec4` - Four-dimensional vector operations
 - `matr` - Multidimensional matrix operations
-- `calc` - Single- and multi-variable calculus operations
+- `calc` - Several-variable calculus operations
 
 There are also four "global" commands in Chalkboard, which are:
 - `README()` - Prints basic information about Chalkboard in the console
@@ -59,7 +59,7 @@ The comprehensive Chalkboard documentation can be visited [here](https://zushah.
 # Getting Started
 After installing Chalkboard into your program, you can immediately get started with using it. Every Chalkboard command begins with typing "Chalkboard" followed by a period, then the name of the category of the command (all categories are listed above in the [documentation](#documentation) section) with another period, and lastly the desired command itself.
 ```js
-Chalkboard.category.command(params);
+Chalkboard.category.command(parameters);
 ```
 Here is some code that shows off only a few basic features of Chalkboard:
 ```js
@@ -76,9 +76,10 @@ let fnds = cb.calc.fnds(f, r, cb.PI(-1/2), cb.PI(1/2), 0, cb.PI(2)); // Flux of 
 
 let primes = cb.numb.primeArr(0, 100); // Array of prime numbers between 0 and 100
 let midPrime = cb.stat.median(primes); // Median number in the primes array
+cb.plot.barplot(primes, cb.stat.array(0, 100, 11), 5, [[0, 0, 0], [0, 0, 255]]); // Barplot of the primes array with a bin size of 10, a scale of 2, a stroke color of black, and a fill color of blue
 
 let z = cb.comp.new(1, 1); // z = 1 + i
-let zsqsqrt = cb.comp.sqrt(cb.comp.sq(z)); // sqrt(z^2) = z
+let zsqsqrt = cb.comp.sqrt(cb.comp.sq(z)); // The square root of z squared
 
 let r = cb.real.function(["Math.cos(t)", "Math.sin(t)"], "curv"); // r(t) = (cos(t), sin(t))
 cb.plot.xyplane(2); // Draws the Cartesian coordinate plane
@@ -112,7 +113,9 @@ More examples (which are more interesting) can be seen [here](https://zushah.git
     <li>Open a pull request. It will be reviewed soon and then merged to the main branch.</li>
 </ol>
 
-The Chalkboard library is available under the [MIT License](https://www.opensource.org/license/mit/) which can be viewed [here](https://github.com/Zushah/Chalkboard/blob/main/LICENSE).
+The changelog can be read [here](https://github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md).
+
+The Chalkboard library is available under the [MIT License](https://github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
 
 # Acknowledgements
 Thanks to [Bhavjit Chauhan](https://github.com/bhavjitChauhan) for his [contribution](https://github.com/Zushah/Chalkboard/commit/d3f0a82f0c2b1351f391908ef2d6f78403881259) to [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).

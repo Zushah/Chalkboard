@@ -1,17 +1,17 @@
 /*
     The Chalkboard Library
-    Version 1.3.1 released 12/04/2023
+    Version 1.4.0 released 12/11/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1
+    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0
     Documentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.3.1 released 12/04/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.4.0 released 12/11/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
     },
     LOGO: function(x, y, s) {
         x = x || width / 2;
@@ -267,8 +267,9 @@ var Chalkboard = {
                 return "TypeError: Parameter \"type\" must be either \"expl\", \"pola\", \"curv\", \"surf\", or \"mult\".";
             }
         },
-        parse: function(str) {
-            return Function('"use strict"; return (' + str + ')')();
+        parse: function(str, init) {
+            init = init || '';
+            return Function('"use strict"; ' + init + ' return (' + str + ')')();
         },
         val: function(func, val) {
             if(func.type === "expl") {

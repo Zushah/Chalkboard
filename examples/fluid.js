@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.3.1 Example Program: Fluid Flow
+    Version 1.4.0 Example Program: Fluid Flow
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -18,12 +18,12 @@ var F = cb.vec2.field("y", "-x / ((1 + x * x) * (1 + x * x))");
 class Particle {
     constructor() {
         this.pos = cb.vec2.new(cb.numb.random(-canvas.width / 2, canvas.width / 2), cb.numb.random(-canvas.height / 2, canvas.height / 2)); // Position vector
-        this.vel = cb.vec2.new(0, 0); // Velocity vector
+        this.vel = cb.vec2.new(0); // Velocity vector
         this.ppos = this.pos; // Previous position vector
     }
     update() {
         // Update the particle's position and velocity
-        this.vel = cb.vec2.magset(cb.vec2.fromField(F, cb.vec2.scl(this.pos, 1/100)), 5); // Velocity direction depends on the (scaled) vector field, velocity magnitude is set to always be 10
+        this.vel = cb.vec2.magset(cb.vec2.fromField(F, cb.vec2.scl(this.pos, 1/100)), 5); // Velocity direction depends on the (scaled) vector field, velocity magnitude is set to always be 5
         this.pos = cb.vec2.add(this.pos, this.vel); // Velocity is added to the position
     }
     constrain() {
@@ -53,7 +53,7 @@ class Particle {
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.beginPath();
-        ctx.moveTo(this.pos.x, this.pos.y)
+        ctx.moveTo(this.pos.x, this.pos.y);
         ctx.lineTo(this.ppos.x, this.ppos.y);
         ctx.stroke();
         ctx.restore();
