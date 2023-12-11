@@ -339,33 +339,50 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        Heaviside: function(num) {
-            if(num >= 0) {
-                return 1;
-            } else if(num < 0) {
+        Heaviside: function(num, edge, scl) {
+            edge = edge || 0;
+            scl = scl || 1;
+            if(num >= edge) {
+                return scl;
+            } else if(num < edge) {
                 return 0;
             }
         },
-        Dirac: function(num) {
-            if(num === 0) {
-                return Infinity;
-            } else if(num !== 0) {
+        Dirac: function(num, edge, scl) {
+            edge = edge || 0;
+            scl = scl || 1;
+            if(num === edge) {
+                return scl;
+            } else if(num !== edge) {
                 return 0;
             }
         },
-        ramp: function(num) {
-            if(num >= 0) {
-                return num;
-            } else if(num < 0) {
+        ramp: function(num, edge, scl) {
+            edge = edge || 0;
+            scl = scl || 1;
+            if(num >= edge) {
+                return num * scl;
+            } else if(num < edge) {
                 return 0;
             }
         },
-        rect: function(num, scl) {
-            scl = scl || 2;
-            if(num > scl / 2 || num < -scl / 2) {
+        rect: function(num, center, width, scl) {
+            center = center || 0;
+            width = width || 2;
+            scl = scl || 1;
+            if(num > (center + width / 2) || num < (center - width / 2)) {
                 return 0;
-            } else if(num <= scl / 2 || num >= -scl / 2) {
-                return 1;
+            } else if(num <= (center + width / 2) || num >= (center - width / 2)) {
+                return scl;
+            }
+        },
+        pingpong: function(num, edge, scl) {
+            edge = edge || 0;
+            scl = scl || 1;
+            if((num + edge) % (2 * scl) < scl) {
+                return (num + edge) % scl;
+            } else {
+                return scl - (num + edge) % scl;
             }
         },
         slope: function(x1, y1, x2, y2) {
@@ -425,7 +442,7 @@ var Chalkboard = {
     },
     comp: {
         new: function(a, b) {
-            return {a: a, b: b};
+            return {a: a, b: b, type: "comp"};
         },
         Re: function(comp) {
             return comp.a;
@@ -440,7 +457,7 @@ var Chalkboard = {
             return Chalkboard.comp.new(Chalkboard.trig.cos(x), Chalkboard.trig.sin(x));
         },
         ln: function(comp) {
-            return Chalkboard.comp.new(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Math.atan2(comp.b, comp.a));
+            return Chalkboard.comp.new(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Chalkboard.trig.arctan2(comp.b, comp.a));
         },
         mag: function(comp) {
             return Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b));
@@ -533,7 +550,7 @@ var Chalkboard = {
     },
     quat: {
         new: function(a, b, c, d) {
-            return {a: a, b: b, c: c, d: d};
+            return {a: a, b: b, c: c, d: d, type: "quat"};
         },
         random: function(inf, sup) {
             return Chalkboard.quat.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -686,6 +703,7 @@ var Chalkboard = {
             domain = domain || [-10, 10];
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -696,24 +714,113 @@ var Chalkboard = {
                 var f = Chalkboard.real.parse("x => " + func.definition);
                 for(var i = domain[0] / scl; i <= domain[1] / scl; i++) {
                     vertex(i, -f(i * scl) / scl);
+                    data.push([i, f(i)]);
                 }
             } else if(func.type === "pola") {
                 var r = Chalkboard.real.parse("O => " + func.definition);
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(r(i * scl) / scl * Chalkboard.trig.cos(i * scl), -r(i * scl) / scl * Chalkboard.trig.sin(i * scl));
+                    data.push([i, r(i)]);
                 }
             } else if(func.type === "curv") {
                 var x = Chalkboard.real.parse("t => " + func.definition[0]),
                     y = Chalkboard.real.parse("t => " + func.definition[1]);
                 for(var i = domain[0] / scl; i < domain[1] / scl; i++) {
                     vertex(x(i * scl) / scl, -y(i * scl) / scl);
+                    data.push([x(i), y(i)]);
                 }
             } else {
                 return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", or \"curv\".";
             }
             endShape();
             popMatrix();
-            return "The function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
+        },
+        barplot: function(arr, bins, scl, rgba, origin, weight) {
+            scl = scl || 1;
+            scl /= 100;
+            rgba = rgba || [[0, 0, 0], [255, 255, 255]];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 2;
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            strokeWeight(weight);
+            stroke(rgba.length === 3 ? color(rgba[0][0], rgba[0][1], rgba[0][2]) : color(rgba[0][0], rgba[0][1], rgba[0][2], rgba[0][3]));
+            fill(rgba.length === 3 ? color(rgba[1][0], rgba[1][1], rgba[1][2]) : color(rgba[1][0], rgba[1][1], rgba[1][2], rgba[1][3]));
+            var bars = [];
+            for(var i = 0; i < bins.length; i++) {
+                if(i === 0) {
+                    bars.push(Chalkboard.stat.lte(arr, bins[0]));
+                } else if(i === bins.length) {
+                    bars.push(Chalkboard.stat.gte(arr, bins[bins.length - 1]));
+                } else {
+                    bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
+                }
+            }
+            var counts = [];
+            for(var i = 0; i < bars.length; i++) {
+                counts.push(bars[i].length);
+            }
+            var x = 0, width = counts.length / (2 * scl);
+            for(var i = 0; i < counts.length; i++) {
+                rect(x - width, 0, 1 / scl, -counts[i] / scl);
+                x += 1 / scl;
+            }
+            popMatrix();
+            return bars;
+        },
+        lineplot: function(arr, bins, scl, rgba, origin, weight) {
+            scl = scl || 1;
+            scl /= 100;
+            rgba = rgba || [0, 0, 0];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 2;
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            noFill();
+            strokeWeight(weight);
+            stroke(rgba.length === 3 ? color(rgba[0], rgba[1], rgba[2]) : color(rgba[0], rgba[1], rgba[2], rgba[3]));
+            var verts = [];
+            for(var i = 0; i < bins.length; i++) {
+                if(i === 0) {
+                    verts.push(Chalkboard.stat.lte(arr, bins[0]));
+                } else if(i === bins.length) {
+                    verts.push(Chalkboard.stat.gte(arr, bins[bins.length - 1]));
+                } else {
+                    verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
+                }
+            }
+            var counts = [];
+            for(var i = 0; i < verts.length; i++) {
+                counts.push(verts[i].length);
+            }
+            beginShape();
+            for(var i = 0; i < counts.length; i++) {
+                vertex(i / scl, -counts[i] / scl);
+            }
+            endShape();
+            popMatrix();
+            return verts;
+        },
+        scatterplot: function(arr1, arr2, scl, rgba, origin, weight) {
+            scl = scl || 1;
+            scl /= 100;
+            rgba = rgba || [0, 0, 0];
+            origin = origin || [width / 2, height / 2];
+            weight = weight || 5;
+            var data = [];
+            pushMatrix();
+            translate(origin[0], origin[1]);
+            strokeWeight(weight * 5);
+            stroke(rgba.length === 3 ? color(rgba[0], rgba[1], rgba[2]) : color(rgba[0], rgba[1], rgba[2], rgba[3]));
+            if(arr1.length === arr2.length) {
+                for(var i = 0; i < arr1.length; i++) {
+                    point(arr1[i] / scl - arr1.length / (2 * scl), -arr2[i] / scl + arr1.length / (2 * scl));
+                    data.push([arr1[i], arr2[i]]);
+                }
+            }
+            popMatrix();
+            return data;
         },
         comp: function(comp, scl, origin, weight, rgba) {
             scl = scl || 1;
@@ -729,7 +836,7 @@ var Chalkboard = {
             popMatrix();
             noStroke();
             noFill();
-            return "The complex number " + Chalkboard.comp.toString(comp) + " has been plotted at the point (" + (origin[0] + comp.a / scl) + ", " + (origin[1] - comp.b / scl) + ") with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return [[comp.a], [comp.b]];
         },
         vec2: function(vec2, scl, rgba, origin, weight) {
             scl = scl || 1;
@@ -743,7 +850,7 @@ var Chalkboard = {
             translate(origin[0], origin[1]);
             line(0, 0, vec2.x / scl, -vec2.y / scl);
             popMatrix();
-            return "The vector " + Chalkboard.vec2.toString(vec2) + " has been plotted at the point (" + (origin[0] + vec2.x / scl) + ", " + (origin[1] - vec2.y / scl) + ") with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return [[vec2.x], [vec2.y]];
         },
         field: function(vec2field, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -753,6 +860,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 5;
             res = res || 25;
+            var data = [];
             stroke(rgba.length === 3 ? color(rgba[0], rgba[1], rgba[2]) : color(rgba[0], rgba[1], rgba[2], rgba[3]));
             strokeWeight(weight);
             pushMatrix();
@@ -761,10 +869,11 @@ var Chalkboard = {
                 for(var j = domain[1][0] / scl; j < domain[1][1] / scl; j += res) {
                     var v = Chalkboard.vec2.fromField(vec2field, Chalkboard.vec2.new(i, j));
                     line(i, j, i + v.x, j + v.y);
+                    data.push([i + v.x, j + v.y]);
                 }
             }
             popMatrix();
-            return "The vector field (" + vec2field.p + ", " + vec2field.q + ") has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for (x, y) ∈ [" + domain[0][0] + ", " + domain[0][1] + "]×[" + domain[1][0] + ", " + domain[1][1] + "]  with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         vec3: function(vec3, scl, rgba, origin, weight) {
             scl = scl || 1;
@@ -778,7 +887,7 @@ var Chalkboard = {
             translate(origin[0], origin[1]);
             line(0, 0, (vec3.x / scl) / (vec3.z * 0.25 + 1), (-vec3.y / scl) / (vec3.z * 0.25 + 1));
             popMatrix();
-            return "The vector " + Chalkboard.vec3.toString(vec3) + " has been plotted at the point (" + (origin[0] + vec3.x / scl) + ", " + (origin[1] - vec3.y / scl) + ") with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return [[vec3.x], [vec3.y], [vec3.z]];
         },
         matr: function(matr, scl, rgba, origin, weight) {
             scl = scl || 1;
@@ -804,7 +913,7 @@ var Chalkboard = {
             Chalkboard.vec2.plot(plotnegaxisx, scl, rgba, origin, weight);
             Chalkboard.vec2.plot(plotposaxisy, scl, rgba, origin, weight);
             Chalkboard.vec2.plot(plotnegaxisy, scl, rgba, origin, weight);
-            return "The matrix has been plotted with its origin at the point (" + origin[0] + ", " + origin[1] + ") with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return matr;
         },
         dfdx: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -814,6 +923,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -822,10 +932,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.dfdx(func, i * scl) / scl);
+                data.push([i, Chalkboard.calc.dfdx(func, i)]);
             }
             endShape();
             popMatrix();
-            return "The first-order derivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         d2fdx2: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -835,6 +946,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -843,10 +955,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.d2fdx2(func, i * scl) / scl);
+                data.push([i, Chalkboard.calc.d2fdx2(func, i)]);
             }
             endShape();
             popMatrix();
-            return "The second-order derivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         fxdx: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -856,6 +969,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -864,10 +978,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.fxdx(func, 0, i * scl) / scl);
+                data.push([i, Chalkboard.calc.fxdx(func, 0, i)]);
             }
             endShape();
             popMatrix();
-            return "The antiderivative of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         convolution: function(func_1, func_2, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -877,6 +992,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -885,10 +1001,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.convolution(func_1, func_2, i * scl) / scl);
+                data.push([i, Chalkboard.calc.convolution(func_1, func_2, i)]);
             }
             endShape();
             popMatrix();
-            return "The convolution of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         correlation: function(func_1, func_2, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -898,6 +1015,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -906,10 +1024,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.correlation(func_1, func_2, i * scl) / scl);
+                data.push([i, Chalkboard.calc.correlation(func_1, func_2, i)]);
             }
             endShape();
             popMatrix();
-            return "The cross-correlation of the functions " + func_1.definition + " and " + func_2.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         autocorrelation: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -919,6 +1038,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -927,10 +1047,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.autocorrelation(func, i * scl) / scl);
+                data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
             }
             endShape();
             popMatrix();
-            return "The autocorrelation of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         Laplace: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -940,6 +1061,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -949,15 +1071,17 @@ var Chalkboard = {
             if(domain[0] >= 0) {
                 for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                     vertex(i, -Chalkboard.calc.Laplace(func, i * scl) / scl);
+                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             } else {
                 for(var i = 0; i <= domain[1] / scl; i += res) {
                     vertex(i, -Chalkboard.calc.Laplace(func, i * scl) / scl);
+                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             }
             endShape();
             popMatrix();
-            return "The Laplace transform of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         },
         Fourier: function(func, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
@@ -967,6 +1091,7 @@ var Chalkboard = {
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             res = res || 25;
+            var data = [];
             pushMatrix();
             translate(origin[0], origin[1]);
             noFill();
@@ -975,10 +1100,11 @@ var Chalkboard = {
             beginShape();
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 vertex(i, -Chalkboard.calc.Fourier(func, i * scl) / scl);
+                data.push([i, Chalkboard.calc.Fourier(func, i)]);
             }
             endShape();
             popMatrix();
-            return "The Fourier transform of the function " + func.definition + " has been plotted at the point (" + origin[0] + ", " + origin[1] + ") for x ∈ [" + domain[0] + ", " + domain[1] + "] with the rgba color (" + rgba[0] + ", " + rgba[1] + ", " + rgba[2] + ").";
+            return data;
         }
     },
     geom: {
@@ -1298,27 +1424,76 @@ var Chalkboard = {
             }
             return result;
         },
-        norm: function(arr) {
-            var result = 0;
-            for(var i = 0; i < arr.length; i++) {
-                result += arr[i] * arr[i];
-            }
-            return Chalkboard.real.sqrt(result);
-        },
-        normsq: function(arr) {
-            var result = 0;
-            for(var i = 0; i < arr.length; i++) {
-                result += arr[i] * arr[i];
-            }
-            return result;
-        },
-        normalize: function(arr) {
+        random: function(inf, sup, length) {
             var result = [];
-            var norm = Chalkboard.stat.norm(arr);
-            for(var i = 0; i < arr.length; i++) {
-                result.push(arr[i] / norm);
+            for(var i = 0; i < length; i++) {
+                result.push(Chalkboard.numb.random(inf, sup));
             }
             return result;
+        },
+        norm: function(arr, type) {
+            type = type || "L2";
+            var result = 0;
+            if(type === "L0") {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] !== 0) {
+                        result += 1;
+                    }
+                }
+                return result;
+            } else if(type === "L1") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += Math.abs(arr[i]);
+                }
+                return result;
+            } else if(type === "L2") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += arr[i] * arr[i];
+                }
+                return Chalkboard.real.sqrt(result);
+            } else if(type === "LInfinity") {
+                return Math.abs(Chalkboard.stat.max(arr));
+            } else {
+                return "TypeError: Parameter \"type\" must be \"L0\", \"L1\", \"L2\", or \"LInfinity\".";
+            }
+        },
+        normsq: function(arr, type) {
+            type = type || "L2";
+            var result = 0;
+            if(type === "L0") {
+                for(var i = 0; i < arr.length; i++) {
+                    if(arr[i] !== 0) {
+                        result += 1;
+                    }
+                }
+                return result * result;
+            } else if(type === "L1") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += Math.abs(arr[i]);
+                }
+                return result * result;
+            } else if(type === "L2") {
+                for(var i = 0; i < arr.length; i++) {
+                    result += arr[i] * arr[i];
+                }
+                return result;
+            } else if(type === "LInfinity") {
+                return Math.abs(Chalkboard.stat.max(arr)) * Math.abs(Chalkboard.stat.max(arr));
+            } else {
+                return "TypeError: Parameter \"type\" must be \"L0\", \"L1\", \"L2\", or \"LInfinity\".";
+            }
+        },
+        normalize: function(arr, type) {
+            if(type === "L0" || type === "L1" || type === "L2" || type === "LInfinity") {
+                var result = [];
+                var norm = Chalkboard.stat.norm(arr, type);
+                for(var i = 0; i < arr.length; i++) {
+                    result.push(arr[i] / norm);
+                }
+                return result;
+            } else {
+                return "TypeError: Parameter \"type\" must be \"L0\", \"L1\", \"L2\", or \"LInfinity\".";
+            }
         },
         constrain: function(arr, range) {
             var result = [];
@@ -1329,7 +1504,7 @@ var Chalkboard = {
         },
         eq: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.isArray()) {
+            if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] === arrORnum[i]) {
@@ -1346,9 +1521,66 @@ var Chalkboard = {
             }
             return result;
         },
+        ineq: function(arr, inf, sup, includeInf, includeSup) {
+            includeInf = includeInf || false;
+            includeSup = includeSup || false;
+            var result = [];
+            if(inf.constructor === Array && sup.constructor === Array) {
+                if(arr.length === inf.length && arr.length === sup.length) {
+                    for(var i = 0; i < arr.length; i++) {
+                        if(includeInf) {
+                            if(includeSup) {
+                                if(arr[i] >= inf[i] && arr[i] <= sup[i]) {
+                                    result.push(arr[i]);
+                                }
+                            } else {
+                                if(arr[i] >= inf[i] && arr[i] < sup[i]) {
+                                    result.push(arr[i]);
+                                }
+                            }
+                        } else {
+                            if(includeSup) {
+                                if(arr[i] > inf[i] && arr[i] <= sup[i]) {
+                                    result.push(arr[i]);
+                                }
+                            } else {
+                                if(arr[i] > inf[i] && arr[i] < sup[i]) {
+                                    result.push(arr[i]);
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                for(var i = 0; i < arr.length; i++) {
+                    if(includeInf) {
+                        if(includeSup) {
+                            if(arr[i] >= inf && arr[i] <= sup) {
+                                result.push(arr[i]);
+                            }
+                        } else {
+                            if(arr[i] >= inf && arr[i] < sup) {
+                                result.push(arr[i]);
+                            }
+                        }
+                    } else {
+                        if(includeSup) {
+                            if(arr[i] > inf && arr[i] <= sup) {
+                                result.push(arr[i]);
+                            }
+                        } else {
+                            if(arr[i] > inf && arr[i] < sup) {
+                                result.push(arr[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        },
         gt: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.isArray()) {
+            if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] > arrORnum[i]) {
@@ -1367,7 +1599,7 @@ var Chalkboard = {
         },
         gte: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.isArray()) {
+            if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] >= arrORnum[i]) {
@@ -1386,7 +1618,7 @@ var Chalkboard = {
         },
         lt: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.isArray()) {
+            if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] < arrORnum[i]) {
@@ -1405,7 +1637,7 @@ var Chalkboard = {
         },
         lte: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.isArray()) {
+            if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] <= arrORnum[i]) {
@@ -1415,7 +1647,7 @@ var Chalkboard = {
                 }
             } else {
                 for(var i = 0; i < arr.length; i++) {
-                    if(arr[i] < arrORnum) {
+                    if(arr[i] <= arrORnum) {
                         result.push(arr[i]);
                     }
                 }
