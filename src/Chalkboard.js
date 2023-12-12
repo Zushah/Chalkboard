@@ -450,6 +450,21 @@ var Chalkboard = {
         new: function(a, b) {
             return {a: a, b: b, type: "comp"};
         },
+        function: function(definition) {
+            return {definition: definition, type: "comp"};
+        },
+        parse: function(str, init) {
+            init = init || '';
+            return Function('"use strict"; ' + init + ' return (' + str + ')')();
+        },
+        val: function(func, comp) {
+            if(func.type === "comp") {
+                var f = Chalkboard.comp.parse("z => " + func.definition);
+                return f(comp);
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"comp\".";
+            }
+        },
         Re: function(comp) {
             return comp.a;
         },
@@ -458,12 +473,6 @@ var Chalkboard = {
         },
         random: function(inf, sup) {
             return Chalkboard.comp.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
-        },
-        Euler: function(x) {
-            return Chalkboard.comp.new(Chalkboard.trig.cos(x), Chalkboard.trig.sin(x));
-        },
-        ln: function(comp) {
-            return Chalkboard.comp.new(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Chalkboard.trig.arctan2(comp.b, comp.a));
         },
         mag: function(comp) {
             return Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b));
@@ -500,6 +509,15 @@ var Chalkboard = {
         },
         round: function(comp) {
             return Chalkboard.comp.new(Math.round(comp.a), Math.round(comp.b));
+        },
+        Euler: function(rad) {
+            return Chalkboard.comp.new(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
+        },
+        pow: function(comp, num) {
+            return Chalkboard.comp.new(Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.cos(num * Chalkboard.comp.arg(comp)), Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.sin(num * Chalkboard.comp.arg(comp)));
+        },
+        ln: function(comp) {
+            return Chalkboard.comp.new(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Chalkboard.trig.arctan2(comp.b, comp.a));
         },
         sq: function(comp) {
             return Chalkboard.comp.new((comp.a * comp.a) - (comp.b * comp.b), 2 * comp.a * comp.b);
@@ -1377,21 +1395,21 @@ var Chalkboard = {
         arctan2: function(y, x) {
             if(x === 0) {
                 if(y > 0) {
-                    return Chalkboard.PI(1/2);
+                    return Math.PI / 2;
                 } else if(y < 0) {
-                    return Chalkboard.PI(-1/2);
+                    return -Math.PI / 2;
                 } else {
                     return 0;
                 }
             } else {
                 if(x > 0 && y >= 0) {
-                    return Chalkboard.trig.arctan(Math.abs(y / x));
+                    return Math.atan(Math.abs(y / x));
                 } else if(x < 0 && y >= 0) {
-                    return Chalkboard.PI() - Chalkboard.trig.arctan(Math.abs(y / x));
+                    return Math.PI - Math.atan(Math.abs(y / x));
                 } else if(x < 0 && y < 0) {
-                    return -Chalkboard.PI() + Chalkboard.trig.arctan(Math.abs(y / x));
+                    return -Math.PI + Math.atan(Math.abs(y / x));
                 } else {
-                    return -Chalkboard.trig.arctan(Math.abs(y / x));
+                    return -Math.atan(Math.abs(y / x));
                 }
             }
         },
