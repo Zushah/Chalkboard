@@ -445,8 +445,8 @@ var Chalkboard = {
         new: function(a, b) {
             return {a: a, b: b, type: "comp"};
         },
-        function: function(definition) {
-            return {definition: definition, type: "comp"};
+        function: function(realDefinition, imagDefinition) {
+            return {definition: [realDefinition, imagDefinition], type: "comp"};
         },
         parse: function(str, init) {
             init = init || '';
@@ -454,17 +454,26 @@ var Chalkboard = {
         },
         val: function(func, comp) {
             if(func.type === "comp") {
-                var f = Chalkboard.comp.parse("z => " + func.definition);
-                return f(comp);
+                var ref = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    imf = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                return Chalkboard.comp.new(ref(comp.a, comp.b), imf(comp.a, comp.b));
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"comp\".";
             }
         },
-        Re: function(comp) {
-            return comp.a;
+        Re: function(funcORcomp) {
+            if(funcORcomp.definition !== undefined && funcORcomp.type === "comp") {
+                return funcORcomp.definition[0];
+            } else if(funcORcomp.a !== undefined && funcORcomp.type === "comp") {
+                return funcORcomp.a;
+            }
         },
-        Im: function(comp) {
-            return comp.b;
+        Im: function(funcORcomp) {
+            if(funcORcomp.definition !== undefined && funcORcomp.type === "comp") {
+                return funcORcomp.definition[1];
+            } else if(funcORcomp.b !== undefined && funcORcomp.type === "comp") {
+                return funcORcomp.b;
+            }
         },
         random: function(inf, sup) {
             return Chalkboard.comp.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -497,7 +506,7 @@ var Chalkboard = {
             return Chalkboard.comp.new(-comp.a, -comp.b);
         },
         reciprocate: function(comp) {
-            return Chalkboard.comp.new(comp.a / Chalkboard.comp.magsq(comp), -comp.b / Chalkboard.comp.magsq(comp));
+            return Chalkboard.comp.new(1 / comp.a, 1 / comp.b);
         },
         absolute: function(comp) {
             return Chalkboard.comp.new(Math.abs(comp.a), Math.abs(comp.b));
@@ -522,6 +531,9 @@ var Chalkboard = {
         },
         rotate: function(comp, rad) {
             return Chalkboard.comp.new(Chalkboard.comp.mag(comp) * Chalkboard.trig.cos(Chalkboard.comp.arg(comp) + rad), Chalkboard.comp.mag(comp) * Chalkboard.trig.sin(Chalkboard.comp.arg(comp) + rad));
+        },
+        invert: function(comp) {
+            return Chalkboard.comp.new(comp.a / Chalkboard.comp.magsq(comp), -comp.b / Chalkboard.comp.magsq(comp));
         },
         conjugate: function(comp) {
             return Chalkboard.comp.new(comp.a, -comp.b);
@@ -719,7 +731,7 @@ var Chalkboard = {
             scl = scl || 1;
             scl /= 100;
             rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
+            domain = domain || func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10];
             origin = origin || [width / 2, height / 2];
             weight = weight || 2;
             var data = [];
@@ -748,8 +760,28 @@ var Chalkboard = {
                     vertex(x(i * scl) / scl, -y(i * scl) / scl);
                     data.push([x(i), y(i)]);
                 }
+            } else if(func.type === "comp") {
+                var ref = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    imf = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                for(var i = domain[0][0] / scl; i <= domain[0][1] / scl; i += 5) {
+                    for(var j = domain[1][0] / scl; j <= domain[1][1] / scl; j += 5) {
+                        var z = Chalkboard.comp.new(ref(i * scl, j * scl) / scl, imf(i * scl, j * scl) / scl);
+                        noStroke();
+                        if(z.a === 0 && z.b === 0) {
+                            fill(0, 0, 0);
+                        } else if(z.a === Infinity && z.b === Infinity) {
+                            fill(255, 255, 255);
+                        } else {
+                            colorMode(HSB);
+                            fill(Chalkboard.numb.map(Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)), [0, 360], [0, 255]), 255, Chalkboard.numb.map((Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100, [0, 100], [0, 255]));
+                            colorMode(RGB);
+                        }
+                        rect(i, j, 5, 5);
+                        data.push([ref(i, j), imf(i, j)]);
+                    }
+                }
             } else {
-                return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", or \"curv\".";
+                return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", \"curv\", or \"comp\".";
             }
             endShape();
             popMatrix();
@@ -884,8 +916,8 @@ var Chalkboard = {
             strokeWeight(weight);
             pushMatrix();
             translate(origin[0], origin[1]);
-            for(var i = domain[0][0] / scl; i < domain[0][1] / scl; i += res) {
-                for(var j = domain[1][0] / scl; j < domain[1][1] / scl; j += res) {
+            for(var i = domain[0][0] / scl; i <= domain[0][1] / scl; i += res) {
+                for(var j = domain[1][0] / scl; j <= domain[1][1] / scl; j += res) {
                     var v = Chalkboard.vec2.fromField(vec2field, Chalkboard.vec2.new(i, j));
                     line(i, j, i + v.x, j + v.y);
                     data.push([i + v.x, j + v.y]);
