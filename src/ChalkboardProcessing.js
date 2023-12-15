@@ -454,9 +454,9 @@ var Chalkboard = {
         },
         val: function(func, comp) {
             if(func.type === "comp") {
-                var ref = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
-                    imf = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
-                return Chalkboard.comp.new(ref(comp.a, comp.b), imf(comp.a, comp.b));
+                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                return Chalkboard.comp.new(u(comp.a, comp.b), v(comp.a, comp.b));
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"comp\".";
             }
@@ -761,11 +761,11 @@ var Chalkboard = {
                     data.push([x(i), y(i)]);
                 }
             } else if(func.type === "comp") {
-                var ref = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
-                    imf = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
                 for(var i = domain[0][0] / scl; i <= domain[0][1] / scl; i += 5) {
                     for(var j = domain[1][0] / scl; j <= domain[1][1] / scl; j += 5) {
-                        var z = Chalkboard.comp.new(ref(i * scl, j * scl) / scl, imf(i * scl, j * scl) / scl);
+                        var z = Chalkboard.comp.new(u(i * scl, j * scl) / scl, v(i * scl, j * scl) / scl);
                         noStroke();
                         if(z.a === 0 && z.b === 0) {
                             fill(0, 0, 0);
@@ -777,7 +777,7 @@ var Chalkboard = {
                             colorMode(RGB);
                         }
                         rect(i, j, 5, 5);
-                        data.push([ref(i, j), imf(i, j)]);
+                        data.push([u(i, j), v(i, j)]);
                     }
                 }
             } else {
@@ -2958,10 +2958,10 @@ var Chalkboard = {
                         return dfdx * dxdt + dfdy * dydt;
                     }
                 } else {
-                    return "TypeError: Parameter \"func\" must be of type \"curv\".";
+                    return "TypeError: Parameter \"func_2\" must be of type \"curv\".";
                 }
             } else {
-                return "TypeError: Parameter \"func\" must be of type \"mult\".";
+                return "TypeError: Parameter \"func_1\" must be of type \"mult\".";
             }
         },
         grad: function(funcORvecfield, vec) {
@@ -3145,6 +3145,21 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\" or \"vec3field\".";
             }
         },
+        dfdz: function(func, comp) {
+            var h = 0.000000001;
+            if(func.type === "comp") {
+                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                var duda = (u(comp.a + h, comp.b) - u(comp.a, comp.b)) / h,
+                    dudb = (u(comp.a, comp.b + h) - u(comp.a, comp.b)) / h,
+                    dvda = (v(comp.a + h, comp.b) - v(comp.a, comp.b)) / h,
+                    dvdb = (v(comp.a, comp.b + h) - v(comp.a, comp.b)) / h;
+                return Chalkboard.matr.new([duda, dudb],
+                                           [dvda, dvdb]);
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"comp\".";
+            }
+        },
         fxdx: function(func, a, b) {
             if(func.type === "expl" || func.type === "pola") {
                 var f;
@@ -3206,32 +3221,6 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"mult\".";
             }
         },
-        frdt: function(funcORvecfield, func, a, b) {
-            if(func.type === "curv") {
-                var result = 0;
-                var dt = (b - a) / 10000;
-                if(funcORvecfield.type === "mult") {
-                    for(var t = a; t <= b; t += dt) {
-                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.vec2.toArray(Chalkboard.real.val(func, t))) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
-                    }
-                    return result * dt;
-                } else if(funcORvecfield.type === "vec2field") {
-                    for(var t = a; t <= b; t += dt) {
-                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
-                    }
-                    return result * dt;
-                } else if(funcORvecfield.type === "vec3field") {
-                    for(var t = a; t <= b; t += dt) {
-                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
-                    }
-                    return result * dt;
-                } else {
-                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", or \"vec3field\".";
-                }
-            } else {
-                return "TypeError: Parameter \"func\" must be of type \"curv\".";
-            }
-        },
         fds: function(func, a, b, c, d) {
             var result = 0;
             var drdt, drds;
@@ -3265,6 +3254,32 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
+        frds: function(funcORvecfield, func, a, b) {
+            if(func.type === "curv") {
+                var result = 0;
+                var dt = (b - a) / 10000;
+                if(funcORvecfield.type === "mult") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.vec2.toArray(Chalkboard.real.val(func, t))) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
+                } else if(funcORvecfield.type === "vec2field") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
+                } else if(funcORvecfield.type === "vec3field") {
+                    for(var t = a; t <= b; t += dt) {
+                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                    }
+                    return result * dt;
+                } else {
+                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", or \"vec3field\".";
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"curv\".";
+            }
+        },
         fnds: function(vecfield, func, a, b, c, d) {
             var result = 0;
             var drdt, drds;
@@ -3296,6 +3311,25 @@ var Chalkboard = {
                 return result * ds * dt;
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
+            }
+        },
+        fzdz: function(func_1, func_2, a, b) {
+            if(func_1.type === "comp") {
+                if(func_2.type === "curv") {
+                    var result = Chalkboard.comp.new(0, 0);
+                    var dt = (b - a) / 10000;
+                    for(var t = a; t <= b; t += dt) {
+                        var fz = Chalkboard.comp.val(func_1, Chalkboard.vec2.toComplex(Chalkboard.real.val(func_2, t)));
+                        var zt = Chalkboard.calc.dfdx(func_2, t);
+                        result.a += (fz.a * zt.x) - (fz.b * zt.y);
+                        result.b += (fz.b * zt.x) + (fz.a * zt.y);
+                    }
+                    return Chalkboard.comp.scl(result, dt);
+                } else {
+                    return "TypeError: Parameter \"func_2\" must be of type \"curv\".";
+                }
+            } else {
+                return "TypeError: Parameter \"func_1\" must be of type \"comp\".";
             }
         },
         extrema: function(func, domain) {
