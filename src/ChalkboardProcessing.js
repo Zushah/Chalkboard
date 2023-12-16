@@ -801,9 +801,9 @@ var Chalkboard = {
             var bars = [];
             for(var i = 0; i < bins.length; i++) {
                 if(i === 0) {
-                    bars.push(Chalkboard.stat.lte(arr, bins[0]));
+                    bars.push(Chalkboard.stat.lt(arr, bins[0], true));
                 } else if(i === bins.length) {
-                    bars.push(Chalkboard.stat.gte(arr, bins[bins.length - 1]));
+                    bars.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
                 } else {
                     bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
                 }
@@ -834,9 +834,9 @@ var Chalkboard = {
             var verts = [];
             for(var i = 0; i < bins.length; i++) {
                 if(i === 0) {
-                    verts.push(Chalkboard.stat.lte(arr, bins[0]));
+                    verts.push(Chalkboard.stat.lt(arr, bins[0], true));
                 } else if(i === bins.length) {
-                    verts.push(Chalkboard.stat.gte(arr, bins[bins.length - 1]));
+                    verts.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
                 } else {
                     verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
                 }
@@ -1629,77 +1629,65 @@ var Chalkboard = {
             }
             return result;
         },
-        gt: function(arr, arrORnum) {
+        lt: function(arr, arrORnum, includeEnd) {
+            includeEnd = includeEnd || false;
             var result = [];
             if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
-                        if(arr[i] > arrORnum[i]) {
-                            result.push(arr[i]);
+                        if(includeEnd) {
+                            if(arr[i] <= arrORnum[i]) {
+                                result.push(arr[i]);
+                            }
+                        } else {
+                            if(arr[i] < arrORnum[i]) {
+                                result.push(arr[i]);
+                            }
                         }
                     }
                 }
             } else {
                 for(var i = 0; i < arr.length; i++) {
-                    if(arr[i] > arrORnum) {
-                        result.push(arr[i]);
+                    if(includeEnd) {
+                        if(arr[i] <= arrORnum) {
+                            result.push(arr[i]);
+                        }
+                    } else {
+                        if(arr[i] < arrORnum) {
+                            result.push(arr[i]);
+                        }
                     }
                 }
             }
             return result;
         },
-        gte: function(arr, arrORnum) {
+        gt: function(arr, arrORnum, includeEnd) {
+            includeEnd = includeEnd || false;
             var result = [];
             if(arrORnum.constructor === Array) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
-                        if(arr[i] >= arrORnum[i]) {
-                            result.push(arr[i]);
+                        if(includeEnd) {
+                            if(arr[i] >= arrORnum[i]) {
+                                result.push(arr[i]);
+                            }
+                        } else {
+                            if(arr[i] > arrORnum[i]) {
+                                result.push(arr[i]);
+                            }
                         }
                     }
                 }
             } else {
                 for(var i = 0; i < arr.length; i++) {
-                    if(arr[i] >= arrORnum) {
-                        result.push(arr[i]);
-                    }
-                }
-            }
-            return result;
-        },
-        lt: function(arr, arrORnum) {
-            var result = [];
-            if(arrORnum.constructor === Array) {
-                if(arr.length === arrORnum.length) {
-                    for(var i = 0; i < arr.length; i++) {
-                        if(arr[i] < arrORnum[i]) {
+                    if(includeEnd) {
+                        if(arr[i] >= arrORnum) {
                             result.push(arr[i]);
                         }
-                    }
-                }
-            } else {
-                for(var i = 0; i < arr.length; i++) {
-                    if(arr[i] < arrORnum) {
-                        result.push(arr[i]);
-                    }
-                }
-            }
-            return result;
-        },
-        lte: function(arr, arrORnum) {
-            var result = [];
-            if(arrORnum.constructor === Array) {
-                if(arr.length === arrORnum.length) {
-                    for(var i = 0; i < arr.length; i++) {
-                        if(arr[i] <= arrORnum[i]) {
+                    } else {
+                        if(arr[i] > arrORnum) {
                             result.push(arr[i]);
                         }
-                    }
-                }
-            } else {
-                for(var i = 0; i < arr.length; i++) {
-                    if(arr[i] <= arrORnum) {
-                        result.push(arr[i]);
                     }
                 }
             }
@@ -1933,7 +1921,7 @@ var Chalkboard = {
         toObject: function(arr) {
             var result = {};
             for(var i = 0; i < arr.length; i++) {
-                result["_" + arr[i]] = arr[i];
+                result["_" + i] = arr[i];
             }
             return result;
         },
@@ -3154,8 +3142,21 @@ var Chalkboard = {
                     dudb = (u(comp.a, comp.b + h) - u(comp.a, comp.b)) / h,
                     dvda = (v(comp.a + h, comp.b) - v(comp.a, comp.b)) / h,
                     dvdb = (v(comp.a, comp.b + h) - v(comp.a, comp.b)) / h;
-                return Chalkboard.matr.new([duda, dudb],
-                                           [dvda, dvdb]);
+                return {a: Chalkboard.comp.new(duda, dvda), b: Chalkboard.comp.new(dudb, dvdb)};
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"comp\".";
+            }
+        },
+        df2dz2: function(func, comp) {
+            var h = 0.00001;
+            if(func.type === "comp") {
+                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                var d2uda2 = (u(comp.a + h, comp.b) - 2 * u(comp.a, comp.b) + u(comp.a - h, comp.b)) / (h * h),
+                    d2udb2 = (u(comp.a, comp.b + h) - 2 * u(comp.a, comp.b) + u(comp.a, comp.b - h)) / (h * h),
+                    d2vda2 = (v(comp.a + h, comp.b) - 2 * v(comp.a, comp.b) + v(comp.a - h, comp.b)) / (h * h),
+                    d2vdb2 = (v(comp.a, comp.b + h) - 2 * v(comp.a, comp.b) + v(comp.a, comp.b - h)) / (h * h);
+                return {a: Chalkboard.comp.new(d2uda2, d2vda2), b: Chalkboard.comp.new(d2udb2, d2vdb2)};
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"comp\".";
             }
@@ -3320,9 +3321,8 @@ var Chalkboard = {
                     var dt = (b - a) / 10000;
                     for(var t = a; t <= b; t += dt) {
                         var fz = Chalkboard.comp.val(func_1, Chalkboard.vec2.toComplex(Chalkboard.real.val(func_2, t)));
-                        var zt = Chalkboard.calc.dfdx(func_2, t);
-                        result.a += (fz.a * zt.x) - (fz.b * zt.y);
-                        result.b += (fz.b * zt.x) + (fz.a * zt.y);
+                        var rt = Chalkboard.calc.dfdx(func_2, t);
+                        result = Chalkboard.comp.add(result, Chalkboard.comp.new((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
                     }
                     return Chalkboard.comp.scl(result, dt);
                 } else {
