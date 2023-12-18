@@ -1,13 +1,35 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v1.5.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) - 12/18/2023
+The seventh release of the Chalkboard library.
+Commits: [`v1.4.0...v1.5.0`](https://github.com/Zushah/Chalkboard/compare/v1.4.0...v1.5.0)
+- Added Chalkboard as an npm package, so now it can be used on the server-side just like the client side
+- Added `comp.function`, `comp.parse`, and `comp.val` to define, parse, and evaluate complex functions
+- Added `calc.dfdz`, `calc.d2fdz2`, and `calc.fzdz` to calculate the first derivatives, second derivatives, and antiderivatives of complex functions
+- Added approximations of functions using Taylor series with `calc.Taylor` and `plot.Taylor`
+- Added `comp.pow` to calculate the exponentiation of a complex number
+- Added `comp.root` to calculate the roots of a complex number
+- Added `comp.invert` (calculates the multiplicative inverse of a complex number) to replace the functionality of `comp.reciprocate`
+- Removed `stat.gte` and `stat.lte` and respectively incorporated their functionalities into `stat.gt` and `stat.lt`
+- Changed `comp.reciprocate` to return the reciprocals of the components of a complex number instead of returning the multiplicative inverse of a complex number
+- Changed `stat.gt` and `stat.lt` to have `includeEnd` parameters which determines whether the conditional they check for is "greater/less than" (input false) or "greater/less than or equal to" (input true)
+- Changed `plot.barplot` and `plot.lineplot` to use the new functionalities of `stat.gt` and `stat.lt` instead of the removed `stat.gte` and `stat.lte`
+- Changed `comp.Re` and `comp.Im` to respectively return the real and imaginary components of complex functions, too, instead of only the real and imaginary components of complex numbers
+- Changed `stat.toObject` to return an object with its properties named based on the array's index instead of the array's element
+- Changed `trig.arctan2` to use `Math.atan` instead of `trig.arctan` to be faster
+- Changed the name of `calc.frdt` to `calc.frds`
+- Changed `plot.function` to accept complex functions as inputs to plot their domain colorings
+- Fixed the error messages in `calc.dfdrt` which were misspelled
+- Fixed `plot.field` to include the upper bounds in its domain
+
 ## [v1.4.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0) - 12/11/2023
 The sixth release of the Chalkboard library.
 Commits: [`v1.3.1...v1.4.0`](https://github.com/Zushah/Chalkboard/compare/v1.3.1...v1.4.0)
 - Added many new commands for arrays: creating an array of random numbers, calculating different types of the norm (and the squared norm) of an array, calculating the normalized array, calculating the array that has the numbers that are equal to, greater than (or equal to), less than (or equal to), or some compound inequality of another number or array, calculating the skewness and kurtosis of an array, calculating the different quartiles of an array, and converting an array to a vector, matrix, object, string, or printing it in the console
 - Added `plot.barplot`, `plot.lineplot`, and `plot.scatterplot` to plot arrays of data
 - Added `.constrain` commands for numbers, arrays, complex numbers, quaternions, vectors, and matrices to constrain their values within a range
-- Added `trig.arctan2` to calculate angles
+- Added `trig.arctan2` to accurately calculate the angle between a vector and the positive x-axis
 - Added `numb.sum` and `numb.mul` for the calculation of specified summation and product formulae
 - Added `.reflect` and `.refract` commands for vectors to calculate reflection and refraction vectors
 - Added `real.pingpong` to calculate the ping-pong function
@@ -41,14 +63,14 @@ Commits: [`v1.2.0...v1.3.0`](https://github.com/Zushah/Chalkboard/compare/v1.2.0
 - Changed `matr.toVector` to have another optional parameter for the row/column of a matrix to define a vector from
 - Added `comp.scl` and `quat.scl`, and changed all of the `.magset` commands to work using their respective `.scl` commands
 - Added a `type` parameter to `stat.mean` to enable the calculation of different types of means: arithmetic, geometric, and harmonic
-- Changed `real.function`, `real.parse`, `calc.dfdx`, and `calc.fxdx` to work for the new `"mult"` function type for multivariable functions, the new `"curv"` function type for parametric curves, and the new `"surf"` function type for parametric surfaces
-- Changed all `plot` commands so they can now optionally have their opacity changed with the `rgba` parameter (which previously used to only be `rgb`)
-- Changed `numb.Gaussian` to use `for(;;)` instead of `while(typeof x === "undefined")`
-- Changed the name of `calc.average` to `calc.mean`
 - Removed `geom.dist2D` and `geom.dist3D` and replaced them with `geom.dist` and `geom.distsq` which can calculate the distance between any-dimensional points
 - Removed `vec2.rotate2D`, `vec3.rotatex`, `vec3.rotatey`, and `vec3.rotatez` because all vector rotations can be handled with rotation matrices
 - Removed `matr.rotater2D` and `matr.rotater3D` and replaced them with `matr.rotater` which can do both 2D and 3D rotations depending on the number of parameters inputted (one parameter required for 2D rotations, three parameters required for 3D rotations)
 - Removed `real.sqrt` from returning a complex number when the input is negative because it would sometimes cause bugs
+- Changed `real.function`, `real.parse`, `calc.dfdx`, and `calc.fxdx` to work for the new `"mult"` function type for multivariable functions, the new `"curv"` function type for parametric curves, and the new `"surf"` function type for parametric surfaces
+- Changed all `plot` commands so they can now optionally have their opacity changed with the `rgba` parameter (which previously used to only be `rgb`)
+- Changed `numb.Gaussian` to use `for(;;)` instead of `while(typeof x === "undefined")`
+- Changed the name of `calc.average` to `calc.mean`
 - Fixed `matr.invert` returning `NaN` values when `0` is on the diagonal of a matrix, thanks to [@bhavjitChauhan](https://github.com/bhavjitChauhan).
 
 ## [v1.2.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.2.0) - 11/27/2023
@@ -57,12 +79,12 @@ Commits: [`v1.1.0...v1.2.0`](https://github.com/Zushah/Chalkboard/compare/v1.1.0
 - Added new matrix commands for the trace of a matrix, the row space of a matrix, the column space, and null space, the exponentation, the row Echelon form (Gaussian elimination), solving systems of linear equations, and conversion of a matrix to an object
 - Added `plot.comp`, `plot.vec2`, `plot.vec3`, and `plot.matr` to replace `comp.display`, `vec2.display`, `vec3.display`, and `matr.display`
 - Added `numb.binomial` to calculate binomial coefficients
+- Removed `vec2.fromNumber`, `vec3.angcos`, `vec4.angcos`, and `matr.dimension`
+- Removed all of the `.addScl` (scalar addition) commands for vectors
 - Changed all of the `matr` commands to work for matrices of any and all dimensions (previously there was a four-by-four dimension limit)
 - Changed all of the `.mulScl` (scalar multiplication) commands for vectors and matrices to be renamed as `.scl`
 - Changed `numb.random` to have both of its parameters be optional (no parameters inputted returns a random number between 0 and 1)
 - Changed `numb.Gaussian` to use `while(typeof x === "undefined")` instead of `while(true)`
-- Removed `vec2.fromNumber`, `vec3.angcos`, `vec4.angcos`, and `matr.dimension`
-- Removed all of the `.addScl` (scalar addition) commands for vectors
 - Fixed the `vec2.magset` and `vec3.magset` commands which would return vectors in the wrong dimensions
 
 ## [v1.1.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0) - 11/13/2023
@@ -74,6 +96,7 @@ Commits: [`v1.0.0...v1.1.0`](https://github.com/Zushah/Chalkboard/compare/v1.0.0
 - Added `.convolution`, `.correlation`, and `.autocorrelation` commands in the `stat`, `calc`, and `plot` categories to calculate and plot the discrete and continuous convolutions, cross-correlations, and autocorrelations of arrays and functions, respectively
 - Added `stat.error` to calculate the standard error of an array
 - Added `matr.cofactor` and `matr.adjugate` to calculate the cofactor and adjugate matrices of a matrix
+- Removed `calc.rOdO` because polar differentation can now be done with `calc.fxdx` instead
 - Changed `calc.fxdx` to work using Simpson's rule instead of the trapezoidal Riemann sum
 - Changed `real.val`, `calc.dfdx`, and `calc.fxdx` to work for all Chalkboard functions regardless of their `type` (before they only worked for `"expl"` functions)
 - Changed `matr.det` and `matr.transpose` to work for all matrices regardless of their dimension
@@ -82,7 +105,6 @@ Commits: [`v1.0.0...v1.1.0`](https://github.com/Zushah/Chalkboard/compare/v1.0.0
 - Changed `plot.function` and `numb.factorial` to be more written slightly more efficiently
 - Changed the name of the `position` parameter in `stat.Gaussian` to `mean`
 - Changed the name of `numb.prime` (the command that checks if a number is prime) to `numb.isPrime`, so parts of `numb.primeArr` and `prime.compositeArr` had to be changed, too
-- Removed `calc.rOdO` because polar differentation can now be done with `calc.fxdx` instead
 
 ## [v1.0.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) - 11/06/2023
 The first release of the Chalkboard library.

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.4.0 Example Program: Mandelbrot Set
+    Version 1.5.0 Example Program: Mandelbrot Set
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

@@ -1,0 +1,24 @@
+{
+  "name": "@zushah/chalkboard",
+  "version": "1.5.0",
+  "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
+  "main": "src/Chalkboard.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Zushah/Chalkboard.git"
+  },
+  "keywords": [
+    "mathematics",
+    "khan-academy",
+    "processing"
+  ],
+  "author": "Zushah",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Zushah/Chalkboard/issues"
+  },
+  "homepage": "https://zushah.github.io/Chalkboard/home.html"
+}

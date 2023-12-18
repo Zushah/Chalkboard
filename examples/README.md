@@ -1,5 +1,5 @@
 # Chalkboard examples
-Six basic programs made by Zushah that utilize [Chalkboard v1.4.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0) are located in this directory.
+Six basic programs made by Zushah that utilize [Chalkboard v1.5.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) are located in this directory.
 
 They can be viewed in action here:
 - [fluid.js](https://zushah.github.io/Chalkboard/examples/fluid.html)

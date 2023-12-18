@@ -1,17 +1,17 @@
 /*
     The Chalkboard Library
-    Version 1.4.0 released 12/11/2023
+    Version 1.5.0 released 12/18/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0
-    Documentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/
+    Latest release ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0
+    Documentation ===> https://zushah.github.io/Chalkboard/documentation.html/
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.4.0 released 12/11/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release can be found here ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0\nDocumentation can be found here ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.5.0 released 12/18/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0\nDocumentation ===> https://zushah.github.io/Chalkboard/documentation.html/");
     },
     LOGO: function(x, y, s) {
         x = x || width / 2;
@@ -1115,7 +1115,7 @@ var Chalkboard = {
             popMatrix();
             return data;
         },
-        Taylor: function(func, n, a, scl, rgba, domain, origin, weight, res, context) {
+        Taylor: function(func, n, a, scl, rgba, domain, origin, weight, res) {
             scl = scl || 1;
             scl /= 100;
             rgba = rgba || [0, 0, 0];
