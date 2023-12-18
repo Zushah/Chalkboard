@@ -543,6 +543,17 @@ var Chalkboard = {
         conjugate: function(comp) {
             return Chalkboard.comp.new(comp.a, -comp.b);
         },
+        root: function(comp, n) {
+            if(Number.isInteger(n) && n > 0) {
+                var result = [];
+                var r = Chalkboard.comp.mag(comp);
+                var t = Chalkboard.comp.arg(comp);
+                for(var i = 0; i < n; i++) {
+                    result.push(Chalkboard.comp.new(Chalkboard.real.nrt(r, n) * Chalkboard.trig.cos((t + Chalkboard.PI(2 * i)) / n), Chalkboard.real.nrt(r, n) * Chalkboard.trig.sin((t + Chalkboard.PI(2 * i)) / n)));
+                }
+                return result;
+            }
+        },
         dist: function(comp_1, comp_2) {
             return Chalkboard.real.sqrt(((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b)));
         },
@@ -1138,6 +1149,29 @@ var Chalkboard = {
             for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
                 context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * scl) / scl);
                 data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
+            }
+            context.stroke();
+            context.restore();
+            return data;
+        },
+        Taylor: function(func, n, a, scl, rgba, domain, origin, weight, res, context) {
+            scl = scl || 1;
+            scl /= 100;
+            rgba = rgba || [0, 0, 0];
+            domain = domain || [-10, 10];
+            origin = origin || [canvas.width / 2, canvas.height / 2];
+            weight = weight || 2;
+            res = res || 25;
+            context = context || ctx;
+            var data = [];
+            context.save();
+            context.translate(origin[0], origin[1]);
+            context.lineWidth = weight;
+            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
+            context.beginPath();
+            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
+                context.lineTo(i, -Chalkboard.calc.Taylor(func, i * scl, n, a) / scl);
+                data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
             }
             context.stroke();
             context.restore();
@@ -3410,6 +3444,19 @@ var Chalkboard = {
         },
         autocorrelation: function(func, val) {
             return Chalkboard.calc.correlation(func, func, val);
+        },
+        Taylor: function(func, val, n, a) {
+            if(func.type === "expl") {
+                if(n === 0) {
+                    return Chalkboard.real.val(func, a);
+                } else if(n === 1) {
+                    return Chalkboard.real.val(func, a) + Chalkboard.calc.dfdx(func, a) * (val - a);
+                } else if(n === 2) {
+                    return Chalkboard.real.val(func, a) + Chalkboard.calc.dfdx(func, a) * (val - a) + (Chalkboard.calc.d2fdx2(func, a) * (val - a) * (val - a)) / 2;
+                }
+            } else {
+                return "TypeError: Parameter \"func\" must be of type \"expl\".";
+            }
         },
         Laplace: function(func, val) {
             if(val > 0) {
