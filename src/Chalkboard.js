@@ -703,136 +703,149 @@ var Chalkboard = {
         }
     },
     plot: {
-        xyplane: function(scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            context = context || ctx;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.lineWidth = weight / 4;
-            context.beginPath();
-            for(var i = Math.floor(-origin[0] / scl); i <= (canvas.width - origin[0]) / scl; i++) {
-                context.moveTo(i / scl, -origin[1]);
-                context.lineTo(i / scl, canvas.width - origin[1]);
+        xyplane: function(config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth / 4;
+            config.context.beginPath();
+            for(var i = Math.floor(-config.origin[0] / config.size); i <= (canvas.width - config.origin[0]) / config.size; i++) {
+                config.context.moveTo(i / config.size, -config.origin[1]);
+                config.context.lineTo(i / config.size, canvas.width - config.origin[1]);
             }
-            context.stroke();
-            context.beginPath();
-            for(var i = Math.floor(-origin[1] / scl); i <= (canvas.width - origin[1]) / scl; i++) {
-                context.moveTo(-origin[0], i / scl);
-                context.lineTo(canvas.width - origin[0], i / scl);
+            config.context.stroke();
+            config.context.beginPath();
+            for(var i = Math.floor(-config.origin[1] / config.size); i <= (canvas.width - config.origin[1]) / config.size; i++) {
+                config.context.moveTo(-config.origin[0], i / config.size);
+                config.context.lineTo(canvas.width - config.origin[0], i / config.size);
             }
-            context.stroke();
-            context.lineWidth = weight;
-            context.beginPath();
-            context.moveTo(-origin[0], 0);
-            context.lineTo(canvas.width - origin[0], 0);
-            context.stroke();
-            context.beginPath();
-            context.moveTo(0, -origin[1]);
-            context.lineTo(0, canvas.width - origin[1]);
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.lineWidth = config.lineWidth;
+            config.context.beginPath();
+            config.context.moveTo(-config.origin[0], 0);
+            config.context.lineTo(canvas.width - config.origin[0], 0);
+            config.context.stroke();
+            config.context.beginPath();
+            config.context.moveTo(0, -config.origin[1]);
+            config.context.lineTo(0, canvas.width - config.origin[1]);
+            config.context.stroke();
+            config.context.restore();
         },
-        rOplane: function(scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            context = context || ctx;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.lineWidth = weight / 4;
-            context.beginPath();
-            for(var i = 0; i <= scl * canvas.width / 2; i++) {
-                context.ellipse(0, 0, i / scl, i / scl, 0, 0, Chalkboard.PI(2));
+        rOplane: function(config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth / 4;
+            config.context.beginPath();
+            for(var i = 0; i <= config.size * canvas.width / 2; i++) {
+                config.context.ellipse(0, 0, i / config.size, i / config.size, 0, 0, Chalkboard.PI(2));
             }
-            context.stroke();
-            context.lineWidth = weight;
-            context.beginPath();
-            context.moveTo(-origin[0], 0);
-            context.lineTo(canvas.width - origin[0], 0);
-            context.stroke()
-            context.beginPath();
-            context.moveTo(0, -origin[1]);
-            context.lineTo(0, canvas.width - origin[1]);
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.lineWidth = config.lineWidth;
+            config.context.beginPath();
+            config.context.moveTo(-config.origin[0], 0);
+            config.context.lineTo(canvas.width - config.origin[0], 0);
+            config.context.stroke()
+            config.context.beginPath();
+            config.context.moveTo(0, -config.origin[1]);
+            config.context.lineTo(0, canvas.width - config.origin[1]);
+            config.context.stroke();
+            config.context.restore();
         },
-        function: function(func, scl, rgba, domain, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            context = context || ctx;
+        function: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
             if(func.type === "expl") {
                 var f = Chalkboard.real.parse("x => " + func.definition);
-                for(var i = domain[0] / scl; i <= domain[1] / scl; i++) {
-                    context.lineTo(i, -f(i * scl) / scl);
+                for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i++) {
+                    config.context.lineTo(i, -f(i * config.size) / config.size);
                     data.push([i, f(i)]);
                 }
             } else if(func.type === "pola") {
                 var r = Chalkboard.real.parse("O => " + func.definition);
-                for(var i = domain[0] / scl; i <= domain[1] / scl; i++) {
-                    context.lineTo(r(i * scl) / scl * Chalkboard.trig.cos(i * scl), -r(i * scl) / scl * Chalkboard.trig.sin(i * scl));
+                for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i++) {
+                    config.context.lineTo(r(i * config.size) / config.size * Chalkboard.trig.cos(i * config.size), -r(i * config.size) / config.size * Chalkboard.trig.sin(i * config.size));
                     data.push([i, r(i)]);
                 }
             } else if(func.type === "curv") {
                 var x = Chalkboard.real.parse("t => " + func.definition[0]),
                     y = Chalkboard.real.parse("t => " + func.definition[1]);
-                for(var i = domain[0] / scl; i <= domain[1] / scl; i++) {
-                    context.lineTo(x(i * scl) / scl, -y(i * scl) / scl);
+                for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i++) {
+                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
                     data.push([x(i), y(i)]);
                 }
             } else if(func.type === "comp") {
                 var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
                     v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
-                for(var i = domain[0][0] / scl; i <= domain[0][1] / scl; i += 5) {
-                    for(var j = domain[1][0] / scl; j <= domain[1][1] / scl; j += 5) {
-                        var z = Chalkboard.comp.new(u(i * scl, j * scl) / scl, v(i * scl, j * scl) / scl);
+                for(var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += 5) {
+                    for(var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += 5) {
+                        var z = Chalkboard.comp.new(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
                         if(z.a === 0 && z.b === 0) {
-                            context.fillStyle = "rgb(0, 0, 0)";
+                            config.context.fillStyle = "rgb(0, 0, 0)";
                         } else if(z.a === Infinity && z.b === Infinity) {
-                            context.fillStyle = "rgb(255, 255, 255)";
+                            config.context.fillStyle = "rgb(255, 255, 255)";
                         } else {
-                            context.fillStyle = "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
+                            config.context.fillStyle = "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
                         }
-                        context.fillRect(i, j, 5, 5);
+                        config.context.fillRect(i, j, 5, 5);
                         data.push([u(i, j), v(i, j)]);
                     }
                 }
             } else {
                 return "TypeError: Property \"type\" of parameter \"func\" must be either \"expl\", \"pola\", \"curv\", or \"comp\".";
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        barplot: function(arr, bins, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [[0, 0, 0], [255, 255, 255]];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            context = context || ctx;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba[0].length === 3 ? "rgb(" + rgba[0][0].toString() + ", " + rgba[0][1].toString() + ", " + rgba[0][2].toString() + ")" : "rgba(" + rgba[0][0].toString() + ", " + rgba[0][1].toString() + ", " + rgba[0][2].toString() + ", " + rgba[0][3].toString() + ")";
-            context.fillStyle = rgba[1].length === 3 ? "rgb(" + rgba[1][0].toString() + ", " + rgba[1][1].toString() + ", " + rgba[1][2].toString() + ")" : "rgba(" + rgba[1][0].toString() + ", " + rgba[1][1].toString() + ", " + rgba[1][2].toString() + ", " + rgba[1][3].toString() + ")";
+        barplot: function(arr, bins, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                fillStyle: config.fillStyle || "white",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.fillStyle = config.fillStyle;
             var bars = [];
             for(var i = 0; i < bins.length; i++) {
                 if(i === 0) {
@@ -847,26 +860,29 @@ var Chalkboard = {
             for(var i = 0; i < bars.length; i++) {
                 counts.push(bars[i].length);
             }
-            var x = 0, width = counts.length / (2 * scl);
+            var x = 0, width = counts.length / (2 * config.size);
             for(var i = 0; i < counts.length; i++) {
-                context.fillRect(x - width, 0, 1 / scl, -counts[i] / scl);
-                context.strokeRect(x - width, 0, 1 / scl, -counts[i] / scl);
-                x += 1 / scl;
+                config.context.fillRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
+                config.context.strokeRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
+                x += 1 / config.size;
             }
-            context.restore();
+            config.context.restore();
             return bars;
         },
-        lineplot: function(arr, bins, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            context = context || ctx;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
+        lineplot: function(arr, bins, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
             var verts = [];
             for(var i = 0; i < bins.length; i++) {
                 if(i === 0) {
@@ -881,353 +897,399 @@ var Chalkboard = {
             for(var i = 0; i < verts.length; i++) {
                 counts.push(verts[i].length);
             }
-            context.beginPath();
+            config.context.beginPath();
             for(var i = 0; i < counts.length; i++) {
-                context.lineTo(i / scl, -counts[i] / scl);
+                config.context.lineTo(i / config.size, -counts[i] / config.size);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return verts;
         },
-        scatterplot: function(arr1, arr2, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
+        scatterplot: function(arr1, arr2, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                fillStyle: config.fillStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 5,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.fillStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.fillStyle = config.fillStyle;
             if(arr1.length === arr2.length) {
                 for(var i = 0; i < arr1.length; i++) {
-                    context.beginPath();
-                    context.ellipse(arr1[i] / scl - arr1.length / (2 * scl), -arr2[i] / scl + arr1.length / (2 * scl), weight, weight, 0, 0, Chalkboard.PI(2));
-                    context.fill();
+                    config.context.beginPath();
+                    config.context.ellipse(arr1[i] / config.size - arr1.length / (2 * config.size), -arr2[i] / config.size + arr1.length / (2 * config.size), config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
+                    config.context.fill();
                     data.push([arr1[i], arr2[i]]);
                 }
             }
-            context.restore();
+            config.context.restore();
             return data;
         },
-        comp: function(comp, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.fillStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.ellipse(comp.a / scl, -comp.b / scl, weight, weight, 0, 0, Chalkboard.PI(2));
-            context.fill();
-            context.restore();
+        comp: function(comp, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                fillStyle: config.fillStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 5,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.fillStyle = config.fillStyle;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.beginPath();
+            config.context.ellipse(comp.a / config.size, -comp.b / config.size, config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
+            config.context.fill();
+            config.context.restore();
             return [[comp.a], [comp.b]];
         },
-        vec2: function(vec2, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.lineWidth = weight;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.lineTo(vec2.x / scl, -vec2.y / scl);
-            context.stroke();
-            context.restore();
+        vec2: function(vec2, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 5,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.beginPath();
+            config.context.moveTo(0, 0);
+            config.context.lineTo(vec2.x / config.size, -vec2.y / config.size);
+            config.context.stroke();
+            config.context.restore();
             return [[vec2.x], [vec2.y]];
         },
-        field: function(vec2field, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [[-10, 10], [-10, 10]];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            res = res || 25;
-            context = context || ctx;
+        field: function(vec2field, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [[-10, 10], [-10, 10]],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 5,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.lineWidth = weight;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            for(var i = domain[0][0] / scl; i <= domain[0][1] / scl; i += res) {
-                for(var j = domain[1][0] / scl; j <= domain[1][1] / scl; j += res) {
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            for(var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
+                for(var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
                     var v = Chalkboard.vec2.fromField(vec2field, Chalkboard.vec2.new(i, j));
-                    context.beginPath();
-                    context.moveTo(i, j);
-                    context.lineTo(i + v.x, j + v.y);
-                    context.stroke();
+                    config.context.beginPath();
+                    config.context.moveTo(i, j);
+                    config.context.lineTo(i + v.x, j + v.y);
+                    config.context.stroke();
                     data.push([i + v.x, j + v.y]);
                 }
             }
-            context.restore();
+            config.context.restore();
             return data;
         },
-        vec3: function(vec3, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 5;
-            context = context || ctx;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.lineWidth = weight;
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.beginPath();
-            context.moveTo(0, 0);
-            context.lineTo((vec3.x / scl) / (vec3.z * 0.25 + 1), (-vec3.y / scl) / (vec3.z * 0.25 + 1));
-            context.stroke();
-            context.restore();
+        vec3: function(vec3, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 5,
+                context: config.context || ctx
+            };
+            config.size /= 100;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth;
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.beginPath();
+            config.context.moveTo(0, 0);
+            config.context.lineTo((vec3.x / config.size) / (vec3.z * 0.25 + 1), (-vec3.y / config.size) / (vec3.z * 0.25 + 1));
+            config.context.stroke();
+            config.context.restore();
             return [[vec3.x], [vec3.y], [vec3.z]];
         },
-        matr: function(matr, scl, rgba, origin, weight, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
+        matr: function(matr, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var plotposx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
             var plotnegx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
             var plotposy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
             var plotnegy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
             for(var i = -10; i <= 10; i++) {
-                Chalkboard.vec2.plot(plotposx, scl, rgba, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
-                Chalkboard.vec2.plot(plotnegx, scl, rgba, [origin[0], origin[1] + (i / scl) * matr[1][1]],  weight / 4, context);
-                Chalkboard.vec2.plot(plotposy, scl, rgba, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
-                Chalkboard.vec2.plot(plotnegy, scl, rgba, [origin[0] + (i / scl) * matr[0][0], origin[1]],  weight / 4, context);
+                Chalkboard.vec2.plot(plotposx, {origin: [config.origin[0], config.origin[1] + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotnegx, {origin: [config.origin[0], config.origin[1] + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotposy, {origin: [config.origin[0] + (i / config.size) * matr[0][0], config.origin[1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotnegy, {origin: [config.origin[0] + (i / config.size) * matr[0][0], config.origin[1]], lineWidth: config.lineWidth / 4});
             }
             var plotposaxisx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
             var plotnegaxisx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
             var plotposaxisy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
             var plotnegaxisy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
-            Chalkboard.vec2.plot(plotposaxisx, scl, rgba, origin, weight, context);
-            Chalkboard.vec2.plot(plotnegaxisx, scl, rgba, origin, weight, context);
-            Chalkboard.vec2.plot(plotposaxisy, scl, rgba, origin, weight, context);
-            Chalkboard.vec2.plot(plotnegaxisy, scl, rgba, origin, weight, context);
+            Chalkboard.vec2.plot(plotposaxisx, config);
+            Chalkboard.vec2.plot(plotnegaxisx, config);
+            Chalkboard.vec2.plot(plotposaxisy, config);
+            Chalkboard.vec2.plot(plotnegaxisy, config);
             return matr;
         },
-        dfdx: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        dfdx: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.dfdx(func, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.dfdx(func, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        d2fdx2: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        d2fdx2: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.d2fdx2(func, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        fxdx: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        fxdx: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.fxdx(func, 0, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        convolution: function(func_1, func_2, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        convolution: function(func_1, func_2, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.convolution(func_1, func_2, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.convolution(func_1, func_2, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.convolution(func_1, func_2, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        correlation: function(func_1, func_2, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        correlation: function(func_1, func_2, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.correlation(func_1, func_2, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.correlation(func_1, func_2, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.correlation(func_1, func_2, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        autocorrelation: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        autocorrelation: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        Taylor: function(func, n, a, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        Taylor: function(func, n, a, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.Taylor(func, i * scl, n, a) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.Taylor(func, i * config.size, n, a) / config.size);
                 data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        Laplace: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        Laplace: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            if(domain[0] >= 0) {
-                for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                    context.lineTo(i, -Chalkboard.calc.Laplace(func, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            if( config.domain[0] >= 0) {
+                for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             } else {
-                for(var i = 0; i <= domain[1] / scl; i += res) {
-                    context.lineTo(i, -Chalkboard.calc.Laplace(func, i * scl) / scl);
+                for(var i = 0; i <= config.domain[1] / config.size; i += config.res) {
+                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         },
-        Fourier: function(func, scl, rgba, domain, origin, weight, res, context) {
-            scl = scl || 1;
-            scl /= 100;
-            rgba = rgba || [0, 0, 0];
-            domain = domain || [-10, 10];
-            origin = origin || [canvas.width / 2, canvas.height / 2];
-            weight = weight || 2;
-            res = res || 25;
-            context = context || ctx;
+        Fourier: function(func, config) {
+            config = config || {};
+            config = {
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                domain: config.domain || [-10, 10],
+                origin: config.origin || [canvas.width / 2, canvas.height / 2],
+                lineWidth: config.lineWidth || 2,
+                res: config.res || 25,
+                context: config.context || ctx
+            };
+            config.size /= 100;
             var data = [];
-            context.save();
-            context.translate(origin[0], origin[1]);
-            context.lineWidth = weight;
-            context.strokeStyle = rgba.length === 3 ? "rgb(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ")" : "rgba(" + rgba[0].toString() + ", " + rgba[1].toString() + ", " + rgba[2].toString() + ", " + rgba[3].toString() + ")";
-            context.beginPath();
-            for(var i = domain[0] / scl; i <= domain[1] / scl; i += res) {
-                context.lineTo(i, -Chalkboard.calc.Fourier(func, i * scl) / scl);
+            config.context.save();
+            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for(var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.Fourier(func, i)]);
             }
-            context.stroke();
-            context.restore();
+            config.context.stroke();
+            config.context.restore();
             return data;
         }
     },
