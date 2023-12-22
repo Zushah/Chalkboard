@@ -255,7 +255,7 @@ var Chalkboard = {
             type = type || "expl";
             if(type === "expl") {
                 return {definition: definition, type: type};
-            }  else if(type === "pola") {
+            } else if(type === "pola") {
                 return {definition: definition, type: type};
             } else if(type === "curv") {
                 return definition.length === 2 ? {definition: [definition[0], definition[1]], type: type} : {definition: [definition[0], definition[1], definition[2]], type: type};
@@ -2464,13 +2464,42 @@ var Chalkboard = {
     },
     matr: {
         new: function(matrix) {
-            return Array.from(arguments);
+            matrix = Array.from(arguments);
+            return matrix;
         },
         rows: function(matr) {
             return matr.length;
         },
         cols: function(matr) {
             return matr[0].length;
+        },
+        push: function(matr, type, rowORcol, elements) {
+            rowORcol -= 1;
+            if(type === "row") {
+                matr.splice(rowORcol, 0, elements);
+                return matr;
+            } else if(type === "col") {
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    matr[i].splice(rowORcol, 0, elements[i]);
+                }
+                return matr;
+            } else {
+                return "TypeError: Parameter \"type\" must be either \"row\" or \"col\".";
+            }
+        },
+        pull: function(matr, type, rowORcol) {
+            rowORcol -= 1;
+            if(type === "row") {
+                matr.splice(rowORcol, 1);
+                return matr;
+            } else if(type === "col") {
+                for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    matr[i].splice(rowOrcol, 1);
+                }
+                return matr;
+            } else {
+                return "TypeError: Parameter \"type\" must be either \"row\" or \"col\".";
+            }
         },
         empty: function(dimension) {
             if(Number.isInteger(dimension) && dimension > 0) {
@@ -2515,7 +2544,7 @@ var Chalkboard = {
             }
         },
         cofactor: function(matr, row, col) {
-            return matr.slice(0, row - 1).concat(matr.slice(row)).map(function (row) {
+            return matr.slice(0, row - 1).concat(matr.slice(row)).map(function(row) {
                 return row.slice(0, col - 1).concat(row.slice(col));
             });
         },
@@ -2552,15 +2581,15 @@ var Chalkboard = {
             }
         },
         rank: function(matr) {
-            return Chalkboard.matr.reduce(matr).filter(function (row) {
-                return row.some(function (element) {
+            return Chalkboard.matr.reduce(matr).filter(function(row) {
+                return row.some(function(element) {
                     return element !== 0;
                 });
             }).length;
         },
         rowspace: function(matr) {
-            return Chalkboard.matr.reduce(matr).filter(function (row) {
-                return row.some(function (element) {
+            return Chalkboard.matr.reduce(matr).filter(function(row) {
+                return row.some(function(element) {
                     return element !== 0;
                 });
             });
@@ -2569,15 +2598,15 @@ var Chalkboard = {
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         },
         nullspace: function(matr) {
-            var augmented = matr.map(function (row) {
+            var augmented = matr.map(function(row) {
                 return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
             });
             var reduced = Chalkboard.matr.reduce(augmented);
-            return reduced.filter(function (row) {
-                return row.slice(0, Chalkboard.matr.rows(matr)).every(function (element) {
+            return reduced.filter(function(row) {
+                return row.slice(0, Chalkboard.matr.rows(matr)).every(function(element) {
                     return element === 0;
                 });
-            }).map(function (row) {
+            }).map(function(row) {
                 return row.slice(Chalkboard.matr.rows(matr));
             });
         },
@@ -2629,6 +2658,78 @@ var Chalkboard = {
                     result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
                 }
                 return result;
+            } else {
+                return undefined;
+            }
+        },
+        LUdecomp: function(matr) {
+            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+                var L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
+                    U = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr)));
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    for(var i = 0; i <= j; i++) {
+                        var sum = 0;
+                        for(var k = 0; k < i; k++) {
+                            sum += L[i][k] * U[k][j];
+                        }
+                        U[i][j] = matr[i][j] - sum;
+                    }
+                    for(var i = j + 1; i < Chalkboard.matr.rows(matr); i++) {
+                        var sum = 0;
+                        for(var k = 0; k < j; k++) {
+                            sum += L[i][k] * U[k][j];
+                        }
+                        L[i][j] = (matr[i][j] - sum) / U[j][j];
+                    }
+                }
+                return {L: L, U: U};
+            } else {
+                return undefined;
+            }
+        },
+        QRdecomp: function(matr) {
+            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+                var Q = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr))),
+                    R = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr)));
+                var dot = function(v1, v2) {
+                    var result = 0;
+                    for(var i = 0; i < v1.length; i++) {
+                        result += v1[i] * v2[i];
+                    }
+                    return result;
+                }
+                var mag = function(v) {
+                    var result = 0;
+                    for(var i = 0; i < v.length; i++) {
+                        result += v[i] * v[i];
+                    }
+                    return Math.sqrt(result);
+                }
+                for(var j = 0; j < Chalkboard.matr.rows(matr); j++) {
+                    var v = matr.map(function(row) {
+                        return row[j];
+                    });
+                    for(var i = 0; i < j; i++) {
+                        var q = Q.map(function(row) {
+                            return row[i];
+                        });
+                        var coeff = dot(v, q) / (mag(q) * mag(q));
+                        v = v.map(function(e, index) {
+                            return e - coeff * q[index];
+                        });
+                    }
+                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        Q[i][j] = v[i] / mag(v);
+                    }
+                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        R[j][i] = i < j ? 0 : matr.map(function(row) {
+                            return row[i];
+                        }).reduce(function(a, v, index) {
+                            return a + v * Q[index][j];
+                        }, 0);
+                    }
+                }
+                return {Q: Q, R: R};
             } else {
                 return undefined;
             }
@@ -3242,7 +3343,7 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"comp\".";
             }
         },
-        df2dz2: function(func, comp) {
+        d2fdz2: function(func, comp) {
             var h = 0.00001;
             if(func.type === "comp") {
                 var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
