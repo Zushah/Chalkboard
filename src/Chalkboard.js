@@ -52,9 +52,45 @@ var Chalkboard = {
     },
     numb: {
         random: function(inf, sup) {
-            inf = inf || 0;
-            sup = sup || 1;
-            return inf + Math.random() * (sup - inf);
+            if(inf === undefined) {
+                inf = 0;
+            }
+            if(sup === undefined) {
+                sup = 1;
+            }
+            return inf + (sup - inf) * Math.random();
+        },
+        exponential: function(l) {
+            if(l === undefined) {
+                l = 1;
+            }
+            return l <= 0 ? 0 : -Math.log(Math.random()) / l;
+        },
+        Gaussian: function(height, mean, deviation) {
+            var u1 = Math.random(), u2 = Math.random();
+            var random = Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(u1)) * Chalkboard.trig.cos(Chalkboard.PI(2) * u2);
+            return random * height * Chalkboard.real.sqrt(deviation) + mean;
+        },
+        Bernoullian: function(p) {
+            if(p === undefined) {
+                p = 0.5;
+            }
+            return Math.random() < p ? 1 : 0;
+        },
+        Poissonian: function(l) {
+            if(l === undefined) {
+                l = 1;
+            }
+            if(l > 0) {
+                var L = Chalkboard.E(-l);
+                var p = 1, k = 0;
+                for(; p > L; ++k) {
+                    p *= Math.random();
+                }
+                return k - 1;
+            } else {
+                return 0;
+            }
         },
         factorial: function(num) {
             if(num >= 0) {
@@ -241,18 +277,39 @@ var Chalkboard = {
             }
             return sequence[num];
         },
-        Gaussian: function(height, mean, deviation) {
-            var u, v, s;
-            for(;;) {
-                u = Chalkboard.numb.random(-1, 1);
-                v = Chalkboard.numb.random(-1, 1);
-                s = u * u + v * v;
-                if(s < 1 && s !== 0) {
-                    break;
+        Goldbach: function(num) {
+            if(num % 2 === 0) {
+                if(num !== 4) {
+                    var a = num / 2, b = num / 2;
+                    if(a % 2 === 0) {
+                        a--;
+                        b++;
+                    }
+                    while(a >= 3) {
+                        if(Chalkboard.numb.isPrime(a) && Chalkboard.numb.isPrime(b)) {
+                            return [a, b];
+                        }
+                        a -= 2;
+                        b += 2;
+                    }
+                    return undefined;
+                } else {
+                    return [2, 2];
                 }
+            } else {
+                return undefined;
             }
-            var z = u * Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(s) / s);
-            return z * height * deviation + mean;
+        },
+        Euler: function(num) {
+            if(num > 0) {
+                var factors = Chalkboard.numb.factors(num);
+                for(var i = 0; i < factors.length; i++) {
+                    num *= (factors[i] - 1) / factors[i];
+                }
+                return num;
+            } else {
+                return undefined;
+            }
         }
     },
     real: {
@@ -1621,6 +1678,16 @@ var Chalkboard = {
             }
             return result;
         },
+        shuffle: function(arr) {
+            var index, temp, rindex;
+            for(index = arr.length - 1; index > 0; index--) {
+                rindex = Math.floor(Chalkboard.numb.random(0, index + 1));
+                temp = arr[index];
+                arr[index] = arr[rindex];
+                arr[rindex] = temp;
+            }
+            return arr;
+        },
         norm: function(arr, type) {
             type = type || "L2";
             var result = 0;
@@ -1828,6 +1895,23 @@ var Chalkboard = {
                             result.push(arr[i]);
                         }
                     }
+                }
+            }
+            return result;
+        },
+        subsets: function(arr) {
+            var result = [[]];
+            arr.sort();
+            for(var i = 0; i < arr.length; i++) {
+                if(i === 0 || arr[i] !== arr[i - 1]) {
+                    var curr = arr[i];
+                    var subsetsWithCurr = [];
+                    for(var j = 0; j < result.length; j++) {
+                        var subset = result[j].slice();
+                        subset.push(curr);
+                        subsetsWithCurr.push(subset);
+                    }
+                    result = result.concat(subsetsWithCurr);
                 }
             }
             return result;
@@ -2538,7 +2622,7 @@ var Chalkboard = {
                 return matr;
             } else if(type === "col") {
                 for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    matr[i].splice(rowOrcol, 1);
+                    matr[i].splice(rowORcol, 1);
                 }
                 return matr;
             } else {
