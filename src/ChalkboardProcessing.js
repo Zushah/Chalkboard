@@ -2077,6 +2077,7 @@ var Chalkboard = {
             return Chalkboard.real.function(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
         },
         regression: function(data, type, degree) {
+            type = type || "linear";
             degree = degree || 2;
             if(type === "linear") {
                 var x = 0, y = 0;
@@ -2091,34 +2092,30 @@ var Chalkboard = {
                     b = (y / data.length) - (a * x) / data.length;
                 return Chalkboard.real.function(a + " * x + " + b);
             } else if(type === "polynomial") {
-                if(Number.isInteger(degree) && degree > 1) {
-                    var A = Chalkboard.matr.new();
-                    for(var i = 0; i < data.length; i++) {
-                        A.push([]);
-                        for(var j = 0; j <= degree; j++) {
-                            A[i].push(Chalkboard.real.pow(data[i][0], j));
-                        }
+                var A = Chalkboard.matr.new();
+                for(var i = 0; i < data.length; i++) {
+                    A.push([]);
+                    for(var j = 0; j <= degree; j++) {
+                        A[i].push(Chalkboard.real.pow(data[i][0], j));
                     }
-                    var AT = Chalkboard.matr.transpose(A);
-                    var B = Chalkboard.matr.new();
-                    for(var i = 0; i < data.length; i++) {
-                        B.push([data[i][1]]);
-                    }
-                    var ATA = Chalkboard.matr.mul(AT, A);
-                    var ATAI = Chalkboard.matr.invert(ATA);
-                    var x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
-                    var coeff = [];
-                    for(var i = 0; i < x.length; i++) {
-                        coeff.push(x[i][0]);
-                    }
-                    var f = coeff[0].toString() + " + " + coeff[1].toString() + " * x";
-                    for(var i = 2; i <= degree; i++) {
-                        f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
-                    }
-                    return Chalkboard.real.function(f);
-                } else {
-                    return undefined;
                 }
+                var AT = Chalkboard.matr.transpose(A);
+                var B = Chalkboard.matr.new();
+                for(var i = 0; i < data.length; i++) {
+                    B.push([data[i][1]]);
+                }
+                var ATA = Chalkboard.matr.mul(AT, A);
+                var ATAI = Chalkboard.matr.invert(ATA);
+                var x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
+                var coeff = [];
+                for(var i = 0; i < x.length; i++) {
+                    coeff.push(x[i][0]);
+                }
+                var f = coeff[0].toString() + " + " + coeff[1].toString() + " * x";
+                for(var i = 2; i <= degree; i++) {
+                    f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
+                }
+                return Chalkboard.real.function(f);
             } else if(type === "power") {
                 var arr = [0, 0, 0, 0];
                 for(var i = 0; i < data.length; i++) {
