@@ -394,7 +394,8 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        nrt: function(num, index) {
+        root: function(num, index) {
+            index = index || 3;
             return Math.exp(Math.log(num) / index);
         },
         tetration: function(base, num) {
@@ -595,6 +596,18 @@ var Chalkboard = {
         sqrt: function(comp) {
             return Chalkboard.comp.new(Chalkboard.real.sqrt((comp.a + Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b))) / 2), Chalkboard.numb.sgn(comp.b) * Chalkboard.real.sqrt((-comp.a + Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b))) / 2));
         },
+        root: function(comp, index) {
+            index = index || 3;
+            if(Number.isInteger(index) && index > 0) {
+                var result = [];
+                var r = Chalkboard.comp.mag(comp);
+                var t = Chalkboard.comp.arg(comp);
+                for(var i = 0; i < index; i++) {
+                    result.push(Chalkboard.comp.new(Chalkboard.real.root(r, index) * Chalkboard.trig.cos((t + Chalkboard.PI(2 * i)) / index), Chalkboard.real.root(r, index) * Chalkboard.trig.sin((t + Chalkboard.PI(2 * i)) / index)));
+                }
+                return result;
+            }
+        },
         rotate: function(comp, rad) {
             return Chalkboard.comp.new(Chalkboard.comp.mag(comp) * Chalkboard.trig.cos(Chalkboard.comp.arg(comp) + rad), Chalkboard.comp.mag(comp) * Chalkboard.trig.sin(Chalkboard.comp.arg(comp) + rad));
         },
@@ -603,17 +616,6 @@ var Chalkboard = {
         },
         conjugate: function(comp) {
             return Chalkboard.comp.new(comp.a, -comp.b);
-        },
-        root: function(comp, n) {
-            if(Number.isInteger(n) && n > 0) {
-                var result = [];
-                var r = Chalkboard.comp.mag(comp);
-                var t = Chalkboard.comp.arg(comp);
-                for(var i = 0; i < n; i++) {
-                    result.push(Chalkboard.comp.new(Chalkboard.real.nrt(r, n) * Chalkboard.trig.cos((t + Chalkboard.PI(2 * i)) / n), Chalkboard.real.nrt(r, n) * Chalkboard.trig.sin((t + Chalkboard.PI(2 * i)) / n)));
-                }
-                return result;
-            }
         },
         dist: function(comp_1, comp_2) {
             return Chalkboard.real.sqrt(((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b)));
@@ -1953,7 +1955,7 @@ var Chalkboard = {
                 for(var i = 0; i < arr.length; i++) {
                     result *= arr[i];
                 }
-                return Chalkboard.real.nrt(Math.abs(result), arr.length);
+                return Chalkboard.real.root(Math.abs(result), arr.length);
             } else if(type === "harmonic") {
                 for(var i = 0; i < arr.length; i++) {
                     result += 1 / arr[i];
@@ -2118,87 +2120,87 @@ var Chalkboard = {
         Gaussian: function(height, mean, deviation) {
             return Chalkboard.real.function(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
         },
-        linreg: function(data) {
-            var x = 0, y = 0;
-            var xx = 0, xy = 0;
-            for(let i = 0; i < data.length; i++) {
-                x += data[i][0];
-                y += data[i][1];
-                xx += data[i][0] * data[i][0];
-                xy += data[i][0] * data[i][1];
-            }
-            var a = (data.length * xy - x * y) / (data.length * xx - x * x),
-                b = (y / data.length) - (a * x) / data.length;
-            return Chalkboard.real.function(a + " * x + " + b);
-        },
-        polreg: function(data, degree) {
+        regression: function(data, type, degree) {
             degree = degree || 2;
-            if(Number.isInteger(degree) && degree > 1) {
-                var A = Chalkboard.matr.new();
-                for(var i = 0; i < data.length; i++) {
-                    A.push([]);
-                    for(var j = 0; j <= degree; j++) {
-                        A[i].push(Chalkboard.real.pow(data[i][0], j));
+            if(type === "linear") {
+                var x = 0, y = 0;
+                var xx = 0, xy = 0;
+                for(let i = 0; i < data.length; i++) {
+                    x += data[i][0];
+                    y += data[i][1];
+                    xx += data[i][0] * data[i][0];
+                    xy += data[i][0] * data[i][1];
+                }
+                var a = (data.length * xy - x * y) / (data.length * xx - x * x),
+                    b = (y / data.length) - (a * x) / data.length;
+                return Chalkboard.real.function(a + " * x + " + b);
+            } else if(type === "polynomial") {
+                if(Number.isInteger(degree) && degree > 1) {
+                    var A = Chalkboard.matr.new();
+                    for(var i = 0; i < data.length; i++) {
+                        A.push([]);
+                        for(var j = 0; j <= degree; j++) {
+                            A[i].push(Chalkboard.real.pow(data[i][0], j));
+                        }
                     }
+                    var AT = Chalkboard.matr.transpose(A);
+                    var B = Chalkboard.matr.new();
+                    for(var i = 0; i < data.length; i++) {
+                        B.push([data[i][1]]);
+                    }
+                    var ATA = Chalkboard.matr.mul(AT, A);
+                    var ATAI = Chalkboard.matr.invert(ATA);
+                    var x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
+                    var coeff = [];
+                    for(var i = 0; i < x.length; i++) {
+                        coeff.push(x[i][0]);
+                    }
+                    var f = coeff[0].toString() + " + " + coeff[1].toString() + " * x";
+                    for(var i = 2; i <= degree; i++) {
+                        f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
+                    }
+                    return Chalkboard.real.function(f);
+                } else {
+                    return undefined;
                 }
-                var AT = Chalkboard.matr.transpose(A);
-                var B = Chalkboard.matr.new();
+            } else if(type === "power") {
+                var arr = [0, 0, 0, 0];
                 for(var i = 0; i < data.length; i++) {
-                    B.push([data[i][1]]);
+                    arr[0] += Chalkboard.real.ln(data[i][0]);
+                    arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
+                    arr[2] += data[i][1];
+                    arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
                 }
-                var ATA = Chalkboard.matr.mul(AT, A);
-                var ATAI = Chalkboard.matr.invert(ATA);
-                var x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
-                var coeff = [];
-                for(var i = 0; i < x.length; i++) {
-                    coeff.push(x[i][0]);
+                var a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
+                    b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
+                return Chalkboard.real.function(a + " * Math.pow(x, " + b + ")");
+            } else if(type === "exponential") {
+                var arr = [0, 0, 0, 0, 0, 0];
+                for(var i = 0; i < data.length; i++) {
+                    arr[0] += data[i][0];
+                    arr[1] += data[i][1];
+                    arr[2] += data[i][0] * data[i][0] * data[i][1];
+                    arr[3] += data[i][1] * Chalkboard.real.ln(data[i][1]);
+                    arr[4] += data[i][0] & data[i][1] * Chalkboard.real.ln(data[i][1]);
+                    arr[5] += data[i][0] * data[i][1];
                 }
-                var f = coeff[0].toString() + " + " + coeff[1].toString() + " * x";
-                for(var i = 2; i <= degree; i++) {
-                    f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
+                var a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
+                    b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
+                return Chalkboard.real.function(a + "* Math.exp(" + b + " * x)");
+            } else if(type === "logarithmic") {
+                var arr = [0, 0, 0, 0];
+                for(var i = 0; i < data.length; i++) {
+                    arr[0] += Chalkboard.real.ln(data[i][0]);
+                    arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
+                    arr[2] += data[i][1];
+                    arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
                 }
-                return Chalkboard.real.function(f);
+                var a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
+                    b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
+                return Chalkboard.real.function(a + " + " + b + " * Math.log(x)");
             } else {
-                return undefined;
+                return "TypeError: Parameter \"type\" must be either \"linear\", \"polynomial\", \"power\", \"exponential\", or \"logarithmic\".";
             }
-        },
-        powreg: function(data) {
-            var arr = [0, 0, 0, 0];
-            for(var i = 0; i < data.length; i++) {
-                arr[0] += Chalkboard.real.ln(data[i][0]);
-                arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
-                arr[2] += data[i][1];
-                arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
-            }
-            var a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
-                b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-            return Chalkboard.real.function(a + " * Math.pow(x, " + b + ")");
-        },
-        expreg: function(data) {
-            var arr = [0, 0, 0, 0, 0, 0];
-            for(var i = 0; i < data.length; i++) {
-                arr[0] += data[i][0];
-                arr[1] += data[i][1];
-                arr[2] += data[i][0] * data[i][0] * data[i][1];
-                arr[3] += data[i][1] * Chalkboard.real.ln(data[i][1]);
-                arr[4] += data[i][0] & data[i][1] * Chalkboard.real.ln(data[i][1]);
-                arr[5] += data[i][0] * data[i][1];
-            }
-            var a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
-                b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
-            return Chalkboard.real.function(a + "* Math.exp(" + b + " * x)");
-        },
-        logreg: function(data) {
-            var arr = [0, 0, 0, 0];
-            for(var i = 0; i < data.length; i++) {
-                arr[0] += Chalkboard.real.ln(data[i][0]);
-                arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
-                arr[2] += data[i][1];
-                arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
-            }
-            var a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
-                b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-            return Chalkboard.real.function(a + " + " + b + " * Math.log(x)");
         },
         toVector: function(arr, type) {
             if(type === "vec2") {
