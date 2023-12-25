@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.5.0 Example Program: Hyperbolic Functions
+    Version 1.6.0 Example Program: Hyperbolic Functions
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -15,12 +15,12 @@ var theta = 0;
 function main() {
     ctx.fillStyle = "rgb(255, 255, 255)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    cb.plot.xyplane(1, [0, 0, 0], [canvas.width / 2, canvas.height / 2], 2);
+    cb.plot.xyplane({lineWidth: 2});
 
     // Plot the unit hyperbola with a parametric function (see: https://en.wikipedia.org/wiki/Hyperbola)
     var f = cb.real.function(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "curv");
-    cb.plot.function(f, 1, [100, 100, 255], [0, 10], [canvas.width / 2, canvas.height / 2], 4);
-    cb.plot.function(f, 1, [100, 100, 255], [-10, 0], [canvas.width / 2, canvas.height / 2], 4);
+    cb.plot.function(f, {strokeStyle: "rgb(100, 100, 255)", domain: [0, 10], lineWidth: 4});
+    cb.plot.function(f, {strokeStyle: "rgb(100, 100, 255)", domain: [-10, 0], lineWidth: 4});
 
     // The two main hyperbolic trigonometric functions, hyperbolic sine (sinh) and hyperbolic cosine (cosh)
     var x = cb.trig.cosh(theta);

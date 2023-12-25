@@ -1,17 +1,17 @@
 /*
     The Chalkboard Library
-    Version 1.5.0 released 12/18/2023
+    Version 1.6.0 released 12/25/2023
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
-    Latest release ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0
-    Documentation ===> https://zushah.github.io/Chalkboard/documentation.html/
+    Repository ===> https://www.github.com/Zushah/Chalkboard
+    Website ===> https://zushah.github.io/Chalkboard/home.html
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.5.0 released 12/18/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nLatest release ===> https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0\nDocumentation ===> https://zushah.github.io/Chalkboard/documentation.html/");
+        console.log("The Chalkboard Library\nVersion 1.6.0 released 12/25/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
     },
     LOGO: function(x, y, s) {
         x = x || width / 2;
@@ -766,6 +766,7 @@ var Chalkboard = {
         }
     },
     plot: {
+        CONTEXT: "ctx",
         xyplane: function(config) {
             config = config || {};
             config = {
@@ -2108,7 +2109,7 @@ var Chalkboard = {
             if(type === "linear") {
                 var x = 0, y = 0;
                 var xx = 0, xy = 0;
-                for(let i = 0; i < data.length; i++) {
+                for(var i = 0; i < data.length; i++) {
                     x += data[i][0];
                     y += data[i][1];
                     xx += data[i][0] * data[i][0];

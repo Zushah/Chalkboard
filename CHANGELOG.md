@@ -1,9 +1,35 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v1.6.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0) - 12/25/2023
+The eighth release of the Chalkboard library.
+Commits: [`v1.5.0...v1.6.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.5.0...v1.6.0)
+- Added a new type of function: the inverse function (`type` of `"inve"`)
+- Added `stat.regression` to calculate different types of statistical regression models (linear, polynomial, exponential, etc.)
+- Added `plot.CONTEXT` which determines the `CanvasRenderingContext2D` to use for plots
+- Added LU decomposition and QR decomposition for matrices with `matr.LUdecomp` and `matr.QRdecomp`
+- Added `matr.push` and `matr.pull` to add or remove rows or columns from matrices
+- Added `matr.fill` to create a new matrix with a single value for all of the elements
+- Added more commands for generating random numbers: `numb.exponential`, `numb.Bernoullian`, and `numb.Poissonian`
+- Added `numb.Goldbach` to return an even number as a sum of two prime numbers
+- Added `numb.Euler` to calculate Euler's totient function on a number
+- Added `stat.shuffle` to randomly shuffle an array and `stat.subsets` to return all of the possible subsets of an array
+- Changed all of the `plot` commands to use an optional `config` object parameter to configure their customizations (size, color, domain, etc.) instead of separate parameters for each of them
+- Changed `real.function`, `real.val`, `calc.dfdx`, `calc.d2fdx2`, and `calc.fxdx` to accomodate the new `"inve"` function type
+- Changed all of the `plot` commands, the `LOGO` command, and the `geom.line3D` command to use the new `plot.CONTEXT` value instead of `ctx` and `canvas`
+- Changed `matr.empty` and `matr.random` to use `rows` and `cols` as parameters for the size of the matrix instead of `dimension`, and renamed the `dimension` parameter for `matr.identity` to `size`
+- Changed `real.nrt` to be renamed as `real.root` (so `stat.mean` had to be changed since it was used there), and changed the `n` parameter in `comp.root` to be renamed as `index`
+- Changed `numb.random` to use its default values only if the parameters are undefined instead of if the parameters are falsy
+- Changed `matr.new` to use its `matrix` parameter instead of leaving it as declared but unused
+- Changed `comp.d2fdz2` which was incorrectly named as `comp.df2dz2`
+- Fixed (rewrote) `numb.Gaussian` which basically didn't work at all
+- Fixed `real.pow` which returned `NaN` for 0 raised to the power of 0
+- Fixed the default domain for `plot.function` which was incorrectly using the domain for domain colorings instead of normal graphs
+
+
 ## [v1.5.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) - 12/18/2023
 The seventh release of the Chalkboard library.
-Commits: [`v1.4.0...v1.5.0`](https://github.com/Zushah/Chalkboard/compare/v1.4.0...v1.5.0)
+Commits: [`v1.4.0...v1.5.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.4.0...v1.5.0)
 - Added Chalkboard as an npm package, so now it can be used on the server-side just like the client side
 - Added `comp.function`, `comp.parse`, and `comp.val` to define, parse, and evaluate complex functions
 - Added `calc.dfdz`, `calc.d2fdz2`, and `calc.fzdz` to calculate the first derivatives, second derivatives, and antiderivatives of complex functions
@@ -25,7 +51,7 @@ Commits: [`v1.4.0...v1.5.0`](https://github.com/Zushah/Chalkboard/compare/v1.4.0
 
 ## [v1.4.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0) - 12/11/2023
 The sixth release of the Chalkboard library.
-Commits: [`v1.3.1...v1.4.0`](https://github.com/Zushah/Chalkboard/compare/v1.3.1...v1.4.0)
+Commits: [`v1.3.1...v1.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.3.1...v1.4.0)
 - Added many new commands for arrays: creating an array of random numbers, calculating different types of the norm (and the squared norm) of an array, calculating the normalized array, calculating the array that has the numbers that are equal to, greater than (or equal to), less than (or equal to), or some compound inequality of another number or array, calculating the skewness and kurtosis of an array, calculating the different quartiles of an array, and converting an array to a vector, matrix, object, string, or printing it in the console
 - Added `plot.barplot`, `plot.lineplot`, and `plot.scatterplot` to plot arrays of data
 - Added `.constrain` commands for numbers, arrays, complex numbers, quaternions, vectors, and matrices to constrain their values within a range
@@ -45,14 +71,14 @@ Commits: [`v1.3.1...v1.4.0`](https://github.com/Zushah/Chalkboard/compare/v1.3.1
 
 ## [v1.3.1](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) - 12/04/2023
 The fifth release of the Chalkboard library.
-Commits: [`v1.3.0...v1.3.1`](https://github.com/Zushah/Chalkboard/compare/v1.3.0...v1.3.1)
+Commits: [`v1.3.0...v1.3.1`](https://www.github.com/Zushah/Chalkboard/compare/v1.3.0...v1.3.1)
 - Fixed `matr.translator` which was misspelled
 - Fixed `matr.rotator` which didn't work for two-dimensional rotations and was also misspelled
 - Fixed `calc.grad` which didn't work for vector fields because of another misspelling
 
 ## [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0) - 12/04/2023
 The fourth release of the Chalkboard library.
-Commits: [`v1.2.0...v1.3.0`](https://github.com/Zushah/Chalkboard/compare/v1.2.0...v1.3.0)
+Commits: [`v1.2.0...v1.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.2.0...v1.3.0)
 - Added multivariable calculus, with commands for directional differentiation, multivariable chain rule, gradient (partial differentiation), double gradient (second-order partial differentiation), divergence, curl, double integration, line/surface integration, arc length, surface area, and curvature
 - Added second-order differentiation with `calc.d2fdx2`, unit tangent vectors for parametric curves with `calc.tangent`, unit normal vectors with `calc.normal`, and unit binormal vectors with `calc.binormal`
 - Functions that previously had the `type` property of `"para"` should now be changed to `"curv"`
@@ -71,11 +97,11 @@ Commits: [`v1.2.0...v1.3.0`](https://github.com/Zushah/Chalkboard/compare/v1.2.0
 - Changed all `plot` commands so they can now optionally have their opacity changed with the `rgba` parameter (which previously used to only be `rgb`)
 - Changed `numb.Gaussian` to use `for(;;)` instead of `while(typeof x === "undefined")`
 - Changed the name of `calc.average` to `calc.mean`
-- Fixed `matr.invert` returning `NaN` values when `0` is on the diagonal of a matrix, thanks to [@bhavjitChauhan](https://github.com/bhavjitChauhan).
+- Fixed `matr.invert` returning `NaN` values when `0` is on the diagonal of a matrix, thanks to [@bhavjitChauhan](https://www.github.com/bhavjitChauhan).
 
 ## [v1.2.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.2.0) - 11/27/2023
 The third release of the Chalkboard library.
-Commits: [`v1.1.0...v1.2.0`](https://github.com/Zushah/Chalkboard/compare/v1.1.0...v1.2.0)
+Commits: [`v1.1.0...v1.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.1.0...v1.2.0)
 - Added new matrix commands for the trace of a matrix, the row space of a matrix, the column space, and null space, the exponentation, the row Echelon form (Gaussian elimination), solving systems of linear equations, and conversion of a matrix to an object
 - Added `plot.comp`, `plot.vec2`, `plot.vec3`, and `plot.matr` to replace `comp.display`, `vec2.display`, `vec3.display`, and `matr.display`
 - Added `numb.binomial` to calculate binomial coefficients
@@ -89,7 +115,7 @@ Commits: [`v1.1.0...v1.2.0`](https://github.com/Zushah/Chalkboard/compare/v1.1.0
 
 ## [v1.1.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0) - 11/13/2023
 The second release of the Chalkboard library.
-Commits: [`v1.0.0...v1.1.0`](https://github.com/Zushah/Chalkboard/compare/v1.0.0...v1.1.0)
+Commits: [`v1.0.0...v1.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.0.0...v1.1.0)
 - Added `numb.prime` to calculate the nth prime number, `numb.nextPrime` to calculate the next prime number, and `numb.primeGap` to calculate the prime gap with an interval
 - Added `numb.factors` to calculate the prime factorization of a number and `numb.divisors` to calculate the divisors of a number
 - Added `numb.Gaussian` to calculate a random number based on a Gaussian distribution
@@ -108,4 +134,4 @@ Commits: [`v1.0.0...v1.1.0`](https://github.com/Zushah/Chalkboard/compare/v1.0.0
 
 ## [v1.0.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) - 11/06/2023
 The first release of the Chalkboard library.
-Commits: [`v1.0.0...main`](https://github.com/Zushah/Chalkboard/compare/v1.0.0...main)
+Commits: [`v1.0.0...main`](https://www.github.com/Zushah/Chalkboard/compare/v1.0.0...main)

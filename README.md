@@ -1,10 +1,10 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./assets/Chalkboard-logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
     <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://www.codefactor.io/repository/github/zushah/chalkboard/badge" alt="CodeFactor grade"></a>
-    <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/badge/node-v20.10.0-limegreen" alt="Node.js support"></a>
-    <a href="https://github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT License"></a>
-    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="JSDelivr requests"></a> 
+    <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dt/@zushah/chalkboard" alt="npm downloads"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT License"></a>
+    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="jsDelivr requests"></a> 
     <br>
     <a href="https://zushah.github.io/Chalkboard/home.html">https://zushah.github.io/Chalkboard/home.html</a>
 </p>
@@ -21,18 +21,18 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.5.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0), Chalkboard has 431 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.6.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0), Chalkboard has 444 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
 
 # Installation
 If your JavaScript project is being run on the client-side within a webpage, you can install Chalkboard with this HTML tag:
 ```html
-<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.5.0/src/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.6.0/src/Chalkboard.min.js"></script>
 ```
 If your JavaScript project is being run on the server-side within the [Node.js](https://nodejs.org/en) environment, you can install Chalkboard with this console command:
 ```bash
-npm install @zushah/chalkboard@1.5.0
+npm install @zushah/chalkboard@1.6.0
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0) and put the relevant files in your project's directory.
 
 More methods and details about installing Chalkboard can be read [here](https://zushah.github.io/Chalkboard/installation.html).
 
@@ -71,7 +71,9 @@ const cb = Chalkboard; // Chalkboard is a nice name but it's also long
 /*
 Note that this code is written on the client-side
 You can write all the same code on the server-side, too, but you would have to replace the line above with:
-const cb = require("@zushah/chalkboard@1.5.0");
+import cb from "@zushah/chalkboard";
+OR
+const cb = require("@zushah/chalkboard");
 */
 
 let f = cb.real.function("Math.cos(2 * x)"); // f(x) = cos(2x)
@@ -85,16 +87,16 @@ let fnds = cb.calc.fnds(f, r, cb.PI(-1/2), cb.PI(1/2), 0, cb.PI(2)); // Flux of 
 
 let primes = cb.numb.primeArr(0, 100); // Array of prime numbers between 0 and 100
 let midPrime = cb.stat.median(primes); // Median number in the primes array
-cb.plot.barplot(primes, cb.stat.array(0, 100, 11), 5, [[0, 0, 0], [0, 0, 255]]); // Barplot of the primes array with a bin size of 10, a scale of 2, a stroke color of black, and a fill color of blue
+cb.plot.barplot(primes, cb.stat.array(0, 100, 11), {size: 5, strokeStyle: "black", fillStyle: "blue"}); // Barplot of the primes array with a bin size of 10, a scale of 2, a stroke color of black, and a fill color of blue
 
 let z = cb.comp.new(1, 1); // z = 1 + i
 let zsqsqrt = cb.comp.sqrt(cb.comp.sq(z)); // The square root of z squared equals z
-let f = cb.comp.function("a*a - b*b + 1", "2*a*b"); // f(z) = z^2 + 1 for z = a + bi (a complex-valued function)
+let f = cb.comp.function("a*a - b*b + 1", "2*a*b"); // f(z) = z^2 + 1
 cb.plot.function(f); // Plots the domain coloring of f
 
 let r = cb.real.function(["Math.cos(t)", "Math.sin(t)"], "curv"); // r(t) = (cos(t), sin(t))
-cb.plot.xyplane(2); // Draws the Cartesian coordinate plane
-cb.plot.function(r, 2, [255, 0, 0] [0, cb.PI(1/2)]); // Plots r(t) colored red from t = 0 to t = π/2
+cb.plot.xyplane({size: 2}); // Draws the Cartesian coordinate plane scaled by 2
+cb.plot.function(r, {size: 2, strokeStyle: "rgb(255, 100, 100)", domain: [0, cb.PI(2)]}); // Plots r(t) scaled by 2 colored light red from t = 0 to t = π/2
 
 let a = cb.vec3.new(1, 2, 3); // Vector a = (1, 2, 3)
 let b = cb.vec3.new(4, 5, 6); // Vector b = (4, 5, 6)
@@ -111,7 +113,7 @@ let mi = cb.matr.invert(m); // mi is the inverse of m
 let mmi = cb.matr.mul(m, mi); // mmi is the product of m and mi
 cb.matr.print(mmi); // Prints mmi in the console
 ```
-More examples that are more interesting can be seen [here](https://zushah.github.io/Chalkboard/examples.html) with their source code [here](https://github.com/Zushah/Chalkboard/tree/main/examples).
+More examples that are more interesting can be seen [here](https://zushah.github.io/Chalkboard/examples.html) with their source code [here](https://www.github.com/Zushah/Chalkboard/tree/main/examples).
 
 # Contributing
 <ol>
@@ -121,12 +123,12 @@ More examples that are more interesting can be seen [here](https://zushah.github
     <li>Open a pull request. It will be reviewed soon and then merged to the main branch.</li>
 </ol>
 
-The changelog can be read [here](https://github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md).
+The changelog can be read [here](https://www.github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md).
 
-The Chalkboard library is available under the [MIT License](https://github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
+The Chalkboard library is available under the [MIT License](https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
 
 # Acknowledgements
-Thanks to [Bhavjit Chauhan](https://github.com/bhavjitChauhan) for his [contribution](https://www.github.com/Zushah/Chalkboard/pull/1) to [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).\
+Thanks to [Bhavjit Chauhan](https://www.github.com/bhavjitChauhan) for his [contribution](https://www.github.com/Zushah/Chalkboard/pull/1) to [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).\
 Thanks to [G. Yang](https://www.github.com/gyang0) for his [contribution](https://www.github.com/Zushah/zushah.github.io/pull/1) to the [documentation](https://www.github.com/Zushah/zushah.github.io/tree/main/Chalkboard).
 
 # Contact
