@@ -3371,6 +3371,246 @@ var Chalkboard = {
             console.log(Chalkboard.matr.toString(matr));
         }
     },
+    tens: {
+        new: function(tensor) {
+            tensor = Array.from(arguments);
+            var newNDArray = function(arr) {
+                return arr.map(function(subarr) {
+                    if(subarr.constructor === Array) {
+                        return newNDArray(subarr);
+                    } else {
+                        return subarr;
+                    }
+                });
+            };
+            return newNDArray(tensor);
+        },
+        fill: function(element, size) {
+            size = Array.from(arguments).slice(1);
+            var newNDArray = function(size) {
+                if(size.length === 0) {
+                    return element;
+                }
+                var curr = size[0];
+                var rest = size.slice(1);
+                var result = [];
+                for(var i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
+                }
+                return result;
+            }
+            return newNDArray(size);
+        },
+        empty: function(size) {
+            size = Array.from(arguments);
+            var newNDArray = function(size) {
+                if(size.length === 0) {
+                    return null;
+                }
+                var curr = size[0];
+                var rest = size.slice(1);
+                var result = [];
+                for(var i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
+                }
+                return result;
+            }
+            return newNDArray(size);
+        },
+        identity: function(size) {
+            size = Array.from(arguments);
+            var newNDArray = function(size) {
+                if(size.length === 0) {
+                    return 1;
+                }
+                var curr = size[0];
+                var rest = size.slice(1);
+                var result = [];
+                for(var i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
+                }
+                return result;
+            }
+            return newNDArray(size);
+        },
+        random: function(inf, sup, size) {
+            size = Array.from(arguments).slice(2);
+            var newNDArray = function(size) {
+                if(size.length === 0) {
+                    return Chalkboard.numb.random(inf, sup);
+                }
+                var curr = size[0];
+                var rest = size.slice(1);
+                var result = [];
+                for(var i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
+                }
+                return result;
+            }
+            return newNDArray(size);
+        },
+        invert: function(tens) {
+            return Chalkboard.matr.invert(Chalkboard.tens.toMatrix(tens));
+        },
+        zero: function(tens) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.zero(tens[i]);
+                }
+                return result;
+            } else {
+                return 0;
+            }
+        },
+        negate: function(tens) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.negate(tens[i]);
+                }
+                return result;
+            } else {
+                return -tens;
+            }
+        },
+        reciprocate: function(tens) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.reciprocate(tens[i]);
+                }
+                return result;
+            } else {
+                return 1 / tens;
+            }
+        },
+        absolute: function(tens) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.absolute(tens[i]);
+                }
+                return result;
+            } else {
+                return Math.abs(tens);
+            }
+        },
+        round: function(tens) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.round(tens[i]);
+                }
+                return result;
+            } else {
+                return Math.round(tens);
+            }
+        },
+        scl: function(tens, num) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.scl(tens[i], num);
+                }
+                return result;
+            } else {
+                return tens * num;
+            }
+        },
+        constrain: function(tens, range) {
+            var result = Chalkboard.tens.new();
+            if(tens.constructor === Array) {
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.constrain(tens[i], range);
+                }
+                return result;
+            } else {
+                return Chalkboard.numb.constrain(tens, range);
+            }
+        },
+        add: function(tens_1, tens_2) {
+            var result = Chalkboard.tens.new();
+            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+                for(var i = 0; i < Math.max(tens_1.length, tens_2.length); i++) {
+                    result[i] = Chalkboard.tens.add(tens_1[i] !== undefined ? tens_1[i] : 0, tens_2[i] !== undefined ? tens_2[i] : 0);
+                }
+                return result;
+            } else {
+                return tens_1 + tens_2;
+            }
+        },
+        sub: function(tens_1, tens_2) {
+            var result = Chalkboard.tens.new();
+            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+                for(var i = 0; i < Math.max(tens_1.length, tens_2.length); i++) {
+                    result[i] = Chalkboard.tens.sub(tens_1[i] !== undefined ? tens_1[i] : 0, tens_2[i] !== undefined ? tens_2[i] : 0);
+                }
+                return result;
+            } else {
+                return tens_1 - tens_2;
+            }
+        },
+        mul: function(tens_1, tens_2) {
+            var result = Chalkboard.tens.new();
+            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+                for(var i = 0; i < tens_1.length; i++) {
+                    var subarr = Chalkboard.tens.new();
+                    for(var j = 0; j < tens_2.length; j++) {
+                        subarr[j] = Chalkboard.tens.mul(tens_1[i], tens_2[j]);
+                    }
+                    result.push(subarr);
+                }
+                return result;
+            } else {
+                return tens_1 * tens_2;
+            }
+        },
+        pow: function(tens, num) {
+            if(num === 0) {
+                return Chalkboard.tens.identity(num);
+            } else {
+                var result = tens;
+                for(var i = 1; i < num; i++) {
+                    result = Chalkboard.tens.mul(tens, result);
+                }
+                return result;
+            }
+        },
+        toMatrix: function(tens) {
+            var result = Chalkboard.matr.new();
+            var flatten = function(tens, result) {
+                for(var i = 0; i < tens.length; i++) {
+                    if(tens[i].constructor === Array) {
+                        flatten(tens[i], result);
+                    } else {
+                        result.push(tens[i]);
+                    }
+                }
+            }
+            var matr = Chalkboard.matr.new();
+            flatten(tens, matr);
+            var rows = tens.length || 1;
+            for(var j = 0; j < rows; j++) {
+                result.push(matr.slice(j * matr.length / rows, (j + 1) * matr.length / rows));
+            }
+            return result;
+        },
+        toArray: function(tens) {
+            var result = [];
+            var flatten = function(tens) {
+                for(var i = 0; i < tens.length; i++) {
+                    if(tens[i].constructor === Array) {
+                        flatten(tens[i]);
+                    } else {
+                        result.push(tens[i]);
+                    }
+                }
+            }
+            flatten(tens);
+            return result;
+        }
+    },
     calc: {
         lim: function(func, val) {
             if(func.type === "expl") {
