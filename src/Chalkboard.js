@@ -14,10 +14,10 @@ var Chalkboard = {
         console.log("The Chalkboard Library\nVersion 1.6.0 released 12/25/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
     },
     LOGO: function(x, y, s, context) {
-        x = x || Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2;
-        y = y || Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2;
+        x = x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2;
+        y = y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2;
         s = s || 1;
-        context = context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT);
+        context = context || Chalkboard.real.parse(Chalkboard.CONTEXT);
         context.save();
         context.translate(x, y);
         context.scale(s, s);
@@ -50,6 +50,8 @@ var Chalkboard = {
         exponent = exponent || 1;
         return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
     },
+    CONTEXT: "ctx",
+    PARSEPREFIX: "",
     numb: {
         random: function(inf, sup) {
             if(inf === undefined) {
@@ -331,9 +333,8 @@ var Chalkboard = {
                 return "TypeError: Parameter \"type\" must be either \"expl\", \"inve\", \"pola\", \"curv\", \"surf\", or \"mult\".";
             }
         },
-        parse: function(str, init) {
-            init = init || '';
-            return Function('"use strict"; ' + init + ' return (' + str + ')')();
+        parse: function(str) {
+            return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + ' return (' + str + ')')();
         },
         val: function(func, val) {
             if(func.type === "expl") {
@@ -515,14 +516,17 @@ var Chalkboard = {
     },
     comp: {
         new: function(a, b) {
-            return {a: a, b: b, type: "comp"};
+            if(b === undefined) {
+                return {a: a, b: 0, type: "comp"};
+            } else {
+                return {a: a, b: b, type: "comp"};
+            }
         },
         function: function(realDefinition, imagDefinition) {
             return {definition: [realDefinition, imagDefinition], type: "comp"};
         },
-        parse: function(str, init) {
-            init = init || '';
-            return Function('"use strict"; ' + init + ' return (' + str + ')')();
+        parse: function(str) {
+            return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + ' return (' + str + ')')();
         },
         val: function(func, comp) {
             if(func.type === "comp") {
@@ -623,9 +627,21 @@ var Chalkboard = {
             return Chalkboard.comp.new(comp.a, -comp.b);
         },
         dist: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return Chalkboard.real.sqrt(((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b)));
         },
         distsq: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return ((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b));
         },
         scl: function(comp, num) {
@@ -635,15 +651,39 @@ var Chalkboard = {
             return Chalkboard.comp.new(Chalkboard.numb.constrain(comp.a, range), Chalkboard.numb.constrain(comp.b, range));
         },
         add: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return Chalkboard.comp.new(comp_1.a + comp_2.a, comp_1.b + comp_2.b);
         },
         sub: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return Chalkboard.comp.new(comp_1.a - comp_2.a, comp_1.b - comp_2.b);
         },
         mul: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return Chalkboard.comp.new((comp_1.a * comp_2.a) - (comp_1.b * comp_2.b), (comp_1.a * comp_2.b) + (comp_1.b * comp_2.a));
         },
         div: function(comp_1, comp_2) {
+            if(typeof comp_1 === "number") {
+                comp_1 = Chalkboard.comp.new(comp_1, 0);
+            }
+            if(typeof comp_2 === "number") {
+                comp_2 = Chalkboard.comp.new(comp_2, 0);
+            }
             return Chalkboard.comp.new(((comp_1.a * comp_2.a) - (comp_1.b * comp_2.b)) / Chalkboard.comp.magsq(comp_2), ((comp_1.a * comp_2.b) + (comp_1.b * comp_2.a)) / Chalkboard.comp.magsq(comp_2));
         },
         toVector: function(comp) {
@@ -665,7 +705,11 @@ var Chalkboard = {
     },
     quat: {
         new: function(a, b, c, d) {
-            return {a: a, b: b, c: c, d: d, type: "quat"};
+            if(b === undefined && c === undefined && d === undefined) {
+                return {a: a, b: 0, c: 0, d: 0, type: "quat"};
+            } else {
+                return {a: a, b: b, c: c, d: d, type: "quat"};
+            }
         },
         random: function(inf, sup) {
             return Chalkboard.quat.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -707,9 +751,21 @@ var Chalkboard = {
             return Chalkboard.quat.new(quat.a, -quat.b, -quat.c, -quat.d);
         },
         dist: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
             return Chalkboard.real.sqrt(((quat_2.a - quat_1.a) * (quat_2.a - quat_1.a)) + ((quat_2.b - quat_1.b) * (quat_2.b - quat_1.b)) + ((quat_2.c - quat_1.c) * (quat_2.c - quat_1.c)) + ((quat_2.d - quat_1.d) * (quat_2.d - quat_1.d)));
         },
         distsq: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
             return ((quat_2.a - quat_1.a) * (quat_2.a - quat_1.a)) + ((quat_2.b - quat_1.b) * (quat_2.b - quat_1.b)) + ((quat_2.c - quat_1.c) * (quat_2.c - quat_1.c)) + ((quat_2.d - quat_1.d) * (quat_2.d - quat_1.d));
         },
         scl: function(quat, num) {
@@ -719,13 +775,40 @@ var Chalkboard = {
             return Chalkboard.quat.new(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
         },
         add: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
             return Chalkboard.quat.new(quat_1.a + quat_2.a, quat_1.b + quat_2.b, quat_1.c + quat_2.c, quat_1.d + quat_2.d);
         },
         sub: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
             return Chalkboard.quat.new(quat_1.a - quat_2.a, quat_1.b - quat_2.b, quat_1.c - quat_2.c, quat_1.d - quat_2.d);
         },
         mul: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
             return Chalkboard.quat.new((quat_1.a * quat_2.a) - (quat_1.b * quat_2.b) - (quat_1.c * quat_2.c) - (quat_1.d * quat_2.d), (quat_1.a * quat_2.b) + (quat_1.b * quat_2.a) + (quat_1.c * quat_2.d) - (quat_1.d * quat_2.c), (quat_1.a * quat_2.c) - (quat_1.b * quat_2.d) + (quat_1.c * quat_2.a) + (quat_1.d * quat_2.b), (quat_1.a * quat_2.d) + (quat_1.b * quat_2.c) - (quat_1.c * quat_2.b) + (quat_1.d * quat_2.a));
+        },
+        div: function(quat_1, quat_2) {
+            if(typeof quat_1 === "number") {
+                quat_1 = Chalkboard.quat.new(quat_1, 0, 0, 0);
+            }
+            if(typeof quat_2 === "number") {
+                quat_2 = Chalkboard.quat.new(quat_2, 0, 0, 0);
+            }
+            return Chalkboard.quat.new((quat_1.a * quat_2.a + quat_1.b * quat_2.b + quat_1.c * quat_2.c + quat_1.d * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.b * quat_2.a - quat_1.a * quat_2.b - quat_1.d * quat_2.c + quat_1.c * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.c * quat_2.a + quat_1.d * quat_2.b - quat_1.a * quat_2.c - quat_1.b * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.d * quat_2.a - quat_1.c * quat_2.b + quat_1.b * quat_2.c - quat_1.a * quat_2.d) / Chalkboard.quat.magsq(quat_2));
         },
         fromAxis: function(vec3, rad) {
             return Chalkboard.quat.new(Chalkboard.trig.cos(rad / 2), vec3.x * Chalkboard.trig.sin(rad / 2), vec3.y * Chalkboard.trig.sin(rad / 2), vec3.z * Chalkboard.trig.sin(rad / 2));
@@ -771,58 +854,59 @@ var Chalkboard = {
         }
     },
     plot: {
-        CONTEXT: "ctx",
         xyplane: function(config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
-            var cw = Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width;
+            var cw = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth / 4;
             config.context.beginPath();
-            for(var i = Math.floor(-config.origin[0] / config.size); i <= (cw - config.origin[0]) / config.size; i++) {
-                config.context.moveTo(i / config.size, -config.origin[1]);
-                config.context.lineTo(i / config.size, cw - config.origin[1]);
+            for(var i = Math.floor(-config.x / config.size); i <= (cw - config.x) / config.size; i++) {
+                config.context.moveTo(i / config.size, -config.y);
+                config.context.lineTo(i / config.size, cw - config.y);
             }
             config.context.stroke();
             config.context.beginPath();
-            for(var i = Math.floor(-config.origin[1] / config.size); i <= (cw - config.origin[1]) / config.size; i++) {
-                config.context.moveTo(-config.origin[0], i / config.size);
-                config.context.lineTo(cw - config.origin[0], i / config.size);
+            for(var i = Math.floor(-config.y / config.size); i <= (cw - config.y) / config.size; i++) {
+                config.context.moveTo(-config.x, i / config.size);
+                config.context.lineTo(cw - config.x, i / config.size);
             }
             config.context.stroke();
             config.context.lineWidth = config.lineWidth;
             config.context.beginPath();
-            config.context.moveTo(-config.origin[0], 0);
-            config.context.lineTo(cw - config.origin[0], 0);
+            config.context.moveTo(-config.x, 0);
+            config.context.lineTo(cw - config.x, 0);
             config.context.stroke();
             config.context.beginPath();
-            config.context.moveTo(0, -config.origin[1]);
-            config.context.lineTo(0, cw - config.origin[1]);
+            config.context.moveTo(0, -config.y);
+            config.context.lineTo(0, cw - config.y);
             config.context.stroke();
             config.context.restore();
         },
         rOplane: function(config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
-            var cw = Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width;
+            var cw = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth / 4;
             config.context.beginPath();
@@ -832,29 +916,30 @@ var Chalkboard = {
             config.context.stroke();
             config.context.lineWidth = config.lineWidth;
             config.context.beginPath();
-            config.context.moveTo(-config.origin[0], 0);
-            config.context.lineTo(cw - config.origin[0], 0);
+            config.context.moveTo(-config.x, 0);
+            config.context.lineTo(cw - config.x, 0);
             config.context.stroke()
             config.context.beginPath();
-            config.context.moveTo(0, -config.origin[1]);
-            config.context.lineTo(0, cw - config.origin[1]);
+            config.context.moveTo(0, -config.y);
+            config.context.lineTo(0, cw - config.y);
             config.context.stroke();
             config.context.restore();
         },
         function: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -910,16 +995,17 @@ var Chalkboard = {
         barplot: function(arr, bins, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
                 fillStyle: config.fillStyle || "white",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
+                strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.fillStyle = config.fillStyle;
@@ -949,15 +1035,16 @@ var Chalkboard = {
         lineplot: function(arr, bins, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             var verts = [];
@@ -985,16 +1072,17 @@ var Chalkboard = {
         scatterplot: function(arr1, arr2, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 fillStyle: config.fillStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 5,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.fillStyle = config.fillStyle;
             if(arr1.length === arr2.length) {
                 for(var i = 0; i < arr1.length; i++) {
@@ -1010,16 +1098,17 @@ var Chalkboard = {
         comp: function(comp, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 fillStyle: config.fillStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 5,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             config.context.fillStyle = config.fillStyle;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.beginPath();
             config.context.ellipse(comp.a / config.size, -comp.b / config.size, config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
             config.context.fill();
@@ -1029,17 +1118,18 @@ var Chalkboard = {
         vec2: function(vec2, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 5,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.beginPath();
             config.context.moveTo(0, 0);
             config.context.lineTo(vec2.x / config.size, -vec2.y / config.size);
@@ -1050,20 +1140,21 @@ var Chalkboard = {
         field: function(vec2field, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [[-10, 10], [-10, 10]],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 5,
+                domain: config.domain || [[-10, 10], [-10, 10]],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             for(var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
                 for(var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
                     var v = Chalkboard.vec2.fromField(vec2field, Chalkboard.vec2.new(i, j));
@@ -1080,17 +1171,18 @@ var Chalkboard = {
         vec3: function(vec3, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 5,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.beginPath();
             config.context.moveTo(0, 0);
             config.context.lineTo((vec3.x / config.size) / (vec3.z * 0.25 + 1), (-vec3.y / config.size) / (vec3.z * 0.25 + 1));
@@ -1101,11 +1193,12 @@ var Chalkboard = {
         matr: function(matr, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var plotposx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
@@ -1113,10 +1206,10 @@ var Chalkboard = {
             var plotposy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
             var plotnegy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
             for(var i = -10; i <= 10; i++) {
-                Chalkboard.vec2.plot(plotposx, {origin: [config.origin[0], config.origin[1] + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
-                Chalkboard.vec2.plot(plotnegx, {origin: [config.origin[0], config.origin[1] + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
-                Chalkboard.vec2.plot(plotposy, {origin: [config.origin[0] + (i / config.size) * matr[0][0], config.origin[1]], lineWidth: config.lineWidth / 4});
-                Chalkboard.vec2.plot(plotnegy, {origin: [config.origin[0] + (i / config.size) * matr[0][0], config.origin[1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotposx, {origin: [config.x, config.y + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotnegx, {origin: [config.x, config.y + (i / config.size) * matr[1][1]], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotposy, {origin: [config.x + (i / config.size) * matr[0][0], config.y], lineWidth: config.lineWidth / 4});
+                Chalkboard.vec2.plot(plotnegy, {origin: [config.x + (i / config.size) * matr[0][0], config.y], lineWidth: config.lineWidth / 4});
             }
             var plotposaxisx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
             var plotnegaxisx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
@@ -1131,18 +1224,19 @@ var Chalkboard = {
         dfdx: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1162,18 +1256,19 @@ var Chalkboard = {
         d2fdx2: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1193,18 +1288,19 @@ var Chalkboard = {
         fxdx: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1224,18 +1320,19 @@ var Chalkboard = {
         convolution: function(func_1, func_2, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1250,18 +1347,19 @@ var Chalkboard = {
         correlation: function(func_1, func_2, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1276,18 +1374,19 @@ var Chalkboard = {
         autocorrelation: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1302,18 +1401,19 @@ var Chalkboard = {
         Taylor: function(func, n, a, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1328,18 +1428,19 @@ var Chalkboard = {
         Laplace: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1361,18 +1462,19 @@ var Chalkboard = {
         Fourier: function(func, config) {
             config = config || {};
             config = {
+                x: config.x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
+                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
-                domain: config.domain || [-10, 10],
-                origin: config.origin || [Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.width / 2, Chalkboard.real.parse(Chalkboard.plot.CONTEXT).canvas.height / 2],
                 lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT)
+                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             };
             config.size /= 100;
             var data = [];
             config.context.save();
-            config.context.translate(config.origin[0], config.origin[1]);
+            config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
@@ -1529,7 +1631,7 @@ var Chalkboard = {
             return h * (Chalkboard.real.sqrt(-(a * a * a * a) + 2 * (a * b) * (a * b) + 2 * (a * c) * (a * c) - (b * b * b * b) + 2 * (b * c) * (b * c) - (c * c * c * c))) / 4;
         },
         line3D: function(x1, y1, z1, x2, y2, z2, context) {
-            context = context || Chalkboard.real.parse(Chalkboard.plot.CONTEXT);
+            context = context || Chalkboard.real.parse(Chalkboard.CONTEXT);
             context.beginPath();
             context.moveTo(x1 / (z1 * 0.0025 + 1), y1 / (z1 * 0.0025 + 1));
             context.lineTo(x2 / (z2 * 0.0025 + 1), y2 / (z2 * 0.0025 + 1));
@@ -3617,7 +3719,7 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"comp\".";
             }
         },
-        fxdx: function(func, a, b) {
+        fxdx: function(func, inf, sup) {
             if(func.type === "expl" || func.type === "inve" || func.type === "pola") {
                 var f;
                 if(func.type === "expl") {
@@ -3627,36 +3729,36 @@ var Chalkboard = {
                 } else if(func.type === "pola") {
                     f = Chalkboard.real.parse("O => " + "((" + func.definition + ") * (" + func.definition + ")) / 2");
                 }
-                var fx = f(a) + f(b);
-                var dx = (b - a) / 1000000;
+                var fx = f(inf) + f(sup);
+                var dx = (sup - inf) / 1000000;
                 for(var i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f(a + i * dx) : 4 * f(a + i * dx);
+                    fx += i % 2 === 0 ? 2 * f(inf + i * dx) : 4 * f(inf + i * dx);
                 }
                 return (fx * dx) / 3;
             } else if(func.type === "curv") {
                 if(func.definition.length === 2) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    var xt = x(a) + x(b),
-                        yt = y(a) + y(b);
-                    var dt = (b - a) / 1000000;
+                    var xt = x(inf) + x(sup),
+                        yt = y(inf) + y(sup);
+                    var dt = (sup - inf) / 1000000;
                     for(var i = 1; i < 1000000; i++) {
-                        xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
-                        yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
+                        xt += i % 2 === 0 ? 2 * x(inf + i * dt) : 4 * x(inf + i * dt);
+                        yt += i % 2 === 0 ? 2 * y(sup + i * dt) : 4 * y(sup + i * dt);
                     }
                     return Chalkboard.vec2.new((xt * dt) / 3, (yt * dt) / 3);
                 } else if(func.definition.length === 3) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    var xt = x(a) + x(b),
-                        yt = y(a) + y(b),
-                        zt = z(a) + z(b);
-                    var dt = (b - a) / 1000000;
+                    var xt = x(inf) + x(sup),
+                        yt = y(inf) + y(sup),
+                        zt = z(inf) + z(sup);
+                    var dt = (sup - inf) / 1000000;
                     for(var i = 1; i < 1000000; i++) {
-                        xt += i % 2 === 0 ? 2 * x(a + i * dt) : 4 * x(a + i * dt);
-                        yt += i % 2 === 0 ? 2 * y(a + i * dt) : 4 * y(a + i * dt);
-                        zt += i % 2 === 0 ? 2 * z(a + i * dt) : 4 * z(a + i * dt);
+                        xt += i % 2 === 0 ? 2 * x(inf + i * dt) : 4 * x(inf + i * dt);
+                        yt += i % 2 === 0 ? 2 * y(inf + i * dt) : 4 * y(inf + i * dt);
+                        zt += i % 2 === 0 ? 2 * z(inf + i * dt) : 4 * z(inf + i * dt);
                     }
                     return Chalkboard.vec3.new((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
                 }
@@ -3664,14 +3766,14 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"inve\", \"pola\", or \"curv\".";
             }
         },
-        fxydxdy: function(func, a, b, c, d) {
+        fxydxdy: function(func, xinf, xsup, yinf, ysup) {
             if(func.type === "mult") {
                 var f = Chalkboard.real.parse("(x, y) => " + func.definition);
                 var result = 0;
-                var dx = (b - a) / 10000,
-                    dy = (d - c) / 10000;
-                for(var x = a; x <= b; x += dx) {
-                    for(var y = c; y <= d; y += dy) {
+                var dx = (xsup - xinf) / 10000,
+                    dy = (ysup - yinf) / 10000;
+                for(var x = xinf; x <= xsup; x += dx) {
+                    for(var y = yinf; y <= ysup; y += dy) {
                         result += f(x, y);
                     }
                 }
@@ -3680,29 +3782,29 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"mult\".";
             }
         },
-        fds: function(func, a, b, c, d) {
+        fds: function(func, tinf, tsup, sinf, ssup) {
             var result = 0;
             var drdt, drds;
             if(func.type === "curv") {
-                var dt = (b - a) / 10000;
+                var dt = (tsup - tinf) / 10000;
                 if(func.definition.length === 2) {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
                         result += Chalkboard.vec2.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
                         result += Chalkboard.vec3.mag(drdt);
                     }
                     return result * dt;
                 }
             } else if(func.type === "surf") {
-                var dt = (b - a) / 100,
-                    ds = (d - c) / 100;
-                for(var s = c; s <= d; s += ds) {
-                    for(var t = a; t <= b; t += dt) {
+                var dt = (tsup - tinf) / 100,
+                    ds = (ssup - sinf) / 100;
+                for(var s = sinf; s <= ssup; s += ds) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
                         drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
                         result += Chalkboard.vec3.mag(Chalkboard.vec3.cross(drds, drdt));
@@ -3713,22 +3815,22 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
-        frds: function(funcORvecfield, func, a, b) {
+        frds: function(funcORvecfield, func, inf, sup) {
             if(func.type === "curv") {
                 var result = 0;
-                var dt = (b - a) / 10000;
+                var dt = (sup - inf) / 10000;
                 if(funcORvecfield.type === "mult") {
-                    for(var t = a; t <= b; t += dt) {
-                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.vec2.toArray(Chalkboard.real.val(func, t))) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
+                    for(var t = inf; t <= sup; t += dt) {
+                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.real.val(func, t)) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
                 } else if(funcORvecfield.type === "vec2field") {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = inf; t <= sup; t += dt) {
                         result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
                 } else if(funcORvecfield.type === "vec3field") {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = inf; t <= sup; t += dt) {
                         result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
@@ -3739,29 +3841,29 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
             }
         },
-        fnds: function(vecfield, func, a, b, c, d) {
+        fnds: function(vecfield, func, tinf, tsup, sinf, ssup) {
             var result = 0;
             var drdt, drds;
             if(func.type === "curv") {
-                var dt = (b - a) / 10000;
+                var dt = (tsup - tinf) / 10000;
                 if(func.definition.length === 2) {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
                         result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.vec2.new(-drdt.y, drdt.x)) * Chalkboard.vec2.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
-                    for(var t = a; t <= b; t += dt) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
                         result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.normal(func, t)) * Chalkboard.vec3.mag(drdt);
                     }
                     return result * dt;
                 }
             } else if(func.type === "surf") {
-                var dt = (b - a) / 100,
-                    ds = (d - c) / 100;
-                for(var s = c; s <= d; s += ds) {
-                    for(var t = a; t <= b; t += dt) {
+                var dt = (tsup - tinf) / 100,
+                    ds = (ssup - sinf) / 100;
+                for(var s = sinf; s <= ssup; s += ds) {
+                    for(var t = tinf; t <= tsup; t += dt) {
                         drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
                         drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
                         result += Chalkboard.vec3.scalarTriple(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, Chalkboard.vec2.new(s, t))), drds, drdt);
@@ -3772,12 +3874,12 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
-        fzdz: function(func_1, func_2, a, b) {
+        fzdz: function(func_1, func_2, inf, sup) {
             if(func_1.type === "comp") {
                 if(func_2.type === "curv") {
                     var result = Chalkboard.comp.new(0, 0);
-                    var dt = (b - a) / 10000;
-                    for(var t = a; t <= b; t += dt) {
+                    var dt = (sup - inf) / 10000;
+                    for(var t = inf; t <= sup; t += dt) {
                         var fz = Chalkboard.comp.val(func_1, Chalkboard.vec2.toComplex(Chalkboard.real.val(func_2, t)));
                         var rt = Chalkboard.calc.dfdx(func_2, t);
                         result = Chalkboard.comp.add(result, Chalkboard.comp.new((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
