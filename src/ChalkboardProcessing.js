@@ -3339,8 +3339,21 @@ var Chalkboard = {
             };
             return newNDArray(tensor);
         },
+        size: function(tens) {
+            if(tens.constructor === Array) {
+                var result = [tens.length];
+                if(Array.isArray(tens[0])) {
+                    result = result.concat(Chalkboard.tens.size(tens[0]));
+                }
+                return result;
+            } else {
+                return [];
+            }
+        },
         fill: function(element, size) {
-            size = Array.from(arguments).slice(1);
+            if(size.constructor !== Array) {
+                size = Array.from(arguments).slice(1);
+            }
             var newNDArray = function(size) {
                 if(size.length === 0) {
                     return element;
@@ -3356,7 +3369,9 @@ var Chalkboard = {
             return newNDArray(size);
         },
         empty: function(size) {
-            size = Array.from(arguments);
+            if(size.constructor !== Array) {
+                size = Array.from(arguments);
+            }
             var newNDArray = function(size) {
                 if(size.length === 0) {
                     return null;
@@ -3371,24 +3386,10 @@ var Chalkboard = {
             }
             return newNDArray(size);
         },
-        identity: function(size) {
-            size = Array.from(arguments);
-            var newNDArray = function(size) {
-                if(size.length === 0) {
-                    return 1;
-                }
-                var curr = size[0];
-                var rest = size.slice(1);
-                var result = [];
-                for(var i = 0; i < curr; i++) {
-                    result[i] = newNDArray(rest);
-                }
-                return result;
-            }
-            return newNDArray(size);
-        },
         random: function(inf, sup, size) {
-            size = Array.from(arguments).slice(2);
+            if(size.constructor !== Array) {
+                size = Array.from(arguments).slice(2);
+            }
             var newNDArray = function(size) {
                 if(size.length === 0) {
                     return Chalkboard.numb.random(inf, sup);
@@ -3402,9 +3403,6 @@ var Chalkboard = {
                 return result;
             }
             return newNDArray(size);
-        },
-        invert: function(tens) {
-            return Chalkboard.matr.invert(Chalkboard.tens.toMatrix(tens));
         },
         zero: function(tens) {
             var result = Chalkboard.tens.new();
@@ -3520,17 +3518,6 @@ var Chalkboard = {
                 return tens_1 * tens_2;
             }
         },
-        pow: function(tens, num) {
-            if(num === 0) {
-                return Chalkboard.tens.identity(num);
-            } else {
-                var result = tens;
-                for(var i = 1; i < num; i++) {
-                    result = Chalkboard.tens.mul(tens, result);
-                }
-                return result;
-            }
-        },
         toMatrix: function(tens) {
             var result = Chalkboard.matr.new();
             var flatten = function(tens, result) {
@@ -3563,6 +3550,35 @@ var Chalkboard = {
             }
             flatten(tens);
             return result;
+        },
+        toString: function(tens) {
+            if(tens.constructor === Array) {
+                var result = "[";
+                for(var i = 0; i < tens.length; i++) {
+                    result += Chalkboard.tens.toString(tens[i]);
+                    if(i < tens.length - 1) {
+                        result += ", ";
+                    }
+                }
+                result += "]";
+                return result;
+            } else {
+                return tens.toString();
+            }
+        },
+        toObject: function(tens) {
+            if(tens.constructor === Array) {
+                var result = {};
+                for(var i = 0; i < tens.length; i++) {
+                    result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
+                }
+                return result;
+            } else {
+                return tens;
+            }
+        },
+        print: function(tens) {
+            return console.log(Chalkboard.tens.toString(tens));
         }
     },
     calc: {
