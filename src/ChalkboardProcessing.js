@@ -850,15 +850,13 @@ var Chalkboard = {
     },
     plot: {
         xyplane: function(config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2
-            };
-            config.size /= 100;
+            }).size /= 100;
             pushMatrix();
             translate(config.x, config.y);
             stroke(config.stroke);
@@ -875,15 +873,13 @@ var Chalkboard = {
             popMatrix();
         },
         rOplane: function(config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2
-            };
-            config.size /= 100;
+            }).size /= 100;
             pushMatrix();
             translate(config.x, config.y);
             noFill();
@@ -898,16 +894,14 @@ var Chalkboard = {
             popMatrix();
         },
         function: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10])
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -968,16 +962,14 @@ var Chalkboard = {
             return data;
         },
         barplot: function(arr, bins, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 fill: config.fill || color(255),
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2
-            };
-            config.size /= 100;
+            }).size /= 100;
             pushMatrix();
             translate(config.x, config.y);
             strokeWeight(config.strokeWeight);
@@ -1006,15 +998,13 @@ var Chalkboard = {
             return bars;
         },
         lineplot: function(arr, bins, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2
-            };
-            config.size /= 100;
+            }).size /= 100;
             pushMatrix();
             translate(config.x, config.y);
             noFill();
@@ -1043,15 +1033,13 @@ var Chalkboard = {
             return verts;
         },
         scatterplot: function(arr1, arr2, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 5
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1067,15 +1055,13 @@ var Chalkboard = {
             return data;
         },
         comp: function(comp, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 5
-            };
-            config.size /= 100;
+            }).size /= 100;
             stroke(config.stroke);
             strokeWeight(config.strokeWeight);
             pushMatrix();
@@ -1087,15 +1073,13 @@ var Chalkboard = {
             return [[comp.a], [comp.b]];
         },
         vec2: function(vec2, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 5
-            };
-            config.size /= 100;
+            }).size /= 100;
             stroke(config.stroke);
             strokeWeight(config.strokeWeight);
             pushMatrix();
@@ -1105,17 +1089,15 @@ var Chalkboard = {
             return [[vec2.x], [vec2.y]];
         },
         field: function(vec2field, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 5,
                 domain: config.domain || [[-10, 10], [-10, 10]],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             stroke(config.stroke);
             strokeWeight(config.strokeWeight);
@@ -1132,15 +1114,13 @@ var Chalkboard = {
             return data;
         },
         vec3: function(vec3, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 5
-            };
-            config.size /= 100;
+            }).size /= 100;
             stroke(config.stroke);
             strokeWeight(config.strokeWeight);
             pushMatrix();
@@ -1150,47 +1130,36 @@ var Chalkboard = {
             return [[vec3.x], [vec3.y], [vec3.z]];
         },
         matr: function(matr, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
-                strokeWeight: config.strokeWeight || 2
-            };
-            config.size /= 100;
-            var plotposx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
-            var plotnegx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
-            var plotposy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
-            var plotnegy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
-            for(var i = -10; i <= 10; i++) {
-                Chalkboard.vec2.plot(plotposx, {origin: [config.x, config.y + (i / config.size) * matr[1][1]], strokeWeight: config.strokeWeight / 4});
-                Chalkboard.vec2.plot(plotnegx, {origin: [config.x, config.y + (i / config.size) * matr[1][1]], strokeWeight: config.strokeWeight / 4});
-                Chalkboard.vec2.plot(plotposy, {origin: [config.x + (i / config.size) * matr[0][0], config.y], strokeWeight: config.strokeWeight / 4});
-                Chalkboard.vec2.plot(plotnegy, {origin: [config.x + (i / config.size) * matr[0][0], config.y], strokeWeight: config.strokeWeight / 4});
+                strokeWeight: config.strokeWeight || 2,
+                domain: config.domain || [-10, 10]
+            }).size /= 100;
+            for(var i = config.domain[0]; i <= config.domain[1]; i++) {
+                Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][0], matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, stroke: config.stroke, strokeWeight: config.strokeWeight / 4});
+                Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][0], -matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, stroke: config.stroke, strokeWeight: config.strokeWeight / 4});
+                Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][1], matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, stroke: config.stroke, strokeWeight: config.strokeWeight / 4});
+                Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][1], -matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, stroke: config.stroke, strokeWeight: config.strokeWeight / 4});
             }
-            var plotposaxisx = Chalkboard.vec2.new(matr[0][0], matr[1][0]);
-            var plotnegaxisx = Chalkboard.vec2.new(-matr[0][0], -matr[1][0]);
-            var plotposaxisy = Chalkboard.vec2.new(matr[0][1], matr[1][1]);
-            var plotnegaxisy = Chalkboard.vec2.new(-matr[0][1], -matr[1][1]);
-            Chalkboard.vec2.plot(plotposaxisx, config);
-            Chalkboard.vec2.plot(plotnegaxisx, config);
-            Chalkboard.vec2.plot(plotposaxisy, config);
-            Chalkboard.vec2.plot(plotnegaxisy, config);
+            Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][0], matr[1][0]), config);
+            Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][0], -matr[1][0]), config);
+            Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][1], matr[1][1]), config);
+            Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][1], -matr[1][1]), config);
             return matr;
         },
         dfdx: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1212,17 +1181,15 @@ var Chalkboard = {
             return data;
         },
         d2fdx2: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1244,17 +1211,15 @@ var Chalkboard = {
             return data;
         },
         fxdx: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1276,17 +1241,15 @@ var Chalkboard = {
             return data;
         },
         convolution: function(func_1, func_2, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1303,17 +1266,15 @@ var Chalkboard = {
             return data;
         },
         correlation: function(func_1, func_2, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1330,17 +1291,15 @@ var Chalkboard = {
             return data;
         },
         autocorrelation: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1357,17 +1316,15 @@ var Chalkboard = {
             return data;
         },
         Taylor: function(func, n, a, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1384,17 +1341,15 @@ var Chalkboard = {
             return data;
         },
         Laplace: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
@@ -1418,17 +1373,15 @@ var Chalkboard = {
             return data;
         },
         Fourier: function(func, config) {
-            config = config || {};
-            config = {
-                x: config.x || width / 2,
+            (config = {
+                x: (config = config || {}).x || width / 2,
                 y: config.y || height / 2,
                 size: config.size || 1,
                 stroke: config.stroke || color(0),
                 strokeWeight: config.strokeWeight || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25
-            };
-            config.size /= 100;
+            }).size /= 100;
             var data = [];
             pushMatrix();
             translate(config.x, config.y);
