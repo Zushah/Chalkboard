@@ -2283,13 +2283,14 @@ var Chalkboard = {
                 return "TypeError: Parameter \"type\" must be either \"linear\", \"polynomial\", \"power\", \"exponential\", or \"logarithmic\".";
             }
         },
-        toVector: function(arr, type) {
+        toVector: function(arr, type, index) {
+            if(index === undefined) { index = 0; }
             if(type === "vec2") {
-                return Chalkboard.vec2.new(arr[0], arr[1]);
+                return Chalkboard.vec2.new(arr[index], arr[index + 1]);
             } else if(type === "vec3") {
-                return Chalkboard.vec3.new(arr[0], arr[1], arr[2]);
+                return Chalkboard.vec3.new(arr[index], arr[index + 1], arr[index + 2]);
             } else if(type === "vec4") {
-                return Chalkboard.vec4.new(arr[0], arr[1], arr[2], arr[3]);
+                return Chalkboard.vec4.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             } else {
                 return "TypeError: Parameter \"type\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
@@ -2309,6 +2310,12 @@ var Chalkboard = {
                 }
             }
             return result;
+        },
+        toTensor: function(arr, size) {
+            if(size.constructor !== Array) {
+                size = Array.from(arguments).slice(1);
+            }
+            return Chalkboard.tens.resize(arr, size);
         },
         toObject: function(arr) {
             var result = {};
@@ -3290,6 +3297,12 @@ var Chalkboard = {
                 return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
+        toTensor: function(matr, size) {
+            if(size.constructor !== Array) {
+                size = Array.from(arguments).slice(1);
+            }
+            return Chalkboard.tens.resize(matr, size);
+        },
         toArray: function(matr) {
             var result = [];
             for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -3349,6 +3362,23 @@ var Chalkboard = {
                 return [];
             }
         },
+        resize: function(tens, size) {
+            if(size.constructor !== Array) {
+                size = Array.from(arguments).slice(1);
+            }
+            var result = Chalkboard.tens.fill(0, size);
+            var refill = function(arr1, arr2) {
+                for(var i = 0; i < arr2.length; i++) {
+                    if(arr2[i].constructor === Array) {
+                        refill(arr1, arr2[i]);
+                    } else {
+                        arr2[i] = arr1.shift();
+                    }
+                }
+            };
+            refill(Chalkboard.tens.toArray(tens), result);
+            return result;
+        },
         fill: function(element, size) {
             if(size.constructor !== Array) {
                 size = Array.from(arguments).slice(1);
@@ -3402,6 +3432,9 @@ var Chalkboard = {
                 return result;
             }
             return newNDArray(size);
+        },
+        transpose: function(tens) {
+            return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens).reverse());
         },
         zero: function(tens) {
             var result = Chalkboard.tens.new();
@@ -3517,6 +3550,19 @@ var Chalkboard = {
                 return tens_1 * tens_2;
             }
         },
+        toVector: function(tens, type, index) {
+            if(index === undefined) { index = 0; }
+            var arr = Chalkboard.tens.toArray(tens);
+            if(type === "vec2") {
+                return Chalkboard.vec2.new(arr[index], arr[index + 1]);
+            } else if(type === "vec3") {
+                return Chalkboard.vec3.new(arr[index], arr[index + 1], arr[index + 2]);
+            } else if(type === "vec4") {
+                return Chalkboard.vec4.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
+            } else {
+                return "TypeError: Parameter \"type\" should be \"vec2\", \"vec3\", or \"vec4\".";
+            }
+        },
         toMatrix: function(tens) {
             var result = Chalkboard.matr.new();
             var flatten = function(tens, result) {
@@ -3550,19 +3596,22 @@ var Chalkboard = {
             flatten(tens);
             return result;
         },
-        toString: function(tens) {
-            if(tens.constructor === Array) {
-                var result = "[";
+        toString: function(tens, indentation) {
+            if(indentation === undefined) { indentation = 0; }
+            if(tens[0].constructor === Array) {
+                var result = "\t".repeat(indentation) + "[\n";
                 for(var i = 0; i < tens.length; i++) {
-                    result += Chalkboard.tens.toString(tens[i]);
-                    if(i < tens.length - 1) {
-                        result += ", ";
-                    }
+                    result += Chalkboard.tens.toString(tens[i], indentation + 1);
                 }
-                result += "]";
+                result += "\t".repeat(indentation) + "]\n";
                 return result;
             } else {
-                return tens.toString();
+                var result = "\t".repeat(indentation) + "[ ";
+                for(var i = 0; i < tens.length; i++) {
+                    result += tens[i].toString() + " ";
+                }
+                result += "]\n";
+                return result;
             }
         },
         toObject: function(tens) {
