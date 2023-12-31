@@ -261,11 +261,23 @@ var Chalkboard = {
             }
         },
         binomial: function(n, k) {
+            if(k < 0 || k > n) {
+                return 0;
+            }
             if(k === 0 || k === n) {
                 return 1;
-            } else {
-                return Chalkboard.numb.binomial(n - 1, k - 1) + Chalkboard.numb.binomial(n - 1, k);
             }
+            if(k === 1 || k === n - 1) {
+                return n;
+            }
+            if(n - k < k) {
+                k = n - k;
+            }
+            var result = n;
+            for(var i = 2; i <= k; i++) {
+                result *= (n - i + 1) / i;
+            }
+            return Math.round(result);
         },
         Fibonacci: function(num) {
             var sequence = [0, 1];
@@ -2816,6 +2828,21 @@ var Chalkboard = {
                 return undefined;
             }
         },
+        exchange: function(size) {
+            if(Number.isInteger(size) && size > 0) {
+                var result = Chalkboard.matr.fill(0, size, size);
+                for(var i = 0; i < size; i++) {
+                    for(var j = 0; j < size; j++) {
+                        if(i + j === size - 1) {
+                            result[i][j] = 1;
+                        }
+                    }
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
         random: function(rows, cols, inf, sup) {
             if(Number.isInteger(rows) && Number.isInteger(cols) && rows > 0 && cols > 0) {
                 var result = Chalkboard.matr.new();
@@ -2823,6 +2850,73 @@ var Chalkboard = {
                     result.push([]);
                     for(var j = 0; j < cols; j++) {
                         result[i].push(Chalkboard.numb.random(inf, sup));
+                    }
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
+        shift: function(size, shiftAmount) {
+            shiftAmount = shiftAmount || 1;
+            if(Number.isInteger(size) && size > 0) {
+                var result = Chalkboard.matr.fill(0, size, size);
+                for(var i = 0; i < size; i++) {
+                    for(var j = 0; j < size; j++) {
+                        result[i][j] = Chalkboard.numb.Kronecker(i + shiftAmount, j);
+                    }
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
+        binomial: function(size, type) {
+            type = type || "lower";
+            if(Number.isInteger(size) && size > 0) {
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < size; i++) {
+                    result.push([]);
+                    for(var j = 0; j < size; j++) {
+                        if(type === "lower") {
+                            result[i].push(Chalkboard.numb.binomial(i, j));
+                        } else if(type === "upper") {
+                            result[i].push(Chalkboard.numb.binomial(j, i));
+                        }
+                    }
+                }
+                if(type === "symmetric") {
+                    return Chalkboard.matr.mul(Chalkboard.matr.binomial(size, "lower"), Chalkboard.matr.binomial(size, "upper"));
+                } else if(type !== "lower" && type !== "upper") {
+                    return "TypeError: Parameter \"type\" must be either \"lower\", \"upper\", or \"symmetric\".";
+                } else {
+                    return result;
+                }
+            } else {
+                return undefined;
+            }
+        },
+        Hilbert: function(size) {
+            if(Number.isInteger(size) && size > 0) {
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < size; i++) {
+                    result.push([]);
+                    for(var j = 0; j < size; j++) {
+                        result[i].push(1 / (i + j + 1));
+                    }
+                }
+                return result;
+            } else {
+                return undefined;
+            }
+        },
+        Lehmer: function(size) {
+            if(Number.isInteger(size) && size > 0) {
+                var result = Chalkboard.matr.new();
+                for(var i = 0; i < size; i++) {
+                    result.push([]);
+                    for(var j = 0; j < size; j++) {
+                        result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
                     }
                 }
                 return result;
@@ -3166,6 +3260,29 @@ var Chalkboard = {
                 return undefined;
             }
         },
+        mulvec: function(matr, vec) {
+            if(vec.type === "vec2") {
+                if(Chalkboard.matr.rows(matr) === 2) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec)), "vec2");
+                } else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                }
+            } else if(vec.type === "vec3") {
+                if(Chalkboard.matr.rows(matr) === 3) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec3.toMatrix(vec)), "vec3");
+                } else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                }
+            } else if(vec.type === "vec4") {
+                if(Chalkboard.matr.rows(matr) === 4) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec4.toMatrix(vec)), "vec4");
+                } else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                }
+            } else {
+                return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
+            }
+        },
         pow: function(matr, num) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 if(Number.isInteger(num) && num >= 0) {
@@ -3184,6 +3301,29 @@ var Chalkboard = {
             } else {
                 return undefined;
             }
+        },
+        addKronecker: function(matr_1, matr_2) {
+            if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.cols(matr_1) && Chalkboard.matr.rows(matr_2) === Chalkboard.matr.cols(matr_2)) {
+                return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr_1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr_1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr_2)), matr_2));
+            } else {
+                return undefined;
+            }
+        },
+        mulKronecker: function(matr_1, matr_2) {
+            var result = Chalkboard.matr.new();
+            for(var i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
+                for(var j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
+                    for(var k = 0; k < Chalkboard.matr.rows(matr_2); k++) {
+                        for(var l = 0; l < Chalkboard.matr.cols(matr_2); l++) {
+                            if(!result[i * Chalkboard.matr.rows(matr_2) + k]) {
+                                result[i * Chalkboard.matr.rows(matr_2) + k] = [];
+                            }
+                            result[i * Chalkboard.matr.rows(matr_2) + k][j * Chalkboard.matr.cols(matr_2) + l] = matr_1[i][j] * matr_2[k][l];
+                        }
+                    }
+                }
+            }
+            return result;
         },
         reduce: function(matr) {
             var lead = 0;
@@ -3283,6 +3423,16 @@ var Chalkboard = {
             }
             return result;
         },
+        toObject: function(matr) {
+            var result = {};
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result["i" + (i + 1)] = {};
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
+                }
+            }
+            return result;
+        },
         toString: function(matr) {
             var result = "";
             for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -3291,16 +3441,6 @@ var Chalkboard = {
                     result += matr[i][j].toString() + " ";
                 }
                 result = result.trimEnd() + " ]\n";
-            }
-            return result;
-        },
-        toObject: function(matr) {
-            var result = {};
-            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result["i" + (i + 1)] = {};
-                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
-                }
             }
             return result;
         },
@@ -3328,11 +3468,11 @@ var Chalkboard = {
             };
             return newNDArray(tensor);
         },
-        layers: function(tens) {
+        rank: function(tens) {
             if(tens.constructor === Array) {
                 var result = 0;
                 for(var i = 0; i < tens.length; i++) {
-                    result = Math.max(result, Chalkboard.tens.layers(tens[i]));
+                    result = Math.max(result, Chalkboard.tens.rank(tens[i]));
                 }
                 return result + 1;
             } else {
@@ -3360,31 +3500,31 @@ var Chalkboard = {
                     if(arr2[i].constructor === Array) {
                         refill(arr1, arr2[i]);
                     } else {
-                        arr2[i] = arr1.shift();
+                        arr2[i] = arr1.length > 0 ? arr1.shift() : 0;
                     }
                 }
             };
             refill(Chalkboard.tens.toArray(tens), result);
             return result;
         },
-        push: function(tens, layer, index, elements) {
-            if(layer === 0) {
+        push: function(tens, rank, index, elements) {
+            if(rank === 0) {
                 tens.splice(index, 0, elements);
                 return tens;
             } else {
                 for(var i = 0; i < tens.length; i++) {
-                    Chalkboard.tens.push(tens[i], layer - 1, index, elements[i]);
+                    Chalkboard.tens.push(tens[i], rank - 1, index, elements[i]);
                 }
                 return tens;
             }
         },
-        pull: function(tens, layer, index) {
-            if(layer === 0) {
+        pull: function(tens, rank, index) {
+            if(rank === 0) {
                 tens.splice(index, 1);
                 return tens;
             } else {
                 for(var i = 0; i < tens.length; i++) {
-                    Chalkboard.tens.pull(tens[i], layer - 1, index);
+                    Chalkboard.tens.pull(tens[i], rank - 1, index);
                 }
                 return tens;
             }
@@ -3442,6 +3582,13 @@ var Chalkboard = {
                 return result;
             }
             return newNDArray(size);
+        },
+        contract: function(tens) {
+            if(Chalkboard.tens.rank(tens) > 2) {
+                return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens)[0], Chalkboard.tens.size(tens).slice(1).reduce(function(a, b) { return a * b; }) / Chalkboard.tens.size(tens)[0]);
+            } else if(Chalkboard.tens.rank(tens) === 2) {
+                return Chalkboard.matr.trace(tens);
+            }
         },
         transpose: function(tens) {
             return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens).reverse());
@@ -3606,6 +3753,17 @@ var Chalkboard = {
             flatten(tens);
             return result;
         },
+        toObject: function(tens) {
+            if(tens.constructor === Array) {
+                var result = {};
+                for(var i = 0; i < tens.length; i++) {
+                    result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
+                }
+                return result;
+            } else {
+                return tens;
+            }
+        },
         toString: function(tens, indentation) {
             if(indentation === undefined) { indentation = 0; }
             if(tens[0].constructor === Array) {
@@ -3622,17 +3780,6 @@ var Chalkboard = {
                 }
                 result += "]\n";
                 return result;
-            }
-        },
-        toObject: function(tens) {
-            if(tens.constructor === Array) {
-                var result = {};
-                for(var i = 0; i < tens.length; i++) {
-                    result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
-                }
-                return result;
-            } else {
-                return tens;
             }
         },
         print: function(tens) {
