@@ -534,6 +534,9 @@ var Chalkboard = {
                 return {a: a, b: b, type: "comp"};
             }
         },
+        copy: function(comp) {
+            return Object.create(Object.getPrototypeOf(comp), Object.getOwnPropertyDescriptors(comp));
+        },
         function: function(realDefinition, imagDefinition) {
             return {definition: [realDefinition, imagDefinition], type: "comp"};
         },
@@ -722,6 +725,9 @@ var Chalkboard = {
             } else {
                 return {a: a, b: b, c: c, d: d, type: "quat"};
             }
+        },
+        copy: function(quat) {
+            return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
         },
         random: function(inf, sup) {
             return Chalkboard.quat.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -1863,7 +1869,7 @@ var Chalkboard = {
         },
         eq: function(arr, arrORnum) {
             var result = [];
-            if(arrORnum.constructor === Array) {
+            if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(arr[i] === arrORnum[i]) {
@@ -1884,7 +1890,7 @@ var Chalkboard = {
             includeInf = includeInf || false;
             includeSup = includeSup || false;
             var result = [];
-            if(inf.constructor === Array && sup.constructor === Array) {
+            if(Array.isArray(inf) && Array.isArray(sup)) {
                 if(arr.length === inf.length && arr.length === sup.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(includeInf) {
@@ -1940,7 +1946,7 @@ var Chalkboard = {
         lt: function(arr, arrORnum, includeEnd) {
             includeEnd = includeEnd || false;
             var result = [];
-            if(arrORnum.constructor === Array) {
+            if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(includeEnd) {
@@ -1972,7 +1978,7 @@ var Chalkboard = {
         gt: function(arr, arrORnum, includeEnd) {
             includeEnd = includeEnd || false;
             var result = [];
-            if(arrORnum.constructor === Array) {
+            if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(var i = 0; i < arr.length; i++) {
                         if(includeEnd) {
@@ -2324,7 +2330,7 @@ var Chalkboard = {
             return result;
         },
         toTensor: function(arr, size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments).slice(1);
             }
             return Chalkboard.tens.resize(arr, size);
@@ -2350,6 +2356,9 @@ var Chalkboard = {
             } else {
                 return {x: x, y: y, type: "vec2"};
             }
+        },
+        copy: function(vec2) {
+            return Object.create(Object.getPrototypeOf(vec2), Object.getOwnPropertyDescriptors(vec2));
         },
         random: function(inf, sup) {
             return Chalkboard.vec2.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -2494,6 +2503,9 @@ var Chalkboard = {
             } else {
                 return {x: x, y: y, z: z, type: "vec3"};
             }
+        },
+        copy: function(vec3) {
+            return Object.create(Object.getPrototypeOf(vec3), Object.getOwnPropertyDescriptors(vec3));
         },
         random: function(inf, sup) {
             return Chalkboard.vec3.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -2646,6 +2658,9 @@ var Chalkboard = {
                 return {x: x, y: y, z: z, w: w, type: "vec4"};
             }
         },
+        copy: function(vec4) {
+            return Object.create(Object.getPrototypeOf(vec4), Object.getOwnPropertyDescriptors(vec4));
+        },
         random: function(inf, sup) {
             return Chalkboard.vec4.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         },
@@ -2782,11 +2797,21 @@ var Chalkboard = {
         new: function(matrix) {
             if(arguments.length === 0) {
                 return [];
-            } else if(matrix.constructor === Array && matrix[0].constructor === Array) {
+            } else if(Array.isArray(matrix) && Array.isArray(matrix[0])) {
                 return matrix;
             } else {
                 return Array.from(arguments);
             }
+        },
+        copy: function(matr) {
+            var result = Chalkboard.matr.new();
+            for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result.push([]);
+                for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result[i].push(matr[i][j]);
+                }
+            }
+            return result;
         },
         rows: function(matr) {
             return matr.length;
@@ -2795,6 +2820,9 @@ var Chalkboard = {
             return matr[0].length;
         },
         resize: function(matr, rows, cols) {
+            if(cols === undefined) {
+                cols = rows;
+            }
             var result = Chalkboard.matr.new();
             var flat = Chalkboard.matr.toArray(matr);
             var index = 0;
@@ -2835,6 +2863,9 @@ var Chalkboard = {
             }
         },
         fill: function(element, rows, cols) {
+            if(cols === undefined) {
+                cols = rows;
+            }
             if(Number.isInteger(rows) && Number.isInteger(cols) && rows > 0 && cols > 0) {
                 var result = Chalkboard.matr.new();
                 for(var i = 0; i < rows; i++) {
@@ -2849,6 +2880,9 @@ var Chalkboard = {
             }
         },
         empty: function(rows, cols) {
+            if(cols === undefined) {
+                cols = rows;
+            }
             if(Number.isInteger(rows) && Number.isInteger(cols) && rows > 0 && cols > 0) {
                 var result = Chalkboard.matr.new();
                 for(var i = 0; i < rows; i++) {
@@ -2889,7 +2923,10 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        random: function(rows, cols, inf, sup) {
+        random: function(inf, sup, rows, cols) {
+            if(cols === undefined) {
+                cols = rows;
+            }
             if(Number.isInteger(rows) && Number.isInteger(cols) && rows > 0 && cols > 0) {
                 var result = Chalkboard.matr.new();
                 for(var i = 0; i < rows; i++) {
@@ -3092,7 +3129,7 @@ var Chalkboard = {
         LUdecomp: function(matr) {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 var L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
-                    U = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr)));
+                    U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
                 for(var j = 0; j < Chalkboard.matr.cols(matr); j++) {
                     for(var i = 0; i <= j; i++) {
                         var sum = 0;
@@ -3115,51 +3152,51 @@ var Chalkboard = {
             }
         },
         QRdecomp: function(matr) {
-            if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                var Q = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr))),
-                    R = Chalkboard.matr.zero(Chalkboard.matr.empty(Chalkboard.matr.rows(matr)));
-                var dot = function(v1, v2) {
-                    var result = 0;
-                    for(var i = 0; i < v1.length; i++) {
-                        result += v1[i] * v2[i];
-                    }
-                    return result;
+            var Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
+                R = Chalkboard.matr.copy(matr);
+            for(var j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
+                var norm = 0;
+                for(var i = j; i < Chalkboard.matr.rows(matr); i++) {
+                    norm += R[i][j] * R[i][j];
                 }
-                var mag = function(v) {
-                    var result = 0;
+                norm = Chalkboard.real.sqrt(norm);
+                var v = [];
+                v[0] = norm - R[j][j];
+                var normalizer = v[0] * v[0];
+                for(var i = 1; i < Chalkboard.matr.rows(matr) - j; i++) {
+                    v[i] = -R[i + j][j];
+                    normalizer += v[i] * v[i];
+                }
+                normalizer = 1 / Chalkboard.real.sqrt(normalizer);
+                for(var i = 0; i < v.length; i++) {
+                    v[i] *= normalizer;
+                }
+                R[j][j] = norm;
+                for(var i = j + 1; i < Chalkboard.matr.rows(R); i++) {
+                    R[i][j] = 0;
+                }
+                for(var k = j + 1; k < Chalkboard.matr.cols(R); k++) {
+                    var dot = 0;
                     for(var i = 0; i < v.length; i++) {
-                        result += v[i] * v[i];
+                        dot += v[i] * R[i + j][k];
                     }
-                    return Math.sqrt(result);
-                }
-                for(var j = 0; j < Chalkboard.matr.rows(matr); j++) {
-                    var v = matr.map(function(row) {
-                        return row[j];
-                    });
-                    for(var i = 0; i < j; i++) {
-                        var q = Q.map(function(row) {
-                            return row[i];
-                        });
-                        var coeff = dot(v, q) / (mag(q) * mag(q));
-                        v = v.map(function(e, index) {
-                            return e - coeff * q[index];
-                        });
-                    }
-                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        Q[i][j] = v[i] / mag(v);
-                    }
-                    for(var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        R[j][i] = i < j ? 0 : matr.map(function(row) {
-                            return row[i];
-                        }).reduce(function(a, v, index) {
-                            return a + v * Q[index][j];
-                        }, 0);
+                    dot *= 2;
+                    for(var i = 0; i < v.length; i++) {
+                        R[i + j][k] -= dot * v[i];
                     }
                 }
-                return {Q: Q, R: R};
-            } else {
-                return undefined;
+                for(var k = 0; k < Chalkboard.matr.cols(Q); k++) {
+                    var dot = 0;
+                    for(var i = 0; i < v.length; i++) {
+                        dot += v[i] * Q[k][i + j];
+                    }
+                    dot *= 2;
+                    for(var i = 0; i < v.length; i++) {
+                        Q[k][i + j] -= dot * v[i];
+                    }
+                }
             }
+            return {Q: Q, R: R};
         },
         zero: function(matr) {
             var result = Chalkboard.matr.new();
@@ -3260,6 +3297,28 @@ var Chalkboard = {
                 }
             }
             return result;
+        },
+        concat: function(matr_1, matr_2, type) {
+            type = type || "row";
+            if(type === "row") {
+                if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2)) {
+                    return Chalkboard.matr.new(matr_1.concat(matr_2));
+                } else {
+                    return undefined;
+                }
+            } else if(type === "col") {
+                if(Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
+                    var result = Chalkboard.matr.new();
+                    for(var i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
+                        result.push(matr_1[i].concat(matr_2[i]));
+                    }
+                    return result;
+                } else {
+                    return undefined;
+                }
+            } else {
+                return "TypeError: Parameter \"type\" should be either \"row\" or \"col\".";
+            }
         },
         add: function(matr_1, matr_2) {
             if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
@@ -3455,7 +3514,7 @@ var Chalkboard = {
             }
         },
         toTensor: function(matr, size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments).slice(1);
             }
             return Chalkboard.tens.resize(matr, size);
@@ -3498,14 +3557,14 @@ var Chalkboard = {
         new: function(tensor) {
             if(arguments.length === 0) {
                 return [];
-            } else if(arguments.length === 1 && arguments[0].constructor === Array) {
+            } else if(arguments.length === 1 && Array.isArray(arguments[0])) {
                 tensor = arguments[0];
             } else {
                 tensor = Array.from(arguments);
             }
             var newNDArray = function(arr) {
                 return arr.map(function(subarr) {
-                    if(subarr.constructor === Array) {
+                    if(Array.isArray(subarr)) {
                         return newNDArray(subarr);
                     } else {
                         return subarr;
@@ -3514,8 +3573,19 @@ var Chalkboard = {
             };
             return newNDArray(tensor);
         },
+        copy: function(tens) {
+            if(Array.isArray(tens)) {
+                var result = Chalkboard.tens.new();
+                for(var i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.tens.copy(tens[i]);
+                }
+                return result;
+            } else {
+                return tens;
+            }
+        },
         rank: function(tens) {
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 var result = 0;
                 for(var i = 0; i < tens.length; i++) {
                     result = Math.max(result, Chalkboard.tens.rank(tens[i]));
@@ -3526,7 +3596,7 @@ var Chalkboard = {
             }
         },
         size: function(tens) {
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 var result = [tens.length];
                 if(Array.isArray(tens[0])) {
                     result = result.concat(Chalkboard.tens.size(tens[0]));
@@ -3537,13 +3607,13 @@ var Chalkboard = {
             }
         },
         resize: function(tens, size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments).slice(1);
             }
             var result = Chalkboard.tens.fill(0, size);
             var refill = function(arr1, arr2) {
                 for(var i = 0; i < arr2.length; i++) {
-                    if(arr2[i].constructor === Array) {
+                    if(Array.isArray(arr2[i])) {
                         refill(arr1, arr2[i]);
                     } else {
                         arr2[i] = arr1.length > 0 ? arr1.shift() : 0;
@@ -3576,7 +3646,7 @@ var Chalkboard = {
             }
         },
         fill: function(element, size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments).slice(1);
             }
             var newNDArray = function(size) {
@@ -3594,7 +3664,7 @@ var Chalkboard = {
             return newNDArray(size);
         },
         empty: function(size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments);
             }
             var newNDArray = function(size) {
@@ -3612,7 +3682,7 @@ var Chalkboard = {
             return newNDArray(size);
         },
         random: function(inf, sup, size) {
-            if(size.constructor !== Array) {
+            if(!Array.isArray(size)) {
                 size = Array.from(arguments).slice(2);
             }
             var newNDArray = function(size) {
@@ -3641,7 +3711,7 @@ var Chalkboard = {
         },
         zero: function(tens) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.zero(tens[i]);
                 }
@@ -3652,7 +3722,7 @@ var Chalkboard = {
         },
         negate: function(tens) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.negate(tens[i]);
                 }
@@ -3663,7 +3733,7 @@ var Chalkboard = {
         },
         reciprocate: function(tens) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.reciprocate(tens[i]);
                 }
@@ -3674,7 +3744,7 @@ var Chalkboard = {
         },
         absolute: function(tens) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.absolute(tens[i]);
                 }
@@ -3685,7 +3755,7 @@ var Chalkboard = {
         },
         round: function(tens) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.round(tens[i]);
                 }
@@ -3696,7 +3766,7 @@ var Chalkboard = {
         },
         scl: function(tens, num) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.scl(tens[i], num);
                 }
@@ -3707,7 +3777,7 @@ var Chalkboard = {
         },
         constrain: function(tens, range) {
             var result = Chalkboard.tens.new();
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 for(var i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.constrain(tens[i], range);
                 }
@@ -3716,9 +3786,21 @@ var Chalkboard = {
                 return Chalkboard.numb.constrain(tens, range);
             }
         },
+        concat: function(tens_1, tens_2, rank) {
+            rank = rank || 1;
+            var concatAtRank = function(arr1, arr2, currentRank) {
+                if(currentRank = rank) {
+                    return Chalkboard.tens.new(arr1.concat(arr2));
+                }
+                return arr1.map(function(element, index) {
+                    return concatAtRank(element, arr2[index], currentRank);
+                });
+            }
+            return concatAtRank(tens_1, tens_2, 1);
+        },
         add: function(tens_1, tens_2) {
             var result = Chalkboard.tens.new();
-            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+            if(Array.isArray(tens_1) && Array.isArray(tens_2)) {
                 for(var i = 0; i < Math.max(tens_1.length, tens_2.length); i++) {
                     result[i] = Chalkboard.tens.add(tens_1[i] !== undefined ? tens_1[i] : 0, tens_2[i] !== undefined ? tens_2[i] : 0);
                 }
@@ -3729,7 +3811,7 @@ var Chalkboard = {
         },
         sub: function(tens_1, tens_2) {
             var result = Chalkboard.tens.new();
-            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+            if(Array.isArray(tens_1) && Array.isArray(tens_2)) {
                 for(var i = 0; i < Math.max(tens_1.length, tens_2.length); i++) {
                     result[i] = Chalkboard.tens.sub(tens_1[i] !== undefined ? tens_1[i] : 0, tens_2[i] !== undefined ? tens_2[i] : 0);
                 }
@@ -3740,7 +3822,7 @@ var Chalkboard = {
         },
         mul: function(tens_1, tens_2) {
             var result = Chalkboard.tens.new();
-            if(tens_1.constructor === Array && tens_2.constructor === Array) {
+            if(Array.isArray(tens_1) && Array.isArray(tens_2)) {
                 for(var i = 0; i < tens_1.length; i++) {
                     var subarr = Chalkboard.tens.new();
                     for(var j = 0; j < tens_2.length; j++) {
@@ -3770,7 +3852,7 @@ var Chalkboard = {
             var result = Chalkboard.matr.new();
             var flatten = function(tens, result) {
                 for(var i = 0; i < tens.length; i++) {
-                    if(tens[i].constructor === Array) {
+                    if(Array.isArray(tens[i])) {
                         flatten(tens[i], result);
                     } else {
                         result.push(tens[i]);
@@ -3789,7 +3871,7 @@ var Chalkboard = {
             var result = [];
             var flatten = function(tens) {
                 for(var i = 0; i < tens.length; i++) {
-                    if(tens[i].constructor === Array) {
+                    if(Array.isArray(tens[i])) {
                         flatten(tens[i]);
                     } else {
                         result.push(tens[i]);
@@ -3800,7 +3882,7 @@ var Chalkboard = {
             return result;
         },
         toObject: function(tens) {
-            if(tens.constructor === Array) {
+            if(Array.isArray(tens)) {
                 var result = {};
                 for(var i = 0; i < tens.length; i++) {
                     result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
@@ -3812,7 +3894,7 @@ var Chalkboard = {
         },
         toString: function(tens, indentation) {
             if(indentation === undefined) { indentation = 0; }
-            if(tens[0].constructor === Array) {
+            if(Array.isArray(tens[0])) {
                 var result = "\t".repeat(indentation) + "[\n";
                 for(var i = 0; i < tens.length; i++) {
                     result += Chalkboard.tens.toString(tens[i], indentation + 1);
