@@ -2768,14 +2768,31 @@ var Chalkboard = {
     },
     matr: {
         new: function(matrix) {
-            matrix = Array.from(arguments);
-            return matrix;
+            if(arguments.length === 0) {
+                return [];
+            } else if(matrix.constructor === Array && matrix[0].constructor === Array) {
+                return matrix;
+            } else {
+                return Array.from(arguments);
+            }
         },
         rows: function(matr) {
             return matr.length;
         },
         cols: function(matr) {
             return matr[0].length;
+        },
+        resize: function(matr, rows, cols) {
+            var result = Chalkboard.matr.new();
+            var flat = Chalkboard.matr.toArray(matr);
+            var index = 0;
+            for(var i = 0; i < rows; i++) {
+                result.push([]);
+                for(var j = 0; j < cols; j++) {
+                    result[i].push(index < flat.length ? flat[index++] : 0);
+                }
+            }
+            return result;
         },
         push: function(matr, type, rowORcol, elements) {
             rowORcol -= 1;
@@ -3339,7 +3356,13 @@ var Chalkboard = {
     },
     tens: {
         new: function(tensor) {
-            tensor = Array.from(arguments);
+            if(arguments.length === 0) {
+                return [];
+            } else if(arguments.length === 1 && arguments[0].constructor === Array) {
+                tensor = arguments[0];
+            } else {
+                tensor = Array.from(arguments);
+            }
             var newNDArray = function(arr) {
                 return arr.map(function(subarr) {
                     if(subarr.constructor === Array) {
@@ -3350,6 +3373,17 @@ var Chalkboard = {
                 });
             };
             return newNDArray(tensor);
+        },
+        layers: function(tens) {
+            if(tens.constructor === Array) {
+                var result = 0;
+                for(var i = 0; i < tens.length; i++) {
+                    result = Math.max(result, Chalkboard.tens.layers(tens[i]));
+                }
+                return result + 1;
+            } else {
+                return 0;
+            }
         },
         size: function(tens) {
             if(tens.constructor === Array) {
@@ -3378,6 +3412,28 @@ var Chalkboard = {
             };
             refill(Chalkboard.tens.toArray(tens), result);
             return result;
+        },
+        push: function(tens, layer, index, elements) {
+            if(layer === 0) {
+                tens.splice(index, 0, elements);
+                return tens;
+            } else {
+                for(var i = 0; i < tens.length; i++) {
+                    Chalkboard.tens.push(tens[i], layer - 1, index, elements[i]);
+                }
+                return tens;
+            }
+        },
+        pull: function(tens, layer, index) {
+            if(layer === 0) {
+                tens.splice(index, 1);
+                return tens;
+            } else {
+                for(var i = 0; i < tens.length; i++) {
+                    Chalkboard.tens.pull(tens[i], layer - 1, index);
+                }
+                return tens;
+            }
         },
         fill: function(element, size) {
             if(size.constructor !== Array) {
