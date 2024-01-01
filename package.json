@@ -1,6 +1,6 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "1.6.0",
+  "version": "1.7.0",
   "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
   "main": "src/Chalkboard.js",
   "scripts": {

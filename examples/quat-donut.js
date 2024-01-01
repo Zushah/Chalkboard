@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.6.0 Example Program: Quaternion Donut
+    Version 1.7.0 Descartes Example Program: Quaternion Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -11,7 +11,7 @@ canvas.height = window.innerHeight;
 
 var cb = Chalkboard; // Initialize Chalkboard as cb
 
-// Generate the donut's points with a parametric function (see: https://en.wikipedia.org/wiki/Torus)
+// Generate the donut's points with parametric equations (see: https://en.wikipedia.org/wiki/Torus)
 var points = [];
 for(var u = 0; u < cb.PI(2); u += cb.PI(1/16)) {
     for(var v = 0; v < cb.PI(2); v += cb.PI(1/6)) {

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.6.0 Example Program: Newton's Method
+    Version 1.7.0 Descartes Example Program: Newton's Method
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

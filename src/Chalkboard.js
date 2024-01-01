@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library
-    Version 1.6.0 released 12/25/2023
+    Version 1.7.0 Descartes released 01/01/2024
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
@@ -11,7 +11,7 @@
 */
 var Chalkboard = {
     README: function() {
-        console.log("The Chalkboard Library\nVersion 1.6.0 released 12/25/2023\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
+        console.log("The Chalkboard Library\nVersion 1.7.0 Descartes released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
     },
     LOGO: function(x, y, s, context) {
         x = x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2;
@@ -3789,7 +3789,7 @@ var Chalkboard = {
         concat: function(tens_1, tens_2, rank) {
             rank = rank || 1;
             var concatAtRank = function(arr1, arr2, currentRank) {
-                if(currentRank = rank) {
+                if(currentRank === rank) {
                     return Chalkboard.tens.new(arr1.concat(arr2));
                 }
                 return arr1.map(function(element, index) {

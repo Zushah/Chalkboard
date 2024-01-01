@@ -1,10 +1,12 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="./assets/Chalkboard-logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0"><img src="https://img.shields.io/github/v/release/Zushah/Chalkboard" alt="Latest release"></a>
-    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://www.codefactor.io/repository/github/zushah/chalkboard/badge" alt="CodeFactor grade"></a>
-    <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dt/@zushah/chalkboard" alt="npm downloads"></a>
-    <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-yellow" alt="MIT License"></a>
-    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://data.jsdelivr.com/v1/package/gh/Zushah/Chalkboard/badge" alt="jsDelivr requests"></a> 
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0"><img src="https://img.shields.io/badge/release-v1.7.0_Descartes-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
+    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://img.shields.io/codefactor/grade/github/Zushah/Chalkboard?color=blue&logo=codefactor&logoColor=white" alt="CodeFactor grade"></a>
+    <a href="https://bundlephobia.com/package/@zushah/chalkboard@1.7.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=darkgreen&logo=files&logoColor=white" alt="Minified size"></a>
+    <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?logo=npm&logoColor=white" alt="npm downloads"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/Zushah/Chalkboard?color=yellow&logo=opensourceinitiative&logoColor=white" alt="MIT License"></a>
+    <a href="https://en.wikipedia.org/wiki/JavaScript"><img src="https://img.shields.io/github/languages/top/Zushah/Chalkboard?color=orange&logo=javascript&logoColor=white" alt="Written in JavaScript"></a>
+    <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://img.shields.io/jsdelivr/gh/hm/Zushah/Chalkboard?color=crimson&logo=jsdelivr&logoColor=white" alt="jsDelivr requests"></a> 
     <br>
     <a href="https://zushah.github.io/Chalkboard/home.html">https://zushah.github.io/Chalkboard/home.html</a>
 </p>
@@ -21,28 +23,28 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.6.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0), Chalkboard has 444 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0), Chalkboard has 492 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard/home.html).
 
 # Installation
 If your JavaScript project is being run on the client-side within a webpage, you can install Chalkboard with this HTML tag:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.6.0/src/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@1.7.0/src/Chalkboard.min.js"></script>
 ```
 If your JavaScript project is being run on the server-side within the [Node.js](https://nodejs.org/en) environment, you can install Chalkboard with this console command:
 ```bash
-npm install @zushah/chalkboard@1.6.0
+npm install @zushah/chalkboard@1.7.0
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) and put the relevant files in your project's directory.
 
 More methods and details about installing Chalkboard can be read [here](https://zushah.github.io/Chalkboard/installation.html).
 
 # Documentation
-These are all thirteen Chalkboard categories with a brief description of what they're mostly about, and listed in the order they appear in the source code:
+These are all fourteen Chalkboard categories with a brief description of what they're mostly about, and listed in the order they appear in the source code:
 - `numb` - Number-theory-related operations
 - `real` - Real number and real function operations
 - `comp` - Complex number and complex function operations
 - `quat` - Quaternion operations
-- `plot` - Plotting functions, complex numbers, vectors, matrices, and statistical graphs
+- `plot` - Plotting real and complex functions, complex numbers, vectors, matrices, and statistical graphs
 - `geom` - Geometric formulae operations
 - `trig` - Trigonometric function operations
 - `stat` - Statistical array operations
@@ -50,13 +52,16 @@ These are all thirteen Chalkboard categories with a brief description of what th
 - `vec3` - Three-dimensional vector operations
 - `vec4` - Four-dimensional vector operations
 - `matr` - Multidimensional matrix operations
-- `calc` - Several-variable calculus operations
+- `tens` - Tensor (multidimensional multidimensional matrix) operations
+- `calc` - Single/multi-variable real/complex-valued calculus operations
 
-There are also four "global" commands in Chalkboard, which are:
+There are also six "global" commands and constants in Chalkboard, which are:
 - `README()` - Prints basic information about Chalkboard in the console
 - `LOGO()` - Draws the Chalkboard logo
-- `PI()` - Computes the number pi
+- `PI()` - Computes the number π
 - `E()` - Computes the number e
+- `CONTEXT` - The JavaScript canvas rendering context to use for plotting
+- `PARSEPREFIX` - Used for adding custom functions to the Chalkboard parser
 
 The comprehensive Chalkboard documentation can be visited [here](https://zushah.github.io/Chalkboard/documentation.html).
 
@@ -67,14 +72,11 @@ Chalkboard.category.command(parameters);
 ```
 Here is some code that shows off only a few features of Chalkboard:
 ```js
-const cb = Chalkboard; // Chalkboard is a nice name but it's also long
-/*
-Note that this code is written on the client-side
-You can write all the same code on the server-side, too, but you would have to replace the line above with:
-import cb from "@zushah/chalkboard";
-OR
-const cb = require("@zushah/chalkboard");
-*/
+const cb = Chalkboard; // Initialize in a browser
+// or
+const cb = require("@zushah/chalkboard"); // Initialize in Node with CommonJS
+// or
+import cb from "@zushah/chalkboard"; // Initiialize in Node with ES Modules
 
 let f = cb.real.function("Math.cos(2 * x)"); // f(x) = cos(2x)
 let dfdx = cb.calc.dfdx(f, 2); // Derivative of f at x = 0
@@ -112,6 +114,12 @@ let m = cb.matr.new([0, 1, 1, 1, 1],  // m is a 5x5 matrix
 let mi = cb.matr.invert(m); // mi is the inverse of m
 let mmi = cb.matr.mul(m, mi); // mmi is the product of m and mi
 cb.matr.print(mmi); // Prints mmi in the console
+
+let t = cb.tens.new([[1, 2], [3, 4]],  // t is a 2x2x2 (rank-3) tensor
+                    [[5, 6], [7, 8]]);
+let tt = cb.tens.mul(t, t); // tt is a 2x2x2x2x2x2 (rank-6) tensor
+let ttm = cb.tens.resize(tt, 8, 8); // ttm is an 8x8 matrix (or rank-2 tensor)
+cb.tens.print(tt); // Prints tt in the console just to see what it looks like for fun
 ```
 More examples that are more interesting can be seen [here](https://zushah.github.io/Chalkboard/examples.html) with their source code [here](https://www.github.com/Zushah/Chalkboard/tree/main/examples).
 
@@ -127,9 +135,10 @@ The changelog can be read [here](https://www.github.com/Zushah/Chalkboard/blob/m
 
 The Chalkboard library is available under the [MIT License](https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
 
-# Acknowledgements
-Thanks to [Bhavjit Chauhan](https://www.github.com/bhavjitChauhan) for his [contribution](https://www.github.com/Zushah/Chalkboard/pull/1) to [v1.3.0](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).\
-Thanks to [G. Yang](https://www.github.com/gyang0) for his [contribution](https://www.github.com/Zushah/zushah.github.io/pull/1) to the [documentation](https://www.github.com/Zushah/zushah.github.io/tree/main/Chalkboard).
+# Acknowledgments
+Thanks to [Bhavjit Chauhan](https://www.github.com/bhavjitChauhan) for his [contribution](https://www.github.com/Zushah/Chalkboard/pull/1) to [v1.3.0 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).\
+Thanks to [G. Yang](https://www.github.com/gyang0) for his [contribution](https://www.github.com/Zushah/zushah.github.io/pull/1) to the [documentation](https://www.github.com/Zushah/zushah.github.io/tree/main/Chalkboard).\
+Thanks to [JentGent](https://www.github.com/JentGent) for his [implementation](https://www.github.com/JentGent/linalg/blob/main/linalg.js#L519) for calculating QR decomposition which was [adapted](https://www.github.com/Zushah/Chalkboard/commit/1dce0dbac82b38f9a550dd496bc878c402a92442) into [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0).
 
 # Contact
 [GitHub](https://www.github.com/Zushah)\

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.6.0 Example Program: Matrix Donut
+    Version 1.7.0 Descartes Example Program: Matrix Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -11,7 +11,7 @@ canvas.height = window.innerHeight;
 
 var cb = Chalkboard; // Initialize Chalkboard as cb
 
-// Generate the donut's points with a parametric function (see: https://en.wikipedia.org/wiki/Torus)
+// Generate the donut's points with parametric equations (see: https://en.wikipedia.org/wiki/Torus)
 var points = [];
 for(var u = 0; u < cb.PI(2); u += cb.PI(1/16)) {
     for(var v = 0; v < cb.PI(2); v += cb.PI(1/6)) {
@@ -41,9 +41,7 @@ function main() {
     // Make the donut rotate with a rotation matrix
     var r = cb.matr.rotator(cb.trig.toRad(1), cb.trig.toRad(1), cb.trig.toRad(1));
     for(var i = 0; i < points.length; i++) {
-        var buffer = cb.vec3.toMatrix(points[i]);      // Create a buffer matrix which has the donut's points
-        var rbuffer = cb.matr.mul(r, buffer);          // Multiply the rotation matrix with the buffer matrix
-        points[i] = cb.matr.toVector(rbuffer, "vec3"); // Reassign the values of the donut's points to the new rotated points
+        points[i] = cb.matr.mulvec(r, points[i]); // Multiply the rotation matrix with the points' vectors
     }
 
     window.requestAnimationFrame(main);
