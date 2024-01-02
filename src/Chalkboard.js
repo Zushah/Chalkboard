@@ -2758,7 +2758,7 @@ var Chalkboard = {
             if(Chalkboard.vect.dimension(vect) === 2) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             } else if(Chalkboard.vect.dimension(vect) === 3) {
-                return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ")";;
+                return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ")";
             } else if(Chalkboard.vect.dimension(vect) === 4) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ", " + vect.w.toString() + ")";
             }
