@@ -362,29 +362,21 @@ var Chalkboard = {
                 if(func.definition.length === 2) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vec2.new(x(val), y(val));
+                    return Chalkboard.vect.new(x(val), y(val));
                 } else if(func.definition.length === 3) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vec3.new(x(val), y(val), z(val));
+                    return Chalkboard.vect.new(x(val), y(val), z(val));
                 }
             } else if(func.type === "surf") {
                 var x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
                     z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
-                    if(val.type === "vec2") {
-                        return Chalkboard.vec3.new(x(val.x, val.y), y(val.x, val.y), z(val.x, val.y));
-                    } else {
-                        return "TypeError: Parameter \"val\" must be of type \"vec2\".";
-                    }
+                return Chalkboard.vect.new(x(val.x, val.y), y(val.x, val.y), z(val.x, val.y));
             } else if(func.type === "mult") {
-                if(val.type === "vec2") {
-                    var f = Chalkboard.real.parse("(x, y) => " + func.definition);
-                    return f(val.x, val.y);
-                } else {
-                    return "TypeError: Parameter \"val\" must be of type \"vec2\".";
-                }
+                var f = Chalkboard.real.parse("(x, y) => " + func.definition);
+                return f(val.x, val.y);
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"pola\", \"curv\", \"surf\", or \"mult\".";
             }
@@ -702,7 +694,7 @@ var Chalkboard = {
             return Chalkboard.comp.new(((comp_1.a * comp_2.a) - (comp_1.b * comp_2.b)) / Chalkboard.comp.magsq(comp_2), ((comp_1.a * comp_2.b) + (comp_1.b * comp_2.a)) / Chalkboard.comp.magsq(comp_2));
         },
         toVector: function(comp) {
-            return Chalkboard.vec2.new(comp.a, comp.b);
+            return Chalkboard.vect.new(comp.a, comp.b);
         },
         toArray: function(comp) {
             return [comp.a, comp.b];
@@ -828,20 +820,17 @@ var Chalkboard = {
             }
             return Chalkboard.quat.new((quat_1.a * quat_2.a + quat_1.b * quat_2.b + quat_1.c * quat_2.c + quat_1.d * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.b * quat_2.a - quat_1.a * quat_2.b - quat_1.d * quat_2.c + quat_1.c * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.c * quat_2.a + quat_1.d * quat_2.b - quat_1.a * quat_2.c - quat_1.b * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.d * quat_2.a - quat_1.c * quat_2.b + quat_1.b * quat_2.c - quat_1.a * quat_2.d) / Chalkboard.quat.magsq(quat_2));
         },
-        fromAxis: function(vec3, rad) {
-            return Chalkboard.quat.new(Chalkboard.trig.cos(rad / 2), vec3.x * Chalkboard.trig.sin(rad / 2), vec3.y * Chalkboard.trig.sin(rad / 2), vec3.z * Chalkboard.trig.sin(rad / 2));
+        fromAxis: function(vect, rad) {
+            return Chalkboard.quat.new(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
         },
-        fromVector: function(vec3) {
-            return Chalkboard.quat.new(0, vec3.x, vec3.y, vec3.z);
-        },
-        toRotation: function(quat, vec3) {
-            var vector = Chalkboard.quat.fromVector(vec3);
+        toRotation: function(quat, vect) {
+            var vector = Chalkboard.vect.toQuaternion(vect);
             var inverse = Chalkboard.quat.invert(quat);
             var quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
-            return Chalkboard.vec3.new(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
+            return Chalkboard.vect.new(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
         },
         toVector: function(quat) {
-            return Chalkboard.vec4.new(quat.a, quat.b, quat.c, quat.d);
+            return Chalkboard.vect.new(quat.a, quat.b, quat.c, quat.d);
         },
         toArray: function(quat) {
             return [quat.a, quat.b, quat.c, quat.d];
@@ -1119,7 +1108,7 @@ var Chalkboard = {
             config.context.restore();
             return [[comp.a], [comp.b]];
         },
-        vec2: function(vec2, config) {
+        vect: function(vect, config) {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1134,12 +1123,12 @@ var Chalkboard = {
             config.context.translate(config.x, config.y);
             config.context.beginPath();
             config.context.moveTo(0, 0);
-            config.context.lineTo(vec2.x / config.size, -vec2.y / config.size);
+            config.context.lineTo(vect.x / config.size, -vect.y / config.size);
             config.context.stroke();
             config.context.restore();
-            return [[vec2.x], [vec2.y]];
+            return [[vect.x], [vect.y]];
         },
-        field: function(vec2field, config) {
+        field: function(vectfield, config) {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1157,7 +1146,7 @@ var Chalkboard = {
             config.context.translate(config.x, config.y);
             for(var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
                 for(var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
-                    var v = Chalkboard.vec2.fromField(vec2field, Chalkboard.vec2.new(i, j));
+                    var v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.new(i, j));
                     config.context.beginPath();
                     config.context.moveTo(i, j);
                     config.context.lineTo(i + v.x, j + v.y);
@@ -1167,26 +1156,6 @@ var Chalkboard = {
             }
             config.context.restore();
             return data;
-        },
-        vec3: function(vec3, config) {
-            (config = {
-                x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
-                y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
-            }).size /= 100;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.beginPath();
-            config.context.moveTo(0, 0);
-            config.context.lineTo((vec3.x / config.size) / (vec3.z * 0.25 + 1), (-vec3.y / config.size) / (vec3.z * 0.25 + 1));
-            config.context.stroke();
-            config.context.restore();
-            return [[vec3.x], [vec3.y], [vec3.z]];
         },
         matr: function(matr, config) {
             (config = {
@@ -1199,15 +1168,15 @@ var Chalkboard = {
                 context: config.context || Chalkboard.real.parse(Chalkboard.CONTEXT)
             }).size /= 100;
             for(var i = config.domain[0]; i <= config.domain[1]; i++) {
-                Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][0], matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][0], -matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][1], matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][1], -matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.new(matr[0][0], matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.new(-matr[0][0], -matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.new(matr[0][1], matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.new(-matr[0][1], -matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
             }
-            Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][0], matr[1][0]), config);
-            Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][0], -matr[1][0]), config);
-            Chalkboard.plot.vec2(Chalkboard.vec2.new(matr[0][1], matr[1][1]), config);
-            Chalkboard.plot.vec2(Chalkboard.vec2.new(-matr[0][1], -matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.new(matr[0][0], matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vet2.new(-matr[0][0], -matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.new(matr[0][1], matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.new(-matr[0][1], -matr[1][1]), config);
             return matr;
         },
         dfdx: function(func, config) {
@@ -2301,16 +2270,14 @@ var Chalkboard = {
                 return "TypeError: Parameter \"type\" must be either \"linear\", \"polynomial\", \"power\", \"exponential\", or \"logarithmic\".";
             }
         },
-        toVector: function(arr, type, index) {
+        toVector: function(arr, dimension, index) {
             if(index === undefined) { index = 0; }
-            if(type === "vec2") {
-                return Chalkboard.vec2.new(arr[index], arr[index + 1]);
-            } else if(type === "vec3") {
-                return Chalkboard.vec3.new(arr[index], arr[index + 1], arr[index + 2]);
-            } else if(type === "vec4") {
-                return Chalkboard.vec4.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
-            } else {
-                return "TypeError: Parameter \"type\" should be \"vec2\", \"vec3\", or \"vec4\".";
+            if(dimension === 2) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1]);
+            } else if(dimension === 3) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1], arr[index + 2]);
+            } else if(dimension === 4) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             }
         },
         toMatrix: function(arr, rows, cols) {
@@ -2349,448 +2316,455 @@ var Chalkboard = {
             console.log(Chalkboard.stat.toString(arr));
         }
     },
-    vec2: {
-        new: function(x, y) {
-            if(y === undefined) {
-                return {x: x, y: x, type: "vec2"};
-            } else {
-                return {x: x, y: y, type: "vec2"};
-            }
-        },
-        copy: function(vec2) {
-            return Object.create(Object.getPrototypeOf(vec2), Object.getOwnPropertyDescriptors(vec2));
-        },
-        random: function(inf, sup) {
-            return Chalkboard.vec2.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
-        },
-        mag: function(vec2) {
-            return Chalkboard.real.sqrt((vec2.x * vec2.x) + (vec2.y * vec2.y));
-        },
-        magsq: function(vec2) {
-            return (vec2.x * vec2.x) + (vec2.y * vec2.y);
-        },
-        magset: function(vec2, num) {
-            return Chalkboard.vec2.scl(Chalkboard.vec2.normalize(vec2), num);
-        },
-        ang: function(vec2) {
-            return Chalkboard.trig.arctan2(vec2.y, vec2.x);
-        },
-        slope: function(vec2) {
-            return vec2.y / vec2.x;
-        },
-        azimuth: function(vec2) {
-            return Chalkboard.trig.arctan(vec2.x / vec2.y);
-        },
-        average: function(vec2) {
-            return (vec2.x + vec2.y) / 2;
-        },
-        normalize: function(vec2) {
-            return Chalkboard.vec2.new(vec2.x / Chalkboard.vec2.mag(vec2), vec2.y / Chalkboard.vec2.mag(vec2));
-        },
-        zero: function(vec2) {
-            return Chalkboard.vec2.new(vec2.x * 0, vec2.y * 0);
-        },
-        negate: function(vec2) {
-            return Chalkboard.vec2.new(-vec2.x, -vec2.y);
-        },
-        reciprocate: function(vec2) {
-            return Chalkboard.vec2.new(1 / vec2.x, 1 / vec2.y);
-        },
-        absolute: function(vec2) {
-            return Chalkboard.vec2.new(Math.abs(vec2.x), Math.abs(vec2.y));
-        },
-        round: function(vec2) {
-            return Chalkboard.vec2.new(Math.round(vec2.x), Math.round(vec2.y));
-        },
-        dist: function(vec2_1, vec2_2) {
-            return Chalkboard.real.sqrt(((vec2_2.x - vec2_1.x) * (vec2_2.x - vec2_1.x)) + ((vec2_2.y - vec2_1.y) * (vec2_2.y - vec2_1.y)));
-        },
-        distsq: function(vec2_1, vec2_2) {
-            return ((vec2_2.x - vec2_1.x) * (vec2_2.x - vec2_1.x)) + ((vec2_2.y - vec2_1.y) * (vec2_2.y - vec2_1.y));
-        },
-        angBtwn: function(vec2_1, vec2_2) {
-            return Math.acos((Chalkboard.vec2.dot(vec2_1, vec2_2)) / (Chalkboard.vec2.mag(vec2_1) * Chalkboard.vec2.mag(vec2_2)));
-        },
-        scl: function(vec2, num) {
-            return Chalkboard.vec2.new(vec2.x * num, vec2.y * num);
-        },
-        constrain: function(vec2, range) {
-            return Chalkboard.vec2.new(Chalkboard.numb.constrain(vec2.x, range), Chalkboard.numb.constrain(vec2.y, range));
-        },
-        add: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.new(vec2_1.x + vec2_2.x, vec2_1.y + vec2_2.y);
-        },
-        sub: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.new(vec2_1.x - vec2_2.x, vec2_1.y - vec2_2.y);
-        },
-        mid: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.new((vec2_1.x + vec2_2.x) / 2, (vec2_1.y + vec2_2.y) / 2);
-        },
-        dot: function(vec2_1, vec2_2) {
-            return (vec2_1.x * vec2_2.x) + (vec2_1.y * vec2_2.y);
-        },
-        cross: function(vec2_1, vec2_2) {
-            return Chalkboard.vec3.new(0, 0, (vec2_1.x * vec2_2.y) - (vec2_1.y * vec2_2.x));
-        },
-        proj: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.scl(vec2_2, Chalkboard.vec2.dot(vec2_1, vec2_2) / Chalkboard.vec2.dot(vec2_2, vec2_2));
-        },
-        oproj: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.proj(vec2_1, vec2_2));
-        },
-        reflect: function(vec2_1, vec2_2) {
-            return Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.scl(vec2_2, 2 * Chalkboard.vec2.dot(vec2_1, vec2_2)));
-        },
-        refract: function(vec2_1, vec2_2, refractiveIndex) {
-            if(refractiveIndex > 0) {
-                var perp = Chalkboard.vec2.scl(Chalkboard.vec2.sub(vec2_1, Chalkboard.vec2.scl(vec2_2, Chalkboard.vec2.dot(vec2_1, vec2_2))), refractiveIndex);
-                var parr = Chalkboard.vec2.scl(vec2_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec2.dot(vec2_1, vec2_2) * Chalkboard.vec2.dot(vec2_1, vec2_2)))));
-                return Chalkboard.vec2.add(perp, parr);
-            } else {
-                return undefined;
-            }
-        },
-        fromAngle: function(rad) {
-            return Chalkboard.vec2.new(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
-        },
-        fromPolar: function(vec2) {
-            return Chalkboard.vec2.new(vec2.x * Chalkboard.trig.cos(vec2.y), vec2.x * Chalkboard.trig.sin(vec2.y));
-        },
-        fromBipolar: function(vec2) {
-            return Chalkboard.vec2.new((vec2.x * vec2.x - vec2.y * vec2.y) / 4, Chalkboard.real.sqrt(16 * vec2.x * vec2.x - (vec2.x * vec2.x - vec2.y * vec2.y + 4) * (vec2.x * vec2.x - vec2.y * vec2.y + 4)));
-        },
-        toPolar: function(vec2) {
-            return Chalkboard.vec2.new(Chalkboard.vec2.mag(vec2), Chalkboard.vec2.ang(vec2));
-        },
-        toBipolar: function(vec2) {
-            return Chalkboard.vec2.new((vec2.x + 1) * (vec2.x + 1) + (vec2.y * vec2.y), (vec2.x - 1) * (vec2.x - 1) + (vec2.y * vec2.y));
-        },
-        toMatrix: function(vec2, type) {
-            type = type || "col";
-            if(type === "col") {
-                return Chalkboard.matr.new([vec2.x], [vec2.y]);
-            } else if(type === "row") {
-                return Chalkboard.matr.new([vec2.x, vec2.y]);
-            } else {
-                return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
-            }
-        },
-        toComplex: function(vec2) {
-            return Chalkboard.comp.new(vec2.x, vec2.y);
-        },
-        toArray: function(vec2) {
-            return [vec2.x, vec2.y];
-        },
-        toString: function(vec2) {
-            return "(" + vec2.x.toString() + ", " + vec2.y.toString() + ")";
-        },
-        field: function(p, q) {
-            return {p: p, q: q, type: "vec2field"};
-        },
-        fromField: function(vec2field, vec2) {
-            var p = Chalkboard.real.parse("(x, y) => " + vec2field.p),
-                q = Chalkboard.real.parse("(x, y) => " + vec2field.q);
-            return Chalkboard.vec2.new(p(vec2.x, vec2.y), q(vec2.x, vec2.y));
-        },
-        print: function(vec2) {
-            console.log(Chalkboard.vec2.toString(vec2));
-        }
-    },
-    vec3: {
-        new: function(x, y, z) {
-            if(y === undefined && z === undefined) {
-                return {x: x, y: x, z: x, type: "vec3"};
-            } else {
-                return {x: x, y: y, z: z, type: "vec3"};
-            }
-        },
-        copy: function(vec3) {
-            return Object.create(Object.getPrototypeOf(vec3), Object.getOwnPropertyDescriptors(vec3));
-        },
-        random: function(inf, sup) {
-            return Chalkboard.vec3.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
-        },
-        mag: function(vec3) {
-            return Chalkboard.real.sqrt((vec3.x * vec3.x) + (vec3.y * vec3.y) + (vec3.z * vec3.z));
-        },
-        magsq: function(vec3) {
-            return (vec3.x * vec3.x) + (vec3.y * vec3.y) + (vec3.z * vec3.z);
-        },
-        magset: function(vec3, num) {
-            return Chalkboard.vec3.scl(Chalkboard.vec3.normalize(vec3), num);
-        },
-        ang: function(vec3) {
-            return [Math.acos(vec3.x / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.y / Chalkboard.vec3.mag(vec3)), Math.acos(vec3.z / Chalkboard.vec3.mag(vec3))];
-        },
-        slope: function(vec3) {
-            return vec3.z / Chalkboard.real.sqrt((vec3.x * vec3.x) + (vec3.y * vec3.y));
-        },
-        azimuth: function(vec3) {
-            return Chalkboard.trig.arctan(vec3.x / vec3.y);
-        },
-        average: function(vec3) {
-            return (vec3.x + vec3.y + vec3.z) / 3;
-        },
-        normalize: function(vec3) {
-            return Chalkboard.vec3.new(vec3.x / Chalkboard.vec3.mag(vec3), vec3.y / Chalkboard.vec3.mag(vec3), vec3.z / Chalkboard.vec3.mag(vec3));
-        },
-        zero: function(vec3) {
-            return Chalkboard.vec3.new(vec3.x * 0, vec3.y * 0, vec3.z * 0);
-        },
-        negate: function(vec3) {
-            return Chalkboard.vec3.new(-vec3.x, -vec3.y, -vec3.z);
-        },
-        reciprocate: function(vec3) {
-            return Chalkboard.vec3.new(1 / vec3.x, 1 / vec3.y, 1 / vec3.z);
-        },
-        absolute: function(vec3) {
-            return Chalkboard.vec3.new(Math.abs(vec3.x), Math.abs(vec3.y), Math.abs(vec3.z));
-        },
-        round: function(vec3) {
-            return Chalkboard.vec3.new(Math.round(vec3.x), Math.round(vec3.y), Math.round(vec3.z));
-        },
-        dist: function(vec3_1, vec3_2) {
-            return Chalkboard.real.sqrt(((vec3_2.x - vec3_1.x) * (vec3_2.x - vec3_1.x)) + ((vec3_2.y - vec3_1.y) * (vec3_2.y - vec3_1.y)) + ((vec3_2.z - vec3_1.z) * (vec3_2.z - vec3_1.z)));
-        },
-        distsq: function(vec3_1, vec3_2) {
-            return ((vec3_2.x - vec3_1.x) * (vec3_2.x - vec3_1.x)) + ((vec3_2.y - vec3_1.y) * (vec3_2.y - vec3_1.y)) + ((vec3_2.z - vec3_1.z) * (vec3_2.z - vec3_1.z));
-        },
-        angBtwn: function(vec3_1, vec3_2) {
-            return Math.acos((Chalkboard.vec3.dot(vec3_1, vec3_2)) / (Chalkboard.vec3.mag(vec3_1) * Chalkboard.vec3.mag(vec3_2)));
-        },
-        scl: function(vec3, num) {
-            return Chalkboard.vec3.new(vec3.x * num, vec3.y * num, vec3.z * num);
-        },
-        constrain: function(vec3, range) {
-            return Chalkboard.vec3.new(Chalkboard.numb.constrain(vec3.x, range), Chalkboard.numb.constrain(vec3.y, range), Chalkboard.numb.constrain(vec3.z, range));
-        },
-        add: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.new(vec3_1.x + vec3_2.x, vec3_1.y + vec3_2.y, vec3_1.z + vec3_2.z);
-        },
-        sub: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.new(vec3_1.x - vec3_2.x, vec3_1.y - vec3_2.y, vec3_1.z - vec3_2.z);
-        },
-        mid: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.new((vec3_1.x + vec3_2.x) / 2, (vec3_1.y + vec3_2.y) / 2, (vec3_1.z + vec3_2.z) / 2);
-        },
-        dot: function(vec3_1, vec3_2) {
-            return (vec3_1.x * vec3_2.x) + (vec3_1.y * vec3_2.y) + (vec3_1.z * vec3_2.z);
-        },
-        cross: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.new((vec3_1.y * vec3_2.z) - (vec3_1.z * vec3_2.y), (vec3_1.z * vec3_2.x) - (vec3_1.x * vec3_2.z), (vec3_1.x * vec3_2.y) - (vec3_1.y * vec3_2.x));
-        },
-        scalarTriple: function(vec3_1, vec3_2, vec3_3) {
-            return Chalkboard.vec3.dot(vec3_1, Chalkboard.vec3.cross(vec3_2, vec3_3));
-        },
-        vectorTriple: function(vec3_1, vec3_2, vec3_3) {
-            return Chalkboard.vec3.cross(vec3_1, Chalkboard.vec3.cross(vec3_2, vec3_3));
-        },
-        proj: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.scl(vec3_2, Chalkboard.vec3.dot(vec3_1, vec3_2) / Chalkboard.vec3.dot(vec3_2, vec3_2));
-        },
-        oproj: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.proj(vec3_1, vec3_2));
-        },
-        reflect: function(vec3_1, vec3_2) {
-            return Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.scl(vec3_2, 2 * Chalkboard.vec3.dot(vec3_1, vec3_2)));
-        },
-        refract: function(vec3_1, vec3_2, refractiveIndex) {
-            if(refractiveIndex > 0) {
-                var perp = Chalkboard.vec3.scl(Chalkboard.vec3.sub(vec3_1, Chalkboard.vec3.scl(vec3_2, Chalkboard.vec3.dot(vec3_1, vec3_2))), refractiveIndex);
-                var parr = Chalkboard.vec3.scl(vec3_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec3.dot(vec3_1, vec3_2) * Chalkboard.vec3.dot(vec3_1, vec3_2)))));
-                return Chalkboard.vec3.add(perp, parr);
-            } else {
-                return undefined;
-            }
-        },
-        fromAngles: function(rad1, rad2) {
-            return Chalkboard.vec3.new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
-        },
-        fromVector: function(vec2) {
-            return Chalkboard.vec3.new(vec2.x, vec2.y, 0);
-        },
-        fromCylindrical: function(vec3) {
-            return Chalkboard.vec3.new(vec3.x * Chalkboard.trig.cos(vec3.y), vec3.x * Chalkboard.trig.sin(vec3.y), vec3.z);
-        },
-        fromSpherical: function(vec3) {
-            return Chalkboard.vec3.new(vec3.x * Chalkboard.trig.sin(vec3.z) * Chalkboard.trig.cos(vec3.y), vec3.x * Chalkboard.trig.sin(vec3.z) * Chalkboard.trig.sin(vec3.y), vec3.x * Chalkboard.trig.cos(vec3.z));
-        },
-        toCylindrical: function(vec3) {
-            return Chalkboard.vec3.new(Chalkboard.vec2.mag(vec3), Chalkboard.vec2.ang(vec3), vec3.z);
-        },
-        toSpherical: function(vec3) {
-            return Chalkboard.vec3.new(Chalkboard.vec3.mag(vec3), Chalkboard.vec2.ang(vec3), Chalkboard.vec3.ang(vec3)[2]);
-        },
-        toMatrix: function(vec3, type) {
-            type = type || "col";
-            if(type === "col") {
-                return Chalkboard.matr.new([vec3.x], [vec3.y], [vec3.z]);
-            } else if(type === "row") {
-                return Chalkboard.matr.new([vec3.x, vec3.y, vec3.z]);
-            } else {
-                return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
-            }
-        },
-        toArray: function(vec3) {
-            return [vec3.x, vec3.y, vec3.z];
-        },
-        toString: function(vec3) {
-            return "(" + vec3.x.toString() + ", " + vec3.y.toString() + ", " + vec3.z.toString() + ")";
-        },
-        field: function(p, q, r) {
-            return {p: p, q: q, r: r, type: "vec3field"};
-        },
-        fromField: function(vec3field, vec3) {
-            var p = Chalkboard.real.parse("(x, y, z) => " + vec3field.p),
-                q = Chalkboard.real.parse("(x, y, z) => " + vec3field.q),
-                r = Chalkboard.real.parse("(x, y, z) => " + vec3field.r);
-            return Chalkboard.vec3.new(p(vec3.x, vec3.y, vec3.z), q(vec3.x, vec3.y, vec3.z), r(vec3.x, vec3.y, vec3.z));
-        },
-        print: function(vec3) {
-            console.log(Chalkboard.vec3.toString(vec3));
-        }
-    },
-    vec4: {
+    vect: {
         new: function(x, y, z, w) {
-            if(y === undefined && z === undefined && w === undefined) {
-                return {x: x, y: x, z: x, w: x, type: "vec4"};
+            if(z === undefined && w === undefined) {
+                return {x: x, y: y};
+            } else if(w === undefined) {
+                return {x: x, y: y, z: z};
             } else {
-                return {x: x, y: y, z: z, w: w, type: "vec4"};
+                return {x: x, y: y, z: z, w: w};
             }
-        },
-        copy: function(vec4) {
-            return Object.create(Object.getPrototypeOf(vec4), Object.getOwnPropertyDescriptors(vec4));
-        },
-        random: function(inf, sup) {
-            return Chalkboard.vec4.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
-        },
-        mag: function(vec4) {
-            return Chalkboard.real.sqrt((vec4.x * vec4.x) + (vec4.y * vec4.y) + (vec4.z * vec4.z) + (vec4.w * vec4.w));
-        },
-        magsq: function(vec4) {
-            return (vec4.x * vec4.x) + (vec4.y * vec4.y) + (vec4.z * vec4.z) + (vec4.w * vec4.w);
-        },
-        magset: function(vec4, num) {
-            return Chalkboard.vec4.scl(Chalkboard.vec4.normalize(vec4), num);
-        },
-        ang: function(vec4) {
-            return [Math.acos(vec4.x / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.y / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.z / Chalkboard.vec4.mag(vec4)), Math.acos(vec4.w / Chalkboard.vec4.mag(vec4))];
-        },
-        slope: function(vec4) {
-            return vec4.w / Chalkboard.real.sqrt((vec4.x * vec4.x) + (vec4.y * vec4.y) + (vec4.z * vec4.z));
-        },
-        average: function(vec4) {
-            return (vec4.x + vec4.y + vec4.z + vec4.w) / 4;
-        },
-        normalize: function(vec4) {
-            return Chalkboard.vec4.new(vec4.x / Chalkboard.vec4.mag(vec4), vec4.y / Chalkboard.vec4.mag(vec4), vec4.z / Chalkboard.vec4.mag(vec4), vec4.w / Chalkboard.vec4.mag(vec4));
-        },
-        zero: function(vec4) {
-            return Chalkboard.vec4.new(vec4.x * 0, vec4.y * 0, vec4.z * 0, vec4.w * 0);
-        },
-        negate: function(vec4) {
-            return Chalkboard.vec4.new(-vec4.x, -vec4.y, -vec4.z, -vec4.w);
-        },
-        reciprocate: function(vec4) {
-            return Chalkboard.vec4.new(1 / vec4.x, 1 / vec4.y, 1 / vec4.z, 1 / vec4.w);
-        },
-        absolute: function(vec4) {
-            return Chalkboard.vec4.new(Math.abs(vec4.x), Math.abs(vec4.y), Math.abs(vec4.z), Math.abs(vec4.w));
-        },
-        round: function(vec4) {
-            return Chalkboard.vec4.new(Math.round(vec4.x), Math.round(vec4.y), Math.round(vec4.z), Math.round(vec4.w));
-        },
-        dist: function(vec4_1, vec4_2) {
-            return Chalkboard.real.sqrt(((vec4_2.x - vec4_1.x) * (vec4_2.x - vec4_1.x)) + ((vec4_2.y - vec4_1.y) * (vec4_2.y - vec4_1.y)) + ((vec4_2.z - vec4_1.z) * (vec4_2.z - vec4_1.z)) + ((vec4_2.w - vec4_1.w) * (vec4_2.w - vec4_1.w)));
-        },
-        distsq: function(vec4_1, vec4_2) {
-            return ((vec4_2.x - vec4_1.x) * (vec4_2.x - vec4_1.x)) + ((vec4_2.y - vec4_1.y) * (vec4_2.y - vec4_1.y)) + ((vec4_2.z - vec4_1.z) * (vec4_2.z - vec4_1.z)) + ((vec4_2.w - vec4_1.w) * (vec4_2.w - vec4_1.w));
-        },
-        angBtwn: function(vec4_1, vec4_2) {
-            return Math.acos((Chalkboard.vec4.dot(vec4_1, vec4_2)) / (Chalkboard.vec4.mag(vec4_1) * Chalkboard.vec4.mag(vec4_2)));
-        },
-        scl: function(vec4, num) {
-            return Chalkboard.vec4.new(vec4.x * num, vec4.y * num, vec4.z * num, vec4.w * num);
-        },
-        constrain: function(vec4, range) {
-            return Chalkboard.vec4.new(Chalkboard.numb.constrain(vec4.x, range), Chalkboard.numb.constrain(vec4.y, range), Chalkboard.numb.constrain(vec4.z, range), Chalkboard.numb.constrain(vec4.w, range));
-        },
-        add: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.new(vec4_1.x + vec4_2.x, vec4_1.y + vec4_2.y, vec4_1.z + vec4_2.z, vec4_1.w + vec4_2.w);
-        },
-        sub: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.new(vec4_1.x - vec4_2.x, vec4_1.y - vec4_2.y, vec4_1.z - vec4_2.z, vec4_1.w - vec4_2.w);
-        },
-        mid: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.new((vec4_1.x + vec4_2.x) / 2, (vec4_1.y + vec4_2.y) / 2, (vec4_1.z + vec4_2.z) / 2, (vec4_1.w + vec4_2.w) / 2);
-        },
-        dot: function(vec4_1, vec4_2) {
-            return (vec4_1.x * vec4_2.x) + (vec4_1.y * vec4_2.y) + (vec4_1.z * vec4_2.z) + (vec4_1.w * vec4_2.w);
-        },
-        proj: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.scl(vec4_2, Chalkboard.vec4.dot(vec4_1, vec4_2) / Chalkboard.vec4.dot(vec4_2, vec4_2));
-        },
-        oproj: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.proj(vec4_1, vec4_2));
-        },
-        reflect: function(vec4_1, vec4_2) {
-            return Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.scl(vec4_2, 2 * Chalkboard.vec4.dot(vec4_1, vec4_2)));
-        },
-        refract: function(vec4_1, vec4_2, refractiveIndex) {
-            if(refractiveIndex > 0) {
-                var perp = Chalkboard.vec4.scl(Chalkboard.vec4.sub(vec4_1, Chalkboard.vec4.scl(vec4_2, Chalkboard.vec4.dot(vec4_1, vec4_2))), refractiveIndex);
-                var parr = Chalkboard.vec4.scl(vec4_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vec4.dot(vec4_1, vec4_2) * Chalkboard.vec4.dot(vec4_1, vec4_2)))));
-                return Chalkboard.vec4.add(perp, parr);
-            } else {
-                return undefined;
-            }
-        },
-        fromVector: function(vec3) {
-            return Chalkboard.vec4.new(vec3.x, vec3.y, vec3.z, 0);
-        },
-        fromHypercylindrical: function(vec4) {
-            return Chalkboard.vec4.new(vec4.x * Chalkboard.trig.cos(vec4.y) * Chalkboard.trig.cos(vec4.z), vec4.x * Chalkboard.trig.cos(vec4.y) * Chalkboard.trig.sin(vec4.z), vec4.x * Chalkboard.trig.sin(vec4.y), vec4.w);
-        },
-        fromHyperspherical: function(vec4) {
-            return Chalkboard.vec4.new(vec4.x * Chalkboard.trig.cos(vec4.y) * Chalkboard.trig.cos(vec4.z) * Chalkboard.trig.cos(vec4.w), vec4.x * Chalkboard.trig.cos(vec4.y) * Chalkboard.trig.sin(vec4.z) * Chalkboard.trig.cos(vec4.w), vec4.x * Chalkboard.trig.sin(vec4.y) * Chalkboard.trig.cos(vec4.w), vec4.x * Chalkboard.trig.sin(vec4.w));
-        },
-        toHypercylindrical: function(vec4) {
-            return Chalkboard.vec4.new(Chalkboard.vec3.mag(vec4), Chalkboard.vec2.ang(vec4), Chalkboard.vec3.ang(vec4)[2], vec4.w);
-        },
-        toHyperspherical: function(vec4) {
-            return Chalkboard.vec4.new(Chalkboard.vec4.mag(vec4), Chalkboard.vec2.ang(vec4), Chalkboard.vec3.ang(vec4)[2], Chalkboard.vec4.ang(vec4)[3]);
-        },
-        toMatrix: function(vec4, type) {
-            type = type || "col";
-            if(type === "col") {
-                return Chalkboard.matr.new([vec4.x], [vec4.y], [vec4.z], [vec4.w]);
-            } else if(type === "row") {
-                return Chalkboard.matr.new([vec4.x, vec4.y, vec4.z, vec4.w]);
-            } else {
-                return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
-            }
-        },
-        toQuaternion: function(vec4) {
-            return Chalkboard.quat.new(vec4.x, vec4.y, vec4.z, vec4.w);
-        },
-        toArray: function(vec4) {
-            return [vec4.x, vec4.y, vec4.z, vec4.w];
-        },
-        toString: function(vec4) {
-            return "(" + vec4.x.toString() + ", " + vec4.y.toString() + ", " + vec4.z.toString() + ", " + vec4.w.toString() + ")";
         },
         field: function(p, q, r, s) {
-            return {p: p, q: q, r: r, s: s, type: "vec4field"};
+            if(r === undefined && s === undefined) {
+                return {p: p, q: q};
+            } else if(s === undefined) {
+                return {p: p, q: q, r: r};
+            } else {
+                return {p: p, q: q, r: r, s: s};
+            }
         },
-        fromField: function(vec4field, vec4) {
-            var p = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.p),
-                q = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.q),
-                r = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.r),
-                s = Chalkboard.real.parse("(x, y, z, w) => " + vec4field.s);
-            return Chalkboard.vec4.new(p(vec4.x, vec4.y, vec4.z, vec4.w), q(vec4.x, vec4.y, vec4.z, vec4.w), r(vec4.x, vec4.y, vec4.z, vec4.w), s(vec4.x, vec4.y, vec4.z, vec4.w));
+        fromField: function(vectfield, vect) {
+            if(Chalkboard.vect.dimension(vectfield) === 2 && Chalkboard.vect.dimension(vect) === 2) {
+                var p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
+                return Chalkboard.vect.new(p(vect.x, vect.y), q(vect.x, vect.y));
+            } else if(Chalkboard.vect.dimension(vectfield) === 3 && Chalkboard.vect.dimension(vect) === 3) {
+                var p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
+                return Chalkboard.vect.new(p(vect.x, vect.y, vect.z), q(vect.x, vect.y, vect.z), r(vect.x, vect.y, vect.z));
+            } else if(Chalkboard.vect.dimension(vectfield) === 4 && Chalkboard.vect.dimension(vect) === 4) {
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.r),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.s);
+                return Chalkboard.vect.new(p(vect.x, vect.y, vect.z, vect.w), q(vect.x, vect.y, vect.z, vect.w), r(vect.x, vect.y, vect.z, vect.w), s(vect.x, vect.y, vect.z, vect.w));
+            }
         },
-        print: function(vec4) {
-            console.log(Chalkboard.vec4.toString(vec4));
+        copy: function(vect) {
+            return Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
+        },
+        dimension: function(vectORvectfield) {
+            if((vectORvectfield.x && vectORvectfield.y && !vectORvectfield.z && !vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && !vectORvectfield.r && !vectORvectfield.s)) {
+                return 2;
+            } else if((vectORvectfield.x && vectORvectfield.y && vectORvectfield.z && !vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && vectORvectfield.r && !vectORvectfield.s)) {
+                return 3;
+            } else if((vectORvectfield.x && vectORvectfield.y && vectORvectfield.z && vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && vectORvectfield.r && vectORvectfield.s)) {
+                return 4;
+            }
+        },
+        push: function(vect, component, num) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                if(component === 1) {
+                    return Chalkboard.vect.new(num, vect.y);
+                } else if(component === 2) {
+                    return Chalkboard.vect.new(vect.x, num);
+                } else if(component === 3) {
+                    return Chalkboard.vect.new(vect.x, vect.y, num);
+                } else if(component === 4) {
+                    return Chalkboard.vect.new(vect.x, vect.y, 0, num);
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                if(component === 1) {
+                    return Chalkboard.vect.new(num, vect.y, vect.z);
+                } else if(component === 2) {
+                    return Chalkboard.vect.new(vect.x, num, vect.z);
+                } else if(component === 3) {
+                    return Chalkboard.vect.new(vect.x, vect.y, num);
+                } else if(component === 4) {
+                    return Chalkboard.vect.new(vect.x, vect.y, vect.z, num);
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                if(component === 1) {
+                    return Chalkboard.vect.new(num, vect.y, vect.z, vect.w);
+                } else if(component === 2) {
+                    return Chalkboard.vect.new(vect.x, num, vect.z, vect.w);
+                } else if(component === 3) {
+                    return Chalkboard.vect.new(vect.x, vect.y, num, vect.w);
+                } else if(component === 4) {
+                    return Chalkboard.vect.new(vect.x, vect.y, vect.z, num);
+                }
+            }
+        },
+        pull: function(vect, component) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                if(component === 1) {
+                    return vect.y;
+                } else if(component === 2) {
+                    return vect.x;
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                if(component === 1) {
+                    return Chalkboard.vect.new(0, vect.y, vect.z);
+                } else if(component === 2) {
+                    return Chalkboard.vect.new(vect.x, 0, vect.z);
+                } else if(component === 3) {
+                    return Chalkboard.vect.new(vect.x, vect.y);
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                if(component === 1) {
+                    return Chalkboard.vect.new(0, vect.y, vect.z, vect.w);
+                } else if(component === 2) {
+                    return Chalkboard.vect.new(vect.x, 0, vect.z, vect.w);
+                } else if(component === 3) {
+                    return Chalkboard.vect.new(vect.x, vect.y, 0, vect.w);
+                } else if(component === 4) {
+                    return Chalkboard.vect.new(vect.x, vect.y, vect.z);
+                }
+            }
+        },
+        fill: function(num, dimension) {
+            if(dimension === 2) {
+                return Chalkboard.vect.new(num, num);
+            } else if(dimension === 3) {
+                return Chalkboard.vect.new(num, num, num);
+            } else if(dimension === 4) {
+                return Chalkboard.vect.new(num, num, num, num);
+            }
+        },
+        empty: function(dimension) {
+            if(dimension === 2) {
+                return Chalkboard.vect.new(null, null);
+            } else if(dimension === 3) {
+                return Chalkboard.vect.new(null, null, null)
+            } else if(dimension === 4) {
+                return Chalkboard.vect.new(null, null, null, null);
+            }
+        },
+        random: function(inf, sup, dimension) {
+            if(dimension === 2) {
+                return Chalkboard.vect.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+            } else if(dimension === 3) {
+                return Chalkboard.vect.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+            } else if(dimension === 4) {
+                return Chalkboard.vect.new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+            }
+        },
+        mag: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.real.sqrt((vect.x * vect.x) + (vect.y * vect.y));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.real.sqrt((vect.x * vect.x) + (vect.y * vect.y) + (vect.z * vect.z));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.real.sqrt((vect.x * vect.x) + (vect.y * vect.y) + (vect.z * vect.z) + (vect.w * vect.w));
+            }
+        },
+        magsq: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return (vect.x * vect.x) + (vect.y * vect.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return (vect.x * vect.x) + (vect.y * vect.y) + (vect.z * vect.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return (vect.x * vect.x) + (vect.y * vect.y) + (vect.z * vect.z) + (vect.w * vect.w);
+            }
+        },
+        magset: function(vect, num) {
+            return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
+        },
+        normalize: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect))
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect), vect.w / Chalkboard.vect.mag(vect));
+            }
+        },
+        ang: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.trig.arctan2(vect.y, vect.x);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return [Math.acos(vect.x / Chalkboard.vect.mag(vect)), Math.acos(vect.y / Chalkboard.vect.mag(vect)), Math.acos(vect.z / Chalkboard.vect.mag(vect))];
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return [Math.acos(vect.x / Chalkboard.vect.mag(vect)), Math.acos(vect.y / Chalkboard.vect.mag(vect)), Math.acos(vect.z / Chalkboard.vect.mag(vect)), Math.acos(vect.w / Chalkboard.vect.mag(vect))];
+            }
+        },
+        angBetween: function(vect_1, vect_2) {
+            return Math.acos((Chalkboard.vect.dot(vect_1, vect_2)) / (Chalkboard.vect.mag(vect_1) * Chalkboard.vect.mag(vect_2)));
+        },
+        slope: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return vect.y / vect.x;
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return vect.z / Chalkboard.real.sqrt((vect.x * vect.x) + (vect.y * vect.y));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return vect.w / Chalkboard.real.sqrt((vect.x * vect.x) + (vect.y * vect.y) + (vect.z * vect.z));
+            }
+        },
+        zero: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect.x * 0, vect.y * 0);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect.x * 0, vect.y * 0, vect.z * 0);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect.x * 0, vect.y * 0, vect.z * 0, vect.w * 0);
+            }
+        },
+        negate: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(-vect.x, -vect.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(-vect.x, -vect.y, -vect.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(-vect.x, -vect.y, -vect.z, -vect.w);
+            }
+        },
+        reciprocate: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(1 / vect.x, 1 / vect.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(1 / vect.x, 1 / vect.y, 1 / vect.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(1 / vect.x, 1 / vect.y, 1 / vect.z, 1 / vect.w);
+            }
+        },
+        absolute: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(Math.abs(vect.x), Math.abs(vect.y));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z), Math.abs(vect.w));
+            }
+        },
+        round: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(Math.round(vect.x), Math.round(vect.y));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z), Math.round(vect.w));
+            }
+        },
+        dist: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)) + ((vect_2.w - vect_1.w) * (vect_2.w - vect_1.w)));
+            }
+        },
+        distsq: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)) + ((vect_2.w - vect_1.w) * (vect_2.w - vect_1.w));
+            }
+        },
+        scl: function(vect, num) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect.x * num, vect.y * num);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect.x * num, vect.y * num, vect.z * num);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect.x * num, vect.y * num, vect.z * num, vect.w * num);
+            }
+        },
+        constrain: function(vect, range) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range));
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range), Chalkboard.numb.constrain(vect.w, range));
+            }
+        },
+        add: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z, vect_1.w + vect_2.w);
+            }
+        },
+        sub: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z, vect_1.w - vect_2.w);
+            }
+        },
+        mul: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z, vect_1.w * vect_2.w);
+            }
+        },
+        dot: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y) + (vect_1.z * vect_2.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y) + (vect_1.z * vect_2.z) + (vect_1.w * vect_2.w);
+            }
+        },
+        cross: function(vect_1, vect_2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(0, 0, (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new((vect_1.y * vect_2.z) - (vect_1.z * vect_2.y), (vect_1.z * vect_2.x) - (vect_1.x * vect_2.z), (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
+            }
+        },
+        scalarTriple: function(vect_1, vect_2, vect_3) {
+            return Chalkboard.vect.dot(vect_1, Chalkboard.vect.cross(vect_2, vect_3));
+        },
+        vectorTriple: function(vect_1, vect_2, vect_3) {
+            return Chalkboard.vect.cross(vect_1, Chalkboard.vect.cross(vect_2, vect_3));
+        },
+        scalarQuadruple: function(vect_1, vect_2, vect_3, vect_4) {
+            return Chalkboard.vect.dot(Chalkboard.vect.cross(vect_1, vect_2), Chalkboard.vect.cross(vect_3, vect_4));
+        },
+        vectorQuadruple: function(vect_1, vect_2, vect_3, vect_4) {
+            return Chalkboard.vect.cross(Chalkboard.vect.cross(vect_1, vect_2), Chalkboard.vect.cross(vect_3, vect_4));
+        },
+        proj: function(vect_1, vect_2) {
+            return Chalkboard.vect.scl(vect_2, Chalkboard.vect.dot(vect_1, vect_2) / Chalkboard.vect.dot(vect_2, vect_2));
+        },
+        oproj: function(vect_1, vect_2) {
+            return Chalkboard.vect.sub(vect_1, Chalkboard.vect.proj(vect_1, vect_2));
+        },
+        reflect: function(vect_1, vect_2) {
+            return Chalkboard.vect.sub(vect_1, Chalkboard.vect.scl(vect_2, 2 * Chalkboard.vect.dot(vect_1, vect_2)));
+        },
+        refract: function(vect_1, vect_2, refractiveIndex) {
+            if(refractiveIndex > 0) {
+                var perp = Chalkboard.vect.scl(Chalkboard.vect.sub(vect_1, Chalkboard.vect.scl(vect_2, Chalkboard.vect.dot(vect_1, vect_2))), refractiveIndex);
+                var parr = Chalkboard.vect.scl(vect_2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vect.dot(vect_1, vect_2) * Chalkboard.vect.dot(vect_1, vect_2)))));
+                return Chalkboard.vect.add(perp, parr);
+            } else {
+                return undefined;
+            }
+        },
+        fromAngle: function(rad1, rad2) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
+            }
+        },
+        fromVector: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.vect.new(vect.x, vect.y, 0);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.vect.new(vect.x, vect.y, vect.z, 0);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.vect.new(vect.x, vect.y);
+            }
+        },
+        fromAlternateToCartesian: function(vect, type) {
+            if(type === "polar") {
+                return Chalkboard.vect.new(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
+            } else if(type === "bipolar") {
+                return Chalkboard.vect.new((vect.x * vect.x - vect.y * vect.y) / 4, Chalkboard.real.sqrt(16 * vect.x * vect.x - (vect.x * vect.x - vect.y * vect.y + 4) * (vect.x * vect.x - vect.y * vect.y + 4)));
+            } else if(type === "cylindrical") {
+                return Chalkboard.vect.new(vect.x * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.y), vect.z);
+            } else if(type === "spherical") {
+                return Chalkboard.vect.new(vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z));
+            } else {
+                return "TypeError: Parameter \"type\" must be either \"polar\", \"bipolar\", \"cylindrical\", or \"spherical\".";
+            }
+        },
+        fromCartesianToAlternate: function(vect, type) {
+            if(type === "polar") {
+                return Chalkboard.vect.new(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect));
+            } else if(type === "bipolar") {
+                return Chalkboard.vect.new((vect.x + 1) * (vect.x + 1) + (vect.y * vect.y), (vect.x - 1) * (vect.x - 1) + (vect.y * vect.y));
+            } else if(type === "cylindrical") {
+                return Chalkboard.vect.new(Chalkboard.vect.mag(Chalkboard.vect.new(vect.x, vect.y)), Chalkboard.vect.ang(Chalkboard.vect.new(vect.x, vect.y)), vect.z);
+            } else if(type === "spherical") {
+                return Chalkboard.vect.new(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect.new(vect.x, vect.y)), Chalkboard.vect.ang(vect)[2]);
+            } else {
+                return "TypeError: Parameter \"type\" must be either \"polar\", \"bipolar\", \"cylindrical\", or \"spherical\".";
+            }
+        },
+        toComplex: function(vect) {
+            return Chalkboard.comp.new(vect.x, vect.y);
+        },
+        toQuaternion: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.quat.new(vect.x, vect.y, 0, 0);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.quat.new(0, vect.x, vect.y, vect.z);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.quat.new(vect.x, vect.y, vect.z, vect.w);
+            }
+        },
+        toMatrix: function(vect, type) {
+            type = type || "col";
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                if(type === "col") {
+                    return Chalkboard.matr.new([vect.x], [vect.y]);
+                } else if(type === "row") {
+                    return Chalkboard.matr.new([vect.x, vect.y]);
+                } else {
+                    return "TypeError: Parameter \"type\" must be either \"row\" or \"col\".";
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                if(type === "col") {
+                    return Chalkboard.matr.new([vect.x], [vect.y], [vect.z]);
+                } else if(type === "row") {
+                    return Chalkboard.matr.new([vect.x, vect.y, vect.z]);
+                } else {
+                    return "TypeError: Parameter \"type\" must be either \"row\" or \"col\".";
+                }
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                if(type === "col") {
+                    return Chalkboard.matr.new([vect.x], [vect.y], [vect.z], [vect.w]);
+                } else if(type === "row") {
+                    return Chalkboard.matr.new([vect.x, vect.y, vect.z, vect.w]);
+                } else {
+                    return "TypeError: Parameter \"type\" must be either \"row\" or \"col\".";
+                }
+            }
+        },
+        toTensor: function(vect, size) {
+            if(!Array.isArray(size)) {
+                size = Array.from(arguments).slice(1);
+            }
+            return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), size);
+        },
+        toArray: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return [vect.x, vect.y];
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return [vect.x, vect.y, vect.z];
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return [vect.x, vect.y, vect.z, vect.w];
+            }
+        },
+        toString: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ")";;
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ", " + vect.w.toString() + ")";
+            }
+        },
+        print: function(vect) {
+            console.log(Chalkboard.vect.toString(vect));
         }
     },
     matr: {
@@ -3248,24 +3222,22 @@ var Chalkboard = {
             }
             return result;
         },
-        scaler: function(vec) {
-            if(vec.type === "vec2") {
-                return Chalkboard.matr.new([vec.x, 0], [0, vec.y]);
-            } else if(vec.type === "vec3") {
-                return Chalkboard.matr.new([vec.x, 0, 0], [0, vec.y, 0], [0, 0, vec.z]);
-            } else if(vec.type === "vec4") {
-                return Chalkboard.matr.new([vec.x, 0, 0, 0], [0, vec.y, 0, 0], [0, 0, vec.z, 0], [0, 0, 0, vec.w]);
+        scaler: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.matr.new([vect.x, 0], [0, vect.y]);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.matr.new([vect.x, 0, 0], [0, vect.y, 0], [0, 0, vect.z]);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.matr.new([vect.x, 0, 0, 0], [0, vect.y, 0, 0], [0, 0, vect.z, 0], [0, 0, 0, vect.w]);
             }
         },
-        translator: function(vec) {
-            if(vec.type === "vec2") {
-                return Chalkboard.matr.new([1, 0, vec.x], [0, 1, vec.y], [0, 0, 1]);
-            } else if(vec.type === "vec3") {
-                return Chalkboard.matr.new([1, 0, 0, vec.x], [0, 1, 0, vec.y], [0, 0, 1, vec.z], [0, 0, 0, 1]);
-            } else if(vec.type === "vec4") {
-                return Chalkboard.matr.new([1, 0, 0, 0, vec.x], [0, 1, 0, 0, vec.y], [0, 0, 1, 0, vec.z], [0, 0, 0, 1, vec.w], [0, 0, 0, 0, 1]);
-            } else {
-                return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
+        translator: function(vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
+                return Chalkboard.matr.new([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
+                return Chalkboard.matr.new([1, 0, 0, vect.x], [0, 1, 0, vect.y], [0, 0, 1, vect.z], [0, 0, 0, 1]);
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
+                return Chalkboard.matr.new([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             }
         },
         rotator: function(radx, rady, radz) {
@@ -3365,27 +3337,25 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        mulvec: function(matr, vec) {
-            if(vec.type === "vec2") {
+        mulVector: function(matr, vect) {
+            if(Chalkboard.vect.dimension(vect) === 2) {
                 if(Chalkboard.matr.rows(matr) === 2) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec)), "vec2");
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
                 } else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
-            } else if(vec.type === "vec3") {
+            } else if(Chalkboard.vect.dimension(vect) === 3) {
                 if(Chalkboard.matr.rows(matr) === 3) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec3.toMatrix(vec)), "vec3");
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 3);
                 } else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
-            } else if(vec.type === "vec4") {
+            } else if(Chalkboard.vect.dimension(vect) === 4) {
                 if(Chalkboard.matr.rows(matr) === 4) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vec4.toMatrix(vec)), "vec4");
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 4);
                 } else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vec2.toMatrix(vec));
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
-            } else {
-                return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
         pow: function(matr, num) {
@@ -3481,36 +3451,34 @@ var Chalkboard = {
                 return undefined;
             }
         },
-        toVector: function(matr, vec, type, rowORcol) {
+        toVector: function(matr, dimension, type, rowORcol) {
             type = type || "col";
             rowORcol = rowORcol || 1;
             rowORcol -= 1;
-            if(vec === "vec2") {
+            if(dimension === 2) {
                 if(type === "col") {
-                    return Chalkboard.vec2.new(matr[0][rowORcol], matr[1][rowORcol]);
+                    return Chalkboard.vect.new(matr[0][rowORcol], matr[1][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vec2.new(matr[rowORcol][0], matr[rowORcol][1]);
+                    return Chalkboard.vect.new(matr[rowORcol][0], matr[rowORcol][1]);
                 } else {
                     return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
                 }
-            } else if(vec === "vec3") {
+            } else if(dimension === 3) {
                 if(type === "col") {
-                    return Chalkboard.vec3.new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
+                    return Chalkboard.vect.new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vec3.new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
+                    return Chalkboard.vect.new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
                 } else {
                     return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
                 }
-            } else if(vec === "vec4") {
+            } else if(dimension === 4) {
                 if(type === "col") {
-                    return Chalkboard.vec4.new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
+                    return Chalkboard.vect.new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vec4.new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
+                    return Chalkboard.vect.new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
                 } else {
                     return "TypeError: Parameter \"type\" should be \"row\" or \"col\".";
                 }
-            } else {
-                return "TypeError: Parameter \"vec\" should be \"vec2\", \"vec3\", or \"vec4\".";
             }
         },
         toTensor: function(matr, size) {
@@ -3835,17 +3803,15 @@ var Chalkboard = {
                 return tens_1 * tens_2;
             }
         },
-        toVector: function(tens, type, index) {
+        toVector: function(tens, dimension, index) {
             if(index === undefined) { index = 0; }
             var arr = Chalkboard.tens.toArray(tens);
-            if(type === "vec2") {
-                return Chalkboard.vec2.new(arr[index], arr[index + 1]);
-            } else if(type === "vec3") {
-                return Chalkboard.vec3.new(arr[index], arr[index + 1], arr[index + 2]);
-            } else if(type === "vec4") {
-                return Chalkboard.vec4.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
-            } else {
-                return "TypeError: Parameter \"type\" should be \"vec2\", \"vec3\", or \"vec4\".";
+            if(dimension === 2) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1]);
+            } else if(dimension === 3) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1], arr[index + 2]);
+            } else if(dimension === 4) {
+                return Chalkboard.vect.new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             }
         },
         toMatrix: function(tens) {
@@ -3959,12 +3925,12 @@ var Chalkboard = {
                 if(func.definition.length === 2) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vec2.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
+                    return Chalkboard.vect.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
                 } else if(func.definition.length === 3) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vec3.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h, (z(val + h) - z(val)) / h);
+                    return Chalkboard.vect.new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h, (z(val + h) - z(val)) / h);
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"inve\", \"pola\", or \"curv\".";
@@ -3985,12 +3951,12 @@ var Chalkboard = {
                 if(func.definition.length === 2) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vec2.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h));
+                    return Chalkboard.vect.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h));
                 } else if(func.definition.length === 3) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vec3.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h), (z(val + h) - 2 * z(val) + z(val - h)) / (h * h));
+                    return Chalkboard.vect.new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h), (z(val + h) - 2 * z(val) + z(val - h)) / (h * h));
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"inve\", \"pola\", or \"curv\".";
@@ -3999,9 +3965,9 @@ var Chalkboard = {
         tangent: function(func, val) {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
-                    return Chalkboard.vec2.normalize(Chalkboard.calc.dfdx(func, val));
+                    return Chalkboard.vect.normalize(Chalkboard.calc.dfdx(func, val));
                 } else if(func.definition.length === 3) {
-                    return Chalkboard.vec3.normalize(Chalkboard.calc.dfdx(func, val));
+                    return Chalkboard.vect.normalize(Chalkboard.calc.dfdx(func, val));
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
@@ -4010,9 +3976,9 @@ var Chalkboard = {
         normal: function(func, val) {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
-                    return Chalkboard.vec2.normalize(Chalkboard.calc.d2fdx2(func, val));
+                    return Chalkboard.vect.normalize(Chalkboard.calc.d2fdx2(func, val));
                 } else if(func.definition.length === 3) {
-                    return Chalkboard.vec3.normalize(Chalkboard.calc.d2fdx2(func, val));
+                    return Chalkboard.vect.normalize(Chalkboard.calc.d2fdx2(func, val));
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
@@ -4021,17 +3987,17 @@ var Chalkboard = {
         binormal: function(func, val) {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
-                    return Chalkboard.vec2.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
+                    return Chalkboard.vect.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
                 } else if(func.definition.length === 3) {
-                    return Chalkboard.vec3.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
+                    return Chalkboard.vect.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
             }
         },
-        dfdv: function(func, vec2_pos, vec2_dir) {
+        dfdv: function(func, vect_pos, vect_dir) {
             if(func.type === "mult") {
-                return Chalkboard.vec2.dot(Chalkboard.calc.grad(func, vec2_pos), Chalkboard.vec2.normalize(vec2_dir));
+                return Chalkboard.vect.dot(Chalkboard.calc.grad(func, vect_pos), Chalkboard.vect.normalize(vect_dir));
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"mult\".";
             }
@@ -4053,185 +4019,181 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func_1\" must be of type \"mult\".";
             }
         },
-        grad: function(funcORvecfield, vec) {
+        grad: function(funcORvectfield, vect) {
             var h = 0.000000001;
-            if(funcORvecfield.type === "surf") {
-                var x = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[0]),
-                    y = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[1]),
-                    z = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[2]);
-                var dxds = (x(vec.x + h, vec.y) - x(vec.x, vec.y)) / h,
-                    dxdt = (x(vec.x, vec.y + h) - x(vec.x, vec.y)) / h,
-                    dyds = (y(vec.x + h, vec.y) - y(vec.x, vec.y)) / h,
-                    dydt = (y(vec.x, vec.y + h) - y(vec.x, vec.y)) / h,
-                    dzds = (z(vec.x + h, vec.y) - z(vec.x, vec.y)) / h, 
-                    dzdt = (z(vec.x, vec.y + h) - z(vec.x, vec.y)) / h;
+            if(funcORvectfield.type === "surf") {
+                var x = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[0]),
+                    y = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[1]),
+                    z = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[2]);
+                var dxds = (x(vect.x + h, vect.y) - x(vect.x, vect.y)) / h,
+                    dxdt = (x(vect.x, vect.y + h) - x(vect.x, vect.y)) / h,
+                    dyds = (y(vect.x + h, vect.y) - y(vect.x, vect.y)) / h,
+                    dydt = (y(vect.x, vect.y + h) - y(vect.x, vect.y)) / h,
+                    dzds = (z(vect.x + h, vect.y) - z(vect.x, vect.y)) / h, 
+                    dzdt = (z(vect.x, vect.y + h) - z(vect.x, vect.y)) / h;
                 return Chalkboard.matr.new([dxds, dxdt],
                                            [dyds, dydt],
                                            [dzds, dzdt]);
-            } else if(funcORvecfield.type === "mult") {
-                var f = Chalkboard.real.parse("(x, y) => " + funcORvecfield.definition);
-                var dfdx = (f(vec.x + h, vec.y) - f(vec.x, vec.y)) / h,
-                    dfdy = (f(vec.x, vec.y + h) - f(vec.x, vec.y)) / h;
-                return Chalkboard.vec2.new(dfdx, dfdy);
-            } else if(funcORvecfield.type === "vec2field") {
-                var p = Chalkboard.real.parse("(x, y) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y) => " + funcORvecfield.q);
-                var dpdx = (p(vec.x + h, vec.y) - p(vec.x, vec.y)) / h,
-                    dpdy = (p(vec.x, vec.y + h) - p(vec.x, vec.y)) / h,
-                    dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h,
-                    dqdy = (q(vec.x, vec.y + h) - q(vec.x, vec.y)) / h;
+            } else if(funcORvectfield.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + funcORvectfield.definition);
+                var dfdx = (f(vect.x + h, vect.y) - f(vect.x, vect.y)) / h,
+                    dfdy = (f(vect.x, vect.y + h) - f(vect.x, vect.y)) / h;
+                return Chalkboard.vect.new(dfdx, dfdy);
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 2) {
+                var p = Chalkboard.real.parse("(x, y) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + funcORvectfield.q);
+                var dpdx = (p(vect.x + h, vect.y) - p(vect.x, vect.y)) / h,
+                    dpdy = (p(vect.x, vect.y + h) - p(vect.x, vect.y)) / h,
+                    dqdx = (q(vect.x + h, vect.y) - q(vect.x, vect.y)) / h,
+                    dqdy = (q(vect.x, vect.y + h) - q(vect.x, vect.y)) / h;
                 return Chalkboard.matr.new([dpdx, dpdy],
                                            [dqdx, dqdy]);
-            } else if(funcORvecfield.type === "vec3field") {
-                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.r);
-                var dpdx = (p(vec.x + h, vec.y, vec.z) - p(vec.x, vec.y, vec.z)) / h,
-                    dpdy = (p(vec.x, vec.y + h, vec.z) - p(vec.x, vec.y, vec.z)) / h,
-                    dpdz = (p(vec.x, vec.y, vec.z + h) - p(vec.x, vec.y, vec.z)) / h,
-                    dqdx = (q(vec.x + h, vec.y, vec.z) - q(vec.x, vec.y, vec.z)) / h,
-                    dqdy = (q(vec.x, vec.y + h, vec.z) - q(vec.x, vec.y, vec.z)) / h,
-                    dqdz = (q(vec.x, vec.y, vec.z + h) - q(vec.x, vec.y, vec.z)) / h,
-                    drdx = (r(vec.x + h, vec.y, vec.z) - r(vec.x, vec.y, vec.z)) / h,
-                    drdy = (r(vec.x, vec.y + h, vec.z) - r(vec.x, vec.y, vec.z)) / h,
-                    drdz = (r(vec.x, vec.y, vec.z + h) - r(vec.x, vec.y, vec.z)) / h;
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 3) {
+                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.r);
+                var dpdx = (p(vect.x + h, vect.y, vect.z) - p(vect.x, vect.y, vect.z)) / h,
+                    dpdy = (p(vect.x, vect.y + h, vect.z) - p(vect.x, vect.y, vect.z)) / h,
+                    dpdz = (p(vect.x, vect.y, vect.z + h) - p(vect.x, vect.y, vect.z)) / h,
+                    dqdx = (q(vect.x + h, vect.y, vect.z) - q(vect.x, vect.y, vect.z)) / h,
+                    dqdy = (q(vect.x, vect.y + h, vect.z) - q(vect.x, vect.y, vect.z)) / h,
+                    dqdz = (q(vect.x, vect.y, vect.z + h) - q(vect.x, vect.y, vect.z)) / h,
+                    drdx = (r(vect.x + h, vect.y, vect.z) - r(vect.x, vect.y, vect.z)) / h,
+                    drdy = (r(vect.x, vect.y + h, vect.z) - r(vect.x, vect.y, vect.z)) / h,
+                    drdz = (r(vect.x, vect.y, vect.z + h) - r(vect.x, vect.y, vect.z)) / h;
                 return Chalkboard.matr.new([dpdx, dpdy, dpdz],
                                            [dqdx, dqdy, dqdz],
                                            [drdx, drdy, drdz]);
-            } else if(funcORvecfield.type === "vec4field") {
-                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.r),
-                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.s);
-                var dpdx = (p(vec.x + h, vec.y, vec.z, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dpdy = (p(vec.x, vec.y + h, vec.z, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dpdz = (p(vec.x, vec.y, vec.z + h, vec.w) - p(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dpdw = (p(vec.x, vec.y, vec.z, vec.w + h) - p(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dqdx = (q(vec.x + h, vec.y, vec.z, vec.w) - q(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dqdy = (q(vec.x, vec.y + h, vec.z, vec.w) - q(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dqdz = (q(vec.x, vec.y, vec.z + h, vec.w) - q(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dqdw = (q(vec.x, vec.y, vec.z, vec.w + h) - q(vec.x, vec.y, vec.z, vec.w)) / h,
-                    drdx = (r(vec.x + h, vec.y, vec.z, vec.w) - r(vec.x, vec.y, vec.z, vec.w)) / h,
-                    drdy = (r(vec.x, vec.y + h, vec.z, vec.w) - r(vec.x, vec.y, vec.z, vec.w)) / h,
-                    drdz = (r(vec.x, vec.y, vec.z + h, vec.w) - r(vec.x, vec.y, vec.z, vec.w)) / h,
-                    drdw = (r(vec.x, vec.y, vec.z, vec.w + h) - r(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dsdx = (s(vec.x + h, vec.y, vec.z, vec.w) - s(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dsdy = (s(vec.x, vec.y + h, vec.z, vec.w) - s(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dsdz = (s(vec.x, vec.y, vec.z + h, vec.w) - s(vec.x, vec.y, vec.z, vec.w)) / h,
-                    dsdw = (s(vec.x, vec.y, vec.z, vec.w + h) - s(vec.x, vec.y, vec.z, vec.w)) / h;
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 4) {
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.r),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.s);
+                var dpdx = (p(vect.x + h, vect.y, vect.z, vect.w) - p(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dpdy = (p(vect.x, vect.y + h, vect.z, vect.w) - p(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dpdz = (p(vect.x, vect.y, vect.z + h, vect.w) - p(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dpdw = (p(vect.x, vect.y, vect.z, vect.w + h) - p(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dqdx = (q(vect.x + h, vect.y, vect.z, vect.w) - q(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dqdy = (q(vect.x, vect.y + h, vect.z, vect.w) - q(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dqdz = (q(vect.x, vect.y, vect.z + h, vect.w) - q(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dqdw = (q(vect.x, vect.y, vect.z, vect.w + h) - q(vect.x, vect.y, vect.z, vect.w)) / h,
+                    drdx = (r(vect.x + h, vect.y, vect.z, vect.w) - r(vect.x, vect.y, vect.z, vect.w)) / h,
+                    drdy = (r(vect.x, vect.y + h, vect.z, vect.w) - r(vect.x, vect.y, vect.z, vect.w)) / h,
+                    drdz = (r(vect.x, vect.y, vect.z + h, vect.w) - r(vect.x, vect.y, vect.z, vect.w)) / h,
+                    drdw = (r(vect.x, vect.y, vect.z, vect.w + h) - r(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dsdx = (s(vect.x + h, vect.y, vect.z, vect.w) - s(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dsdy = (s(vect.x, vect.y + h, vect.z, vect.w) - s(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dsdz = (s(vect.x, vect.y, vect.z + h, vect.w) - s(vect.x, vect.y, vect.z, vect.w)) / h,
+                    dsdw = (s(vect.x, vect.y, vect.z, vect.w + h) - s(vect.x, vect.y, vect.z, vect.w)) / h;
                 return Chalkboard.matr.new([dpdx, dpdy, dpdz, dpdw],
                                            [dqdx, dqdy, dqdz, dqdw],
                                            [drdx, drdy, drdz, drdw],
                                            [dsdx, dsdy, dsdz, dsdw]);
             } else {
-                return "TypeError: Parameter \"funcORvecfield\" must be of type \"surf\", \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
+                return "TypeError: Parameter \"funcORvectfield\" must be of type \"surf\", \"mult\", or \"vectfield\".";
             }
         },
-        grad2: function(funcORvecfield, vec) {
+        grad2: function(funcORvectfield, vect) {
             var h = 0.00001;
-            if(funcORvecfield.type === "surf") {
-                var x = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[0]),
-                    y = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[1]),
-                    z = Chalkboard.real.parse("(s, t) => " + funcORvecfield.definition[2]);
-                var d2xds2 = (x(vec.x + h, vec.y) - 2 * x(vec.x, vec.y) + x(vec.x - h, vec.y)) / (h * h),
-                    d2xdt2 = (x(vec.x, vec.y + h) - 2 * x(vec.x, vec.y) + x(vec.x, vec.y - h)) / (h * h),
-                    d2yds2 = (y(vec.x + h, vec.y) - 2 * y(vec.x, vec.y) + y(vec.x - h, vec.y)) / (h * h),
-                    d2ydt2 = (y(vec.x, vec.y + h) - 2 * y(vec.x, vec.y) + y(vec.x, vec.y - h)) / (h * h),
-                    d2zds2 = (z(vec.x + h, vec.y) - 2 * z(vec.x, vec.y) + z(vec.x - h, vec.y)) / (h * h), 
-                    d2zdt2 = (z(vec.x, vec.y + h) - 2 * z(vec.x, vec.y) + z(vec.x, vec.y - h)) / (h * h);
+            if(funcORvectfield.type === "surf") {
+                var x = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[0]),
+                    y = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[1]),
+                    z = Chalkboard.real.parse("(s, t) => " + funcORvectfield.definition[2]);
+                var d2xds2 = (x(vect.x + h, vect.y) - 2 * x(vect.x, vect.y) + x(vect.x - h, vect.y)) / (h * h),
+                    d2xdt2 = (x(vect.x, vect.y + h) - 2 * x(vect.x, vect.y) + x(vect.x, vect.y - h)) / (h * h),
+                    d2yds2 = (y(vect.x + h, vect.y) - 2 * y(vect.x, vect.y) + y(vect.x - h, vect.y)) / (h * h),
+                    d2ydt2 = (y(vect.x, vect.y + h) - 2 * y(vect.x, vect.y) + y(vect.x, vect.y - h)) / (h * h),
+                    d2zds2 = (z(vect.x + h, vect.y) - 2 * z(vect.x, vect.y) + z(vect.x - h, vect.y)) / (h * h), 
+                    d2zdt2 = (z(vect.x, vect.y + h) - 2 * z(vect.x, vect.y) + z(vect.x, vect.y - h)) / (h * h);
                 return Chalkboard.matr.new([d2xds2, d2xdt2],
                                            [d2yds2, d2ydt2],
                                            [d2zds2, d2zdt2]);
-            } else if(funcORvecfield.type === "mult") {
-                var f = Chalkboard.real.parse("(x, y) => " + funcORvecfield.definition);
-                var d2fdx2 = (f(vec.x + h, vec.y) - 2 * f(vec.x, vec.y) + f(vec.x - h, vec.y)) / (h * h),
-                    d2fdy2 = (f(vec.x, vec.y + h) - 2 * f(vec.x, vec.y) + f(vec.x, vec.y - h)) / (h * h),
-                    d2fdxdy = (f(vec.x + h, vec.y + h) - f(vec.x + h, vec.y) - f(vec.x, vec.y + h) + f(vec.x, vec.y)) / (h * h),
-                    d2fdydx = (f(vec.x + h, vec.y + h) - f(vec.x, vec.y + h) - f(vec.x + h, vec.y) + f(vec.x, vec.y)) / (h * h);
+            } else if(funcORvectfield.type === "mult") {
+                var f = Chalkboard.real.parse("(x, y) => " + funcORvectfield.definition);
+                var d2fdx2 = (f(vect.x + h, vect.y) - 2 * f(vect.x, vect.y) + f(vect.x - h, vect.y)) / (h * h),
+                    d2fdy2 = (f(vect.x, vect.y + h) - 2 * f(vect.x, vect.y) + f(vect.x, vect.y - h)) / (h * h),
+                    d2fdxdy = (f(vect.x + h, vect.y + h) - f(vect.x + h, vect.y) - f(vect.x, vect.y + h) + f(vect.x, vect.y)) / (h * h),
+                    d2fdydx = (f(vect.x + h, vect.y + h) - f(vect.x, vect.y + h) - f(vect.x + h, vect.y) + f(vect.x, vect.y)) / (h * h);
                 return Chalkboard.matr.new([d2fdx2, d2fdxdy],
                                            [d2fdydx, d2fdy2]);
-            } else if(funcORvecfield.type === "vec2field") {
-                var p = Chalkboard.real.parse("(x, y) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y) => " + funcORvecfield.q);
-                var d2pdx2 = (p(vec.x + h, vec.y) - 2 * p(vec.x, vec.y) + p(vec.x - h, vec.y)) / (h * h),
-                    d2pdy2 = (p(vec.x, vec.y + h) - 2 * p(vec.x, vec.y) + p(vec.x, vec.y - h)) / (h * h),
-                    d2qdx2 = (q(vec.x + h, vec.y) - 2 * q(vec.x, vec.y) + q(vec.x - h, vec.y)) / (h * h),
-                    d2qdy2 = (q(vec.x, vec.y + h) - 2 * q(vec.x, vec.y) + q(vec.x, vec.y - h)) / (h * h);
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 2) {
+                var p = Chalkboard.real.parse("(x, y) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + funcORvectfield.q);
+                var d2pdx2 = (p(vect.x + h, vect.y) - 2 * p(vect.x, vect.y) + p(vect.x - h, vect.y)) / (h * h),
+                    d2pdy2 = (p(vect.x, vect.y + h) - 2 * p(vect.x, vect.y) + p(vect.x, vect.y - h)) / (h * h),
+                    d2qdx2 = (q(vect.x + h, vect.y) - 2 * q(vect.x, vect.y) + q(vect.x - h, vect.y)) / (h * h),
+                    d2qdy2 = (q(vect.x, vect.y + h) - 2 * q(vect.x, vect.y) + q(vect.x, vect.y - h)) / (h * h);
                 return Chalkboard.matr.new([d2pdx2, d2pdy2],
                                            [d2qdx2, d2qdy2]);
-            } else if(funcORvecfield.type === "vec3field") {
-                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvecfield.r);
-                var d2pdx2 = (p(vec.x + h, vec.y, vec.z) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x - h, vec.y, vec.z)) / (h * h),
-                    d2pdy2 = (p(vec.x, vec.y + h, vec.z) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x, vec.y - h, vec.z)) / (h * h),
-                    d2pdz2 = (p(vec.x, vec.y, vec.z + h) - 2 * p(vec.x, vec.y, vec.z) + p(vec.x, vec.y, vec.z - h)) / (h * h),
-                    d2qdx2 = (q(vec.x + h, vec.y, vec.z) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x - h, vec.y, vec.z)) / (h * h),
-                    d2qdy2 = (q(vec.x, vec.y + h, vec.z) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x, vec.y - h, vec.z)) / (h * h),
-                    d2qdz2 = (q(vec.x, vec.y, vec.z + h) - 2 * q(vec.x, vec.y, vec.z) + q(vec.x, vec.y, vec.z - h)) / (h * h),
-                    d2rdx2 = (r(vec.x + h, vec.y, vec.z) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x - h, vec.y, vec.z)) / (h * h),
-                    d2rdy2 = (r(vec.x, vec.y + h, vec.z) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x, vec.y - h, vec.z)) / (h * h),
-                    d2rdz2 = (r(vec.x, vec.y, vec.z + h) - 2 * r(vec.x, vec.y, vec.z) + r(vec.x, vec.y, vec.z - h)) / (h * h);
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 3) {
+                var p = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + funcORvectfield.r);
+                var d2pdx2 = (p(vect.x + h, vect.y, vect.z) - 2 * p(vect.x, vect.y, vect.z) + p(vect.x - h, vect.y, vect.z)) / (h * h),
+                    d2pdy2 = (p(vect.x, vect.y + h, vect.z) - 2 * p(vect.x, vect.y, vect.z) + p(vect.x, vect.y - h, vect.z)) / (h * h),
+                    d2pdz2 = (p(vect.x, vect.y, vect.z + h) - 2 * p(vect.x, vect.y, vect.z) + p(vect.x, vect.y, vect.z - h)) / (h * h),
+                    d2qdx2 = (q(vect.x + h, vect.y, vect.z) - 2 * q(vect.x, vect.y, vect.z) + q(vect.x - h, vect.y, vect.z)) / (h * h),
+                    d2qdy2 = (q(vect.x, vect.y + h, vect.z) - 2 * q(vect.x, vect.y, vect.z) + q(vect.x, vect.y - h, vect.z)) / (h * h),
+                    d2qdz2 = (q(vect.x, vect.y, vect.z + h) - 2 * q(vect.x, vect.y, vect.z) + q(vect.x, vect.y, vect.z - h)) / (h * h),
+                    d2rdx2 = (r(vect.x + h, vect.y, vect.z) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x - h, vect.y, vect.z)) / (h * h),
+                    d2rdy2 = (r(vect.x, vect.y + h, vect.z) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x, vect.y - h, vect.z)) / (h * h),
+                    d2rdz2 = (r(vect.x, vect.y, vect.z + h) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x, vect.y, vect.z - h)) / (h * h);
                 return Chalkboard.matr.new([d2pdx2, d2pdy2, d2pdz2],
                                            [d2qdx2, d2qdy2, d2qdz2],
                                            [d2rdx2, d2rdy2, d2rdz2]);
-            } else if(funcORvecfield.type === "vec4field") {
-                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.r),
-                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvecfield.s);
-                var d2pdx2 = (p(vec.x + h, vec.y, vec.z, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
-                    d2pdy2 = (p(vec.x, vec.y + h, vec.z, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
-                    d2pdz2 = (p(vec.x, vec.y, vec.z + h, vec.w) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
-                    d2pdw2 = (p(vec.x, vec.y, vec.z, vec.w + h) - 2 * p(vec.x, vec.y, vec.z, vec.w) + p(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
-                    d2qdx2 = (q(vec.x + h, vec.y, vec.z, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
-                    d2qdy2 = (q(vec.x, vec.y + h, vec.z, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
-                    d2qdz2 = (q(vec.x, vec.y, vec.z + h, vec.w) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
-                    d2qdw2 = (q(vec.x, vec.y, vec.z, vec.w + h) - 2 * q(vec.x, vec.y, vec.z, vec.w) + q(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
-                    d2rdx2 = (r(vec.x + h, vec.y, vec.z, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
-                    d2rdy2 = (r(vec.x, vec.y + h, vec.z, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
-                    d2rdz2 = (r(vec.x, vec.y, vec.z + h, vec.w) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
-                    d2rdw2 = (r(vec.x, vec.y, vec.z, vec.w + h) - 2 * r(vec.x, vec.y, vec.z, vec.w) + r(vec.x, vec.y, vec.z, vec.w - h)) / (h * h),
-                    d2sdx2 = (s(vec.x + h, vec.y, vec.z, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x - h, vec.y, vec.z, vec.w)) / (h * h),
-                    d2sdy2 = (s(vec.x, vec.y + h, vec.z, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y - h, vec.z, vec.w)) / (h * h),
-                    d2sdz2 = (s(vec.x, vec.y, vec.z + h, vec.w) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y, vec.z - h, vec.w)) / (h * h),
-                    d2sdw2 = (s(vec.x, vec.y, vec.z, vec.w + h) - 2 * s(vec.x, vec.y, vec.z, vec.w) + s(vec.x, vec.y, vec.z, vec.w - h)) / (h * h);
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 4) {
+                var p = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.r),
+                    s = Chalkboard.real.parse("(x, y, z, w) => " + funcORvectfield.s);
+                var d2pdx2 = (p(vect.x + h, vect.y, vect.z, vect.w) - 2 * p(vect.x, vect.y, vect.z, vect.w) + p(vect.x - h, vect.y, vect.z, vect.w)) / (h * h),
+                    d2pdy2 = (p(vect.x, vect.y + h, vect.z, vect.w) - 2 * p(vect.x, vect.y, vect.z, vect.w) + p(vect.x, vect.y - h, vect.z, vect.w)) / (h * h),
+                    d2pdz2 = (p(vect.x, vect.y, vect.z + h, vect.w) - 2 * p(vect.x, vect.y, vect.z, vect.w) + p(vect.x, vect.y, vect.z - h, vect.w)) / (h * h),
+                    d2pdw2 = (p(vect.x, vect.y, vect.z, vect.w + h) - 2 * p(vect.x, vect.y, vect.z, vect.w) + p(vect.x, vect.y, vect.z, vect.w - h)) / (h * h),
+                    d2qdx2 = (q(vect.x + h, vect.y, vect.z, vect.w) - 2 * q(vect.x, vect.y, vect.z, vect.w) + q(vect.x - h, vect.y, vect.z, vect.w)) / (h * h),
+                    d2qdy2 = (q(vect.x, vect.y + h, vect.z, vect.w) - 2 * q(vect.x, vect.y, vect.z, vect.w) + q(vect.x, vect.y - h, vect.z, vect.w)) / (h * h),
+                    d2qdz2 = (q(vect.x, vect.y, vect.z + h, vect.w) - 2 * q(vect.x, vect.y, vect.z, vect.w) + q(vect.x, vect.y, vect.z - h, vect.w)) / (h * h),
+                    d2qdw2 = (q(vect.x, vect.y, vect.z, vect.w + h) - 2 * q(vect.x, vect.y, vect.z, vect.w) + q(vect.x, vect.y, vect.z, vect.w - h)) / (h * h),
+                    d2rdx2 = (r(vect.x + h, vect.y, vect.z, vect.w) - 2 * r(vect.x, vect.y, vect.z, vect.w) + r(vect.x - h, vect.y, vect.z, vect.w)) / (h * h),
+                    d2rdy2 = (r(vect.x, vect.y + h, vect.z, vect.w) - 2 * r(vect.x, vect.y, vect.z, vect.w) + r(vect.x, vect.y - h, vect.z, vect.w)) / (h * h),
+                    d2rdz2 = (r(vect.x, vect.y, vect.z + h, vect.w) - 2 * r(vect.x, vect.y, vect.z, vect.w) + r(vect.x, vect.y, vect.z - h, vect.w)) / (h * h),
+                    d2rdw2 = (r(vect.x, vect.y, vect.z, vect.w + h) - 2 * r(vect.x, vect.y, vect.z, vect.w) + r(vect.x, vect.y, vect.z, vect.w - h)) / (h * h),
+                    d2sdx2 = (s(vect.x + h, vect.y, vect.z, vect.w) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x - h, vect.y, vect.z, vect.w)) / (h * h),
+                    d2sdy2 = (s(vect.x, vect.y + h, vect.z, vect.w) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y - h, vect.z, vect.w)) / (h * h),
+                    d2sdz2 = (s(vect.x, vect.y, vect.z + h, vect.w) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y, vect.z - h, vect.w)) / (h * h),
+                    d2sdw2 = (s(vect.x, vect.y, vect.z, vect.w + h) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y, vect.z, vect.w - h)) / (h * h);
                 return Chalkboard.matr.new([d2pdx2, d2pdy2, d2pdz2, d2pdw2],
                                            [d2qdx2, d2qdy2, d2qdz2, d2qdw2],
                                            [d2rdx2, d2rdy2, d2rdz2, d2rdw2],
                                            [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
             } else {
-                return "TypeError: Parameter \"funcORvecfield\" must be of type \"surf\", \"mult\", \"vec2field\", \"vec3field\", or \"vec4field\".";
+                return "TypeError: Parameter \"funcORvectfield\" must be of type \"surf\", \"mult\", or \"vectfield\".";
             }
         },
-        div: function(vecfield, vec) {
-            if(vecfield.type === "vec2field" || vecfield.type === "vec3field" || vecfield.type === "vec4field") {
-                return Chalkboard.matr.trace(Chalkboard.calc.grad(vecfield, vec));
-            } else {
-                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\", \"vec3field\", or \"vec4field\".";
+        div: function(vectfield, vect) {
+            if(Chalkboard.vect.dimension(funcORvectfield) === 2 || Chalkboard.vect.dimension(funcORvectfield) === 3 || Chalkboard.vect.dimension(funcORvectfield) === 4) {
+                return Chalkboard.matr.trace(Chalkboard.calc.grad(vectfield, vect));
             }
         },
-        curl: function(vecfield, vec) {
+        curl: function(vectfield, vect) {
             var h = 0.000000001;
-            if(vecfield.type === "vec2field") {
-                var p = Chalkboard.real.parse("(x, y) => " + vecfield.p),
-                    q = Chalkboard.real.parse("(x, y) => " + vecfield.q);
-                var dpdy = (p(vec.x, vec.y + h) - p(vec.x, vec.y)) / h,
-                    dqdx = (q(vec.x + h, vec.y) - q(vec.x, vec.y)) / h;
-                return Chalkboard.vec3.new(0, 0, dqdx - dpdy);
-            } else if(vecfield.type === "vec3field") {
-                var p = Chalkboard.real.parse("(x, y, z) => " + vecfield.p),
-                    q = Chalkboard.real.parse("(x, y, z) => " + vecfield.q),
-                    r = Chalkboard.real.parse("(x, y, z) => " + vecfield.r);
-                var dpdy = (p(vec.x, vec.y + h, vec.z) - p(vec.x, vec.y, vec.z)) / h,
-                    dpdz = (p(vec.x, vec.y, vec.z + h) - p(vec.x, vec.y, vec.z)) / h,
-                    dqdx = (q(vec.x + h, vec.y, vec.z) - q(vec.x, vec.y, vec.z)) / h,
-                    dqdz = (q(vec.x, vec.y, vec.z + h) - q(vec.x, vec.y, vec.z)) / h,
-                    drdx = (r(vec.x + h, vec.y, vec.z) - r(vec.x, vec.y, vec.z)) / h,
-                    drdy = (r(vec.x, vec.y + h, vec.z) - r(vec.x, vec.y, vec.z)) / h;
-                return Chalkboard.vec3.new(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
-            } else {
-                return "TypeError: Parameter \"vecfield\" must be of type \"vec2field\" or \"vec3field\".";
+            if(Chalkboard.vect.dimension(funcORvectfield) === 2) {
+                var p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
+                    q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
+                var dpdy = (p(vect.x, vect.y + h) - p(vect.x, vect.y)) / h,
+                    dqdx = (q(vect.x + h, vect.y) - q(vect.x, vect.y)) / h;
+                return Chalkboard.vect.new(0, 0, dqdx - dpdy);
+            } else if(Chalkboard.vect.dimension(funcORvectfield) === 3) {
+                var p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
+                    q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
+                    r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
+                var dpdy = (p(vect.x, vect.y + h, vect.z) - p(vect.x, vect.y, vect.z)) / h,
+                    dpdz = (p(vect.x, vect.y, vect.z + h) - p(vect.x, vect.y, vect.z)) / h,
+                    dqdx = (q(vect.x + h, vect.y, vect.z) - q(vect.x, vect.y, vect.z)) / h,
+                    dqdz = (q(vect.x, vect.y, vect.z + h) - q(vect.x, vect.y, vect.z)) / h,
+                    drdx = (r(vect.x + h, vect.y, vect.z) - r(vect.x, vect.y, vect.z)) / h,
+                    drdy = (r(vect.x, vect.y + h, vect.z) - r(vect.x, vect.y, vect.z)) / h;
+                return Chalkboard.vect.new(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             }
         },
         dfdz: function(func, comp) {
@@ -4289,7 +4251,7 @@ var Chalkboard = {
                         xt += i % 2 === 0 ? 2 * x(inf + i * dt) : 4 * x(inf + i * dt);
                         yt += i % 2 === 0 ? 2 * y(sup + i * dt) : 4 * y(sup + i * dt);
                     }
-                    return Chalkboard.vec2.new((xt * dt) / 3, (yt * dt) / 3);
+                    return Chalkboard.vect.new((xt * dt) / 3, (yt * dt) / 3);
                 } else if(func.definition.length === 3) {
                     var x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
@@ -4303,7 +4265,7 @@ var Chalkboard = {
                         yt += i % 2 === 0 ? 2 * y(inf + i * dt) : 4 * y(inf + i * dt);
                         zt += i % 2 === 0 ? 2 * z(inf + i * dt) : 4 * z(inf + i * dt);
                     }
-                    return Chalkboard.vec3.new((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
+                    return Chalkboard.vect.new((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"expl\", \"inve\", \"pola\", or \"curv\".";
@@ -4333,13 +4295,13 @@ var Chalkboard = {
                 if(func.definition.length === 2) {
                     for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
-                        result += Chalkboard.vec2.mag(drdt);
+                        result += Chalkboard.vect.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
                     for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
-                        result += Chalkboard.vec3.mag(drdt);
+                        result += Chalkboard.vect.mag(drdt);
                     }
                     return result * dt;
                 }
@@ -4348,9 +4310,9 @@ var Chalkboard = {
                     ds = (ssup - sinf) / 100;
                 for(var s = sinf; s <= ssup; s += ds) {
                     for(var t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
-                        result += Chalkboard.vec3.mag(Chalkboard.vec3.cross(drds, drdt));
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.new(s, t)), 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.new(s, t)), 3, "col", 2);
+                        result += Chalkboard.vect.mag(Chalkboard.vect.cross(drds, drdt));
                     }
                 }
                 return result * ds * dt;
@@ -4358,33 +4320,33 @@ var Chalkboard = {
                 return "TypeError: Parameter \"func\" must be of type \"curv\" or \"surf\".";
             }
         },
-        frds: function(funcORvecfield, func, inf, sup) {
+        frds: function(funcORvectfield, func, inf, sup) {
             if(func.type === "curv") {
                 var result = 0;
                 var dt = (sup - inf) / 10000;
-                if(funcORvecfield.type === "mult") {
+                if(funcORvectfield.type === "mult") {
                     for(var t = inf; t <= sup; t += dt) {
-                        result += Chalkboard.real.val(funcORvecfield, Chalkboard.real.val(func, t)) * Chalkboard.vec2.mag(Chalkboard.calc.dfdx(func, t));
+                        result += Chalkboard.real.val(funcORvectfield, Chalkboard.real.val(func, t)) * Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
-                } else if(funcORvecfield.type === "vec2field") {
+                } else if(Chalkboard.vect.dimension(funcORvectfield) === 2) {
                     for(var t = inf; t <= sup; t += dt) {
-                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(funcORvectfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
-                } else if(funcORvecfield.type === "vec3field") {
+                } else if(Chalkboard.vect.dimension(funcORvectfield) === 3) {
                     for(var t = inf; t <= sup; t += dt) {
-                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(funcORvecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
+                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(funcORvectfield, Chalkboard.real.val(func, t)), Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
                 } else {
-                    return "TypeError: Parameter \"funcORvecfield\" must be of type \"mult\", \"vec2field\", or \"vec3field\".";
+                    return "TypeError: Parameter \"funcORvectfield\" must be of type \"mult\" or \"vectfield\".";
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
             }
         },
-        fnds: function(vecfield, func, tinf, tsup, sinf, ssup) {
+        fnds: function(vectfield, func, tinf, tsup, sinf, ssup) {
             var result = 0;
             var drdt, drds;
             if(func.type === "curv") {
@@ -4392,13 +4354,13 @@ var Chalkboard = {
                 if(func.definition.length === 2) {
                     for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
-                        result += Chalkboard.vec2.dot(Chalkboard.vec2.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.vec2.new(-drdt.y, drdt.x)) * Chalkboard.vec2.mag(drdt);
+                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t)), Chalkboard.vect.new(-drdt.y, drdt.x)) * Chalkboard.vect.mag(drdt);
                     }
                     return result * dt;
                 } else if(func.definition.length === 3) {
                     for(var t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t);
-                        result += Chalkboard.vec3.dot(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, t)), Chalkboard.calc.normal(func, t)) * Chalkboard.vec3.mag(drdt);
+                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t)), Chalkboard.calc.normal(func, t)) * Chalkboard.vect.mag(drdt);
                     }
                     return result * dt;
                 }
@@ -4407,9 +4369,9 @@ var Chalkboard = {
                     ds = (ssup - sinf) / 100;
                 for(var s = sinf; s <= ssup; s += ds) {
                     for(var t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vec2.new(s, t)), "vec3", "col", 2);
-                        result += Chalkboard.vec3.scalarTriple(Chalkboard.vec3.fromField(vecfield, Chalkboard.real.val(func, Chalkboard.vec2.new(s, t))), drds, drdt);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.new(s, t)), 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.new(s, t)), 3, "col", 2);
+                        result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.new(s, t))), drds, drdt);
                     }
                 }
                 return result * ds * dt;
@@ -4423,7 +4385,7 @@ var Chalkboard = {
                     var result = Chalkboard.comp.new(0, 0);
                     var dt = (sup - inf) / 10000;
                     for(var t = inf; t <= sup; t += dt) {
-                        var fz = Chalkboard.comp.val(func_1, Chalkboard.vec2.toComplex(Chalkboard.real.val(func_2, t)));
+                        var fz = Chalkboard.comp.val(func_1, Chalkboard.vect.toComplex(Chalkboard.real.val(func_2, t)));
                         var rt = Chalkboard.calc.dfdx(func_2, t);
                         result = Chalkboard.comp.add(result, Chalkboard.comp.new((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
                     }
@@ -4456,7 +4418,7 @@ var Chalkboard = {
                         d2ydt2 = Chalkboard.calc.d2fdx2(func, val).y;
                     return Math.abs(dxdt * d2ydt2 - dydt * d2xdt2) / Math.sqrt((dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt));
                 } else if(func.definition.length === 3) {
-                    return Chalkboard.vec3.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vec3.mag(Chalkboard.calc.dfdx(func, val));
+                    return Chalkboard.vect.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, val));
                 }
             } else {
                 return "TypeError: Parameter \"func\" must be of type \"curv\".";
