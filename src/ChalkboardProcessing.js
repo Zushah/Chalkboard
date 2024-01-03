@@ -2315,11 +2315,11 @@ var Chalkboard = {
             return Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
         },
         dimension: function(vectORvectfield) {
-            if((vectORvectfield.x && vectORvectfield.y && !vectORvectfield.z && !vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && !vectORvectfield.r && !vectORvectfield.s)) {
+            if((typeof vectORvectfield.x === "number" && typeof vectORvectfield.y === "number" && typeof vectORvectfield.z === "undefined" && typeof vectORvectfield.w === "undefined") || (typeof vectORvectfield.p === "string" && typeof vectORvectfield.q === "string" && typeof vectORvectfield.r === "undefined" && typeof vectORvectfield.s === "undefined")) {
                 return 2;
-            } else if((vectORvectfield.x && vectORvectfield.y && vectORvectfield.z && !vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && vectORvectfield.r && !vectORvectfield.s)) {
+            } else if((typeof vectORvectfield.x === "number" && typeof vectORvectfield.y === "number" && typeof vectORvectfield.z === "number" && typeof vectORvectfield.w === "undefined") || (typeof vectORvectfield.p === "string" && typeof vectORvectfield.q === "string" && typeof vectORvectfield.r === "string" && typeof vectORvectfield.s === "undefined")) {
                 return 3;
-            } else if((vectORvectfield.x && vectORvectfield.y && vectORvectfield.z && vectORvectfield.w) || (vectORvectfield.p && vectORvectfield.q && vectORvectfield.r && vectORvectfield.s)) {
+            } else if((typeof vectORvectfield.x === "number" && typeof vectORvectfield.y === "number" && typeof vectORvectfield.z === "number" && typeof vectORvectfield.w === "number") || (typeof vectORvectfield.p === "string" && typeof vectORvectfield.q === "string" && typeof vectORvectfield.r === "string" && typeof vectORvectfield.s === "string")) {
                 return 4;
             }
         },
@@ -2507,20 +2507,20 @@ var Chalkboard = {
             }
         },
         dist: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)));
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)));
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return Chalkboard.real.sqrt(((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)) + ((vect_2.w - vect_1.w) * (vect_2.w - vect_1.w)));
             }
         },
         distsq: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y));
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z));
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return ((vect_2.x - vect_1.x) * (vect_2.x - vect_1.x)) + ((vect_2.y - vect_1.y) * (vect_2.y - vect_1.y)) + ((vect_2.z - vect_1.z) * (vect_2.z - vect_1.z)) + ((vect_2.w - vect_1.w) * (vect_2.w - vect_1.w));
             }
         },
@@ -2543,45 +2543,45 @@ var Chalkboard = {
             }
         },
         add: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y);
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z);
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return Chalkboard.vect.new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z, vect_1.w + vect_2.w);
             }
         },
         sub: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y);
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z);
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return Chalkboard.vect.new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z, vect_1.w - vect_2.w);
             }
         },
         mul: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y);
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z);
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return Chalkboard.vect.new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z, vect_1.w * vect_2.w);
             }
         },
         dot: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y);
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y) + (vect_1.z * vect_2.z);
-            } else if(Chalkboard.vect.dimension(vect) === 4) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 4 && Chalkboard.vect.dimension(vect_2) === 4) {
                 return (vect_1.x * vect_2.x) + (vect_1.y * vect_2.y) + (vect_1.z * vect_2.z) + (vect_1.w * vect_2.w);
             }
         },
         cross: function(vect_1, vect_2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(Chalkboard.vect.dimension(vect_1) === 2 && Chalkboard.vect.dimension(vect_2) === 2) {
                 return Chalkboard.vect.new(0, 0, (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else if(Chalkboard.vect.dimension(vect_1) === 3 && Chalkboard.vect.dimension(vect_2) === 3) {
                 return Chalkboard.vect.new((vect_1.y * vect_2.z) - (vect_1.z * vect_2.y), (vect_1.z * vect_2.x) - (vect_1.x * vect_2.z), (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
             }
         },
@@ -2616,9 +2616,9 @@ var Chalkboard = {
             }
         },
         fromAngle: function(rad1, rad2) {
-            if(Chalkboard.vect.dimension(vect) === 2) {
+            if(typeof rad2 === "undefined") {
                 return Chalkboard.vect.new(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
-            } else if(Chalkboard.vect.dimension(vect) === 3) {
+            } else {
                 return Chalkboard.vect.new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
             }
         },
