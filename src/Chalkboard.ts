@@ -841,7 +841,14 @@ const Chalkboard: any = {
         }
     },
     plot: {
-        xyplane: (config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): void => {
+        xyplane: (config: {
+            x: number; //
+            y: number; //
+            size: number; //
+            strokeStyle: string; //
+            lineWidth: number; //
+            context: CanvasRenderingContext2D; //
+        }): void => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -878,7 +885,14 @@ const Chalkboard: any = {
             config.context.stroke();
             config.context.restore();
         },
-        rOplane: (config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): void => {
+        rOplane: (config: {
+            x: number, //
+            y: number, //
+            size: number, //
+            strokeStyle: string, //
+            lineWidth: number, //
+            context: CanvasRenderingContext2D; //
+        }): void => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -908,7 +922,15 @@ const Chalkboard: any = {
             config.context.stroke();
             config.context.restore();
         },
-        function: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number] | [[number, number], [number, number]], context: CanvasRenderingContext2D}): number[][] => {
+        function: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number] | [[number, number], [number, number]];
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -975,7 +997,15 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        barplot: (arr: number[], bins: number[], config: {x: number, y: number, size: number, fillStyle: string, strokeStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): number[][] => {
+        barplot: (arr: number[], bins: number[], config: {
+            x: number;
+            y: number;
+            size: number;
+            fillStyle: string;
+            strokeStyle: string;
+            lineWidth: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1013,7 +1043,14 @@ const Chalkboard: any = {
             config.context.restore();
             return bars;
         },
-        lineplot: (arr: number[], bins: number[], config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): number[][] => {
+        lineplot: (arr: number[], bins: number[], config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1048,7 +1085,14 @@ const Chalkboard: any = {
             config.context.restore();
             return verts;
         },
-        scatterplot: (arr1: number[], arr2: number[], config: {x: number, y: number, size: number, fillStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): number[][] => {
+        scatterplot: (arr1: number[], arr2: number[], config: {
+            x: number;
+            y: number;
+            size: number;
+            fillStyle: string;
+            lineWidth: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1072,7 +1116,14 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        comp: (comp: ChalkboardComplex, config: {x: number, y: number, size: number, fillStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): number[][] => {
+        comp: (comp: ChalkboardComplex, config: {
+            x: number;
+            y: number;
+            size: number;
+            fillStyle: string;
+            lineWidth: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1090,7 +1141,14 @@ const Chalkboard: any = {
             config.context.restore();
             return [[comp.a], [comp.b]];
         },
-        vect: (vect: ChalkboardVector, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, context: CanvasRenderingContext2D}): number[][] => {
+        vect: (vect: ChalkboardVector, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1110,7 +1168,16 @@ const Chalkboard: any = {
             config.context.restore();
             return [[vect.x], [vect.y]];
         },
-        field: (vectfield: ChalkboardVectorField, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [[number, number], [number, number]], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        field: (vectfield: ChalkboardVectorField, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [[number, number], [number, number]];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1139,7 +1206,15 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        matr: (matr: ChalkboardMatrix, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], context: CanvasRenderingContext2D}): number[][] => {
+        matr: (matr: ChalkboardMatrix, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1161,7 +1236,16 @@ const Chalkboard: any = {
             Chalkboard.plot.vect(Chalkboard.vect.new(-matr[0][1], -matr[1][1]), config);
             return matr;
         },
-        dfdx: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        dfdx: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1191,7 +1275,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        d2fdx2: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        d2fdx2: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1221,7 +1314,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        fxdx: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        fxdx: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1251,7 +1353,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        convolution: (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        convolution: (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1276,7 +1387,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        correlation: (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        correlation: (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1301,7 +1421,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        autocorrelation: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        autocorrelation: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1326,7 +1455,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        Taylor: (func: ChalkboardFunction, n: 0 | 1 | 2, a: number, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        Taylor: (func: ChalkboardFunction, n: 0 | 1 | 2, a: number, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1351,7 +1489,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        Laplace: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        Laplace: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
@@ -1383,7 +1530,16 @@ const Chalkboard: any = {
             config.context.restore();
             return data;
         },
-        Fourier: (func: ChalkboardFunction, config: {x: number, y: number, size: number, strokeStyle: string, lineWidth: number, domain: [number, number], res: number, context: CanvasRenderingContext2D}): number[][] => {
+        Fourier: (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number];
+            res: number;
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
             (config = {
                 x: (config = config || {}).x || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2,
                 y: config.y || Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2,
