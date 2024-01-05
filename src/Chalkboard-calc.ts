@@ -20,10 +20,10 @@ namespace Chalkboard {
             }
         }
         export const convolution = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, val: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real._function("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " - x)") + ")"), -100, 100) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " - x)") + ")"), -100, 100) as number;
         }
         export const correlation = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, val: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real._function("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " + x)") + ")"), -100, 100) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " + x)") + ")"), -100, 100) as number;
         }
         export const curl = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
             let h = 0.000000001;
@@ -32,7 +32,7 @@ namespace Chalkboard {
                     q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
                 let dpdy = (p(vect.x, vect.y + h) - p(vect.x, vect.y)) / h,
                     dqdx = (q(vect.x + h, vect.y) - q(vect.x, vect.y)) / h;
-                return Chalkboard.vect._new(0, 0, dqdx - dpdy);
+                return Chalkboard.vect.init(0, 0, dqdx - dpdy);
             } else if(Chalkboard.vect.dimension(vectfield) === 3 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined")) {
                 let p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
@@ -43,7 +43,7 @@ namespace Chalkboard {
                     dqdz = (q(vect.x, vect.y, vect.z + h) - q(vect.x, vect.y, vect.z)) / h,
                     drdx = (r(vect.x + h, vect.y, vect.z) - r(vect.x, vect.y, vect.z)) / h,
                     drdy = (r(vect.x, vect.y + h, vect.z) - r(vect.x, vect.y, vect.z)) / h;
-                return Chalkboard.vect._new(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
+                return Chalkboard.vect.init(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             } else {
                 throw new TypeError("Parameter \"vectfield\" must be of type \"ChalkboardVectorField\" with 2 or 3 dimensions.");
             }
@@ -85,12 +85,12 @@ namespace Chalkboard {
                 if(func.definition.length === 2) {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vect._new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
+                    return Chalkboard.vect.init((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h);
                 } else {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vect._new((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h, (z(val + h) - z(val)) / h);
+                    return Chalkboard.vect.init((x(val + h) - x(val)) / h, (y(val + h) - y(val)) / h, (z(val + h) - z(val)) / h);
                 }
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
@@ -111,12 +111,12 @@ namespace Chalkboard {
                 if(func.definition.length === 2) {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vect._new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h));
+                    return Chalkboard.vect.init((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h));
                 } else {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vect._new((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h), (z(val + h) - 2 * z(val) + z(val - h)) / (h * h));
+                    return Chalkboard.vect.init((x(val + h) - 2 * x(val) + x(val - h)) / (h * h), (y(val + h) - 2 * y(val) + y(val - h)) / (h * h), (z(val + h) - 2 * z(val) + z(val - h)) / (h * h));
                 }
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
@@ -131,7 +131,7 @@ namespace Chalkboard {
                     dudb = (u(comp.a, comp.b + h) - u(comp.a, comp.b)) / h,
                     dvda = (v(comp.a + h, comp.b) - v(comp.a, comp.b)) / h,
                     dvdb = (v(comp.a, comp.b + h) - v(comp.a, comp.b)) / h;
-                return [Chalkboard.comp._new(duda, dvda), Chalkboard.comp._new(dudb, dvdb)];
+                return [Chalkboard.comp.init(duda, dvda), Chalkboard.comp.init(dudb, dvdb)];
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
@@ -145,7 +145,7 @@ namespace Chalkboard {
                     d2udb2 = (u(comp.a, comp.b + h) - 2 * u(comp.a, comp.b) + u(comp.a, comp.b - h)) / (h * h),
                     d2vda2 = (v(comp.a + h, comp.b) - 2 * v(comp.a, comp.b) + v(comp.a - h, comp.b)) / (h * h),
                     d2vdb2 = (v(comp.a, comp.b + h) - 2 * v(comp.a, comp.b) + v(comp.a, comp.b - h)) / (h * h);
-                return [Chalkboard.comp._new(d2uda2, d2vda2), Chalkboard.comp._new(d2udb2, d2vdb2)];
+                return [Chalkboard.comp.init(d2uda2, d2vda2), Chalkboard.comp.init(d2udb2, d2vdb2)];
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
@@ -214,8 +214,8 @@ namespace Chalkboard {
                     ds = (ssup - sinf) / 100;
                 for(let s = sinf; s <= ssup; s += ds) {
                     for(let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect._new(s, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect._new(s, t)) as ChalkboardMatrix, 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 2);
                         result += Chalkboard.vect.mag(Chalkboard.vect.cross(drds, drdt));
                     }
                 }
@@ -232,7 +232,7 @@ namespace Chalkboard {
                 if(func.definition.length === 2) {
                     for(let t = tinf; t <= tsup; t += dt) {
                         drdt = Chalkboard.calc.dfdx(func, t) as ChalkboardVector;
-                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t) as ChalkboardVector), Chalkboard.vect._new(-drdt.y, drdt.x)) * Chalkboard.vect.mag(drdt);
+                        result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t) as ChalkboardVector), Chalkboard.vect.init(-drdt.y, drdt.x)) * Chalkboard.vect.mag(drdt);
                     }
                     return result * dt;
                 } else {
@@ -247,9 +247,9 @@ namespace Chalkboard {
                     ds = (ssup - sinf) / 100;
                 for(let s = sinf; s <= ssup; s += ds) {
                     for(let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect._new(s, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect._new(s, t)) as ChalkboardMatrix, 3, "col", 2);
-                        result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect._new(s, t)) as ChalkboardVector), drds, drdt);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 2);
+                        result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.init(s, t)) as ChalkboardVector), drds, drdt);
                     }
                 }
                 return result * ds * dt;
@@ -258,7 +258,7 @@ namespace Chalkboard {
             }
         }
         export const Fourier = (func: ChalkboardFunction, val: number): number => {
-            return (2 * (Chalkboard.calc.fxdx(Chalkboard.real._function("(" + func.definition + ") * Math.cos(" + val + " * x)"), 0, 10) as number)) / Chalkboard.PI();
+            return (2 * (Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func.definition + ") * Math.cos(" + val + " * x)"), 0, 10) as number)) / Chalkboard.PI();
         }
         export const frds = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, func: ChalkboardFunction, inf: number, sup: number): number => {
             const funct = funcORvectfield as ChalkboardFunction;
@@ -315,7 +315,7 @@ namespace Chalkboard {
                         xt += i % 2 === 0 ? 2 * x(inf + i * dt) : 4 * x(inf + i * dt);
                         yt += i % 2 === 0 ? 2 * y(sup + i * dt) : 4 * y(sup + i * dt);
                     }
-                    return Chalkboard.vect._new((xt * dt) / 3, (yt * dt) / 3);
+                    return Chalkboard.vect.init((xt * dt) / 3, (yt * dt) / 3);
                 } else {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
@@ -329,7 +329,7 @@ namespace Chalkboard {
                         yt += i % 2 === 0 ? 2 * y(inf + i * dt) : 4 * y(inf + i * dt);
                         zt += i % 2 === 0 ? 2 * z(inf + i * dt) : 4 * z(inf + i * dt);
                     }
-                    return Chalkboard.vect._new((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
+                    return Chalkboard.vect.init((xt * dt) / 3, (yt * dt) / 3, (zt * dt) / 3);
                 }
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
@@ -354,12 +354,12 @@ namespace Chalkboard {
         export const fzdz = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
             if(func_1.type === "comp") {
                 if(func_2.type === "curv") {
-                    let result = Chalkboard.comp._new(0, 0);
+                    let result = Chalkboard.comp.init(0, 0);
                     let dt = (sup - inf) / 10000;
                     for(let t = inf; t <= sup; t += dt) {
                         let fz = Chalkboard.comp.val(func_1, Chalkboard.vect.toComplex(Chalkboard.real.val(func_2, t) as ChalkboardVector));
                         let rt = Chalkboard.calc.dfdx(func_2, t) as ChalkboardVector;
-                        result = Chalkboard.comp.add(result, Chalkboard.comp._new((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
+                        result = Chalkboard.comp.add(result, Chalkboard.comp.init((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
                     }
                     return Chalkboard.comp.scl(result, dt);
                 } else {
@@ -383,14 +383,14 @@ namespace Chalkboard {
                     dydt = (y(vect.x, vect.y + h) - y(vect.x, vect.y)) / h,
                     dzds = (z(vect.x + h, vect.y) - z(vect.x, vect.y)) / h, 
                     dzdt = (z(vect.x, vect.y + h) - z(vect.x, vect.y)) / h;
-                return Chalkboard.matr._new([dxds, dxdt],
+                return Chalkboard.matr.init([dxds, dxdt],
                                            [dyds, dydt],
                                            [dzds, dzdt]);
             } else if(func.type === "mult" && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined")) {
                 let f = Chalkboard.real.parse("(x, y) => " + func.definition);
                 let dfdx = (f(vect.x + h, vect.y) - f(vect.x, vect.y)) / h,
                     dfdy = (f(vect.x, vect.y + h) - f(vect.x, vect.y)) / h;
-                return Chalkboard.vect._new(dfdx, dfdy);
+                return Chalkboard.vect.init(dfdx, dfdy);
             } else if(Chalkboard.vect.dimension(vectfield) === 2 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined")) {
                 let p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
@@ -398,7 +398,7 @@ namespace Chalkboard {
                     dpdy = (p(vect.x, vect.y + h) - p(vect.x, vect.y)) / h,
                     dqdx = (q(vect.x + h, vect.y) - q(vect.x, vect.y)) / h,
                     dqdy = (q(vect.x, vect.y + h) - q(vect.x, vect.y)) / h;
-                return Chalkboard.matr._new([dpdx, dpdy],
+                return Chalkboard.matr.init([dpdx, dpdy],
                                            [dqdx, dqdy]);
             } else if(Chalkboard.vect.dimension(vectfield) === 3 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined")) {
                 let p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
@@ -413,7 +413,7 @@ namespace Chalkboard {
                     drdx = (r(vect.x + h, vect.y, vect.z) - r(vect.x, vect.y, vect.z)) / h,
                     drdy = (r(vect.x, vect.y + h, vect.z) - r(vect.x, vect.y, vect.z)) / h,
                     drdz = (r(vect.x, vect.y, vect.z + h) - r(vect.x, vect.y, vect.z)) / h;
-                return Chalkboard.matr._new([dpdx, dpdy, dpdz],
+                return Chalkboard.matr.init([dpdx, dpdy, dpdz],
                                            [dqdx, dqdy, dqdz],
                                            [drdx, drdy, drdz]);
             } else if(Chalkboard.vect.dimension(vectfield) === 4 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number")) {
@@ -437,7 +437,7 @@ namespace Chalkboard {
                     dsdy = (s(vect.x, vect.y + h, vect.z, vect.w) - s(vect.x, vect.y, vect.z, vect.w)) / h,
                     dsdz = (s(vect.x, vect.y, vect.z + h, vect.w) - s(vect.x, vect.y, vect.z, vect.w)) / h,
                     dsdw = (s(vect.x, vect.y, vect.z, vect.w + h) - s(vect.x, vect.y, vect.z, vect.w)) / h;
-                return Chalkboard.matr._new([dpdx, dpdy, dpdz, dpdw],
+                return Chalkboard.matr.init([dpdx, dpdy, dpdz, dpdw],
                                            [dqdx, dqdy, dqdz, dqdw],
                                            [drdx, drdy, drdz, drdw],
                                            [dsdx, dsdy, dsdz, dsdw]);
@@ -459,7 +459,7 @@ namespace Chalkboard {
                     d2ydt2 = (y(vect.x, vect.y + h) - 2 * y(vect.x, vect.y) + y(vect.x, vect.y - h)) / (h * h),
                     d2zds2 = (z(vect.x + h, vect.y) - 2 * z(vect.x, vect.y) + z(vect.x - h, vect.y)) / (h * h), 
                     d2zdt2 = (z(vect.x, vect.y + h) - 2 * z(vect.x, vect.y) + z(vect.x, vect.y - h)) / (h * h);
-                return Chalkboard.matr._new([d2xds2, d2xdt2],
+                return Chalkboard.matr.init([d2xds2, d2xdt2],
                                            [d2yds2, d2ydt2],
                                            [d2zds2, d2zdt2]);
             } else if(func.type === "mult" && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined")) {
@@ -468,7 +468,7 @@ namespace Chalkboard {
                     d2fdy2 = (f(vect.x, vect.y + h) - 2 * f(vect.x, vect.y) + f(vect.x, vect.y - h)) / (h * h),
                     d2fdxdy = (f(vect.x + h, vect.y + h) - f(vect.x + h, vect.y) - f(vect.x, vect.y + h) + f(vect.x, vect.y)) / (h * h),
                     d2fdydx = (f(vect.x + h, vect.y + h) - f(vect.x, vect.y + h) - f(vect.x + h, vect.y) + f(vect.x, vect.y)) / (h * h);
-                return Chalkboard.matr._new([d2fdx2, d2fdxdy],
+                return Chalkboard.matr.init([d2fdx2, d2fdxdy],
                                            [d2fdydx, d2fdy2]);
             } else if(Chalkboard.vect.dimension(vectfield) === 2 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined")) {
                 let p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
@@ -477,7 +477,7 @@ namespace Chalkboard {
                     d2pdy2 = (p(vect.x, vect.y + h) - 2 * p(vect.x, vect.y) + p(vect.x, vect.y - h)) / (h * h),
                     d2qdx2 = (q(vect.x + h, vect.y) - 2 * q(vect.x, vect.y) + q(vect.x - h, vect.y)) / (h * h),
                     d2qdy2 = (q(vect.x, vect.y + h) - 2 * q(vect.x, vect.y) + q(vect.x, vect.y - h)) / (h * h);
-                return Chalkboard.matr._new([d2pdx2, d2pdy2],
+                return Chalkboard.matr.init([d2pdx2, d2pdy2],
                                            [d2qdx2, d2qdy2]);
             } else if(Chalkboard.vect.dimension(vectfield) === 3 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined")) {
                 let p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
@@ -492,7 +492,7 @@ namespace Chalkboard {
                     d2rdx2 = (r(vect.x + h, vect.y, vect.z) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x - h, vect.y, vect.z)) / (h * h),
                     d2rdy2 = (r(vect.x, vect.y + h, vect.z) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x, vect.y - h, vect.z)) / (h * h),
                     d2rdz2 = (r(vect.x, vect.y, vect.z + h) - 2 * r(vect.x, vect.y, vect.z) + r(vect.x, vect.y, vect.z - h)) / (h * h);
-                return Chalkboard.matr._new([d2pdx2, d2pdy2, d2pdz2],
+                return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2],
                                            [d2qdx2, d2qdy2, d2qdz2],
                                            [d2rdx2, d2rdy2, d2rdz2]);
             } else if(Chalkboard.vect.dimension(vectfield) === 4 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number")) {
@@ -516,7 +516,7 @@ namespace Chalkboard {
                     d2sdy2 = (s(vect.x, vect.y + h, vect.z, vect.w) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y - h, vect.z, vect.w)) / (h * h),
                     d2sdz2 = (s(vect.x, vect.y, vect.z + h, vect.w) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y, vect.z - h, vect.w)) / (h * h),
                     d2sdw2 = (s(vect.x, vect.y, vect.z, vect.w + h) - 2 * s(vect.x, vect.y, vect.z, vect.w) + s(vect.x, vect.y, vect.z, vect.w - h)) / (h * h);
-                return Chalkboard.matr._new([d2pdx2, d2pdy2, d2pdz2, d2pdw2],
+                return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2, d2pdw2],
                                            [d2qdx2, d2qdy2, d2qdz2, d2qdw2],
                                            [d2rdx2, d2rdy2, d2rdz2, d2rdw2],
                                            [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
@@ -526,7 +526,7 @@ namespace Chalkboard {
         }
         export const Laplace = (func: ChalkboardFunction, val: number): number => {
             if(val > 0) {
-                return Chalkboard.calc.fxdx(Chalkboard.real._function("(" + func.definition + ") * Math.exp(-" + val + " * x)"), 0, 10) as number;
+                return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func.definition + ") * Math.exp(-" + val + " * x)"), 0, 10) as number;
             } else {
                 throw new RangeError("Parameter \"val\" must be of type \"number\" greater than 0.");
             }

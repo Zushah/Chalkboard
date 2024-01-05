@@ -10,37 +10,13 @@
     Website ===> https://zushah.github.io/Chalkboard/home.html
 */
 
-/// <reference path="Chalkboard-real.ts"/>
-
-interface Window { Chalkboard: any };
-type ChalkboardFunction = {
-    definition: string | string[];
-    type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp";
-};
-type ChalkboardVectorField = {
-    p: string;
-    q: string;
-    r?: string;
-    s?: string;
-};
-type ChalkboardComplex = {
-    a: number;
-    b: number;
-};
-type ChalkboardQuaternion = {
-    a: number;
-    b: number;
-    c: number;
-    d: number;
-};
-type ChalkboardVector = {
-    x: number;
-    y: number;
-    z?: number;
-    w?: number;
-};
+type ChalkboardComplex = { a: number; b: number; };
+type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"; };
 type ChalkboardMatrix = number[][];
+type ChalkboardQuaternion = { a: number; b: number; c: number; d: number; };
 type ChalkboardTensor = number | ChalkboardTensor[];
+type ChalkboardVector = { x: number; y: number; z?: number; w?: number; };
+type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string; };
 
 namespace Chalkboard {
     export const CONTEXT: string = "ctx";

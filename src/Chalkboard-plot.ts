@@ -284,7 +284,7 @@ namespace Chalkboard {
             config.context.translate(config.x, config.y);
             for(let i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
                 for(let j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
-                    let v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect._new(i, j));
+                    let v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
                     config.context.beginPath();
                     config.context.moveTo(i, j);
                     config.context.lineTo(i + v.x, j + v.y);
@@ -329,7 +329,7 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
-        export const _function = (func: ChalkboardFunction, config: {
+        export const definition = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
             size: number;
@@ -385,7 +385,7 @@ namespace Chalkboard {
                     v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
                 for(let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
                     for(let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
-                        let z = Chalkboard.comp._new(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
+                        let z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
                         if(z.a === 0 && z.b === 0) {
                             config.context.fillStyle = "rgb(0, 0, 0)";
                         } else if(z.a === Infinity && z.b === Infinity) {
@@ -545,15 +545,15 @@ namespace Chalkboard {
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
             for(let i = config.domain[0]; i <= config.domain[1]; i++) {
-                Chalkboard.plot.vect(Chalkboard.vect._new(matr[0][0], matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vect(Chalkboard.vect._new(-matr[0][0], -matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vect(Chalkboard.vect._new(matr[0][1], matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
-                Chalkboard.plot.vect(Chalkboard.vect._new(-matr[0][1], -matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), {x: config.x, y: config.y + (i / config.size) * matr[1][1], size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
+                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), {x: config.x + (i / config.size) * matr[0][0], y: config.y, size: config.size, strokeStyle: config.strokeStyle, lineWidth: config.lineWidth / 4, context: config.context});
             }
-            Chalkboard.plot.vect(Chalkboard.vect._new(matr[0][0], matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect._new(-matr[0][0], -matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect._new(matr[0][1], matr[1][1]), config);
-            Chalkboard.plot.vect(Chalkboard.vect._new(-matr[0][1], -matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), config);
             return matr;
         }
         export const rOplane = (config: {

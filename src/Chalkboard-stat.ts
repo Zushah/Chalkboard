@@ -100,7 +100,7 @@ namespace Chalkboard {
             return result;
         }
         export const Gaussian = (height: number, mean: number, deviation: number): ChalkboardFunction => {
-            return Chalkboard.real._function(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
+            return Chalkboard.real.define(height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))");
         }
         export const gt = (arr: number[], arrORnum: number | number[], includeEnd: boolean = false): number[] => {
             let result = [];
@@ -417,9 +417,9 @@ namespace Chalkboard {
                 }
                 let a = (data.length * xy - x * y) / (data.length * xx - x * x),
                     b = (y / data.length) - (a * x) / data.length;
-                return Chalkboard.real._function(a + " * x + " + b);
+                return Chalkboard.real.define(a + " * x + " + b);
             } else if(type === "polynomial") {
-                let A = Chalkboard.matr._new();
+                let A = Chalkboard.matr.init();
                 for(let i = 0; i < data.length; i++) {
                     A.push([]);
                     for(let j = 0; j <= degree; j++) {
@@ -427,7 +427,7 @@ namespace Chalkboard {
                     }
                 }
                 let AT = Chalkboard.matr.transpose(A);
-                let B = Chalkboard.matr._new();
+                let B = Chalkboard.matr.init();
                 for(let i = 0; i < data.length; i++) {
                     B.push([data[i][1]]);
                 }
@@ -442,7 +442,7 @@ namespace Chalkboard {
                 for(let i = 2; i <= degree; i++) {
                     f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
                 }
-                return Chalkboard.real._function(f);
+                return Chalkboard.real.define(f);
             } else if(type === "power") {
                 let arr = [0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
@@ -453,7 +453,7 @@ namespace Chalkboard {
                 }
                 let a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
                     b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-                return Chalkboard.real._function(a + " * Math.pow(x, " + b + ")");
+                return Chalkboard.real.define(a + " * Math.pow(x, " + b + ")");
             } else if(type === "exponential") {
                 let arr = [0, 0, 0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
@@ -466,7 +466,7 @@ namespace Chalkboard {
                 }
                 let a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
                     b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
-                return Chalkboard.real._function(a + "* Math.exp(" + b + " * x)");
+                return Chalkboard.real.define(a + "* Math.exp(" + b + " * x)");
             } else if(type === "logarithmic") {
                 let arr = [0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
@@ -477,7 +477,7 @@ namespace Chalkboard {
                 }
                 let a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
                     b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-                return Chalkboard.real._function(a + " + " + b + " * Math.log(x)");
+                return Chalkboard.real.define(a + " + " + b + " * Math.log(x)");
             } else {
                 throw new TypeError("Parameter \"type\" must be \"linear\", \"polynomial\", \"power\", \"exponential\", or \"logarithmic\".");
             }
@@ -519,7 +519,7 @@ namespace Chalkboard {
             return result;
         }
         export const toMatrix = (arr: number[], rows: number, cols: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             let index = 0;
             for(let i = 0; i < rows; i++) {
                 result[i] = [];
@@ -552,11 +552,11 @@ namespace Chalkboard {
         }
         export const toVector = (arr: number[], dimension: 2 | 3 | 4, index: number = 0): ChalkboardVector => {
             if(dimension === 2) {
-                return Chalkboard.vect._new(arr[index], arr[index + 1]);
+                return Chalkboard.vect.init(arr[index], arr[index + 1]);
             } else if(dimension === 3) {
-                return Chalkboard.vect._new(arr[index], arr[index + 1], arr[index + 2]);
+                return Chalkboard.vect.init(arr[index], arr[index + 1], arr[index + 2]);
             } else if(dimension === 4) {
-                return Chalkboard.vect._new(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
+                return Chalkboard.vect.init(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             } else {
                 throw new RangeError("Parameter \"dimension\" must be 2, 3, or 4.");
             }

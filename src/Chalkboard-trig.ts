@@ -7,7 +7,7 @@ namespace Chalkboard {
     export namespace trig {
         export const arccos = (rad: number): number | undefined => {
             if(rad > -1 && rad < 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (Math.sqrt(1 - x * x))"), rad, 1) as number;
+                return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (Math.sqrt(1 - x * x))"), rad, 1) as number;
             } else if(rad === 1) {
                 return 0;
             } else if(rad === -1) {
@@ -24,7 +24,7 @@ namespace Chalkboard {
             }
         }
         export const arccot = (rad: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (1 + x * x)"), rad, 1000) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (1 + x * x)"), rad, 1000) as number;
         }
         export const arccoth = (rad: number): number | undefined => {
             if(rad < -1 || rad > 1) {
@@ -35,13 +35,13 @@ namespace Chalkboard {
         }
         export const arccsc = (rad: number): number | undefined => {
             if(rad > 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (x * Math.sqrt(x * x - 1))"), rad, 1000) as number;
+                return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (x * Math.sqrt(x * x - 1))"), rad, 1000) as number;
             } else if(rad === 1) {
                 return Chalkboard.PI() / 2;
             } else if(rad === -1) {
                 return -Chalkboard.PI() / 2;
             } else if(rad < 1) {
-                return -Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (x * Math.sqrt(x * x - 1))"), Math.abs(rad), 1000);
+                return -Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (x * Math.sqrt(x * x - 1))"), Math.abs(rad), 1000);
             } else {
                 return undefined;
             }
@@ -55,7 +55,7 @@ namespace Chalkboard {
         }
         export const arcsec = (rad: number): number | undefined => {
             if(rad > 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (x * Math.sqrt(x * x - 1))"), 1.000001, rad) as number;
+                return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (x * Math.sqrt(x * x - 1))"), 1.000001, rad) as number;
             } else if(rad === 1) {
                 return 0;
             } else if(rad === -1) {
@@ -73,7 +73,7 @@ namespace Chalkboard {
         }
         export const arcsin = (rad: number): number | undefined => {
             if(rad > -1 && rad < 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (Math.sqrt(1 - x * x))"), 0, rad) as number;
+                return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (Math.sqrt(1 - x * x))"), 0, rad) as number;
             } else if(rad === 1) {
                 return Chalkboard.PI() / 2;
             } else if(rad === -1) {
@@ -86,7 +86,7 @@ namespace Chalkboard {
             return Math.log(rad + Math.sqrt(rad * rad + 1));
         }
         export const arctan = (rad: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / (1 + x * x)"), 0, rad) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / (1 + x * x)"), 0, rad) as number;
         }
         export const arctanh = (rad: number): number | undefined => {
             if(rad > -1 && rad < 1) {

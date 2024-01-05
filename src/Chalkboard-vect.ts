@@ -5,33 +5,24 @@
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     export namespace vect {
-        export const _new = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
-            if(z === undefined && w === undefined) {
-                return {x: x, y: y};
-            } else if(w === undefined) {
-                return {x: x, y: y, z: z};
-            } else {
-                return {x: x, y: y, z: z, w: w};
-            }
-        }
         export const absolute = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Math.abs(vect.x), Math.abs(vect.y));
+                return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z));
+                return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z), Math.abs(vect.w));
+                return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z), Math.abs(vect.w));
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
         export const add = (vect_1: ChalkboardVector, vect_2: ChalkboardVector): ChalkboardVector => {
             if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "undefined" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "undefined" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x + vect_2.x, vect_1.y + vect_2.y);
+                return Chalkboard.vect.init(vect_1.x + vect_2.x, vect_1.y + vect_2.y);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z);
+                return Chalkboard.vect.init(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "number") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "number")) {
-                return Chalkboard.vect._new(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z, vect_1.w + vect_2.w);
+                return Chalkboard.vect.init(vect_1.x + vect_2.x, vect_1.y + vect_2.y, vect_1.z + vect_2.z, vect_1.w + vect_2.w);
             } else {
                 throw new TypeError("Parameters \"vect_1\" and \"vect_2\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -52,11 +43,11 @@ namespace Chalkboard {
         }
         export const constrain = (vect: ChalkboardVector, range: [number, number] = [0, 1]): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
+                return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range));
+                return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range), Chalkboard.numb.constrain(vect.w, range));
+                return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range), Chalkboard.numb.constrain(vect.w, range));
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -66,9 +57,9 @@ namespace Chalkboard {
         }
         export const cross = (vect_1: ChalkboardVector, vect_2: ChalkboardVector): ChalkboardVector => {
             if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "undefined" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "undefined" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(0, 0, (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
+                return Chalkboard.vect.init(0, 0, (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new((vect_1.y * vect_2.z) - (vect_1.z * vect_2.y), (vect_1.z * vect_2.x) - (vect_1.x * vect_2.z), (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
+                return Chalkboard.vect.init((vect_1.y * vect_2.z) - (vect_1.z * vect_2.y), (vect_1.z * vect_2.x) - (vect_1.x * vect_2.z), (vect_1.x * vect_2.y) - (vect_1.y * vect_2.x));
             } else {
                 throw new TypeError("Parameters \"vect_1\" and \"vect_2\" must be of type \"ChalkboardVector\" with 2 or 3 dimensions.");
             }
@@ -122,11 +113,11 @@ namespace Chalkboard {
         export const empty = (dimension: 2 | 3 | 4): ChalkboardVector => {
             const _null = null as unknown as number;
             if(dimension === 2) {
-                return Chalkboard.vect._new(_null, _null);
+                return Chalkboard.vect.init(_null, _null);
             } else if(dimension === 3) {
-                return Chalkboard.vect._new(_null, _null, _null)
+                return Chalkboard.vect.init(_null, _null, _null)
             } else if(dimension === 4) {
-                return Chalkboard.vect._new(_null, _null, _null, _null);
+                return Chalkboard.vect.init(_null, _null, _null, _null);
             } else {
                 throw new TypeError("Parameter \"dimension\" must be 2, 3, or 4.");
             }
@@ -142,44 +133,44 @@ namespace Chalkboard {
         }
         export const fill = (num: number, dimension: 2 | 3 | 4): ChalkboardVector => {
             if(dimension === 2) {
-                return Chalkboard.vect._new(num, num);
+                return Chalkboard.vect.init(num, num);
             } else if(dimension === 3) {
-                return Chalkboard.vect._new(num, num, num);
+                return Chalkboard.vect.init(num, num, num);
             } else if(dimension === 4) {
-                return Chalkboard.vect._new(num, num, num, num);
+                return Chalkboard.vect.init(num, num, num, num);
             } else {
                 throw new TypeError("Parameter \"dimension\" must be 2, 3, or 4.");
             }
         }
         export const fromAlternateToCartesian = (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical"): ChalkboardVector => {
             if(type === "polar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
+                return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             } else if(type === "bipolar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new((vect.x * vect.x - vect.y * vect.y) / 4, Chalkboard.real.sqrt(16 * vect.x * vect.x - (vect.x * vect.x - vect.y * vect.y + 4) * (vect.x * vect.x - vect.y * vect.y + 4)));
+                return Chalkboard.vect.init((vect.x * vect.x - vect.y * vect.y) / 4, Chalkboard.real.sqrt(16 * vect.x * vect.x - (vect.x * vect.x - vect.y * vect.y + 4) * (vect.x * vect.x - vect.y * vect.y + 4)));
             } else if(type === "cylindrical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.y), vect.z);
+                return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.y), vect.z);
             } else if(type === "spherical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z));
+                return Chalkboard.vect.init(vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z));
             } else {
                 throw new TypeError("Parameter \"type\" must be \"polar\", \"bipolar\", \"cylindrical\", or \"spherical\".");
             }
         }
         export const fromAngle = (rad1: number, rad2?: number): ChalkboardVector => {
             if(typeof rad2 === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
+                return Chalkboard.vect.init(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
             } else {
-                return Chalkboard.vect._new(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
+                return Chalkboard.vect.init(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
             }
         }
         export const fromCartesianToAlternate = (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical"): ChalkboardVector => {
             if(type === "polar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect) as number);
+                return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect) as number);
             } else if(type === "bipolar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new((vect.x + 1) * (vect.x + 1) + (vect.y * vect.y), (vect.x - 1) * (vect.x - 1) + (vect.y * vect.y));
+                return Chalkboard.vect.init((vect.x + 1) * (vect.x + 1) + (vect.y * vect.y), (vect.x - 1) * (vect.x - 1) + (vect.y * vect.y));
             } else if(type === "cylindrical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.vect.mag(Chalkboard.vect._new(vect.x, vect.y)), Chalkboard.vect.ang(Chalkboard.vect._new(vect.x, vect.y)) as number, vect.z);
+                return Chalkboard.vect.init(Chalkboard.vect.mag(Chalkboard.vect.init(vect.x, vect.y)), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)) as number, vect.z);
             } else if(type === "spherical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect._new(vect.x, vect.y)) as number, (Chalkboard.vect.ang(vect) as number[])[2]);
+                return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)) as number, (Chalkboard.vect.ang(vect) as number[])[2]);
             } else {
                 throw new TypeError("Parameter \"type\" must be \"polar\", \"bipolar\", \"cylindrical\", or \"spherical\".");
             }
@@ -188,31 +179,40 @@ namespace Chalkboard {
             if(Chalkboard.vect.dimension(vectfield) === 2 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 let p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
-                return Chalkboard.vect._new(p(vect.x, vect.y), q(vect.x, vect.y));
+                return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
             } else if(Chalkboard.vect.dimension(vectfield) === 3 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
                 let p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
                     r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
-                return Chalkboard.vect._new(p(vect.x, vect.y, vect.z), q(vect.x, vect.y, vect.z), r(vect.x, vect.y, vect.z));
+                return Chalkboard.vect.init(p(vect.x, vect.y, vect.z), q(vect.x, vect.y, vect.z), r(vect.x, vect.y, vect.z));
             } else if(Chalkboard.vect.dimension(vectfield) === 4 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 let p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.q),
                     r = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.r),
                     s = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.s);
-                return Chalkboard.vect._new(p(vect.x, vect.y, vect.z, vect.w), q(vect.x, vect.y, vect.z, vect.w), r(vect.x, vect.y, vect.z, vect.w), s(vect.x, vect.y, vect.z, vect.w));
+                return Chalkboard.vect.init(p(vect.x, vect.y, vect.z, vect.w), q(vect.x, vect.y, vect.z, vect.w), r(vect.x, vect.y, vect.z, vect.w), s(vect.x, vect.y, vect.z, vect.w));
             } else {
                 throw new TypeError("Parameters \"vectfield\" and \"vect\" must respectively be of type \"ChalkboardVector\" and \"ChalkboardVectorField\" with 2, 3, or 4 dimensions.");
             }
         }
         export const fromVector = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x, vect.y, 0);
+                return Chalkboard.vect.init(vect.x, vect.y, 0);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x, vect.y, vect.z, 0);
+                return Chalkboard.vect.init(vect.x, vect.y, vect.z, 0);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(vect.x, vect.y);
+                return Chalkboard.vect.init(vect.x, vect.y);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
+            }
+        }
+        export const init = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
+            if(z === undefined && w === undefined) {
+                return {x: x, y: y};
+            } else if(w === undefined) {
+                return {x: x, y: y, z: z};
+            } else {
+                return {x: x, y: y, z: z, w: w};
             }
         }
         export const mag = (vect: ChalkboardVector): number => {
@@ -242,33 +242,33 @@ namespace Chalkboard {
         }
         export const mul = (vect_1: ChalkboardVector, vect_2: ChalkboardVector): ChalkboardVector => {
             if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "undefined" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "undefined" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x * vect_2.x, vect_1.y * vect_2.y);
+                return Chalkboard.vect.init(vect_1.x * vect_2.x, vect_1.y * vect_2.y);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z);
+                return Chalkboard.vect.init(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "number") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "number")) {
-                return Chalkboard.vect._new(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z, vect_1.w * vect_2.w);
+                return Chalkboard.vect.init(vect_1.x * vect_2.x, vect_1.y * vect_2.y, vect_1.z * vect_2.z, vect_1.w * vect_2.w);
             } else {
                 throw new TypeError("Parameters \"vect_1\" and \"vect_2\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
         export const negate = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(-vect.x, -vect.y);
+                return Chalkboard.vect.init(-vect.x, -vect.y);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(-vect.x, -vect.y, -vect.z);
+                return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(-vect.x, -vect.y, -vect.z, -vect.w);
+                return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z, -vect.w);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
         export const normalize = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect))
+                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect))
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect));
+                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect), vect.w / Chalkboard.vect.mag(vect));
+                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect), vect.w / Chalkboard.vect.mag(vect));
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -291,21 +291,21 @@ namespace Chalkboard {
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
                 if(component === 1) {
-                    return Chalkboard.vect._new(0, vect.y, vect.z);
+                    return Chalkboard.vect.init(0, vect.y, vect.z);
                 } else if(component === 2) {
-                    return Chalkboard.vect._new(vect.x, 0, vect.z);
+                    return Chalkboard.vect.init(vect.x, 0, vect.z);
                 } else {
-                    return Chalkboard.vect._new(vect.x, vect.y);
+                    return Chalkboard.vect.init(vect.x, vect.y);
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 if(component === 1) {
-                    return Chalkboard.vect._new(0, vect.y, vect.z, vect.w);
+                    return Chalkboard.vect.init(0, vect.y, vect.z, vect.w);
                 } else if(component === 2) {
-                    return Chalkboard.vect._new(vect.x, 0, vect.z, vect.w);
+                    return Chalkboard.vect.init(vect.x, 0, vect.z, vect.w);
                 } else if(component === 3) {
-                    return Chalkboard.vect._new(vect.x, vect.y, 0, vect.w);
+                    return Chalkboard.vect.init(vect.x, vect.y, 0, vect.w);
                 } else {
-                    return Chalkboard.vect._new(vect.x, vect.y, vect.z);
+                    return Chalkboard.vect.init(vect.x, vect.y, vect.z);
                 }
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
@@ -314,33 +314,33 @@ namespace Chalkboard {
         export const push = (vect: ChalkboardVector, component: 1 | 2 | 3 | 4, num: number): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 if(component === 1) {
-                    return Chalkboard.vect._new(num, vect.y);
+                    return Chalkboard.vect.init(num, vect.y);
                 } else if(component === 2) {
-                    return Chalkboard.vect._new(vect.x, num);
+                    return Chalkboard.vect.init(vect.x, num);
                 } else if(component === 3) {
-                    return Chalkboard.vect._new(vect.x, vect.y, num);
+                    return Chalkboard.vect.init(vect.x, vect.y, num);
                 } else {
-                    return Chalkboard.vect._new(vect.x, vect.y, 0, num);
+                    return Chalkboard.vect.init(vect.x, vect.y, 0, num);
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
                 if(component === 1) {
-                    return Chalkboard.vect._new(num, vect.y, vect.z);
+                    return Chalkboard.vect.init(num, vect.y, vect.z);
                 } else if(component === 2) {
-                    return Chalkboard.vect._new(vect.x, num, vect.z);
+                    return Chalkboard.vect.init(vect.x, num, vect.z);
                 } else if(component === 3) {
-                    return Chalkboard.vect._new(vect.x, vect.y, num);
+                    return Chalkboard.vect.init(vect.x, vect.y, num);
                 } else {
-                    return Chalkboard.vect._new(vect.x, vect.y, vect.z, num);
+                    return Chalkboard.vect.init(vect.x, vect.y, vect.z, num);
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 if(component === 1) {
-                    return Chalkboard.vect._new(num, vect.y, vect.z, vect.w);
+                    return Chalkboard.vect.init(num, vect.y, vect.z, vect.w);
                 } else if(component === 2) {
-                    return Chalkboard.vect._new(vect.x, num, vect.z, vect.w);
+                    return Chalkboard.vect.init(vect.x, num, vect.z, vect.w);
                 } else if(component === 3) {
-                    return Chalkboard.vect._new(vect.x, vect.y, num, vect.w);
+                    return Chalkboard.vect.init(vect.x, vect.y, num, vect.w);
                 } else {
-                    return Chalkboard.vect._new(vect.x, vect.y, vect.z, num);
+                    return Chalkboard.vect.init(vect.x, vect.y, vect.z, num);
                 }
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
@@ -348,22 +348,22 @@ namespace Chalkboard {
         }
         export const random = (inf: number, sup: number, dimension: 2 | 3 | 4): ChalkboardVector => {
             if(dimension === 2) {
-                return Chalkboard.vect._new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+                return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             } else if(dimension === 3) {
-                return Chalkboard.vect._new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+                return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             } else if(dimension === 4) {
-                return Chalkboard.vect._new(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+                return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             } else {
                 throw new TypeError("Parameter \"dimension\" must be 2, 3, or 4.");
             }
         }
         export const reciprocate = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(1 / vect.x, 1 / vect.y);
+                return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(1 / vect.x, 1 / vect.y, 1 / vect.z);
+                return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(1 / vect.x, 1 / vect.y, 1 / vect.z, 1 / vect.w);
+                return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z, 1 / vect.w);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -382,11 +382,11 @@ namespace Chalkboard {
         }
         export const round = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Math.round(vect.x), Math.round(vect.y));
+                return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z));
+                return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z));
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z), Math.round(vect.w));
+                return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z), Math.round(vect.w));
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -399,11 +399,11 @@ namespace Chalkboard {
         }
         export const scl = (vect: ChalkboardVector, num: number): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * num, vect.y * num);
+                return Chalkboard.vect.init(vect.x * num, vect.y * num);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * num, vect.y * num, vect.z * num);
+                return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z * num);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(vect.x * num, vect.y * num, vect.z * num, vect.w * num);
+                return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z * num, vect.w * num);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -421,11 +421,11 @@ namespace Chalkboard {
         }
         export const sub = (vect_1: ChalkboardVector, vect_2: ChalkboardVector): ChalkboardVector => {
             if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "undefined" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "undefined" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x - vect_2.x, vect_1.y - vect_2.y);
+                return Chalkboard.vect.init(vect_1.x - vect_2.x, vect_1.y - vect_2.y);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "undefined") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "undefined")) {
-                return Chalkboard.vect._new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z);
+                return Chalkboard.vect.init(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z);
             } else if((typeof vect_1.x === "number" && typeof vect_1.y === "number" && typeof vect_1.z === "number" && typeof vect_1.w === "number") && (typeof vect_2.x === "number" && typeof vect_2.y === "number" && typeof vect_2.z === "number" && typeof vect_2.w === "number")) {
-                return Chalkboard.vect._new(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z, vect_1.w - vect_2.w);
+                return Chalkboard.vect.init(vect_1.x - vect_2.x, vect_1.y - vect_2.y, vect_1.z - vect_2.z, vect_1.w - vect_2.w);
             } else {
                 throw new TypeError("Parameters \"vect_1\" and \"vect_2\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -442,30 +442,30 @@ namespace Chalkboard {
             }
         }
         export const toComplex = (vect: ChalkboardVector): ChalkboardComplex => {
-            return Chalkboard.comp._new(vect.x, vect.y);
+            return Chalkboard.comp.init(vect.x, vect.y);
         }
         export const toMatrix = (vect: ChalkboardVector, type: "col" | "row" = "col"): ChalkboardMatrix => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 if(type === "col") {
-                    return Chalkboard.matr._new([vect.x], [vect.y]);
+                    return Chalkboard.matr.init([vect.x], [vect.y]);
                 } else if(type === "row") {
-                    return Chalkboard.matr._new([vect.x, vect.y]);
+                    return Chalkboard.matr.init([vect.x, vect.y]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
                 if(type === "col") {
-                    return Chalkboard.matr._new([vect.x], [vect.y], [vect.z]);
+                    return Chalkboard.matr.init([vect.x], [vect.y], [vect.z]);
                 } else if(type === "row") {
-                    return Chalkboard.matr._new([vect.x, vect.y, vect.z]);
+                    return Chalkboard.matr.init([vect.x, vect.y, vect.z]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 if(type === "col") {
-                    return Chalkboard.matr._new([vect.x], [vect.y], [vect.z], [vect.w]);
+                    return Chalkboard.matr.init([vect.x], [vect.y], [vect.z], [vect.w]);
                 } else if(type === "row") {
-                    return Chalkboard.matr._new([vect.x, vect.y, vect.z, vect.w]);
+                    return Chalkboard.matr.init([vect.x, vect.y, vect.z, vect.w]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
@@ -475,11 +475,11 @@ namespace Chalkboard {
         }
         export const toQuaternion = (vect: ChalkboardVector): ChalkboardQuaternion => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.quat._new(vect.x, vect.y, 0, 0);
+                return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.quat._new(0, vect.x, vect.y, vect.z);
+                return Chalkboard.quat.init(0, vect.x, vect.y, vect.z);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.quat._new(vect.x, vect.y, vect.z, vect.w);
+                return Chalkboard.quat.init(vect.x, vect.y, vect.z, vect.w);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
@@ -509,11 +509,11 @@ namespace Chalkboard {
         }
         export const zero = (vect: ChalkboardVector): ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * 0, vect.y * 0);
+                return Chalkboard.vect.init(vect.x * 0, vect.y * 0);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.vect._new(vect.x * 0, vect.y * 0, vect.z * 0);
+                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.vect._new(vect.x * 0, vect.y * 0, vect.z * 0, vect.w * 0);
+                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0, vect.w * 0);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }

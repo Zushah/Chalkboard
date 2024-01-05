@@ -5,7 +5,7 @@
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     export namespace real {
-        export const _function = (definition: string | string[], type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" = "expl"): ChalkboardFunction => {
+        export const define = (definition: string | string[], type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" = "expl"): ChalkboardFunction => {
             if(type === "expl") {
                 return {definition: definition, type: type};
             } else if(type === "inve") {
@@ -49,7 +49,7 @@ namespace Chalkboard {
             return (p[1] - p[0]) * t + p[0];
         }
         export const linear = (x1: number, y1: number, x2: number, y2: number): ChalkboardFunction => {
-            return Chalkboard.real._function(Chalkboard.real.slope(x1, y1, x2, y2).toString() + " * (x - " + x2.toString() + ") + " + y2.toString());
+            return Chalkboard.real.define(Chalkboard.real.slope(x1, y1, x2, y2).toString() + " * (x - " + x2.toString() + ") + " + y2.toString());
         }
         export const linearFormula = (a: number, b: number, c?: number, d?: number): number => {
             if(typeof c === "undefined" && typeof d === "undefined") {
@@ -61,7 +61,7 @@ namespace Chalkboard {
             }
         }
         export const ln = (num: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real._function("1 / x"), 1, num) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / x"), 1, num) as number;
         }
         export const log = (base: number, num: number): number => {
             return Chalkboard.real.ln(num) / Chalkboard.real.ln(base);
@@ -94,9 +94,9 @@ namespace Chalkboard {
         }
         export const quadratic = (a: number, b: number, c: number, form: "stan" | "vert" = "stan"): ChalkboardFunction => {
             if(form === "stan") {
-                return Chalkboard.real._function(a.toString() + "* x * x + " + b.toString() + " * x +" + c.toString());
+                return Chalkboard.real.define(a.toString() + "* x * x + " + b.toString() + " * x +" + c.toString());
             } else if(form === "vert") {
-                return Chalkboard.real._function(a.toString() + " * ((x - " + b.toString() + ") * (x - " + b.toString() + ")) +" + c.toString());
+                return Chalkboard.real.define(a.toString() + " * ((x - " + b.toString() + ") * (x - " + b.toString() + ")) +" + c.toString());
             } else {
                 throw new TypeError("Parameter \"form\" must be \"stan\" or \"vert\".");
             }
@@ -158,19 +158,19 @@ namespace Chalkboard {
                 if(func.definition.length === 2) {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vect._new(x(val), y(val));
+                    return Chalkboard.vect.init(x(val), y(val));
                 } else {
                     let x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vect._new(x(val), y(val), z(val));
+                    return Chalkboard.vect.init(x(val), y(val), z(val));
                 }
             } else if(func.type === "surf") {
                 let vect = val as ChalkboardVector;
                 let x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
                     z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
-                return Chalkboard.vect._new(x(vect.x, vect.y), y(vect.x, vect.y), z(vect.x, vect.y));
+                return Chalkboard.vect.init(x(vect.x, vect.y), y(vect.x, vect.y), z(vect.x, vect.y));
             } else if(func.type === "mult" && typeof val !== "number") {
                 let vect = val as ChalkboardVector;
                 let f = Chalkboard.real.parse("(x, y) => " + func.definition);

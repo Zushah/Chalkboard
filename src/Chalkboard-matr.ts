@@ -5,17 +5,8 @@
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     export namespace matr {
-        export const _new = (...matrix: number[][] | number[][][]): ChalkboardMatrix => {
-            if(matrix.length === 0) {
-                return [];
-            } else if(Array.isArray(matrix[0]) && Array.isArray(matrix[0][0])) {
-                return (matrix as number[][][])[0];
-            } else {
-                return matrix as number[][];
-            }
-        }
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -26,7 +17,7 @@ namespace Chalkboard {
         }
         export const add = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
-                let result = Chalkboard.matr._new();
+                let result = Chalkboard.matr.init();
                 for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
                     result[i] = [];
                     for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
@@ -49,7 +40,7 @@ namespace Chalkboard {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         }
         export const binomial = (size: number, type: "lower" | "upper" | "symmetric" = "lower"): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
                 result.push([]);
                 for(let j = 0; j < size; j++) {
@@ -80,13 +71,13 @@ namespace Chalkboard {
         export const concat = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
             if(type === "row") {
                 if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2)) {
-                    return Chalkboard.matr._new(matr_1.concat(matr_2));
+                    return Chalkboard.matr.init(matr_1.concat(matr_2));
                 } else {
                     throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows.");
                 }
             } else if(type === "col") {
                 if(Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
-                    let result = Chalkboard.matr._new();
+                    let result = Chalkboard.matr.init();
                     for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
                         result.push(matr_1[i].concat(matr_2[i]));
                     }
@@ -99,7 +90,7 @@ namespace Chalkboard {
             }
         }
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -109,7 +100,7 @@ namespace Chalkboard {
             return result;
         }
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result.push([]);
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -137,7 +128,7 @@ namespace Chalkboard {
             }
         }
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
                 result.push([]);
                 for(let j = 0; j < cols; j++) {
@@ -158,7 +149,7 @@ namespace Chalkboard {
             return result;
         }
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
                 result.push([]);
                 for(let j = 0; j < cols; j++) {
@@ -168,7 +159,7 @@ namespace Chalkboard {
             return result;
         }
         export const Hilbert = (size: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
                 result.push([]);
                 for(let j = 0; j < size; j++) {
@@ -178,17 +169,26 @@ namespace Chalkboard {
             return result;
         }
         export const identity = (size: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
                 result.push(Array(size).fill(0));
                 result[i][i] = 1;
             }
             return result;
         }
+        export const init = (...matrix: number[][] | number[][][]): ChalkboardMatrix => {
+            if(matrix.length === 0) {
+                return [];
+            } else if(Array.isArray(matrix[0]) && Array.isArray(matrix[0][0])) {
+                return (matrix as number[][][])[0];
+            } else {
+                return matrix as number[][];
+            }
+        }
         export const invert = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                let result = Chalkboard.matr._new();
-                let augmented = Chalkboard.matr._new();
+                let result = Chalkboard.matr.init();
+                let augmented = Chalkboard.matr.init();
                 for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
                     augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
@@ -228,7 +228,7 @@ namespace Chalkboard {
             }
         }
         export const Lehmer = (size: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
                 result.push([]);
                 for(let j = 0; j < size; j++) {
@@ -264,7 +264,7 @@ namespace Chalkboard {
         }
         export const mul = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.cols(matr_1) === Chalkboard.matr.rows(matr_2)) {
-                let result = Chalkboard.matr._new();
+                let result = Chalkboard.matr.init();
                 for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
                     result[i] = [];
                     for(let j = 0; j < Chalkboard.matr.cols(matr_2); j++) {
@@ -280,7 +280,7 @@ namespace Chalkboard {
             }
         }
         export const mulKronecker = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
                 for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
                     for(let k = 0; k < Chalkboard.matr.rows(matr_2); k++) {
@@ -319,7 +319,7 @@ namespace Chalkboard {
             }
         }
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -435,7 +435,7 @@ namespace Chalkboard {
             return {Q: Q, R: R};
         }
         export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
                 result.push([]);
                 for(let j = 0; j < cols; j++) {
@@ -452,7 +452,7 @@ namespace Chalkboard {
             }).length;
         }
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -501,7 +501,7 @@ namespace Chalkboard {
             if(cols === undefined) {
                 cols = rows;
             }
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             let flat = Chalkboard.matr.toArray(matr);
             let index = 0;
             for(let i = 0; i < rows; i++) {
@@ -514,16 +514,16 @@ namespace Chalkboard {
         }
         export const rotator = (radx: number, rady?: number, radz?: number): ChalkboardMatrix => {
             if(rady === undefined && radz === undefined) {
-                return Chalkboard.matr._new([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
+                return Chalkboard.matr.init([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
             } else {
-                let matr_x = Chalkboard.matr._new([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
-                    matr_y = Chalkboard.matr._new([Chalkboard.trig.cos(rady!), 0, Chalkboard.trig.sin(rady!)], [0, 1, 0], [-Chalkboard.trig.sin(rady!), 0, Chalkboard.trig.cos(rady!)]),
-                    matr_z = Chalkboard.matr._new([Chalkboard.trig.cos(radz!), -Chalkboard.trig.sin(radz!), 0], [Chalkboard.trig.sin(radz!), Chalkboard.trig.cos(radz!), 0], [0, 0, 1]);
+                let matr_x = Chalkboard.matr.init([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
+                    matr_y = Chalkboard.matr.init([Chalkboard.trig.cos(rady!), 0, Chalkboard.trig.sin(rady!)], [0, 1, 0], [-Chalkboard.trig.sin(rady!), 0, Chalkboard.trig.cos(rady!)]),
+                    matr_z = Chalkboard.matr.init([Chalkboard.trig.cos(radz!), -Chalkboard.trig.sin(radz!), 0], [Chalkboard.trig.sin(radz!), Chalkboard.trig.cos(radz!), 0], [0, 0, 1]);
                 return Chalkboard.matr.mul(matr_x, Chalkboard.matr.mul(matr_y, matr_z));
             }
         }
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -544,17 +544,17 @@ namespace Chalkboard {
         }
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.matr._new([vect.x, 0], [0, vect.y]);
+                return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.matr._new([vect.x, 0, 0], [0, vect.y, 0], [0, 0, vect.z]);
+                return Chalkboard.matr.init([vect.x, 0, 0], [0, vect.y, 0], [0, 0, vect.z]);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.matr._new([vect.x, 0, 0, 0], [0, vect.y, 0, 0], [0, 0, vect.z, 0], [0, 0, 0, vect.w]);
+                return Chalkboard.matr.init([vect.x, 0, 0, 0], [0, vect.y, 0, 0], [0, 0, vect.z, 0], [0, 0, 0, vect.w]);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -590,7 +590,7 @@ namespace Chalkboard {
         }
         export const sub = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
-                let result = Chalkboard.matr._new();
+                let result = Chalkboard.matr.init();
                 for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
                     result[i] = [];
                     for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
@@ -642,25 +642,25 @@ namespace Chalkboard {
             rowORcol -= 1;
             if(dimension === 2) {
                 if(type === "col") {
-                    return Chalkboard.vect._new(matr[0][rowORcol], matr[1][rowORcol]);
+                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vect._new(matr[rowORcol][0], matr[rowORcol][1]);
+                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
             } else if(dimension === 3) {
                 if(type === "col") {
-                    return Chalkboard.vect._new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
+                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vect._new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
+                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
             } else if(dimension === 4) {
                 if(type === "col") {
-                    return Chalkboard.vect._new(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
+                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
                 } else if(type === "row") {
-                    return Chalkboard.vect._new(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
+                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
                 } else {
                     throw new TypeError("Parameter \"type\" must be \"col\" or \"row\".");
                 }
@@ -680,7 +680,7 @@ namespace Chalkboard {
             }
         }
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.cols(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.rows(matr); j++) {
@@ -691,17 +691,17 @@ namespace Chalkboard {
         }
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                return Chalkboard.matr._new([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
+                return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                return Chalkboard.matr._new([1, 0, 0, vect.x], [0, 1, 0, vect.y], [0, 0, 1, vect.z], [0, 0, 0, 1]);
+                return Chalkboard.matr.init([1, 0, 0, vect.x], [0, 1, 0, vect.y], [0, 0, 1, vect.z], [0, 0, 0, 1]);
             } else if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                return Chalkboard.matr._new([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
+                return Chalkboard.matr.init([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             } else {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let result = Chalkboard.matr._new();
+            let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
