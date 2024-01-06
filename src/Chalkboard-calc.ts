@@ -19,11 +19,11 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
-        export const convolution = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, val: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " - x)") + ")"), -100, 100) as number;
+        export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func1.definition + ") * (" + (func2.definition as string).replace(/x/g, "(" + val + " - x)") + ")"), -100, 100) as number;
         }
-        export const correlation = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, val: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func_1.definition + ") * (" + (func_2.definition as string).replace(/x/g, "(" + val + " + x)") + ")"), -100, 100) as number;
+        export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
+            return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func1.definition + ") * (" + (func2.definition as string).replace(/x/g, "(" + val + " + x)") + ")"), -100, 100) as number;
         }
         export const curl = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
             let h = 0.000000001;
@@ -63,9 +63,9 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
-        export const dfdv = (func: ChalkboardFunction, vect_pos: ChalkboardVector, vect_dir: ChalkboardVector): number => {
+        export const dfdv = (func: ChalkboardFunction, vectpos: ChalkboardVector, vectdir: ChalkboardVector): number => {
             if(func.type === "mult") {
-                return Chalkboard.vect.dot(Chalkboard.calc.grad(func, vect_pos) as ChalkboardVector, Chalkboard.vect.normalize(vect_dir));
+                return Chalkboard.vect.dot(Chalkboard.calc.grad(func, vectpos) as ChalkboardVector, Chalkboard.vect.normalize(vectdir));
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
@@ -150,29 +150,29 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
         }
-        export const dfrdt = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, val: number): number => {
-            if(func_1.type === "mult") {
-                if(func_2.type === "curv") {
-                    if(func_2.definition.length === 2) {
-                        let dfdx = (Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val) as ChalkboardVector) as ChalkboardVector).x,
-                            dfdy = (Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val) as ChalkboardVector) as ChalkboardVector).y,
-                            dxdt = (Chalkboard.calc.dfdx(func_2, val) as ChalkboardVector).x,
-                            dydt = (Chalkboard.calc.dfdx(func_2, val) as ChalkboardVector).y;
+        export const dfrdt = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
+            if(func1.type === "mult") {
+                if(func2.type === "curv") {
+                    if(func2.definition.length === 2) {
+                        let dfdx = (Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector).x,
+                            dfdy = (Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector).y,
+                            dxdt = (Chalkboard.calc.dfdx(func2, val) as ChalkboardVector).x,
+                            dydt = (Chalkboard.calc.dfdx(func2, val) as ChalkboardVector).y;
                         return dfdx * dxdt + dfdy * dydt;
                     } else {
-                        let dfdx = (Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val) as ChalkboardVector) as ChalkboardVector).x,
-                            dfdy = (Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val) as ChalkboardVector) as ChalkboardVector).y,
-                            dfdz = (Chalkboard.calc.grad(func_1, Chalkboard.real.val(func_2, val) as ChalkboardVector) as ChalkboardVector).z,
-                            dxdt = (Chalkboard.calc.dfdx(func_2, val) as ChalkboardVector).x,
-                            dydt = (Chalkboard.calc.dfdx(func_2, val) as ChalkboardVector).y,
-                            dzdt = (Chalkboard.calc.dfdx(func_2, val) as ChalkboardVector).z;
+                        let dfdx = (Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector).x,
+                            dfdy = (Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector).y,
+                            dfdz = (Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector).z,
+                            dxdt = (Chalkboard.calc.dfdx(func2, val) as ChalkboardVector).x,
+                            dydt = (Chalkboard.calc.dfdx(func2, val) as ChalkboardVector).y,
+                            dzdt = (Chalkboard.calc.dfdx(func2, val) as ChalkboardVector).z;
                         return dfdx * dxdt + dfdy * dydt + dfdz! * dzdt!;
                     }
                 } else {
-                    throw new TypeError("Parameter \"func_2\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
+                    throw new TypeError("Parameter \"func2\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
                 }
             } else {
-                throw new TypeError("Parameter \"func_1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
+                throw new TypeError("Parameter \"func1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
         }
         export const div = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): number => {
@@ -351,22 +351,22 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
         }
-        export const fzdz = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
-            if(func_1.type === "comp") {
-                if(func_2.type === "curv") {
+        export const fzdz = (func1: ChalkboardFunction, func2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
+            if(func1.type === "comp") {
+                if(func2.type === "curv") {
                     let result = Chalkboard.comp.init(0, 0);
                     let dt = (sup - inf) / 10000;
                     for(let t = inf; t <= sup; t += dt) {
-                        let fz = Chalkboard.comp.val(func_1, Chalkboard.vect.toComplex(Chalkboard.real.val(func_2, t) as ChalkboardVector));
-                        let rt = Chalkboard.calc.dfdx(func_2, t) as ChalkboardVector;
+                        let fz = Chalkboard.comp.val(func1, Chalkboard.vect.toComplex(Chalkboard.real.val(func2, t) as ChalkboardVector));
+                        let rt = Chalkboard.calc.dfdx(func2, t) as ChalkboardVector;
                         result = Chalkboard.comp.add(result, Chalkboard.comp.init((fz.a * rt.x) - (fz.b * rt.y), (fz.b * rt.x) + (fz.a * rt.y)));
                     }
                     return Chalkboard.comp.scl(result, dt);
                 } else {
-                    throw new TypeError("Parameter \"func_2\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
+                    throw new TypeError("Parameter \"func2\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
                 }
             } else {
-                throw new TypeError("Parameter \"func_1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
+                throw new TypeError("Parameter \"func1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
         }
         export const grad = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector | ChalkboardMatrix => {

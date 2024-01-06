@@ -28,7 +28,9 @@ namespace Chalkboard {
         context.translate(x, y);
         context.scale(s, s);
         context.fillStyle = "rgb(25, 25, 25)";
-        context.fillRect(-50, -50, 100, 100);
+        context.beginPath();
+        context.ellipse(0, 0, 50, 50, 0, 0, Chalkboard.PI(2));
+        context.fill();
         context.fillStyle = "rgb(50, 125, 200)";
         context.textAlign = "center";
         context.textBaseline = "middle";
@@ -54,9 +56,10 @@ namespace Chalkboard {
         return coefficient * 4 * (4 * Math.atan(1/5) - Math.atan(1/239));
     }
     export const README = (): void => {
-        console.log("The Chalkboard Library\nVersion " + Chalkboard.VERSION + " Descartes released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
+        console.log("The Chalkboard Library\nVersion " + Chalkboard.VERSION + " " + Chalkboard.VERSIONALIAS + " released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
     }
     export const VERSION: "1.7.0" = "1.7.0";
+    export const VERSIONALIAS: "Descartes" = "Descartes";
 }
 
 if(typeof window === "undefined") {

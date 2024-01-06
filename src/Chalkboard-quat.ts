@@ -8,14 +8,14 @@ namespace Chalkboard {
         export const absolute = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
         }
-        export const add = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): ChalkboardQuaternion => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const add = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return Chalkboard.quat.init(quat_1.a + quat_2.a, quat_1.b + quat_2.b, quat_1.c + quat_2.c, quat_1.d + quat_2.d);
+            return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
         }
         export const conjugate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
@@ -26,32 +26,32 @@ namespace Chalkboard {
         export const copy = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
         }
-        export const dist = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): number => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const dist = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): number => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return Chalkboard.real.sqrt(((quat_2.a - quat_1.a) * (quat_2.a - quat_1.a)) + ((quat_2.b - quat_1.b) * (quat_2.b - quat_1.b)) + ((quat_2.c - quat_1.c) * (quat_2.c - quat_1.c)) + ((quat_2.d - quat_1.d) * (quat_2.d - quat_1.d)));
+            return Chalkboard.real.sqrt(((quat2.a - quat1.a) * (quat2.a - quat1.a)) + ((quat2.b - quat1.b) * (quat2.b - quat1.b)) + ((quat2.c - quat1.c) * (quat2.c - quat1.c)) + ((quat2.d - quat1.d) * (quat2.d - quat1.d)));
         }
-        export const distsq = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): number => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const distsq = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): number => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return ((quat_2.a - quat_1.a) * (quat_2.a - quat_1.a)) + ((quat_2.b - quat_1.b) * (quat_2.b - quat_1.b)) + ((quat_2.c - quat_1.c) * (quat_2.c - quat_1.c)) + ((quat_2.d - quat_1.d) * (quat_2.d - quat_1.d));
+            return ((quat2.a - quat1.a) * (quat2.a - quat1.a)) + ((quat2.b - quat1.b) * (quat2.b - quat1.b)) + ((quat2.c - quat1.c) * (quat2.c - quat1.c)) + ((quat2.d - quat1.d) * (quat2.d - quat1.d));
         }
-        export const div = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): ChalkboardQuaternion => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const div = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return Chalkboard.quat.init((quat_1.a * quat_2.a + quat_1.b * quat_2.b + quat_1.c * quat_2.c + quat_1.d * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.b * quat_2.a - quat_1.a * quat_2.b - quat_1.d * quat_2.c + quat_1.c * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.c * quat_2.a + quat_1.d * quat_2.b - quat_1.a * quat_2.c - quat_1.b * quat_2.d) / Chalkboard.quat.magsq(quat_2), (quat_1.d * quat_2.a - quat_1.c * quat_2.b + quat_1.b * quat_2.c - quat_1.a * quat_2.d) / Chalkboard.quat.magsq(quat_2));
+            return Chalkboard.quat.init((quat1.a * quat2.a + quat1.b * quat2.b + quat1.c * quat2.c + quat1.d * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.b * quat2.a - quat1.a * quat2.b - quat1.d * quat2.c + quat1.c * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.c * quat2.a + quat1.d * quat2.b - quat1.a * quat2.c - quat1.b * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.d * quat2.a - quat1.c * quat2.b + quat1.b * quat2.c - quat1.a * quat2.d) / Chalkboard.quat.magsq(quat2));
         }
         export const fromAxis = (vect: ChalkboardVector, rad: number): ChalkboardQuaternion => {
             if(typeof vect.z !== "undefined") {
@@ -75,14 +75,14 @@ namespace Chalkboard {
         export const magsq = (quat: ChalkboardQuaternion): number => {
             return (quat.a * quat.a) + (quat.b * quat.b) + (quat.c * quat.c) + (quat.d * quat.d);
         }
-        export const mul = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): ChalkboardQuaternion => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const mul = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return Chalkboard.quat.init((quat_1.a * quat_2.a) - (quat_1.b * quat_2.b) - (quat_1.c * quat_2.c) - (quat_1.d * quat_2.d), (quat_1.a * quat_2.b) + (quat_1.b * quat_2.a) + (quat_1.c * quat_2.d) - (quat_1.d * quat_2.c), (quat_1.a * quat_2.c) - (quat_1.b * quat_2.d) + (quat_1.c * quat_2.a) + (quat_1.d * quat_2.b), (quat_1.a * quat_2.d) + (quat_1.b * quat_2.c) - (quat_1.c * quat_2.b) + (quat_1.d * quat_2.a));
+            return Chalkboard.quat.init((quat1.a * quat2.a) - (quat1.b * quat2.b) - (quat1.c * quat2.c) - (quat1.d * quat2.d), (quat1.a * quat2.b) + (quat1.b * quat2.a) + (quat1.c * quat2.d) - (quat1.d * quat2.c), (quat1.a * quat2.c) - (quat1.b * quat2.d) + (quat1.c * quat2.a) + (quat1.d * quat2.b), (quat1.a * quat2.d) + (quat1.b * quat2.c) - (quat1.c * quat2.b) + (quat1.d * quat2.a));
         }
         export const negate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
@@ -105,14 +105,14 @@ namespace Chalkboard {
         export const scl = (quat: ChalkboardQuaternion, num: number): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
         }
-        export const sub = (quat_1: ChalkboardQuaternion, quat_2: ChalkboardQuaternion): ChalkboardQuaternion => {
-            if(typeof quat_1 === "number") {
-                quat_1 = Chalkboard.quat.init(quat_1, 0, 0, 0);
+        export const sub = (quat1: ChalkboardQuaternion, quat2: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if(typeof quat1 === "number") {
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             }
-            if(typeof quat_2 === "number") {
-                quat_2 = Chalkboard.quat.init(quat_2, 0, 0, 0);
+            if(typeof quat2 === "number") {
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             }
-            return Chalkboard.quat.init(quat_1.a - quat_2.a, quat_1.b - quat_2.b, quat_1.c - quat_2.c, quat_1.d - quat_2.d);
+            return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
         }
         export const toArray = (quat: ChalkboardQuaternion): [number, number, number, number] => {
             return [quat.a, quat.b, quat.c, quat.d];

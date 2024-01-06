@@ -8,14 +8,14 @@ namespace Chalkboard {
         export const absolute = (comp: ChalkboardComplex): ChalkboardComplex => {
             return Chalkboard.comp.init(Math.abs(comp.a), Math.abs(comp.b));
         }
-        export const add = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): ChalkboardComplex => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const add = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): ChalkboardComplex => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return Chalkboard.comp.init(comp_1.a + comp_2.a, comp_1.b + comp_2.b);
+            return Chalkboard.comp.init(comp1.a + comp2.a, comp1.b + comp2.b);
         }
         export const arg = (comp: ChalkboardComplex): number => {
             return Chalkboard.trig.arctan2(comp.b, comp.a);
@@ -32,32 +32,32 @@ namespace Chalkboard {
         export const define = (realDefinition: string, imagDefinition: string): ChalkboardFunction => {
             return {definition: [realDefinition, imagDefinition], type: "comp"};
         }
-        export const dist = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): number => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const dist = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): number => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return Chalkboard.real.sqrt(((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b)));
+            return Chalkboard.real.sqrt(((comp2.a - comp1.a) * (comp2.a - comp1.a)) + ((comp2.b - comp1.b) * (comp2.b - comp1.b)));
         }
-        export const distsq = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): number => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const distsq = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): number => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return ((comp_2.a - comp_1.a) * (comp_2.a - comp_1.a)) + ((comp_2.b - comp_1.b) * (comp_2.b - comp_1.b));
+            return ((comp2.a - comp1.a) * (comp2.a - comp1.a)) + ((comp2.b - comp1.b) * (comp2.b - comp1.b));
         }
-        export const div = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): ChalkboardComplex => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const div = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): ChalkboardComplex => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return Chalkboard.comp.init(((comp_1.a * comp_2.a) - (comp_1.b * comp_2.b)) / Chalkboard.comp.magsq(comp_2), ((comp_1.a * comp_2.b) + (comp_1.b * comp_2.a)) / Chalkboard.comp.magsq(comp_2));
+            return Chalkboard.comp.init(((comp1.a * comp2.a) - (comp1.b * comp2.b)) / Chalkboard.comp.magsq(comp2), ((comp1.a * comp2.b) + (comp1.b * comp2.a)) / Chalkboard.comp.magsq(comp2));
         }
         export const Euler = (rad: number): ChalkboardComplex => {
             return Chalkboard.comp.init(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
@@ -87,14 +87,14 @@ namespace Chalkboard {
         export const magsq = (comp: ChalkboardComplex): number => {
             return (comp.a * comp.a) + (comp.b * comp.b);
         }
-        export const mul = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): ChalkboardComplex => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const mul = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): ChalkboardComplex => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return Chalkboard.comp.init((comp_1.a * comp_2.a) - (comp_1.b * comp_2.b), (comp_1.a * comp_2.b) + (comp_1.b * comp_2.a));
+            return Chalkboard.comp.init((comp1.a * comp2.a) - (comp1.b * comp2.b), (comp1.a * comp2.b) + (comp1.b * comp2.a));
         }
         export const negate = (comp: ChalkboardComplex): ChalkboardComplex => {
             return Chalkboard.comp.init(-comp.a, -comp.b);
@@ -151,14 +151,14 @@ namespace Chalkboard {
         export const sqrt = (comp: ChalkboardComplex): ChalkboardComplex => {
             return Chalkboard.comp.init(Chalkboard.real.sqrt((comp.a + Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b))) / 2), Chalkboard.numb.sgn(comp.b) * Chalkboard.real.sqrt((-comp.a + Chalkboard.real.sqrt((comp.a * comp.a) + (comp.b * comp.b))) / 2));
         }
-        export const sub = (comp_1: ChalkboardComplex, comp_2: ChalkboardComplex): ChalkboardComplex => {
-            if(typeof comp_1 === "number") {
-                comp_1 = Chalkboard.comp.init(comp_1, 0);
+        export const sub = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): ChalkboardComplex => {
+            if(typeof comp1 === "number") {
+                comp1 = Chalkboard.comp.init(comp1, 0);
             }
-            if(typeof comp_2 === "number") {
-                comp_2 = Chalkboard.comp.init(comp_2, 0);
+            if(typeof comp2 === "number") {
+                comp2 = Chalkboard.comp.init(comp2, 0);
             }
-            return Chalkboard.comp.init(comp_1.a - comp_2.a, comp_1.b - comp_2.b);
+            return Chalkboard.comp.init(comp1.a - comp2.a, comp1.b - comp2.b);
         }
         export const toArray = (comp: ChalkboardComplex): [number, number] => {
             return [comp.a, comp.b];

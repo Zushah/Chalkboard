@@ -112,7 +112,7 @@ namespace Chalkboard {
             config.context.restore();
             return [[comp.a], [comp.b]];
         }
-        export const convolution = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {
+        export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, config: {
             x: number;
             y: number;
             size: number;
@@ -139,14 +139,14 @@ namespace Chalkboard {
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             for(let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.convolution(func_1, func_2, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.convolution(func_1, func_2, i)]);
+                config.context.lineTo(i, -Chalkboard.calc.convolution(func1, func2, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.convolution(func1, func2, i)]);
             }
             config.context.stroke();
             config.context.restore();
             return data;
         }
-        export const correlation = (func_1: ChalkboardFunction, func_2: ChalkboardFunction, config: {
+        export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, config: {
             x: number;
             y: number;
             size: number;
@@ -173,8 +173,8 @@ namespace Chalkboard {
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             for(let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.correlation(func_1, func_2, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.correlation(func_1, func_2, i)]);
+                config.context.lineTo(i, -Chalkboard.calc.correlation(func1, func2, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.correlation(func1, func2, i)]);
             }
             config.context.stroke();
             config.context.restore();

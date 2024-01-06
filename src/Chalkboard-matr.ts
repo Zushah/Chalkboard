@@ -15,25 +15,25 @@ namespace Chalkboard {
             }
             return result;
         }
-        export const add = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
-            if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
+        export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                 let result = Chalkboard.matr.init();
-                for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
+                for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                     result[i] = [];
-                    for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
-                        result[i][j] = matr_1[i][j] + matr_2[i][j];
+                    for(let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        result[i][j] = matr1[i][j] + matr2[i][j];
                     }
                 }
                 return result;
             } else {
-                throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
+                throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
             }
         }
-        export const addKronecker = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
-            if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.cols(matr_1) && Chalkboard.matr.rows(matr_2) === Chalkboard.matr.cols(matr_2)) {
-                return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr_1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr_1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr_2)), matr_2));
+        export const addKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.cols(matr1) && Chalkboard.matr.rows(matr2) === Chalkboard.matr.cols(matr2)) {
+                return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2));
             } else {
-                throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" that are square.");
+                throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" that are square.");
             }
         }
         export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
@@ -68,22 +68,22 @@ namespace Chalkboard {
         export const colspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         }
-        export const concat = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
+        export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
             if(type === "row") {
-                if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2)) {
-                    return Chalkboard.matr.init(matr_1.concat(matr_2));
+                if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
+                    return Chalkboard.matr.init(matr1.concat(matr2));
                 } else {
-                    throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows.");
+                    throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows.");
                 }
             } else if(type === "col") {
-                if(Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
+                if(Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                     let result = Chalkboard.matr.init();
-                    for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
-                        result.push(matr_1[i].concat(matr_2[i]));
+                    for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result.push(matr1[i].concat(matr2[i]));
                     }
                     return result;
                 } else {
-                    throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of columns.");
+                    throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of columns.");
                 }
             } else {
                 throw new TypeError("Parameter \"type\" must be \"row\" or \"col\".");
@@ -262,33 +262,33 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
-        export const mul = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
-            if(Chalkboard.matr.cols(matr_1) === Chalkboard.matr.rows(matr_2)) {
+        export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if(Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
                 let result = Chalkboard.matr.init();
-                for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
+                for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                     result[i] = [];
-                    for(let j = 0; j < Chalkboard.matr.cols(matr_2); j++) {
+                    for(let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
                         result[i][j] = 0;
-                        for(let k = 0; k < Chalkboard.matr.cols(matr_1); k++) {
-                            result[i][j] += matr_1[i][k] * matr_2[k][j];
+                        for(let k = 0; k < Chalkboard.matr.cols(matr1); k++) {
+                            result[i][j] += matr1[i][k] * matr2[k][j];
                         }
                     }
                 }
                 return result;
             } else {
-                throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" where the numbers of columns of \"matr_1\" must be equivalent to the number of rows of \"matr_2\".");
+                throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" where the numbers of columns of \"matr1\" must be equivalent to the number of rows of \"matr2\".");
             }
         }
-        export const mulKronecker = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
+        export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
-            for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
-                for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
-                    for(let k = 0; k < Chalkboard.matr.rows(matr_2); k++) {
-                        for(let l = 0; l < Chalkboard.matr.cols(matr_2); l++) {
-                            if(!result[i * Chalkboard.matr.rows(matr_2) + k]) {
-                                result[i * Chalkboard.matr.rows(matr_2) + k] = [];
+            for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                for(let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                    for(let k = 0; k < Chalkboard.matr.rows(matr2); k++) {
+                        for(let l = 0; l < Chalkboard.matr.cols(matr2); l++) {
+                            if(!result[i * Chalkboard.matr.rows(matr2) + k]) {
+                                result[i * Chalkboard.matr.rows(matr2) + k] = [];
                             }
-                            result[i * Chalkboard.matr.rows(matr_2) + k][j * Chalkboard.matr.cols(matr_2) + l] = matr_1[i][j] * matr_2[k][l];
+                            result[i * Chalkboard.matr.rows(matr2) + k][j * Chalkboard.matr.cols(matr2) + l] = matr1[i][j] * matr2[k][l];
                         }
                     }
                 }
@@ -516,10 +516,10 @@ namespace Chalkboard {
             if(rady === undefined && radz === undefined) {
                 return Chalkboard.matr.init([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
             } else {
-                let matr_x = Chalkboard.matr.init([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
-                    matr_y = Chalkboard.matr.init([Chalkboard.trig.cos(rady!), 0, Chalkboard.trig.sin(rady!)], [0, 1, 0], [-Chalkboard.trig.sin(rady!), 0, Chalkboard.trig.cos(rady!)]),
-                    matr_z = Chalkboard.matr.init([Chalkboard.trig.cos(radz!), -Chalkboard.trig.sin(radz!), 0], [Chalkboard.trig.sin(radz!), Chalkboard.trig.cos(radz!), 0], [0, 0, 1]);
-                return Chalkboard.matr.mul(matr_x, Chalkboard.matr.mul(matr_y, matr_z));
+                let matrx = Chalkboard.matr.init([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
+                    matry = Chalkboard.matr.init([Chalkboard.trig.cos(rady!), 0, Chalkboard.trig.sin(rady!)], [0, 1, 0], [-Chalkboard.trig.sin(rady!), 0, Chalkboard.trig.cos(rady!)]),
+                    matrz = Chalkboard.matr.init([Chalkboard.trig.cos(radz!), -Chalkboard.trig.sin(radz!), 0], [Chalkboard.trig.sin(radz!), Chalkboard.trig.cos(radz!), 0], [0, 0, 1]);
+                return Chalkboard.matr.mul(Chalkboard.matr.mul(matrz, matry), matrx);
             }
         }
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
@@ -573,33 +573,33 @@ namespace Chalkboard {
             }
             return result;
         }
-        export const solve = (matr_A: ChalkboardMatrix, matr_B: ChalkboardMatrix): ChalkboardMatrix => {
-            if(Chalkboard.matr.rows(matr_A) === Chalkboard.matr.cols(matr_A)) {
-                if(Chalkboard.matr.rows(matr_A) === Chalkboard.matr.rows(matr_B)) {
-                    if(Chalkboard.matr.det(matr_A) !== 0) {
-                        return Chalkboard.matr.mul(Chalkboard.matr.invert(matr_A), matr_B);
+        export const solve = (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix): ChalkboardMatrix => {
+            if(Chalkboard.matr.rows(matrA) === Chalkboard.matr.cols(matrA)) {
+                if(Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
+                    if(Chalkboard.matr.det(matrA) !== 0) {
+                        return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     } else {
-                        throw new TypeError("Parameter \"matr_A\" must be of type \"ChalkboardMatrix\" that is invertible.");
+                        throw new TypeError("Parameter \"matrA\" must be of type \"ChalkboardMatrix\" that is invertible.");
                     }
                 } else {
-                    throw new TypeError("Parameters \"matr_A\" and \"matr_B\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows.");
+                    throw new TypeError("Parameters \"matrA\" and \"matrB\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows.");
                 }
             } else {
-                throw new TypeError("Parameters \"matr_A\" must be of type \"ChalkboardMatrix\" that is square.");
+                throw new TypeError("Parameters \"matrA\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
-        export const sub = (matr_1: ChalkboardMatrix, matr_2: ChalkboardMatrix): ChalkboardMatrix => {
-            if(Chalkboard.matr.rows(matr_1) === Chalkboard.matr.rows(matr_2) && Chalkboard.matr.cols(matr_1) === Chalkboard.matr.cols(matr_2)) {
+        export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                 let result = Chalkboard.matr.init();
-                for(let i = 0; i < Chalkboard.matr.rows(matr_1); i++) {
+                for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                     result[i] = [];
-                    for(let j = 0; j < Chalkboard.matr.cols(matr_1); j++) {
-                        result[i][j] = matr_1[i][j] - matr_2[i][j];
+                    for(let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        result[i][j] = matr1[i][j] - matr2[i][j];
                     }
                 }
                 return result;
             } else {
-                throw new TypeError("Parameters \"matr_1\" and \"matr_2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
+                throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
             }
         }
         export const toArray = (matr: ChalkboardMatrix): number[] => {
