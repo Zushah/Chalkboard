@@ -134,7 +134,7 @@ namespace Chalkboard {
             if(num >= 0) {
                 return Math.exp(Math.log(num) / 2);
             } else {
-                throw new RangeError("Parameter \"num\" must be of type \"number\" greater than or equal to 0.");
+                return NaN;
             }
         }
         export const tetration = (base: number, num: number): number | undefined => {

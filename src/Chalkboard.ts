@@ -19,7 +19,7 @@ type ChalkboardVector = { x: number; y: number; z?: number; w?: number; };
 type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string; };
 
 namespace Chalkboard {
-    export const CONTEXT: string = "ctx";
+    export let CONTEXT: string = "ctx";
     export const E = (exponent: number = 1): number => {
         return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
     }
@@ -48,7 +48,8 @@ namespace Chalkboard {
         context.stroke();
         context.restore();
     }
-    export const PARSEPREFIX: string = "";
+    export let PARSEPREFIX: string = "";
+    Chalkboard.PARSEPREFIX += "const ctx = document.querySelector('canvas').getContext('2d');";
     export const PI = (coefficient: number = 1): number => {
         return coefficient * 4 * (4 * Math.atan(1/5) - Math.atan(1/239));
     }

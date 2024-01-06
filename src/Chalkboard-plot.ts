@@ -3,6 +3,7 @@
     Version 1.7.0 Descartes
 */
 /// <reference path="Chalkboard.ts"/>
+/// <reference path="Chalkboard-real.ts"/>
 namespace Chalkboard {
     export namespace plot {
         const PARSED_CONTEXT = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D;
@@ -179,6 +180,81 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+        export const definition = (func: ChalkboardFunction, config: {
+            x: number;
+            y: number;
+            size: number;
+            strokeStyle: string;
+            lineWidth: number;
+            domain: [number, number] | [[number, number], [number, number]];
+            context: CanvasRenderingContext2D;
+        }): number[][] => {
+            (config = {
+                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
+                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
+                context: config.context || PARSED_CONTEXT
+            }).size /= 100;
+            let xdomain = config.domain as [number, number];
+            let xydomain = config.domain as [[number, number], [number, number]];
+            let data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            if(func.type === "expl") {
+                let f = Chalkboard.real.parse("x => " + func.definition);
+                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(i, -f(i * config.size) / config.size);
+                    data.push([i, f(i)]);
+                }
+            } else if(func.type === "inve") {
+                let f = Chalkboard.real.parse("y => " + func.definition);
+                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(f(i * config.size) / config.size, -i);
+                    data.push([f(i), i]);
+                }
+            } else if(func.type === "pola") {
+                let r = Chalkboard.real.parse("O => " + func.definition);
+                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(r(i * config.size) / config.size * Chalkboard.trig.cos(i * config.size), -r(i * config.size) / config.size * Chalkboard.trig.sin(i * config.size));
+                    data.push([i, r(i)]);
+                }
+            } else if(func.type === "curv") {
+                let x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    y = Chalkboard.real.parse("t => " + func.definition[1]);
+                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
+                    data.push([x(i), y(i)]);
+                }
+            } else if(func.type === "comp") {
+                let u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                for(let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
+                    for(let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
+                        let z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
+                        if(z.a === 0 && z.b === 0) {
+                            config.context.fillStyle = "rgb(0, 0, 0)";
+                        } else if(z.a === Infinity && z.b === Infinity) {
+                            config.context.fillStyle = "rgb(255, 255, 255)";
+                        } else {
+                            config.context.fillStyle = "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
+                        }
+                        config.context.fillRect(i, j, 5, 5);
+                        data.push([u(i, j), v(i, j)]);
+                    }
+                }
+            } else {
+                throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a property \"type\" of \"expl\", \"inve\", \"pola\", \"curv\", or \"comp\".");
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        }
         export const dfdx = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -324,81 +400,6 @@ namespace Chalkboard {
             for(let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
                 config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * config.size) / config.size);
                 data.push([i, Chalkboard.calc.Fourier(func, i)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        }
-        export const definition = (func: ChalkboardFunction, config: {
-            x: number;
-            y: number;
-            size: number;
-            strokeStyle: string;
-            lineWidth: number;
-            domain: [number, number] | [[number, number], [number, number]];
-            context: CanvasRenderingContext2D;
-        }): number[][] => {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            let xdomain = config.domain as [number, number];
-            let xydomain = config.domain as [[number, number], [number, number]];
-            let data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            if(func.type === "expl") {
-                let f = Chalkboard.real.parse("x => " + func.definition);
-                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(i, -f(i * config.size) / config.size);
-                    data.push([i, f(i)]);
-                }
-            } else if(func.type === "inve") {
-                let f = Chalkboard.real.parse("y => " + func.definition);
-                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(f(i * config.size) / config.size, -i);
-                    data.push([f(i), i]);
-                }
-            } else if(func.type === "pola") {
-                let r = Chalkboard.real.parse("O => " + func.definition);
-                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(r(i * config.size) / config.size * Chalkboard.trig.cos(i * config.size), -r(i * config.size) / config.size * Chalkboard.trig.sin(i * config.size));
-                    data.push([i, r(i)]);
-                }
-            } else if(func.type === "curv") {
-                let x = Chalkboard.real.parse("t => " + func.definition[0]),
-                    y = Chalkboard.real.parse("t => " + func.definition[1]);
-                for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
-                    data.push([x(i), y(i)]);
-                }
-            } else if(func.type === "comp") {
-                let u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
-                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
-                for(let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
-                    for(let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
-                        let z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
-                        if(z.a === 0 && z.b === 0) {
-                            config.context.fillStyle = "rgb(0, 0, 0)";
-                        } else if(z.a === Infinity && z.b === Infinity) {
-                            config.context.fillStyle = "rgb(255, 255, 255)";
-                        } else {
-                            config.context.fillStyle = "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
-                        }
-                        config.context.fillRect(i, j, 5, 5);
-                        data.push([u(i, j), v(i, j)]);
-                    }
-                }
-            } else {
-                throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a property \"type\" of \"expl\", \"inve\", \"pola\", \"curv\", or \"comp\".");
             }
             config.context.stroke();
             config.context.restore();
