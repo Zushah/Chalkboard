@@ -4,10 +4,28 @@
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
+
+    /**
+     * The calculus namespace.
+     * @namespace
+     */
     export namespace calc {
+        /**
+         * Calculates the autocorrelation of an explicit function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const autocorrelation = (func: ChalkboardFunction, val: number): number => {
             return Chalkboard.calc.correlation(func, func, val);
         }
+
+        /**
+         * Calculates the binormal vector of a parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {ChalkboardVector}
+         */
         export const binormal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
@@ -19,12 +37,35 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
+
+        /**
+         * Calculates the convolution of two explicit functions at a value.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func1.definition + ") * (" + (func2.definition as string).replace(/x/g, "(" + val + " - x)") + ")"), -100, 100) as number;
         }
+
+        /**
+         * Calculates the correlation of two explicit functions at a value.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func1.definition + ") * (" + (func2.definition as string).replace(/x/g, "(" + val + " + x)") + ")"), -100, 100) as number;
         }
+
+        /**
+         * Calculates the curl of a 2D or 3D vector field at a vector.
+         * @param {ChalkboardVectorField} vectfield - The vector field
+         * @param {ChalkboardVector} vect - The vector
+         * @returns {ChalkboardVector}
+         */
         export const curl = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
             let h = 0.000000001;
             if(Chalkboard.vect.dimension(vectfield) === 2 && (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined")) {
@@ -48,6 +89,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vectfield\" must be of type \"ChalkboardVectorField\" with 2 or 3 dimensions.");
             }
         }
+
+        /**
+         * Calculates the curvature of a parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const curvature = (func: ChalkboardFunction, val: number): number => {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
@@ -63,6 +111,14 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
+
+        /**
+         * Calculates the directional derivative of a multivariable function at a vector in a direction.
+         * @param {ChalkboardFunction} func - The function
+         * @param {ChalkboardVector} vectpos - The position vector
+         * @param {ChalkboardVector} vectdir - The direction vector
+         * @returns {number}
+         */
         export const dfdv = (func: ChalkboardFunction, vectpos: ChalkboardVector, vectdir: ChalkboardVector): number => {
             if(func.type === "mult") {
                 return Chalkboard.vect.dot(Chalkboard.calc.grad(func, vectpos) as ChalkboardVector, Chalkboard.vect.normalize(vectdir));
@@ -70,6 +126,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
         }
+
+        /**
+         * Calculates the first-order derivative of an explicit, inverse, polar, or parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number | ChalkboardVector}
+         */
         export const dfdx = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
             let h = 0.000000001;
             if(func.type === "expl") {
@@ -96,6 +159,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
             }
         }
+
+        /**
+         * Calculates the second-order derivative of an explicit, inverse, polar, or parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number | ChalkboardVector}
+         */
         export const d2fdx2 = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
             let h = 0.00001;
             if(func.type === "expl") {
@@ -122,6 +192,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
             }
         }
+
+        /**
+         * Calculates the first-order complex derivative of a complex function at a complex number.
+         * @param {ChalkboardFunction} func - The function
+         * @param {ChalkboardComplex} comp - The complex number
+         * @returns {ChalkboardComplex[]}
+         */
         export const dfdz = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
             let h = 0.000000001;
             if(func.type === "comp") {
@@ -136,6 +213,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
         }
+
+        /**
+         * Calculates the second-order complex derivative of a complex function at a complex number.
+         * @param {ChalkboardFunction} func - The function
+         * @param {ChalkboardComplex} comp - The complex number
+         * @returns {ChalkboardComplex[]}
+         */
         export const d2fdz2 = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
             let h = 0.00001;
             if(func.type === "comp") {
@@ -150,6 +234,14 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
         }
+
+        /**
+         * Calculates the first-order multivariable chained derivative of a multivariable function composed with a parametric curve function at a value.
+         * @param {ChalkboardFunction} func1 - The multivariable function
+         * @param {ChalkboardFunction} func2 - The parametric curve function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const dfrdt = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             if(func1.type === "mult") {
                 if(func2.type === "curv") {
@@ -175,6 +267,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
         }
+
+        /**
+         * Calculates the divergence of a vector field at a vector.
+         * @param {ChalkboardVectorField} vectfield - The vector field
+         * @param {ChalkboardVector} vect - The vector
+         * @returns {number}
+         */
         export const div = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): number => {
             if(Chalkboard.vect.dimension(vectfield) === 2 || Chalkboard.vect.dimension(vectfield) === 3 || Chalkboard.vect.dimension(vectfield) === 4) {
                 return Chalkboard.matr.trace(Chalkboard.calc.grad(vectfield, vect) as ChalkboardMatrix);
@@ -182,6 +281,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vectfield\" must be of type \"ChalkboardVectorField\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates the extrema of an explicit function within an interval of its domain.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number[]} domain - The interval
+         * @returns {number[]}
+         */
         export const extrema = (func: ChalkboardFunction, domain: [number, number]): number[] => {
             let result = [];
             for(let i = domain[0]; i <= domain[1]; i++) {
@@ -191,7 +297,17 @@ namespace Chalkboard {
             }
             return result;
         }
-        export const fds = (func: ChalkboardFunction, tinf: number, tsup: number, sinf: number, ssup: number): number => {
+
+        /**
+         * Calculates the curve length or surface area of a parametric curve function or a parametric surface function, respectively.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} tinf - The lower t-bound (for both curve length and surface area)
+         * @param {number} tsup - The upper t-bound (for both curve length and surface area)
+         * @param {number} [sinf] - The lower s-bound (only for surface area)
+         * @param {number} [ssup] - The upper s-bound (only for surface area)
+         * @returns {number}
+         */
+        export const fds = (func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
             let result = 0;
             let drdt, drds;
             if(func.type === "curv") {
@@ -211,11 +327,11 @@ namespace Chalkboard {
                 }
             } else if(func.type === "surf") {
                 let dt = (tsup - tinf) / 100,
-                    ds = (ssup - sinf) / 100;
-                for(let s = sinf; s <= ssup; s += ds) {
+                    ds = (ssup! - sinf!) / 100;
+                for(let s = sinf; s! <= ssup!; s! += ds) {
                     for(let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 2);
                         result += Chalkboard.vect.mag(Chalkboard.vect.cross(drds, drdt));
                     }
                 }
@@ -224,7 +340,18 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\" or \"surf\".");
             }
         }
-        export const fnds = (vectfield: ChalkboardVectorField, func: ChalkboardFunction, tinf: number, tsup: number, sinf: number, ssup: number): number => {
+
+        /**
+         * Calculates the flux (line/surface integration over a vector field) of a parametric curve function or a parametric surface function through a 2D or 3D vector field, respectively.
+         * @param {ChalkboardVectorField} vectfield - The vector field
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} tinf - The lower t-bound (for both 2D and 3D)
+         * @param {number} tsup - The upper t-bound (for both 2D and 3D)
+         * @param {number} [sinf] - The lower s-bound (only for 3D)
+         * @param {number} [ssup] - The upper s-bound (only for 3D)
+         * @returns {number}
+         */
+        export const fnds = (vectfield: ChalkboardVectorField, func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
             let result = 0;
             let drdt, drds;
             if(func.type === "curv") {
@@ -244,12 +371,12 @@ namespace Chalkboard {
                 }
             } else if(func.type === "surf") {
                 let dt = (tsup - tinf) / 100,
-                    ds = (ssup - sinf) / 100;
-                for(let s = sinf; s <= ssup; s += ds) {
+                    ds = (ssup! - sinf!) / 100;
+                for(let s = sinf; s! <= ssup!; s! += ds) {
                     for(let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)) as ChalkboardMatrix, 3, "col", 2);
-                        result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.init(s, t)) as ChalkboardVector), drds, drdt);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 1);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 2);
+                        result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.init(s!, t)) as ChalkboardVector), drds, drdt);
                     }
                 }
                 return result * ds * dt;
@@ -257,9 +384,25 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\" or \"surf\".");
             }
         }
+
+        /**
+         * Calculates the Fourier transform of an explicit function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const Fourier = (func: ChalkboardFunction, val: number): number => {
             return (2 * (Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func.definition + ") * Math.cos(" + val + " * x)"), 0, 10) as number)) / Chalkboard.PI();
         }
+
+        /**
+         * Calculates the circulation (line integration over a scalar/vector field) of a parametric curve through a multivariable function or a vector field.
+         * @param {ChalkboardFunction | ChalkboardVectorField} funcORvectfield - The multivariable function or vector field
+         * @param {ChalkboardFunction} func - The parametric curve function
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @returns {number}
+         */
         export const frds = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, func: ChalkboardFunction, inf: number, sup: number): number => {
             const funct = funcORvectfield as ChalkboardFunction;
             const vectfield = funcORvectfield as ChalkboardVectorField;
@@ -288,6 +431,14 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
+
+        /**
+         * Calculates the integration of an explicit, inverse, polar, or parametric curve function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @returns {number | ChalkboardVector}
+         */
         export const fxdx = (func: ChalkboardFunction, inf: number, sup: number): number | ChalkboardVector => {
             if(func.type === "expl" || func.type === "inve" || func.type === "pola") {
                 let f;
@@ -335,6 +486,16 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"inve\", \"pola\", or \"curv\".");
             }
         }
+
+        /**
+         * Calculates the double integration of a multivariable function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} xinf - The lower x-bound
+         * @param {number} xsup - The upper x-bound
+         * @param {number} yinf - The lower y-bound
+         * @param {number} ysup - The upper y-bound
+         * @returns {number}
+         */
         export const fxydxdy = (func: ChalkboardFunction, xinf: number, xsup: number, yinf: number, ysup: number): number => {
             if(func.type === "mult") {
                 let f = Chalkboard.real.parse("(x, y) => " + func.definition);
@@ -351,6 +512,15 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"mult\".");
             }
         }
+
+        /**
+         * Calculates the complex integration of a complex function composed with a parametric curve function.
+         * @param {ChalkboardFunction} func1 - The complex function
+         * @param {ChalkboardFunction} func2 - The parametric curve function
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @returns 
+         */
         export const fzdz = (func1: ChalkboardFunction, func2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
             if(func1.type === "comp") {
                 if(func2.type === "curv") {
@@ -369,6 +539,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func1\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"comp\".");
             }
         }
+
+        /**
+         * Calculates the first-order gradient of a multivariable function, a parametric surface function, or a vector field at a vector.
+         * @param {ChalkboardFunction | ChalkboardVectorField} funcORvectfield - The function or vector field
+         * @param {ChalkboardVector} vect - The vector
+         * @returns {ChalkboardVector | ChalkboardMatrix}
+         */
         export const grad = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector | ChalkboardMatrix => {
             let h = 0.000000001;
             let func = funcORvectfield as ChalkboardFunction;
@@ -445,6 +622,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"funcORvectfield\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"surf\" or \"mult\" or of type \"ChalkboardVectorField\".");
             }
         }
+
+        /**
+         * Calculates the second-order gradient of a multivariable function, a parametric surface function, or a vector field at a vector.
+         * @param {ChalkboardFunction | ChalkboardVectorField} funcORvectfield - The function or vector field
+         * @param {ChalkboardVector} vect - The vector
+         * @returns {ChalkboardMatrix}
+         */
         export const grad2 = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector): ChalkboardMatrix => {
             let h = 0.00001;
             let func = funcORvectfield as ChalkboardFunction;
@@ -524,6 +708,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"funcORvectfield\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"surf\" or \"mult\" or it must be of type \"ChalkboardVectorField\".");
             }
         }
+
+        /**
+         * Calculates the Laplace transform of a function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number}
+         */
         export const Laplace = (func: ChalkboardFunction, val: number): number => {
             if(val > 0) {
                 return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func.definition + ") * Math.exp(-" + val + " * x)"), 0, 10) as number;
@@ -531,6 +722,13 @@ namespace Chalkboard {
                 throw new RangeError("Parameter \"val\" must be of type \"number\" greater than 0.");
             }
         }
+
+        /**
+         * Calculates the limit of an explicit function as it approaches a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {number | undefined}
+         */
         export const lim = (func: ChalkboardFunction, val: number): number | undefined => {
             if(func.type === "expl") {
                 if(val === Infinity) {
@@ -560,9 +758,24 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\".");
             }
         }
-        export const mean = (func: ChalkboardFunction, a: number, b: number): number => {
-            return (Chalkboard.calc.fxdx(func, a, b) as number) / (b - a);
+
+        /**
+         * Calculates the mean value of an explicit function within an interval.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @returns {number}
+         */
+        export const mean = (func: ChalkboardFunction, inf: number, sup: number): number => {
+            return (Chalkboard.calc.fxdx(func, inf, sup) as number) / (sup - inf);
         }
+
+        /**
+         * Calculates a root of an explicit function with Newton's method within an interval.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number[]} [domain=[-1, 1]] - The interval
+         * @returns {number}
+         */
         export const Newton = (func: ChalkboardFunction, domain: [number, number] = [-1, 1]): number => {
             let x = Chalkboard.numb.random(domain[0], domain[1]);
             for(let i = 0; i < 10; i++) {
@@ -570,6 +783,13 @@ namespace Chalkboard {
             }
             return x;
         }
+
+        /**
+         * Calculates the unit normal vector of a parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {ChalkboardVector}
+         */
         export const normal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
@@ -581,6 +801,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
+
+        /**
+         * Calculates the unit tangent vector of a parametric curve function at a value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @returns {ChalkboardVector}
+         */
         export const tangent = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if(func.type === "curv") {
                 if(func.definition.length === 2) {
@@ -592,6 +819,15 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"curv\".");
             }
         }
+
+        /**
+         * Calculates the nth-degree Taylor series approximation of an explicit function at a value centered around another value.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @param {number} n - The degree
+         * @param {number} a - The center
+         * @returns {number}
+         */
         export const Taylor = (func: ChalkboardFunction, val: number, n: 0 | 1 | 2, a: number): number => {
             if(func.type === "expl") {
                 if(n === 0) {
