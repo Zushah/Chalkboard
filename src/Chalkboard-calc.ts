@@ -50,7 +50,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculates the correlation of two explicit functions at a value.
+         * Calculates the cross-correlation of two explicit functions at a value.
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
          * @param {number} val - The value
@@ -433,7 +433,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculates the integration of an explicit, inverse, polar, or parametric curve function.
+         * Calculates the antiderivative (or integral) of an explicit, inverse, polar, or parametric curve function.
          * @param {ChalkboardFunction} func - The function
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound

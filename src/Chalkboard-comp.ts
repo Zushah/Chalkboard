@@ -6,7 +6,7 @@
 namespace Chalkboard {
 
     /**
-     * The complex numbers namespace.
+     * The complex number namespace.
      * @namespace
      */
     export namespace comp {
@@ -85,7 +85,7 @@ namespace Chalkboard {
          * @param {ChalkboardComplex | number} comp2 - The second complex number 
          * @returns {ChalkboardComplex}
          */
-        export const dist = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): number => {
+        export const dist = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): number => {
             if(typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if(typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.real.sqrt(((comp2.a - comp1.a) * (comp2.a - comp1.a)) + ((comp2.b - comp1.b) * (comp2.b - comp1.b)));
@@ -97,7 +97,7 @@ namespace Chalkboard {
          * @param {ChalkboardComplex | number} comp2 - The second complex number 
          * @returns {ChalkboardComplex}
          */
-        export const distsq = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): number => {
+        export const distsq = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): number => {
             if(typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if(typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
             return ((comp2.a - comp1.a) * (comp2.a - comp1.a)) + ((comp2.b - comp1.b) * (comp2.b - comp1.b));
@@ -109,7 +109,7 @@ namespace Chalkboard {
          * @param {ChalkboardComplex | number} comp2 - The second complex number 
          * @returns {ChalkboardComplex}
          */
-        export const div = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): ChalkboardComplex => {
+        export const div = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
             if(typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if(typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.comp.init(((comp1.a * comp2.a) - (comp1.b * comp2.b)) / Chalkboard.comp.magsq(comp2), ((comp1.a * comp2.b) + (comp1.b * comp2.a)) / Chalkboard.comp.magsq(comp2));
@@ -141,7 +141,7 @@ namespace Chalkboard {
          * Initializes a new complex number
          * @param {number} a - The real part
          * @param {number} b - The imaginary part
-         * @returns {ChalkboardComplex}{ChalkboardComplex}
+         * @returns {ChalkboardComplex}
          */
         export const init = (a: number, b: number = 0): ChalkboardComplex => {
             return {a: a, b: b};
@@ -166,7 +166,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculations the magnitude (or modulus) of a complex number.
+         * Calculates the magnitude (or modulus) of a complex number.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {number}
          */
@@ -215,7 +215,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculates the normalization of two complex numbers.
+         * Calculates the normalization of a complex number.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboardComplex}
          */
@@ -225,7 +225,7 @@ namespace Chalkboard {
 
         /**
          * Parses a string of JavaScript code.
-         * @param {string} str 
+         * @param {string} str - The string
          * @returns {Function}
          */
         export const parse = (str: string): Function => {
@@ -415,7 +415,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculates a complex number multiplied  by zero.
+         * Calculates a complex number multiplied by zero.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboardComplex}
          */

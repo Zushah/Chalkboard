@@ -4,7 +4,18 @@
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
+
+    /**
+     * The matrix namespace.
+     * @namespace
+     */
     export namespace matr {
+
+        /**
+         * Calculates the absolute value of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -15,6 +26,13 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the addition of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                 let result = Chalkboard.matr.init();
@@ -29,6 +47,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
             }
         }
+
+        /**
+         * Calculates the Kronecker addition of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const addKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.cols(matr1) && Chalkboard.matr.rows(matr2) === Chalkboard.matr.cols(matr2)) {
                 return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2));
@@ -36,9 +61,24 @@ namespace Chalkboard {
                 throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" that are square.");
             }
         }
+
+        /**
+         * Calculates the adjugate matrix of a matrix at a row and column.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} row - The row
+         * @param {number} col - The column
+         * @returns {ChalkboardMatrix}
+         */
         export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         }
+
+        /**
+         * Initializes a binomial matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @param {"lower" | "upper" | "symmetric"} [type="lower"] - The type of layout for the matrix, either "lower", "upper", or "symmetric"
+         * @returns {ChalkboardMatrix}
+         */
         export const binomial = (size: number, type: "lower" | "upper" | "symmetric" = "lower"): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
@@ -57,17 +97,45 @@ namespace Chalkboard {
                 return result;
             }
         }
+
+        /**
+         * Calculates the cofactor matrix of a matrix at a row and column.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} row - The row
+         * @param {number} col - The column
+         * @returns {ChalkboardMatrix}
+         */
         export const cofactor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             return matr.slice(0, row - 1).concat(matr.slice(row)).map(function(row) {
                 return row.slice(0, col - 1).concat(row.slice(col));
             });
         }
+
+        /**
+         * Returns the number of columns in a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
         export const cols = (matr: ChalkboardMatrix): number => {
             return matr[0].length;
         }
+
+        /**
+         * Calculates the column space of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const colspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         }
+
+        /**
+         * Calculates the concatentation of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @param {"row" | "col"} [type="row"] - Set to concatenate either the rows with "row" or the columns with "col" 
+         * @returns {ChalkboardMatrix}
+         */
         export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
             if(type === "row") {
                 if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
@@ -89,6 +157,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"type\" must be \"row\" or \"col\".");
             }
         }
+
+        /**
+         * Calculates a matrix constrained within a range.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number[]} [range=[0, 1]] - The range
+         * @returns {ChalkboardMatrix}
+         */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -99,6 +174,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Copies a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -109,6 +190,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the determinant of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
         export const det = (matr: ChalkboardMatrix): number => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 let result = 0;
@@ -127,6 +214,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Initializes an empty matrix.
+         * @param {number} rows - The number of rows
+         * @param {number} cols - The number of columns
+         * @returns {ChalkboardMatrix}
+         */
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
@@ -137,6 +231,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes an exchange matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const exchange = (size: number): ChalkboardMatrix => {
             let result = Chalkboard.matr.fill(0, size, size);
             for(let i = 0; i < size; i++) {
@@ -148,6 +248,14 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes a matrix filled with one number.
+         * @param {number} element - The numberto fill the elements with
+         * @param {number} rows - The number of rows
+         * @param {number} cols - The number of columns
+         * @returns {ChalkboardMatrix}
+         */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
@@ -158,6 +266,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes a Hilbert matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const Hilbert = (size: number): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
@@ -168,6 +282,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes an identity matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const identity = (size: number): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
@@ -176,6 +296,20 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes a new matrix.
+         * @param {number[][] | number[][][]} matrix - Either a sequence of 1D arrays to be used as rows for the matrix or one 2D array to be used as the matrix
+         * @returns {ChalkboardMatrix}
+         * @example
+         * // Defines a 3x3 matrix [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+         * let A = Chalkboard.matr.init([1, 2, 3],
+         *                              [4, 5, 6],
+         *                              [7, 8, 9]);
+         * let B = Chalkboard.matr.init([[1, 2, 3],
+         *                               [4, 5, 6],
+         *                               [7, 8, 9]]);
+         */
         export const init = (...matrix: number[][] | number[][][]): ChalkboardMatrix => {
             if(matrix.length === 0) {
                 return [];
@@ -185,6 +319,12 @@ namespace Chalkboard {
                 return matrix as number[][];
             }
         }
+
+        /**
+         * Calculates the inverse of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const invert = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 let result = Chalkboard.matr.init();
@@ -227,6 +367,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Initializes a Lehmer matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const Lehmer = (size: number): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < size; i++) {
@@ -237,6 +383,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the LU decomposition of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {{L: ChalkboardMatrix, U: ChalkboardMatrix}}
+         */
         export const LUdecomp = (matr: ChalkboardMatrix): {L: ChalkboardMatrix, U: ChalkboardMatrix} => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 let L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
@@ -262,6 +414,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Calculates the multiplication of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
                 let result = Chalkboard.matr.init();
@@ -279,6 +438,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" where the numbers of columns of \"matr1\" must be equivalent to the number of rows of \"matr2\".");
             }
         }
+
+        /**
+         * Calculates the Kronecker multiplication of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -295,6 +461,13 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the multiplication of a matrix with a vector.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {ChalkboardVector} vect - The vector 
+         * @returns {ChalkboardMatrix | ChalkboardVector}
+         */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 if(Chalkboard.matr.rows(matr) === 2) {
@@ -318,6 +491,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates the negation of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -328,6 +507,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the null space of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const nullspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let augmented = matr.map(function(row) {
                 return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
@@ -341,6 +526,13 @@ namespace Chalkboard {
                 return row.slice(Chalkboard.matr.rows(matr));
             });
         }
+
+        /**
+         * Calculates the exponentiation of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} num - The exponent
+         * @returns {ChalkboardMatrix}
+         */
         export const pow = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 if(num === 0) {
@@ -356,9 +548,23 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Prints a matrix in the console.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {void}
+         */
         export const print = (matr: ChalkboardMatrix): void => {
             console.log(Chalkboard.matr.toString(matr));
         }
+
+        /**
+         * Returns a matrix with a row or column removed (pulled out).
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {"row" | "col"} type - Set to pull either a row with "row" or a column with "col"
+         * @param {number} rowORcol - The row or column to pull
+         * @returns {ChalkboardMatrix}
+         */
         export const pull = (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number): ChalkboardMatrix => {
             rowORcol -= 1;
             if(type === "row") {
@@ -373,6 +579,15 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"type\" must be \"row\" or \"col\".");
             }
         }
+
+        /**
+         * Returns a matrix with a row or column added (pushed in).
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {"row" | "col"} type - Set to pull either a row with "row" or a column with "col"
+         * @param {number} rowORcol - The row or column to pull
+         * @param {number[]} elements - The elements to push
+         * @returns {ChalkboardMatrix}
+         */
         export const push = (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number, elements: number[]): ChalkboardMatrix => {
             rowORcol -= 1;
             if(type === "row") {
@@ -387,6 +602,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"type\" must be \"row\" or \"col\".");
             }
         }
+
+        /**
+         * Calculates the QR decomposition of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {{Q: ChalkboardMatrix, R: ChalkboardMatrix}}
+         */
         export const QRdecomp = (matr: ChalkboardMatrix): {Q: ChalkboardMatrix, R: ChalkboardMatrix} => {
             let Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
                 R = Chalkboard.matr.copy(matr);
@@ -434,6 +655,15 @@ namespace Chalkboard {
             }
             return {Q: Q, R: R};
         }
+
+        /**
+         * Initializes a random matrix.
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @param {number} rows - The number of rows
+         * @param {number} cols - The number of columns
+         * @returns {ChalkboardMatrix}
+         */
         export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < rows; i++) {
@@ -444,6 +674,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the rank of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
         export const rank = (matr: ChalkboardMatrix): number => {
             return Chalkboard.matr.reduce(matr).filter(function(row: number[]) {
                 return row.some(function(element) {
@@ -451,6 +687,12 @@ namespace Chalkboard {
                 });
             }).length;
         }
+
+        /**
+         * Calculates the reciprocal of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -461,6 +703,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the row echelon form of a matrix (performs Gaussian elimination on it).
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const reduce = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let lead = 0;
             for(let row = 0; row < Chalkboard.matr.rows(matr); row++) {
@@ -497,6 +745,14 @@ namespace Chalkboard {
             }
             return matr;
         }
+
+        /**
+         * Returns a matrix with the number of rows and columns changed.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} rows - The number of rows to change to
+         * @param {nmber} cols - The number of columns to change to
+         * @returns {ChalkboardMatrix}
+         */
         export const resize = (matr: ChalkboardMatrix, rows: number, cols: number): ChalkboardMatrix => {
             if(cols === undefined) {
                 cols = rows;
@@ -512,6 +768,14 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes a rotation matrix.
+         * @param {number} radx - The xy-rotation in radians (for 2D) or the x-rotation in radians (for 3D)
+         * @param {number} [rady] - The y-rotation in radians (for 3D)
+         * @param {number} [radz] - The z-rotation in radians (for 3D)
+         * @returns {ChalkboardMatrix}
+         */
         export const rotator = (radx: number, rady?: number, radz?: number): ChalkboardMatrix => {
             if(rady === undefined && radz === undefined) {
                 return Chalkboard.matr.init([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
@@ -522,6 +786,12 @@ namespace Chalkboard {
                 return Chalkboard.matr.mul(Chalkboard.matr.mul(matrz, matry), matrx);
             }
         }
+
+        /**
+         * Calculates the rounding of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -532,9 +802,21 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Returns the number of rows in a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
         export const rows = (matr: ChalkboardMatrix): number => {
             return matr.length;
         }
+
+        /**
+         * Calculates the row space of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const rowspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             return Chalkboard.matr.reduce(matr).filter(function(row: number[]) {
                 return row.some(function(element) {
@@ -542,6 +824,12 @@ namespace Chalkboard {
                 });
             });
         }
+
+        /**
+         * Initializes a scaling matrix.
+         * @param {ChalkboardVector} vect - The coordinates to use represented as a vector
+         * @returns {ChalkboardMatrix}
+         */
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
@@ -553,6 +841,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates the scalar multiplication of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} num - The number
+         * @returns {ChalkboardMatrix}
+         */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -563,6 +858,13 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Initializes a shift matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @param {number} shiftAmount - The number of diagonals to shift by, where positive is rightward-shifts and negative is leftward-shifts
+         * @returns {ChalkboardMatrix}
+         */
         export const shift = (size: number, shiftAmount: number = 1): ChalkboardMatrix => {
             let result = Chalkboard.matr.fill(0, size, size);
             for(let i = 0; i < size; i++) {
@@ -573,6 +875,13 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Calculates the solution to a system of linear equations defined by a coefficients matrix and a constants matrix.
+         * @param {ChalkboardMatrix} matrA - The coefficients matrix
+         * @param {ChalkboardMatrix} matrB - The constants matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const solve = (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matrA) === Chalkboard.matr.cols(matrA)) {
                 if(Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
@@ -588,6 +897,13 @@ namespace Chalkboard {
                 throw new TypeError("Parameters \"matrA\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Calculates the subtraction of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if(Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                 let result = Chalkboard.matr.init();
@@ -602,6 +918,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameters \"matr1\" and \"matr2\" must be of type \"ChalkboardMatrix\" with equivalent numbers of rows and columns.");
             }
         }
+
+        /**
+         * Converts a matrix to an array.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number[]}
+         */
         export const toArray = (matr: ChalkboardMatrix): number[] => {
             let result = [];
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -611,6 +933,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Converts a matrix to an object.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {object}
+         */
         export const toObject = (matr: ChalkboardMatrix): object => {
             let result: {[key: string]: {[key: string]: number}} = {};
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -621,6 +949,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Converts a matrix to a string.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {string}
+         */
         export const toString = (matr: ChalkboardMatrix): string => {
             let result = "";
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -632,12 +966,28 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Converts a matrix to a tensor.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number[]} size - The number of rows, columns, tubes, etc. of the tensor represented as a single array or a sequence of arguments
+         * @returns {ChalkboardTensor}
+         */
         export const toTensor = (matr: ChalkboardMatrix, ...size: number[]): ChalkboardTensor => {
             if(Array.isArray(size[0])) {
                 size = size[0];
             }
             return Chalkboard.tens.resize(matr, ...size);
         }
+
+        /**
+         * Converts a matrix to a vector.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} dimension - The dimension of the vector which can be either 2, 3, or 4
+         * @param {"col" | "row"} [type="col"] - Whether the converted vector will be from the row or the column of the matrix
+         * @param {number} [rowORcol=1] - The row or column number to convert
+         * @returns {ChalkboardMatrix}
+         */
         export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, type: "col" | "row" = "col", rowORcol: number = 1): ChalkboardVector => {
             rowORcol -= 1;
             if(dimension === 2) {
@@ -668,6 +1018,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates the trace of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
         export const trace = (matr: ChalkboardMatrix): number => {
             if(Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 let result = 0;
@@ -679,6 +1035,12 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"matr\" must be of type \"ChalkboardMatrix\" that is square.");
             }
         }
+
+        /**
+         * Calculates the transpose of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.cols(matr); i++) {
@@ -689,6 +1051,12 @@ namespace Chalkboard {
             }
             return result;
         }
+        
+        /**
+         * Initializes a translation matrix.
+         * @param {ChalkboardVector} vect - The coordinates to use represented as a vector
+         * @returns {ChalkboardMatrix}
+         */
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
             if(typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
@@ -700,12 +1068,18 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates a matrix multiplied by zero.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             for(let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                 result[i] = [];
                 for(let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = 0;
+                    result[i][j] = matr[i][j] * 0;
                 }
             }
             return result;

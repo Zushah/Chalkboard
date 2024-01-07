@@ -5,8 +5,22 @@
 /// <reference path="Chalkboard.ts"/>
 /// <reference path="Chalkboard-real.ts"/>
 namespace Chalkboard {
+
+    /**
+     * The plotting namespace
+     * @namespace
+     */
     export namespace plot {
+
+        /** @ignore */
         const PARSED_CONTEXT = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D;
+
+        /**
+         * Plots the autocorrelation of an explicit function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const autocorrelation = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -41,6 +55,14 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots a bar plot/chart/graph for an array of data with bins specified by another array.
+         * @param arr 
+         * @param bins 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const barplot = (arr: number[], bins: number[], config: {
             x: number;
             y: number;
@@ -87,6 +109,13 @@ namespace Chalkboard {
             config.context.restore();
             return bars;
         }
+
+        /**
+         * Plots a complex number.
+         * @param comp 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const comp = (comp: ChalkboardComplex, config: {
             x: number;
             y: number;
@@ -112,6 +141,14 @@ namespace Chalkboard {
             config.context.restore();
             return [[comp.a], [comp.b]];
         }
+
+        /**
+         * Plots the convolution of two explicit functions.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -146,6 +183,14 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the cross-correlation of two explicit functions.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -180,6 +225,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots an explicit, inverse, polar, parametric curve, or complex function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const definition = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -255,6 +307,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the first-order derivative of an explicit or inverse function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const dfdx = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -294,6 +353,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the second-order derivative of an explicit or inverse function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const d2fdx2 = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -333,6 +399,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots a 2D vector field.
+         * @param vectfield 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const field = (vectfield: ChalkboardVectorField, config: {
             x: number;
             y: number;
@@ -371,6 +444,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the Fourier transform of an explicit function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const Fourier = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -405,6 +485,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the antiderivative (or integral) of an explicit or inverse function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const fxdx = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -444,6 +531,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the Laplace transform of an explicit function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const Laplace = (func: ChalkboardFunction, config: {
             x: number;
             y: number;
@@ -485,6 +579,14 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots a line chart/plot/graph for an array of data with bins specified by another array.
+         * @param arr 
+         * @param bins 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const lineplot = (arr: number[], bins: number[], config: {
             x: number;
             y: number;
@@ -527,6 +629,13 @@ namespace Chalkboard {
             config.context.restore();
             return verts;
         }
+
+        /**
+         * Plots a 2x2 matrix.
+         * @param matr 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const matr = (matr: ChalkboardMatrix, config: {
             x: number;
             y: number;
@@ -557,6 +666,12 @@ namespace Chalkboard {
             Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), config);
             return matr;
         }
+
+        /**
+         * Plots the polar coordinate plane.
+         * @param {object} config - The configuration options
+         * @returns {void}
+         */
         export const rOplane = (config: {
             x: number;
             y: number;
@@ -594,6 +709,14 @@ namespace Chalkboard {
             config.context.stroke();
             config.context.restore();
         }
+
+        /**
+         * Plots a scatter plot of two arrays of data.
+         * @param arr1 
+         * @param arr2 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const scatterplot = (arr1: number[], arr2: number[], config: {
             x: number;
             y: number;
@@ -625,6 +748,15 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots the nth-degree Taylor series approximation for an explicit function.
+         * @param {ChalkboardFunction} func - The function
+         * @param n 
+         * @param a 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const Taylor = (func: ChalkboardFunction, n: 0 | 1 | 2, a: number, config: {
             x: number;
             y: number;
@@ -659,6 +791,13 @@ namespace Chalkboard {
             config.context.restore();
             return data;
         }
+
+        /**
+         * Plots a 2D vector.
+         * @param vect 
+         * @param {object} config - The configuration options
+         * @returns {number[][]}
+         */
         export const vect = (vect: ChalkboardVector, config: {
             x: number;
             y: number;
@@ -686,6 +825,12 @@ namespace Chalkboard {
             config.context.restore();
             return [[vect.x], [vect.y]];
         }
+
+        /**
+         * Plots the Cartesian coordinate plane.
+         * @param {object} config - The configuration options
+         * @returns {void}
+         */
         export const xyplane = (config: {
             x: number;
             y: number;
