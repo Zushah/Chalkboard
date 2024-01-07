@@ -986,7 +986,7 @@ namespace Chalkboard {
          * @param {number} dimension - The dimension of the vector which can be either 2, 3, or 4
          * @param {"col" | "row"} [type="col"] - Whether the converted vector will be from the row or the column of the matrix
          * @param {number} [rowORcol=1] - The row or column number to convert
-         * @returns {ChalkboardMatrix}
+         * @returns {ChalkboardVector}
          */
         export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, type: "col" | "row" = "col", rowORcol: number = 1): ChalkboardVector => {
             rowORcol -= 1;

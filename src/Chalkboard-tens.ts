@@ -4,7 +4,18 @@
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
+
+    /**
+     * The tensor namespace.
+     * @namespace
+     */
     export namespace tens {
+
+        /**
+         * Calculates the absolute value of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const absolute = (tens: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -16,6 +27,13 @@ namespace Chalkboard {
                 return Math.abs(tens);
             }
         }
+
+        /**
+         * Calculates the addition of two tensors.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {ChalkboardTensor}
+         */
         export const add = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
@@ -27,6 +45,14 @@ namespace Chalkboard {
                 return (tens1 as number) + (tens2 as number);
             }
         }
+
+        /**
+         * Calculates the concatentation of two tensors.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @param {number} [rank=1] - The rank to concatenate 
+         * @returns {ChalkboardTensor}
+         */
         export const concat = (tens1: ChalkboardTensor, tens2: ChalkboardTensor, rank: number = 1): ChalkboardTensor => {
             let concatAtRank = function(arr1: ChalkboardTensor, arr2: ChalkboardTensor, currentRank: number): ChalkboardTensor {
                 if(currentRank === rank) {
@@ -38,6 +64,13 @@ namespace Chalkboard {
             }
             return concatAtRank(tens1, tens2, 1);
         }
+
+        /**
+         * Calculates a tensor constrained within a range.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number[]} [range=[0, 1]] - The range
+         * @returns {ChalkboardTensor}
+         */
         export const constrain = (tens: ChalkboardTensor, range: [number, number] = [0, 1]): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -49,6 +82,12 @@ namespace Chalkboard {
                 return Chalkboard.numb.constrain(tens, range);
             }
         }
+
+        /**
+         * Calculates the contraction of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor | number}
+         */
         export const contract = (tens: ChalkboardTensor): ChalkboardTensor | number => {
             if(Chalkboard.tens.rank(tens) > 2) {
                 return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens)[0], Chalkboard.tens.size(tens).slice(1).reduce(function(a: number, b: number): number { return a * b; }) / Chalkboard.tens.size(tens)[0]);
@@ -58,6 +97,12 @@ namespace Chalkboard {
                 return tens;
             }
         }
+
+        /**
+         * Copies a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const copy = (tens: ChalkboardTensor): ChalkboardTensor => {
             if(Array.isArray(tens)) {
                 let result = Chalkboard.tens.init() as ChalkboardTensor[];
@@ -69,6 +114,12 @@ namespace Chalkboard {
                 return tens;
             }
         }
+
+        /**
+         * Initializes an empty tensor.
+         * @param {number[]} size - The size
+         * @returns {ChalkboardTensor}
+         */
         export const empty =  (...size: number[]): ChalkboardTensor => {
             if(Array.isArray(size[0])) {
                 size = size[0];
@@ -87,6 +138,13 @@ namespace Chalkboard {
             };
             return newNDArray(size) as ChalkboardTensor;
         }
+
+        /**
+         * Initializes a tensor filled with one number.
+         * @param {number} element - The number to fill the elements with
+         * @param {number[]} size - The size
+         * @returns {ChalkboardTensor}
+         */
         export const fill = (element: number, ...size: number[]): ChalkboardTensor => {
             if(Array.isArray(size[0])) {
                 size = size[0];
@@ -105,6 +163,18 @@ namespace Chalkboard {
             };
             return newNDArray(size);
         }
+
+        /**
+         * Initializes a new matrix.
+         * @param {ChalkboardTensor[]} tensor - The n-dimensional array either as a sequence of arrays or one array
+         * @returns {ChalkboardTensor}
+         * @example
+         * // Defines a 2x2x2 tensor [[[1, 2], [3, 4]], [[5, 6], [7, 8]]]
+         * let A = Chalkboard.tens.init([[1, 2], [3, 4]],
+         *                              [[5, 6], [7, 8]]);
+         * let B = Chalkboard.tens.init([[[1, 2], [3, 4]],
+         *                               [[5, 6], [7, 8]]]);
+         */
         export const init = (...tensor: ChalkboardTensor[]): ChalkboardTensor => {
             if(tensor.length === 0) {
                 return [];
@@ -124,6 +194,13 @@ namespace Chalkboard {
             };
             return newNDArray(tensor);
         }
+
+        /**
+         * Calculates the multiplication of two tensors.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {ChalkboardTensor}
+         */
         export const mul = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
@@ -139,6 +216,12 @@ namespace Chalkboard {
                 return (tens1 as number) * (tens2 as number);
             }
         }
+
+        /**
+         * Calculates the negation of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const negate = (tens: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -150,9 +233,23 @@ namespace Chalkboard {
                 return -tens;
             }
         }
+
+        /**
+         * Prints a tensor in the console.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {void}
+         */
         export const print = (tens: ChalkboardTensor): void => {
             console.log(Chalkboard.tens.toString(tens));
         }
+
+        /**
+         * Returns a tensor with elements in a rank removed (pulled out).
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} rank - The rank
+         * @param {number} index - The index of the elements to pull
+         * @returns {ChalkboardTensor}
+         */
         export const pull = (tens: ChalkboardTensor, rank: number, index: number): ChalkboardTensor => {
             tens = tens as ChalkboardTensor[];
             if(rank === 0) {
@@ -165,6 +262,15 @@ namespace Chalkboard {
                 return tens;
             }
         }
+
+        /**
+         * Returns a tensor with elements in a rank added (pushed in).
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} rank - The rank
+         * @param {number} index - The index of the elements to pull
+         * @param {number[]} elements - The elements to push
+         * @returns {ChalkboardTensor}
+         */
         export const push = (tens: ChalkboardTensor, rank: number, index: number, elements: number[]): ChalkboardTensor => {
             tens = tens as ChalkboardTensor[];
             if(rank === 0) {
@@ -177,6 +283,14 @@ namespace Chalkboard {
                 return tens;
             }
         }
+
+        /**
+         * Initializes a random tensor.
+         * @param {number} inf - The lower bound
+         * @param {number} sup - The upper bound
+         * @param {number[]} size - The size
+         * @returns {ChalkboardTensor}
+         */
         export const random = (inf: number, sup: number, ...size: number[]): ChalkboardTensor => {
             if(Array.isArray(size[0])) {
                 size = size[0];
@@ -195,6 +309,12 @@ namespace Chalkboard {
             };
             return newNDArray(size);
         }
+
+        /**
+         * Calculates the rank of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {number}
+         */
         export const rank = (tens: ChalkboardTensor): number => {
             if(Array.isArray(tens)) {
                 let result = 0;
@@ -206,6 +326,12 @@ namespace Chalkboard {
                 return 0;
             }
         }
+
+        /**
+         * Calculates the reciprocal of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const reciprocate = (tens: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -217,6 +343,13 @@ namespace Chalkboard {
                 return 1 / tens;
             }
         }
+
+        /**
+         * Returns a tensor with its size changed.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number[]} size - The size to change to
+         * @returns {ChalkboardTensor}
+         */
         export const resize = (tens: ChalkboardTensor, ...size: number[]): ChalkboardTensor => {
             if(Array.isArray(size[0])) {
                 size = size[0];
@@ -234,6 +367,12 @@ namespace Chalkboard {
             refill(Chalkboard.tens.toArray(tens), result as ChalkboardTensor[]);
             return result;
         }
+
+        /**
+         * Calculates the rounding of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const round = (tens: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -245,6 +384,13 @@ namespace Chalkboard {
                 return Math.round(tens);
             }
         }
+
+        /**
+         * Calculates the scalar multiplication of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} num - The number
+         * @returns {ChalkboardTensor}
+         */
         export const scl = (tens: ChalkboardTensor, num: number): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
@@ -256,6 +402,12 @@ namespace Chalkboard {
                 return tens * num;
             }
         }
+
+        /**
+         * Returns the size of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {number[]}
+         */
         export const size = (tens: ChalkboardTensor): number[] => {
             if(Array.isArray(tens)) {
                 let result = [tens.length];
@@ -267,6 +419,13 @@ namespace Chalkboard {
                 return [];
             }
         }
+
+        /**
+         * Calculates the subtraction of two tensors.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {ChalkboardTensor}
+         */
         export const sub = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
@@ -278,6 +437,12 @@ namespace Chalkboard {
                 return (tens1 as number) - (tens2 as number);
             }
         }
+
+        /**
+         * Converts a tensor to an array.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {number[]}
+         */
         export const toArray = (tens: ChalkboardTensor): number[] => {
             let result: number[] = [];
             let flatten = function(tens: ChalkboardTensor): void {
@@ -292,6 +457,12 @@ namespace Chalkboard {
             flatten(tens);
             return result;
         }
+
+        /**
+         * Converts a tensor to a matrix.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardMatrix}
+         */
         export const toMatrix = (tens: ChalkboardTensor): ChalkboardMatrix => {
             let result = Chalkboard.matr.init();
             let flatten = function(tens: ChalkboardTensor, result: ChalkboardMatrix): void {
@@ -311,6 +482,12 @@ namespace Chalkboard {
             }
             return result;
         }
+
+        /**
+         * Converts a tensor to an object.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {object}
+         */
         export const toObject = (tens: ChalkboardTensor): object | number => {
             if(Array.isArray(tens)) {
                 let result: {[key: string]: number | object} = {};
@@ -322,6 +499,12 @@ namespace Chalkboard {
                 return tens;
             }
         }
+
+        /**
+         * Converts a tensor to a string.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {string}
+         */
         export const toString = (tens: ChalkboardTensor, indentation: number = 0): string => {
             if(Array.isArray((tens as ChalkboardTensor[])[0])) {
                 let result = "\t".repeat(indentation) + "[\n";
@@ -339,6 +522,14 @@ namespace Chalkboard {
                 return result;
             }
         }
+
+        /**
+         * Converts a tensor to a vector.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} dimension - The dimension of the vector, which can be 2, 3, or 4
+         * @param {number} [index=0] - The index to start from
+         * @returns {ChalkboardVector}
+         */
         export const toVector = (tens: ChalkboardTensor, dimension: number, index: number = 0): ChalkboardVector => {
             let arr = Chalkboard.tens.toArray(tens);
             if(dimension === 2) {
@@ -351,9 +542,21 @@ namespace Chalkboard {
                 throw new TypeError("Parameter \"vect\" must be of type \"ChalkboardVector\" with 2, 3, or 4 dimensions.");
             }
         }
+
+        /**
+         * Calculates the transpose of a tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const transpose = (tens: ChalkboardTensor): ChalkboardTensor => {
             return Chalkboard.tens.resize(tens, ...Chalkboard.tens.size(tens).reverse());
         }
+
+        /**
+         * Calculates a tensor multiplied by zero.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {ChalkboardTensor}
+         */
         export const zero = (tens: ChalkboardTensor): ChalkboardTensor => {
             let result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {

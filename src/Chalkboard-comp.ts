@@ -206,7 +206,7 @@ namespace Chalkboard {
         }
 
         /**
-         * Calculates the negation of two complex numbers.
+         * Calculates the negation a complex number.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboardComplex}
          */
