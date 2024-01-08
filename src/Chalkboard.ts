@@ -15,14 +15,14 @@
  * @property {number} a - The real part
  * @property {number} b - The imaginary part
  */
-type ChalkboardComplex = { a: number; b: number; };
+type ChalkboardComplex = { a: number; b: number };
 
 /**
  * The type for mathematical functions.
  * @property {string | string[]} definition - The function's definition
  * @property {"expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"} type - The function's type, which can be "expl" for explicit functions, "inve" for inverse functions, "pola" for polar functions, "curv" for parametric curves, "surf" for parametric surfaces, "mult" for explicit multivariable functions, or "comp" for explicit complex-valued functions
  */
-type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"; };
+type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp" };
 
 /**
  * The type for matrices.
@@ -36,7 +36,7 @@ type ChalkboardMatrix = number[][];
  * @property {number} c - The second imaginary part
  * @property {number} d - The third imaginary part
  */
-type ChalkboardQuaternion = { a: number; b: number; c: number; d: number; };
+type ChalkboardQuaternion = { a: number; b: number; c: number; d: number };
 
 /**
  * The type for tensors.
@@ -50,7 +50,7 @@ type ChalkboardTensor = number | ChalkboardTensor[];
  * @property {number} [z] - The z-component (defined for 3D and 4D vectors)
  * @property {number} [w] - The w-component (defined for 4D vectors)
  */
-type ChalkboardVector = { x: number; y: number; z?: number; w?: number; };
+type ChalkboardVector = { x: number; y: number; z?: number; w?: number };
 
 /**
  * The type for vector fields.
@@ -59,14 +59,13 @@ type ChalkboardVector = { x: number; y: number; z?: number; w?: number; };
  * @property {string} [r] - The z-component (defined for 3D and 4D vector fields)
  * @property {string} [s] - The w-component (defined for 4D vector fields)
  */
-type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string; };
+type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
 
 /**
  * The Chalkboard namespace.
  * @namespace
  */
 namespace Chalkboard {
-
     /**
      * The variable for setting the default JavaScript Canvas API context for Chalkboard to use.
      * @type {string}
@@ -88,7 +87,7 @@ namespace Chalkboard {
      */
     export const E = (exponent: number = 1): number => {
         return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
-    }
+    };
 
     /**
      * Draws the Chalkboard logo.
@@ -101,7 +100,12 @@ namespace Chalkboard {
      * // Draws the logo at (250, 250) with a scale of 2
      * Chalkboard.LOGO(250, 250, 2);
      */
-    export const LOGO = (x: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.width / 2, y: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.height / 2, s: number = 1, context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D): void => {
+    export const LOGO = (
+        x: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.width / 2,
+        y: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.height / 2,
+        s: number = 1,
+        context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D
+    ): void => {
         context.save();
         context.translate(x, y);
         context.scale(s, s);
@@ -127,7 +131,7 @@ namespace Chalkboard {
         context.lineTo(22, -22.5);
         context.stroke();
         context.restore();
-    }
+    };
 
     /**
      * The variable for adding custom functions to the Chalkboard parsers.
@@ -135,7 +139,7 @@ namespace Chalkboard {
      * @example
      * // Doesn't work
      * const twentyfour = Chalkboard.real.parse("Math.factorial(4)");
-     * 
+     *
      * // Does work
      * Chalkboard.PARSEPREFIX = "Math.factorial = function(num) { let n = 1; for (var i = 1; i <= num; i++) { n *= i; } i--; return n; };";
      * const twentyfour = Chalkboard.real.parse("Math.factorial(4)");
@@ -152,8 +156,8 @@ namespace Chalkboard {
      * const TAU = Chalkboard.PI(2); // returns 6.283185307179587
      */
     export const PI = (coefficient: number = 1): number => {
-        return coefficient * 4 * (4 * Math.atan(1/5) - Math.atan(1/239));
-    }
+        return coefficient * 4 * (4 * Math.atan(1 / 5) - Math.atan(1 / 239));
+    };
 
     /**
      * Prints basic information about Chalkboard into the console.
@@ -165,15 +169,21 @@ namespace Chalkboard {
      * //   Version 1.7.0 Descartes released 01/01/2024
      * //   Authored by Zushah ===> https://www.github.com/Zushah
      * //   Available under the MIT License ===> https://www.opensource.org/license/mit/
-     * //   
+     * //
      * //   The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
-     * //   
+     * //
      * //   Repository ===> https://www.github.com/Zushah/Chalkboard
      * //   Website ===> https://zushah.github.io/Chalkboard/home.html
      */
     export const README = (): void => {
-        console.log("The Chalkboard Library\nVersion " + Chalkboard.VERSION + " " + Chalkboard.VERSIONALIAS + " released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html");
-    }
+        console.log(
+            "The Chalkboard Library\nVersion " +
+                Chalkboard.VERSION +
+                " " +
+                Chalkboard.VERSIONALIAS +
+                " released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html"
+        );
+    };
 
     /**
      * The version of Chalkboard.
@@ -194,7 +204,7 @@ namespace Chalkboard {
     export const VERSIONALIAS: "Descartes" = "Descartes";
 }
 
-if(typeof window === "undefined") {
+if (typeof window === "undefined") {
     module.exports = Chalkboard;
 } else {
     window.Chalkboard = Chalkboard;

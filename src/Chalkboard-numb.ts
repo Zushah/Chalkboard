@@ -4,13 +4,11 @@
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
-
     /**
      * The number theory namespace.
      * @namespace
      */
     export namespace numb {
-
         /**
          * Returns a random number from a Bernoulli distribution.
          * @param {number} [p=0.5] - Probability value of distribution
@@ -20,11 +18,11 @@ namespace Chalkboard {
          * const bernoulliRandom = Chalkboard.numb.Bernoullian();
          */
         export const Bernoullian = (p: number = 0.5): number => {
-            if(p === undefined) {
+            if (p === undefined) {
                 p = 0.5;
             }
             return Math.random() < p ? 1 : 0;
-        }
+        };
 
         /**
          * Returns the binomial coefficient for a polynomial.
@@ -36,29 +34,29 @@ namespace Chalkboard {
          * const coeff = Chalkboard.numb.binomial(7, 3);
          */
         export const binomial = (n: number, k: number): number => {
-            if(k < 0 || k > n) {
+            if (k < 0 || k > n) {
                 return 0;
             }
-            if(k === 0 || k === n) {
+            if (k === 0 || k === n) {
                 return 1;
             }
-            if(k === 1 || k === n - 1) {
+            if (k === 1 || k === n - 1) {
                 return n;
             }
-            if(n - k < k) {
+            if (n - k < k) {
                 k = n - k;
             }
             let result = n;
-            for(let i = 2; i <= k; i++) {
+            for (let i = 2; i <= k; i++) {
                 result *= (n - i + 1) / i;
             }
             return Math.round(result);
-        }
+        };
 
         /**
          * Returns the change of two numbers.
-         * @param {number} initial - First number 
-         * @param {number} final - Second number 
+         * @param {number} initial - First number
+         * @param {number} final - Second number
          * @returns {number}
          * @example
          * // Returns 1 or 100%
@@ -66,11 +64,11 @@ namespace Chalkboard {
          */
         export const change = (initial: number, final: number): number => {
             return (final - initial) / initial;
-        }
+        };
 
         /**
          * Returns the combinatorial combination of two numbers.
-         * @param {number} n - First number (total items) 
+         * @param {number} n - First number (total items)
          * @param {number} r - Second number (chosen items)
          * @returns {number}
          * @example
@@ -79,12 +77,12 @@ namespace Chalkboard {
          */
         export const combination = (n: number, r: number): number => {
             return Chalkboard.numb.factorial(n) / (Chalkboard.numb.factorial(n - r) * Chalkboard.numb.factorial(r));
-        }
+        };
 
         /**
          * Returns an array of composite numbers between the lower and upper bounds.
-         * @param {number} inf - Lower bound 
-         * @param {number} sup - Upper bound 
+         * @param {number} inf - Lower bound
+         * @param {number} sup - Upper bound
          * @returns {number[]}
          * @example
          * // Returns the array [0, 1, 4, ... , 996, 998, 999]
@@ -92,17 +90,17 @@ namespace Chalkboard {
          */
         export const compositeArr = (inf: number, sup: number): number[] => {
             const result = [];
-            for(let i = inf; i <= sup; i++) {
-                if(!Chalkboard.numb.isPrime(i)) {
+            for (let i = inf; i <= sup; i++) {
+                if (!Chalkboard.numb.isPrime(i)) {
                     result.push(i);
                 }
             }
             return result;
-        }
+        };
 
         /**
          * Returns the number of composite numbers between the lower and upper bounds.
-         * @param {number} inf - Lower bound 
+         * @param {number} inf - Lower bound
          * @param {number} sup - Upper bound
          * @returns {number}
          * @example
@@ -111,7 +109,7 @@ namespace Chalkboard {
          */
         export const compositeCount = (inf: number, sup: number): number => {
             return Chalkboard.numb.compositeArr(inf, sup).length;
-        }
+        };
 
         /**
          * Returns a number constrained within a range.
@@ -127,7 +125,7 @@ namespace Chalkboard {
          */
         export const constrain = (num: number, range: [number, number] = [0, 1]): number => {
             return Math.max(Math.min(num, range[1]), range[0]);
-        }
+        };
 
         /**
          * Returns the divisors of a number.
@@ -139,13 +137,13 @@ namespace Chalkboard {
          */
         export const divisors = (num: number): number[] => {
             const result = [];
-            for(let i = 1; i <= num; i++) {
-                if(num % i === 0) {
+            for (let i = 1; i <= num; i++) {
+                if (num % i === 0) {
                     result.push(i);
                 }
             }
             return result;
-        }
+        };
 
         /**
          * Returns the value of Euler's totient function of a number.
@@ -156,16 +154,16 @@ namespace Chalkboard {
          * const totient = Chalkboard.numb.Euler(10);
          */
         export const Euler = (num: number): number | undefined => {
-            if(num > 0) {
+            if (num > 0) {
                 const factors = Chalkboard.numb.factors(num);
-                for(let i = 0; i < factors.length; i++) {
+                for (let i = 0; i < factors.length; i++) {
                     num *= (factors[i] - 1) / factors[i];
                 }
                 return num;
             } else {
                 return undefined;
             }
-        }
+        };
 
         /**
          * Returns a random number from an exponential distribution.
@@ -177,7 +175,7 @@ namespace Chalkboard {
          */
         export const exponential = (l: number = 1): number => {
             return l <= 0 ? 0 : -Math.log(Math.random()) / l;
-        }
+        };
 
         /**
          * Returns the factorial of a number.
@@ -189,16 +187,16 @@ namespace Chalkboard {
          */
         export const factorial = (num: number): number => {
             let n = 1;
-            for(var i = 1; i <= num; i++) {
+            for (var i = 1; i <= num; i++) {
                 n *= i;
             }
             i--;
             return n;
-        }
+        };
 
         /**
          * Returns the prime factors of a number.
-         * @param {number} num - Number 
+         * @param {number} num - Number
          * @returns {number[]}
          * @example
          * // Returns the array [2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 5, 5]
@@ -206,21 +204,21 @@ namespace Chalkboard {
          */
         export const factors = (num: number): number[] => {
             const result = [];
-            while(num % 2 === 0) {
+            while (num % 2 === 0) {
                 result.push(2);
                 num /= 2;
             }
-            for(let i = 3; i <= Chalkboard.real.sqrt(num); i += 2) {
-                while(num % i === 0) {
+            for (let i = 3; i <= Chalkboard.real.sqrt(num); i += 2) {
+                while (num % i === 0) {
                     result.push(i);
                     num /= i;
                 }
             }
-            if(num > 2) {
+            if (num > 2) {
                 result.push(num);
             }
             return result;
-        }
+        };
 
         /**
          * Returns the term of the Fibonacci sequence at the inputted index.
@@ -232,11 +230,11 @@ namespace Chalkboard {
          */
         export const Fibonacci = (num: number): number => {
             const sequence = [0, 1];
-            if(sequence[num] === undefined) {
+            if (sequence[num] === undefined) {
                 sequence.push(Chalkboard.numb.Fibonacci(num - 1) + sequence[num - 2]);
             }
             return sequence[num];
-        }
+        };
 
         /**
          * Returns a random number from a Gaussian (or normal) distribution.
@@ -246,13 +244,14 @@ namespace Chalkboard {
          * @returns {number}
          * @example
          * // Standard Gaussian distribution
-         * const gaussRandom = Chalkboard.numb.Gaussian(1, 0, 1 / Chalkboard.real.sqrt(Chalkboard.PI(2))); 
+         * const gaussRandom = Chalkboard.numb.Gaussian(1, 0, 1 / Chalkboard.real.sqrt(Chalkboard.PI(2)));
          */
         export const Gaussian = (height: number, mean: number, deviation: number): number => {
-            const u1 = Math.random(), u2 = Math.random();
+            const u1 = Math.random(),
+                u2 = Math.random();
             const random = Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(u1)) * Chalkboard.trig.cos(Chalkboard.PI(2) * u2);
             return random * height * Chalkboard.real.sqrt(deviation) + mean;
-        }
+        };
 
         /**
          * Returns the greatest common divisor of two numbers.
@@ -264,11 +263,11 @@ namespace Chalkboard {
          * const gcd = Chalkboard.numb.gcd(68, 119);
          */
         export const gcd = (a: number, b: number): number => {
-            if(b === 0) {
+            if (b === 0) {
                 return a;
             }
             return Chalkboard.numb.gcd(b, a % b);
-        }
+        };
 
         /**
          * Returns an even number as a sum of two prime numbers.
@@ -279,15 +278,16 @@ namespace Chalkboard {
          * const primes = Chalkboard.numb.Goldbach(12);
          */
         export const Goldbach = (num: number): [number, number] | undefined => {
-            if(num % 2 === 0) {
-                if(num !== 4) {
-                    let a = num / 2, b = num / 2;
-                    if(a % 2 === 0) {
+            if (num % 2 === 0) {
+                if (num !== 4) {
+                    let a = num / 2,
+                        b = num / 2;
+                    if (a % 2 === 0) {
                         a--;
                         b++;
                     }
-                    while(a >= 3) {
-                        if(Chalkboard.numb.isPrime(a) && Chalkboard.numb.isPrime(b)) {
+                    while (a >= 3) {
+                        if (Chalkboard.numb.isPrime(a) && Chalkboard.numb.isPrime(b)) {
                             return [a, b];
                         }
                         a -= 2;
@@ -300,11 +300,11 @@ namespace Chalkboard {
             } else {
                 return undefined;
             }
-        }
+        };
 
         /**
          * Returns whether or not a number is a prime number.
-         * @param {number} num - Number 
+         * @param {number} num - Number
          * @returns {boolean}
          * @example
          * // All of the following return true
@@ -318,30 +318,30 @@ namespace Chalkboard {
          * Chalkboard.numb.isPrime(7);
          */
         export const isPrime = (num: number): boolean => {
-            for(let i = 2; i <= Chalkboard.real.sqrt(num); i++) {
-                if(num % i === 0) {
+            for (let i = 2; i <= Chalkboard.real.sqrt(num); i++) {
+                if (num % i === 0) {
                     return false;
                 }
             }
             return num > 1;
-        }
+        };
 
         /**
          * Returns the value of the Kronecker delta function of two numbers (returns 1 if they're equal and 0 otherwise).
          * @param {number} a - First number
-         * @param {number} b - Second number 
+         * @param {number} b - Second number
          * @returns {number}
          * @example
          * const yes = Chalkboard.numb.Kronecker(1, 1); // Returns 1
          * const no = Chalkboard.numb.Kronecker(1, 10); // Returns 0
          */
         export const Kronecker = (a: number, b: number): 1 | 0 => {
-            if(a === b) {
+            if (a === b) {
                 return 1;
-            } else  {
+            } else {
                 return 0;
             }
-        }
+        };
 
         /**
          * Returns the least common multiple of two numbers.
@@ -354,7 +354,7 @@ namespace Chalkboard {
          */
         export const lcm = (a: number, b: number): number => {
             return a * (b / Chalkboard.numb.gcd(a, b));
-        }
+        };
 
         /**
          * Returns the proportional mapping of a number from one range to another.
@@ -368,11 +368,11 @@ namespace Chalkboard {
          */
         export const map = (num: number, range1: number[], range2: number[]): number => {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
-        }
+        };
 
         /**
          * Returns the product of a sequence.
-         * @param {string} formula - Sequence written in product notation with the variable "n" 
+         * @param {string} formula - Sequence written in product notation with the variable "n"
          * @param {number} inf - Lower bound
          * @param {number} sup - Upper bound
          * @returns {number}
@@ -383,15 +383,15 @@ namespace Chalkboard {
         export const mul = (formula: string, inf: number, sup: number): number => {
             let result = 1;
             const f = Chalkboard.real.parse("n => " + formula);
-            for(let i = inf; i <= sup; i++) {
+            for (let i = inf; i <= sup; i++) {
                 result *= f(i);
             }
             return result;
-        }
+        };
 
         /**
          * Returns the prime number that succeeds the inputted number.
-         * @param {number} num - Number 
+         * @param {number} num - Number
          * @returns {number}
          * @example
          * // Returns 541
@@ -399,11 +399,11 @@ namespace Chalkboard {
          */
         export const nextPrime = (num: number): number => {
             let result = num + 1;
-            while(!Chalkboard.numb.isPrime(result)) {
+            while (!Chalkboard.numb.isPrime(result)) {
                 result++;
             }
             return result;
-        }
+        };
 
         /**
          * Returns the combinatorial permutation of two numbers.
@@ -416,28 +416,29 @@ namespace Chalkboard {
          */
         export const permutation = (n: number, r: number): number => {
             return Chalkboard.numb.factorial(n) / Chalkboard.numb.factorial(n - r);
-        }
+        };
 
         /**
          * Returns a random number from a Poisson distribution.
-         * @param {number} [l=1] - Rate parameter (lambda) of distribution 
+         * @param {number} [l=1] - Rate parameter (lambda) of distribution
          * @returns {number}
          * @example
          * // Smaller argument means a less uniform distribution
          * const poissonRandom = Chalkboard.numb.Poissonian(0.5);
          */
         export const Poissonian = (l: number = 1): number => {
-            if(l > 0) {
+            if (l > 0) {
                 const L = Chalkboard.E(-l);
-                let p = 1, k = 0;
-                for(; p > L; ++k) {
+                let p = 1,
+                    k = 0;
+                for (; p > L; ++k) {
                     p *= Math.random();
                 }
                 return k - 1;
             } else {
                 return 0;
             }
-        }
+        };
 
         /**
          * Returns the nth prime number.
@@ -448,26 +449,26 @@ namespace Chalkboard {
          * const prime = Chalkboard.numb.prime(100);
          */
         export const prime = (num: number): number => {
-            if(num === 2) {
+            if (num === 2) {
                 return 2;
             }
             let n = 1;
             let prime = 3;
-            while(n < num) {
-                if(Chalkboard.numb.isPrime(prime)) {
+            while (n < num) {
+                if (Chalkboard.numb.isPrime(prime)) {
                     n++;
                 }
-                if(n < num) {
+                if (n < num) {
                     prime += 2;
                 }
             }
             return prime;
-        }
+        };
 
         /**
          * Returns an array of prime numbers between the lower and upper bounds.
-         * @param {number} inf - Lower bound 
-         * @param {number} sup - Upper bound 
+         * @param {number} inf - Lower bound
+         * @param {number} sup - Upper bound
          * @returns {number[]}
          * @example
          * // Returns the array [2, 3, 5, ... , 983, 991, 997]
@@ -475,18 +476,18 @@ namespace Chalkboard {
          */
         export const primeArr = (inf: number, sup: number): number[] => {
             const result = [];
-            for(let i = inf; i <= sup; i++) {
-                if(Chalkboard.numb.isPrime(i)) {
+            for (let i = inf; i <= sup; i++) {
+                if (Chalkboard.numb.isPrime(i)) {
                     result.push(i);
                 }
             }
             return result;
-        }
+        };
 
         /**
          * Returns the number of prime numbers between the lower and upper bounds.
-         * @param {number} inf - Lower bound 
-         * @param {number} sup - Upper bound 
+         * @param {number} inf - Lower bound
+         * @param {number} sup - Upper bound
          * @returns {number}
          * @example
          * // Returns 169
@@ -494,11 +495,11 @@ namespace Chalkboard {
          */
         export const primeCount = (inf: number, sup: number): number => {
             return Chalkboard.numb.primeArr(inf, sup).length;
-        }
+        };
 
         /**
          * Returns the largest prime gap between the lower and upper bounds.
-         * @param {number} inf - Lower bound 
+         * @param {number} inf - Lower bound
          * @param {number} sup - Upper bound
          * @returns {number}
          * @example
@@ -508,11 +509,11 @@ namespace Chalkboard {
         export const primeGap = (inf: number, sup: number): number => {
             let prime = null;
             let gap = 0;
-            for(let i = inf; i <= sup; i++) {
-                if(Chalkboard.numb.isPrime(i)) {
-                    if(prime !== null) {
+            for (let i = inf; i <= sup; i++) {
+                if (Chalkboard.numb.isPrime(i)) {
+                    if (prime !== null) {
                         const temp = i - prime;
-                        if(temp > gap) {
+                        if (temp > gap) {
                             gap = temp;
                         }
                     }
@@ -520,7 +521,7 @@ namespace Chalkboard {
                 }
             }
             return gap;
-        }
+        };
 
         /**
          * Returns a random number from a uniform distribution.
@@ -533,11 +534,11 @@ namespace Chalkboard {
          */
         export const random = (inf: number = 0, sup: number = 1): number => {
             return inf + (sup - inf) * Math.random();
-        }
+        };
 
         /**
          * Returns the sign of a number.
-         * @param {number} num - Number 
+         * @param {number} num - Number
          * @returns {number}
          * @example
          * const pos = Chalkboard.numb.sgn(19); // Returns 1
@@ -545,20 +546,20 @@ namespace Chalkboard {
          * const neg = Chalkboard.numb.sgn(-5); // Returns -1
          */
         export const sgn = (num: number): -1 | 0 | 1 => {
-            if(num > 0) {
+            if (num > 0) {
                 return 1;
-            } else if(num < 0) {
+            } else if (num < 0) {
                 return -1;
             } else {
                 return 0;
             }
-        }
+        };
 
         /**
          * Returns the summation of a sequence.
          * @param {string} formula - Sequence written in summation notation with the variable "n"
          * @param {number} inf - Lower bound
-         * @param {number} sup - Upper bound 
+         * @param {number} sup - Upper bound
          * @returns {number}
          * @example
          * // Returns almost π²/6
@@ -567,10 +568,10 @@ namespace Chalkboard {
         export const sum = (formula: string, inf: number, sup: number): number => {
             let result = 0;
             const f = Chalkboard.real.parse("n => " + formula);
-            for(let i = inf; i <= sup; i++) {
+            for (let i = inf; i <= sup; i++) {
                 result += f(i);
             }
             return result;
-        }
+        };
     }
 }

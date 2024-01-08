@@ -4,13 +4,11 @@
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
-
     /**
      * The geometry namespace.
      * @namespace
      */
     export namespace geom {
-
         /**
          * Calculates the area of a circle.
          * @param {number} r - The radius
@@ -18,7 +16,7 @@ namespace Chalkboard {
          */
         export const circleA = (r: number): number => {
             return Chalkboard.PI() * r * r;
-        }
+        };
 
         /**
          * Calculates the perimeter (circumference) of a circle.
@@ -27,7 +25,7 @@ namespace Chalkboard {
          */
         export const circleP = (r: number): number => {
             return 2 * Chalkboard.PI() * r;
-        }
+        };
 
         /**
          * Calculates the surface area of a cone.
@@ -37,7 +35,7 @@ namespace Chalkboard {
          */
         export const coneA = (r: number, h: number): number => {
             return Chalkboard.PI() * r * (r + Chalkboard.real.sqrt(h * h + r * r));
-        }
+        };
 
         /**
          * Calculates the volume of a cone.
@@ -47,7 +45,7 @@ namespace Chalkboard {
          */
         export const coneV = (r: number, h: number): number => {
             return (Chalkboard.PI() * r * r * h) / 3;
-        }
+        };
 
         /**
          * Calculates the surface area of a cube.
@@ -56,7 +54,7 @@ namespace Chalkboard {
          */
         export const cubeA = (s: number): number => {
             return 6 * s * s;
-        }
+        };
 
         /**
          * Calculates the volume of a cube.
@@ -65,7 +63,7 @@ namespace Chalkboard {
          */
         export const cubeV = (s: number): number => {
             return s * s * s;
-        }
+        };
 
         /**
          * Calculates the surface area of a cylinder.
@@ -75,7 +73,7 @@ namespace Chalkboard {
          */
         export const cylinderA = (r: number, h: number): number => {
             return 2 * Chalkboard.PI() * r * r + 2 * Chalkboard.PI() * r * h;
-        }
+        };
 
         /**
          * Calculates the volume of a cylinder.
@@ -85,7 +83,7 @@ namespace Chalkboard {
          */
         export const cylinderV = (r: number, h: number): number => {
             return Chalkboard.PI() * r * r * h;
-        }
+        };
 
         /**
          * Calculates the distance between two n-dimensional points.
@@ -94,16 +92,16 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const dist = (p1: number[], p2: number[]): number => {
-            if(p1.length === p2.length) {
+            if (p1.length === p2.length) {
                 let result = 0;
-                for(let i = 0; i < p1.length; i++) {
+                for (let i = 0; i < p1.length; i++) {
                     result += (p1[i] - p2[i]) * (p1[i] - p2[i]);
                 }
                 return Chalkboard.real.sqrt(result);
             } else {
-                throw new RangeError("Parameters \"p1\" and \"p2\" must be of type \"number[]\" with the same \"length\" property.");
+                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
             }
-        }
+        };
 
         /**
          * Calculates the distance squared between two n-dimensional points.
@@ -112,16 +110,16 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const distsq = (p1: number[], p2: number[]): number => {
-            if(p1.length === p2.length) {
+            if (p1.length === p2.length) {
                 let result = 0;
-                for(let i = 0; i < p1.length; i++) {
+                for (let i = 0; i < p1.length; i++) {
                     result += (p1[i] - p2[i]) * (p1[i] - p2[i]);
                 }
                 return result;
             } else {
-                throw new RangeError("Parameters \"p1\" and \"p2\" must be of type \"number[]\" with the same \"length\" property.");
+                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
             }
-        }
+        };
 
         /**
          * Calculates the area of an ellipse.
@@ -131,7 +129,7 @@ namespace Chalkboard {
          */
         export const ellipseA = (a: number, b: number): number => {
             return Chalkboard.PI() * a * b;
-        }
+        };
 
         /**
          * Calculates the perimeter of an ellipse.
@@ -142,7 +140,7 @@ namespace Chalkboard {
         export const ellipseP = (a: number, b: number): number => {
             const h = ((a - b) * (a - b)) / ((a + b) * (a + b));
             return Chalkboard.PI() * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
-        }
+        };
 
         /**
          * Calculates the Euler characteristic of a shape.
@@ -153,7 +151,7 @@ namespace Chalkboard {
          */
         export const Euler = (v: number, e: number, f: number): number => {
             return v - e + f;
-        }
+        };
 
         /**
          * Draws a three-dimensional line (or rather, a two-dimensional line with three-dimensional perspective).
@@ -163,14 +161,22 @@ namespace Chalkboard {
          * @param {number} x2 - The second x-coordinate
          * @param {number} y2 - The second y-coordinate
          * @param {number} z2 - The second z-coordinate
-         * @param {CanvasRenderingContext2D} context 
+         * @param {CanvasRenderingContext2D} context
          */
-        export const line3D = (x1: number, y1: number, z1: number, x2: number, y2: number, z2: number, context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D): void => {
+        export const line3D = (
+            x1: number,
+            y1: number,
+            z1: number,
+            x2: number,
+            y2: number,
+            z2: number,
+            context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D
+        ): void => {
             context.beginPath();
             context.moveTo(x1 / (z1 * 0.0025 + 1), y1 / (z1 * 0.0025 + 1));
             context.lineTo(x2 / (z2 * 0.0025 + 1), y2 / (z2 * 0.0025 + 1));
             context.stroke();
-        }
+        };
 
         /**
          * Calculates the median between two n-dimensional points.
@@ -179,16 +185,16 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const mid = (p1: number[], p2: number[]): number[] => {
-            if(p1.length === p2.length) {
+            if (p1.length === p2.length) {
                 const result = [];
-                for(let i = 0; i < p1.length; i++) {
+                for (let i = 0; i < p1.length; i++) {
                     result[i] = (p1[i] + p2[i]) / 2;
                 }
                 return result;
             } else {
-                throw new RangeError("Parameters \"p1\" and \"p2\" must be of type \"number[]\" with the same \"length\" property.");
+                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
             }
-        }
+        };
 
         /**
          * Calculates the area of a parallelogram.
@@ -198,7 +204,7 @@ namespace Chalkboard {
          */
         export const parallelogramA = (l: number, w: number): number => {
             return l * w;
-        }
+        };
 
         /**
          * Calculates the perimeter of a parallelogram.
@@ -208,7 +214,7 @@ namespace Chalkboard {
          */
         export const parallelogramP = (l: number, w: number): number => {
             return 2 * (l + w);
-        }
+        };
 
         /**
          * Calculates the area of a regular polygon.
@@ -219,7 +225,7 @@ namespace Chalkboard {
          */
         export const polygonA = (n: number, s: number, a: number): number => {
             return (n * s * a) / 2;
-        }
+        };
 
         /**
          * Calculates the perimeter of a regular polygon.
@@ -229,7 +235,7 @@ namespace Chalkboard {
          */
         export const polygonP = (n: number, s: number): number => {
             return n * s;
-        }
+        };
 
         /**
          * Calculates the third side length of a triangle (either the hypotenuse or the second leg) given two side lengths with the Pythagorean theorem.
@@ -239,12 +245,12 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Pythagorean = (a: number, b: number, type: "hyp" | "leg" = "hyp"): number => {
-            if(type === "hyp") {
-                return Math.sqrt((a * a) + (b * b));
+            if (type === "hyp") {
+                return Math.sqrt(a * a + b * b);
             } else {
-                return Math.sqrt((b * b) - (a * a));
+                return Math.sqrt(b * b - a * a);
             }
-        }
+        };
 
         /**
          * Calculates a random Pythagorean triple.
@@ -254,10 +260,10 @@ namespace Chalkboard {
          */
         export const PythagoreanTriple = (inf: number, sup: number): [number, number, number] => {
             const a = 2 * Math.round(Chalkboard.numb.random(inf, sup)) - 1,
-                b = ((a * a) / 2) - 0.5,
-                c = ((a * a) / 2) + 0.5;
+                b = (a * a) / 2 - 0.5,
+                c = (a * a) / 2 + 0.5;
             return [a, b, c];
-        }
+        };
 
         /**
          * Calculates the surface area of a rectangular prism.
@@ -268,7 +274,7 @@ namespace Chalkboard {
          */
         export const rectangularprismA = (l: number, w: number, h: number): number => {
             return 2 * (l * h + l * h + w * h);
-        }
+        };
 
         /**
          * Calculates the volume of a rectangular prism.
@@ -279,7 +285,7 @@ namespace Chalkboard {
          */
         export const rectangularprismV = (l: number, w: number, h: number): number => {
             return l * w * h;
-        }
+        };
 
         /**
          * Calculates the area of a sector of a circle.
@@ -289,7 +295,7 @@ namespace Chalkboard {
          */
         export const sectorA = (r: number, rad: number): number => {
             return (r * r * rad) / 2;
-        }
+        };
 
         /**
          * Calculates the perimeter of a sector of a circle.
@@ -299,7 +305,7 @@ namespace Chalkboard {
          */
         export const sectorP = (r: number, rad: number): number => {
             return r * rad;
-        }
+        };
 
         /**
          * Calculates the surface area of a sphere.
@@ -308,7 +314,7 @@ namespace Chalkboard {
          */
         export const sphereA = (r: number): number => {
             return 4 * Chalkboard.PI() * r * r;
-        }
+        };
 
         /**
          * Calculates the volume of a sphere.
@@ -317,7 +323,7 @@ namespace Chalkboard {
          */
         export const sphereV = (r: number): number => {
             return (4 * Chalkboard.PI() * r * r * r) / 3;
-        }
+        };
 
         /**
          * Calculates the area of a square.
@@ -326,7 +332,7 @@ namespace Chalkboard {
          */
         export const squareA = (s: number): number => {
             return s * s;
-        }
+        };
 
         /**
          * Calculates the perimeter of a square.
@@ -335,7 +341,7 @@ namespace Chalkboard {
          */
         export const squareP = (s: number): number => {
             return 4 * s;
-        }
+        };
 
         /**
          * Calculates the area of a trapezoid.
@@ -346,7 +352,7 @@ namespace Chalkboard {
          */
         export const trapezoidA = (b1: number, b2: number, h: number): number => {
             return ((b1 + b2) / 2) * h;
-        }
+        };
 
         /**
          * Calculates the perimeter of a trapezoid.
@@ -358,7 +364,7 @@ namespace Chalkboard {
          */
         export const trapezoidP = (a: number, b: number, c: number, d: number): number => {
             return a + b + c + d;
-        }
+        };
 
         /**
          * Calculates the area of a triangle.
@@ -368,7 +374,7 @@ namespace Chalkboard {
          */
         export const triangleA = (b: number, h: number): number => {
             return (b * h) / 2;
-        }
+        };
 
         /**
          * Calculates the perimeter of a triangle.
@@ -379,7 +385,7 @@ namespace Chalkboard {
          */
         export const triangleP = (a: number, b: number, c: number): number => {
             return a + b + c;
-        }
+        };
 
         /**
          * Calculates the area of a triangle with its side lengths
@@ -391,7 +397,7 @@ namespace Chalkboard {
         export const trianglesidesA = (a: number, b: number, c: number): number => {
             const s = (a + b + c) / 2;
             return Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c)));
-        }
+        };
 
         /**
          * Calculates the surface area of a triangular prism.
@@ -404,7 +410,7 @@ namespace Chalkboard {
         export const triangularprismA = (a: number, b: number, c: number, h: number): number => {
             const s = (a + b + c) / 2;
             return 2 * Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c))) + h * (a + b + c);
-        }
+        };
 
         /**
          * Calculates the volume of a triangular prism.
@@ -415,7 +421,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const triangularprismV = (a: number, b: number, c: number, h: number): number => {
-            return h * (Chalkboard.real.sqrt(-(a * a * a * a) + 2 * (a * b) * (a * b) + 2 * (a * c) * (a * c) - (b * b * b * b) + 2 * (b * c) * (b * c) - (c * c * c * c))) / 4;
-        }
+            return (h * Chalkboard.real.sqrt(-(a * a * a * a) + 2 * (a * b) * (a * b) + 2 * (a * c) * (a * c) - b * b * b * b + 2 * (b * c) * (b * c) - c * c * c * c)) / 4;
+        };
     }
 }
