@@ -140,7 +140,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const ellipseP = (a: number, b: number): number => {
-            let h = ((a - b) * (a - b)) / ((a + b) * (a + b));
+            const h = ((a - b) * (a - b)) / ((a + b) * (a + b));
             return Chalkboard.PI() * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
         }
 
@@ -180,7 +180,7 @@ namespace Chalkboard {
          */
         export const mid = (p1: number[], p2: number[]): number[] => {
             if(p1.length === p2.length) {
-                let result = [];
+                const result = [];
                 for(let i = 0; i < p1.length; i++) {
                     result[i] = (p1[i] + p2[i]) / 2;
                 }
@@ -253,7 +253,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const PythagoreanTriple = (inf: number, sup: number): [number, number, number] => {
-            let a = 2 * Math.round(Chalkboard.numb.random(inf, sup)) - 1,
+            const a = 2 * Math.round(Chalkboard.numb.random(inf, sup)) - 1,
                 b = ((a * a) / 2) - 0.5,
                 c = ((a * a) / 2) + 0.5;
             return [a, b, c];
@@ -389,7 +389,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const trianglesidesA = (a: number, b: number, c: number): number => {
-            let s = (a + b + c) / 2;
+            const s = (a + b + c) / 2;
             return Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c)));
         }
 
@@ -402,7 +402,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const triangularprismA = (a: number, b: number, c: number, h: number): number => {
-            let s = (a + b + c) / 2;
+            const s = (a + b + c) / 2;
             return 2 * Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c))) + h * (a + b + c);
         }
 

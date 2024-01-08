@@ -19,8 +19,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const array = (inf: number, sup: number, length: number = sup - inf + 1): number[] => {
-            let result = [];
-            let step = (sup - inf) / (length - 1);
+            const result = [];
+            const step = (sup - inf) / (length - 1);
             for(let i = 0; i < length; i++) {
                 result.push(inf + (step * i));
             }
@@ -43,7 +43,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const change = (arr1: number[], arr2: number[]): number[] => {
-            let result = [];
+            const result = [];
             if(arr1.length === arr2.length) {
                 for(let i = 0; i < arr1.length; i++) {
                     result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
@@ -61,7 +61,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const chiSquared = (arr1: number[], arr2: number[]): number[] => {
-            let result = [];
+            const result = [];
             if(arr1.length === arr2.length) {
                 for(let i = 0; i < arr1.length; i++) {
                     result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
@@ -88,7 +88,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const constrain = (arr: number[], range: [number, number] = [0, 1]): number[] => {
-            let result = [];
+            const result = [];
             for(let i = 0; i < arr.length; i++) {
                 result.push(Chalkboard.numb.constrain(arr[i], range));
             }
@@ -102,7 +102,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const convolution = (arr1: number[], arr2: number[]): number[] => {
-            let result = [];
+            const result = [];
             for(let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
                 for(let j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
@@ -120,7 +120,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const correlation = (arr1: number[], arr2: number[]): number[] => {
-            let result = [];
+            const result = [];
             for(let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
                 for(let j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
@@ -160,7 +160,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const eq = (arr: number[], arrORnum: number | number[]): number[] => {
-            let result = [];
+            const result = [];
             if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(let i = 0; i < arr.length; i++) {
@@ -198,7 +198,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const gt = (arr: number[], arrORnum: number | number[], includeEnd: boolean = false): number[] => {
-            let result = [];
+            const result = [];
             if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(let i = 0; i < arr.length; i++) {
@@ -239,7 +239,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const ineq = (arr: number[], inf: number, sup: number, includeInf: boolean = false, includeSup: boolean = false): number[] => {
-            let result = [];
+            const result = [];
             if(Array.isArray(inf) && Array.isArray(sup)) {
                 if(arr.length === inf.length && arr.length === sup.length) {
                     for(let i = 0; i < arr.length; i++) {
@@ -301,8 +301,8 @@ namespace Chalkboard {
          */
         export const kurtosis = (arr: number[]): number => {
             let result = 0;
-            let mean = Chalkboard.stat.mean(arr);
-            let deviation = Chalkboard.stat.deviation(arr);
+            const mean = Chalkboard.stat.mean(arr);
+            const deviation = Chalkboard.stat.deviation(arr);
             for(let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
@@ -317,7 +317,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const lt = (arr: number[], arrORnum: number | number[], includeEnd: boolean = false): number[] => {
-            let result = [];
+            const result = [];
             if(Array.isArray(arrORnum)) {
                 if(arr.length === arrORnum.length) {
                     for(let i = 0; i < arr.length; i++) {
@@ -410,7 +410,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const median = (arr: number[]): number => {
-            let temp = arr.slice().sort(function(a, b) {
+            const temp = arr.slice().sort(function(a, b) {
                 return a - b;
             });
             if(temp.length % 2 === 1) {
@@ -441,7 +441,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mode = (arr: number[]): number => {
-            let temp = arr.slice().sort(function(a, b) {
+            const temp = arr.slice().sort(function(a, b) {
                 return a - b;
             });
             let bestStr = 1;
@@ -505,8 +505,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const normalize = (arr: number[], type: "L0" | "L1" | "L2" | "LInfinity" = "L2"): number[] => {
-            let result = [];
-            let norm = Chalkboard.stat.norm(arr, type);
+            const result = [];
+            const norm = Chalkboard.stat.norm(arr, type);
             for(let i = 0; i < arr.length; i++) {
                 result.push(arr[i] / norm);
             }
@@ -577,11 +577,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const quartile = (arr: number[], type: "Q1" | "Q2" | "Q3"): number => {
-            let temp = arr.slice().sort(function(a, b) {
+            const temp = arr.slice().sort(function(a, b) {
                 return a - b;
             });
-            let lo = temp.slice(0, Math.floor(temp.length / 2));
-            let hi = temp.slice(Math.ceil(temp.length / 2));
+            const lo = temp.slice(0, Math.floor(temp.length / 2));
+            const hi = temp.slice(Math.ceil(temp.length / 2));
             if(type === "Q1") {
                 return Chalkboard.stat.median(lo);
             } else if(type === "Q2") {
@@ -601,7 +601,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const random = (inf: number, sup: number, length: number): number[] => {
-            let result = [];
+            const result = [];
             for(let i = 0; i < length; i++) {
                 result.push(Chalkboard.numb.random(inf, sup));
             }
@@ -634,26 +634,26 @@ namespace Chalkboard {
                     xx += data[i][0] * data[i][0];
                     xy += data[i][0] * data[i][1];
                 }
-                let a = (data.length * xy - x * y) / (data.length * xx - x * x),
+                const a = (data.length * xy - x * y) / (data.length * xx - x * x),
                     b = (y / data.length) - (a * x) / data.length;
                 return Chalkboard.real.define(a + " * x + " + b);
             } else if(type === "polynomial") {
-                let A = Chalkboard.matr.init();
+                const A = Chalkboard.matr.init();
                 for(let i = 0; i < data.length; i++) {
                     A.push([]);
                     for(let j = 0; j <= degree; j++) {
                         A[i].push(Chalkboard.real.pow(data[i][0], j));
                     }
                 }
-                let AT = Chalkboard.matr.transpose(A);
-                let B = Chalkboard.matr.init();
+                const AT = Chalkboard.matr.transpose(A);
+                const B = Chalkboard.matr.init();
                 for(let i = 0; i < data.length; i++) {
                     B.push([data[i][1]]);
                 }
-                let ATA = Chalkboard.matr.mul(AT, A);
-                let ATAI = Chalkboard.matr.invert(ATA);
-                let x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
-                let coeff = [];
+                const ATA = Chalkboard.matr.mul(AT, A);
+                const ATAI = Chalkboard.matr.invert(ATA);
+                const x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
+                const coeff = [];
                 for(let i = 0; i < x.length; i++) {
                     coeff.push(x[i][0]);
                 }
@@ -663,18 +663,18 @@ namespace Chalkboard {
                 }
                 return Chalkboard.real.define(f);
             } else if(type === "power") {
-                let arr = [0, 0, 0, 0];
+                const arr = [0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
                     arr[0] += Chalkboard.real.ln(data[i][0]);
                     arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
                     arr[2] += data[i][1];
                     arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
                 }
-                let a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
+                const a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
                     b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
                 return Chalkboard.real.define(a + " * Math.pow(x, " + b + ")");
             } else if(type === "exponential") {
-                let arr = [0, 0, 0, 0, 0, 0];
+                const arr = [0, 0, 0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
                     arr[0] += data[i][0];
                     arr[1] += data[i][1];
@@ -683,18 +683,18 @@ namespace Chalkboard {
                     arr[4] += data[i][0] & data[i][1] * Chalkboard.real.ln(data[i][1]);
                     arr[5] += data[i][0] * data[i][1];
                 }
-                let a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
+                const a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
                     b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
                 return Chalkboard.real.define(a + "* Math.exp(" + b + " * x)");
             } else if(type === "logarithmic") {
-                let arr = [0, 0, 0, 0];
+                const arr = [0, 0, 0, 0];
                 for(let i = 0; i < data.length; i++) {
                     arr[0] += Chalkboard.real.ln(data[i][0]);
                     arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
                     arr[2] += data[i][1];
                     arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
                 }
-                let a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
+                const a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
                     b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
                 return Chalkboard.real.define(a + " + " + b + " * Math.log(x)");
             } else {
@@ -725,8 +725,8 @@ namespace Chalkboard {
          */
         export const skewness = (arr: number[]): number => {
             let result = 0;
-            let mean = Chalkboard.stat.mean(arr);
-            let deviation = Chalkboard.stat.deviation(arr);
+            const mean = Chalkboard.stat.mean(arr);
+            const deviation = Chalkboard.stat.deviation(arr);
             for(let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
@@ -743,10 +743,10 @@ namespace Chalkboard {
             arr.sort();
             for(let i = 0; i < arr.length; i++) {
                 if(i === 0 || arr[i] !== arr[i - 1]) {
-                    let curr = arr[i];
-                    let subsetsWithCurr = [];
+                    const curr = arr[i];
+                    const subsetsWithCurr = [];
                     for(let j = 0; j < result.length; j++) {
-                        let subset = result[j].slice();
+                        const subset = result[j].slice();
                         subset.push(curr);
                         subsetsWithCurr.push(subset);
                     }
@@ -764,7 +764,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const toMatrix = (arr: number[], rows: number, cols: number): ChalkboardMatrix => {
-            let result = Chalkboard.matr.init();
+            const result = Chalkboard.matr.init();
             let index = 0;
             for(let i = 0; i < rows; i++) {
                 result[i] = [];
@@ -786,7 +786,7 @@ namespace Chalkboard {
          * @returns {object}
          */
         export const toObject = (arr: number[]): object => {
-            let result: {[key: string]: number} = {};
+            const result: {[key: string]: number} = {};
             for(let i = 0; i < arr.length; i++) {
                 result["_" + i.toString()] = arr[i];
             }

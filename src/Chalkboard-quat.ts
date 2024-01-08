@@ -264,9 +264,9 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const toRotation = (quat: ChalkboardQuaternion, vect: ChalkboardVector): ChalkboardVector => {
-            let vector = Chalkboard.vect.toQuaternion(vect);
-            let inverse = Chalkboard.quat.invert(quat);
-            let quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
+            const vector = Chalkboard.vect.toQuaternion(vect);
+            const inverse = Chalkboard.quat.invert(quat);
+            const quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
             return Chalkboard.vect.init(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
         }
 

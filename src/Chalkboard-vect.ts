@@ -122,8 +122,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const dimension = (vectORvectfield: ChalkboardVector | ChalkboardVectorField): 2 | 3 | 4 => {
-            let vect = vectORvectfield as ChalkboardVector;
-            let vectfield = vectORvectfield as ChalkboardVectorField;
+            const vect = vectORvectfield as ChalkboardVector;
+            const vectfield = vectORvectfield as ChalkboardVectorField;
             if((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") || (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "undefined" && typeof vectfield.s === "undefined")) {
                 return 2;
             } else if((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") || (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "string" && typeof vectfield.s === "undefined")) {
@@ -305,16 +305,16 @@ namespace Chalkboard {
          */
         export const fromField = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
             if(Chalkboard.vect.dimension(vectfield) === 2 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                let p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
+                const p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
                 return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
             } else if(Chalkboard.vect.dimension(vectfield) === 3 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                let p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
+                const p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
                     r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
                 return Chalkboard.vect.init(p(vect.x, vect.y, vect.z), q(vect.x, vect.y, vect.z), r(vect.x, vect.y, vect.z));
             } else if(Chalkboard.vect.dimension(vectfield) === 4 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                let p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p),
+                const p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p),
                     q = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.q),
                     r = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.r),
                     s = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.s);
@@ -542,8 +542,8 @@ namespace Chalkboard {
          */
         export const refract = (vect1: ChalkboardVector, vect2: ChalkboardVector, refractiveIndex: number): ChalkboardVector => {
             if(refractiveIndex > 0) {
-                let perp = Chalkboard.vect.scl(Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2))), refractiveIndex);
-                let parr = Chalkboard.vect.scl(vect2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vect.dot(vect1, vect2) * Chalkboard.vect.dot(vect1, vect2)))));
+                const perp = Chalkboard.vect.scl(Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2))), refractiveIndex);
+                const parr = Chalkboard.vect.scl(vect2, -Chalkboard.real.sqrt(1 - (refractiveIndex * refractiveIndex) * (1 - (Chalkboard.vect.dot(vect1, vect2) * Chalkboard.vect.dot(vect1, vect2)))));
                 return Chalkboard.vect.add(perp, parr);
             } else {
                 throw new RangeError("Parameter \"refractiveIndex\" must be of type \"number\" greater than 0.");

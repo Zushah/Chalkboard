@@ -41,7 +41,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -86,7 +86,7 @@ namespace Chalkboard {
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.fillStyle = config.fillStyle;
-            let bars = [];
+            const bars = [];
             for(let i = 0; i < bins.length; i++) {
                 if(i === 0) {
                     bars.push(Chalkboard.stat.lt(arr, bins[0], true));
@@ -96,11 +96,12 @@ namespace Chalkboard {
                     bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
                 }
             }
-            let counts = [];
+            const counts = [];
             for(let i = 0; i < bars.length; i++) {
                 counts.push(bars[i].length);
             }
-            let x = 0, width = counts.length / (2 * config.size);
+            let x = 0;
+            const width = counts.length / (2 * config.size);
             for(let i = 0; i < counts.length; i++) {
                 config.context.fillRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
                 config.context.strokeRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
@@ -169,7 +170,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -211,7 +212,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -250,45 +251,45 @@ namespace Chalkboard {
                 domain: config.domain || (func.type === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let xdomain = config.domain as [number, number];
-            let xydomain = config.domain as [[number, number], [number, number]];
-            let data = [];
+            const xdomain = config.domain as [number, number];
+            const xydomain = config.domain as [[number, number], [number, number]];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             if(func.type === "expl") {
-                let f = Chalkboard.real.parse("x => " + func.definition);
+                const f = Chalkboard.real.parse("x => " + func.definition);
                 for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
                     config.context.lineTo(i, -f(i * config.size) / config.size);
                     data.push([i, f(i)]);
                 }
             } else if(func.type === "inve") {
-                let f = Chalkboard.real.parse("y => " + func.definition);
+                const f = Chalkboard.real.parse("y => " + func.definition);
                 for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
                     config.context.lineTo(f(i * config.size) / config.size, -i);
                     data.push([f(i), i]);
                 }
             } else if(func.type === "pola") {
-                let r = Chalkboard.real.parse("O => " + func.definition);
+                const r = Chalkboard.real.parse("O => " + func.definition);
                 for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
                     config.context.lineTo(r(i * config.size) / config.size * Chalkboard.trig.cos(i * config.size), -r(i * config.size) / config.size * Chalkboard.trig.sin(i * config.size));
                     data.push([i, r(i)]);
                 }
             } else if(func.type === "curv") {
-                let x = Chalkboard.real.parse("t => " + func.definition[0]),
+                const x = Chalkboard.real.parse("t => " + func.definition[0]),
                     y = Chalkboard.real.parse("t => " + func.definition[1]);
                 for(let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
                     config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
                     data.push([x(i), y(i)]);
                 }
             } else if(func.type === "comp") {
-                let u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                const u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
                     v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
                 for(let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
                     for(let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
-                        let z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
+                        const z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
                         if(z.a === 0 && z.b === 0) {
                             config.context.fillStyle = "rgb(0, 0, 0)";
                         } else if(z.a === Infinity && z.b === Infinity) {
@@ -334,7 +335,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -380,7 +381,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -426,14 +427,14 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
             config.context.save();
             config.context.translate(config.x, config.y);
             for(let i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
                 for(let j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
-                    let v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
+                    const v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
                     config.context.beginPath();
                     config.context.moveTo(i, j);
                     config.context.lineTo(i + v.x, j + v.y);
@@ -471,7 +472,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -512,7 +513,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -558,7 +559,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -607,7 +608,7 @@ namespace Chalkboard {
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
-            let verts = [];
+            const verts = [];
             for(let i = 0; i < bins.length; i++) {
                 if(i === 0) {
                     verts.push(Chalkboard.stat.lt(arr, bins[0], true));
@@ -617,7 +618,7 @@ namespace Chalkboard {
                     verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
                 }
             }
-            let counts = [];
+            const counts = [];
             for(let i = 0; i < verts.length; i++) {
                 counts.push(verts[i].length);
             }
@@ -688,7 +689,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 2,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let cw = PARSED_CONTEXT.canvas.width;
+            const cw = PARSED_CONTEXT.canvas.width;
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;
@@ -733,7 +734,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 5,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.fillStyle = config.fillStyle;
@@ -777,7 +778,7 @@ namespace Chalkboard {
                 res: config.res || 25,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let data = [];
+            const data = [];
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.lineWidth = config.lineWidth;
@@ -847,7 +848,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 2,
                 context: config.context || PARSED_CONTEXT
             }).size /= 100;
-            let cw = PARSED_CONTEXT.canvas.width;
+            const cw = PARSED_CONTEXT.canvas.width;
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;

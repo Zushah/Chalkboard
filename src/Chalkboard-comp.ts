@@ -290,9 +290,9 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex}
          */
         export const root = (comp: ChalkboardComplex, index: number = 3): ChalkboardComplex[] => {
-            let result = [];
-            let r = Chalkboard.comp.mag(comp);
-            let t = Chalkboard.comp.arg(comp);
+            const result = [];
+            const r = Chalkboard.comp.mag(comp);
+            const t = Chalkboard.comp.arg(comp);
             for(let i = 0; i < index; i++) {
                 result.push(Chalkboard.comp.init(Chalkboard.real.root(r, index) * Chalkboard.trig.cos((t + Chalkboard.PI(2 * i)) / index), Chalkboard.real.root(r, index) * Chalkboard.trig.sin((t + Chalkboard.PI(2 * i)) / index)));
             }
@@ -406,7 +406,7 @@ namespace Chalkboard {
          */
         export const val = (func: ChalkboardFunction, comp: ChalkboardComplex): ChalkboardComplex => {
             if(func.type === "comp") {
-                let u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
+                const u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
                     v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
                 return Chalkboard.comp.init(u(comp.a, comp.b), v(comp.a, comp.b));
             } else {

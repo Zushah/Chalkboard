@@ -198,9 +198,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const qerp = (p1: [number, number], p2: [number, number], p3: [number, number], t: number): number => {
-            let a = p1[1] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
-            let b = -p1[1] * (p2[0] + p3[0]) / ((p1[0] - p2[0]) * (p1[0] - p3[0])) - p2[1] * (p1[0] + p3[0]) / ((p2[0] - p1[0]) * (p2[0] - p3[0])) - p3[1] * (p1[0] + p2[0]) / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
-            let c = p1[1] * p2[0] * p3[0] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] * p1[0] * p3[0] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] * p1[0] * p2[0] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
+            const a = p1[1] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
+            const b = -p1[1] * (p2[0] + p3[0]) / ((p1[0] - p2[0]) * (p1[0] - p3[0])) - p2[1] * (p1[0] + p3[0]) / ((p2[0] - p1[0]) * (p2[0] - p3[0])) - p3[1] * (p1[0] + p2[0]) / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
+            const c = p1[1] * p2[0] * p3[0] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] * p1[0] * p3[0] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] * p1[0] * p2[0] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
             return a * t * t + b * t + c;
         }
 
@@ -328,34 +328,34 @@ namespace Chalkboard {
          */
         export const val = (func: ChalkboardFunction, val: number | ChalkboardVector): number | ChalkboardVector => {
             if(func.type === "expl") {
-                let f = Chalkboard.real.parse("x => " + func.definition);
+                const f = Chalkboard.real.parse("x => " + func.definition);
                 return f(val);
             } else if(func.type === "inve") {
-                let f = Chalkboard.real.parse("y => " + func.definition);
+                const f = Chalkboard.real.parse("y => " + func.definition);
                 return f(val);
             } else if(func.type === "pola") {
-                let r = Chalkboard.real.parse("O => " + func.definition);
+                const r = Chalkboard.real.parse("O => " + func.definition);
                 return r(val);
             } else if(func.type === "curv") {
                 if(func.definition.length === 2) {
-                    let x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    const x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]);
                     return Chalkboard.vect.init(x(val), y(val));
                 } else {
-                    let x = Chalkboard.real.parse("t => " + func.definition[0]),
+                    const x = Chalkboard.real.parse("t => " + func.definition[0]),
                         y = Chalkboard.real.parse("t => " + func.definition[1]),
                         z = Chalkboard.real.parse("t => " + func.definition[2]);
                     return Chalkboard.vect.init(x(val), y(val), z(val));
                 }
             } else if(func.type === "surf") {
-                let vect = val as ChalkboardVector;
-                let x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
+                const vect = val as ChalkboardVector;
+                const x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
                     z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
                 return Chalkboard.vect.init(x(vect.x, vect.y), y(vect.x, vect.y), z(vect.x, vect.y));
             } else if(func.type === "mult" && typeof val !== "number") {
-                let vect = val as ChalkboardVector;
-                let f = Chalkboard.real.parse("(x, y) => " + func.definition);
+                const vect = val as ChalkboardVector;
+                const f = Chalkboard.real.parse("(x, y) => " + func.definition);
                 return f(vect.x, vect.y);
             } else {
                 throw new TypeError("Parameter \"func\" must be of type \"ChalkboardFunction\" with a \"type\" property of \"expl\", \"pola\", \"curv\", \"surf\", or \"mult\".");

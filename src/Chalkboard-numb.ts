@@ -91,7 +91,7 @@ namespace Chalkboard {
          * const arr = Chalkboard.numb.compositeArr(0, 1000);
          */
         export const compositeArr = (inf: number, sup: number): number[] => {
-            let result = [];
+            const result = [];
             for(let i = inf; i <= sup; i++) {
                 if(!Chalkboard.numb.isPrime(i)) {
                     result.push(i);
@@ -138,7 +138,7 @@ namespace Chalkboard {
          * const divisors = Chalkboard.numb.divisors(1000000);
          */
         export const divisors = (num: number): number[] => {
-            let result = [];
+            const result = [];
             for(let i = 1; i <= num; i++) {
                 if(num % i === 0) {
                     result.push(i);
@@ -157,7 +157,7 @@ namespace Chalkboard {
          */
         export const Euler = (num: number): number | undefined => {
             if(num > 0) {
-                let factors = Chalkboard.numb.factors(num);
+                const factors = Chalkboard.numb.factors(num);
                 for(let i = 0; i < factors.length; i++) {
                     num *= (factors[i] - 1) / factors[i];
                 }
@@ -205,7 +205,7 @@ namespace Chalkboard {
          * const factors = Chalkboard.numb.factors(1000000);
          */
         export const factors = (num: number): number[] => {
-            let result = [];
+            const result = [];
             while(num % 2 === 0) {
                 result.push(2);
                 num /= 2;
@@ -231,7 +231,7 @@ namespace Chalkboard {
          * const fibnum = Chalkboard.numb.Fibonacci(10);
          */
         export const Fibonacci = (num: number): number => {
-            let sequence = [0, 1];
+            const sequence = [0, 1];
             if(sequence[num] === undefined) {
                 sequence.push(Chalkboard.numb.Fibonacci(num - 1) + sequence[num - 2]);
             }
@@ -249,8 +249,8 @@ namespace Chalkboard {
          * const gaussRandom = Chalkboard.numb.Gaussian(1, 0, 1 / Chalkboard.real.sqrt(Chalkboard.PI(2))); 
          */
         export const Gaussian = (height: number, mean: number, deviation: number): number => {
-            let u1 = Math.random(), u2 = Math.random();
-            let random = Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(u1)) * Chalkboard.trig.cos(Chalkboard.PI(2) * u2);
+            const u1 = Math.random(), u2 = Math.random();
+            const random = Chalkboard.real.sqrt(-2 * Chalkboard.real.ln(u1)) * Chalkboard.trig.cos(Chalkboard.PI(2) * u2);
             return random * height * Chalkboard.real.sqrt(deviation) + mean;
         }
 
@@ -382,7 +382,7 @@ namespace Chalkboard {
          */
         export const mul = (formula: string, inf: number, sup: number): number => {
             let result = 1;
-            let f = Chalkboard.real.parse("n => " + formula);
+            const f = Chalkboard.real.parse("n => " + formula);
             for(let i = inf; i <= sup; i++) {
                 result *= f(i);
             }
@@ -428,7 +428,7 @@ namespace Chalkboard {
          */
         export const Poissonian = (l: number = 1): number => {
             if(l > 0) {
-                let L = Chalkboard.E(-l);
+                const L = Chalkboard.E(-l);
                 let p = 1, k = 0;
                 for(; p > L; ++k) {
                     p *= Math.random();
@@ -474,7 +474,7 @@ namespace Chalkboard {
          * const arr = Chalkboard.numb.primeArr(0, 1000);
          */
         export const primeArr = (inf: number, sup: number): number[] => {
-            let result = [];
+            const result = [];
             for(let i = inf; i <= sup; i++) {
                 if(Chalkboard.numb.isPrime(i)) {
                     result.push(i);
@@ -511,7 +511,7 @@ namespace Chalkboard {
             for(let i = inf; i <= sup; i++) {
                 if(Chalkboard.numb.isPrime(i)) {
                     if(prime !== null) {
-                        let temp = i - prime;
+                        const temp = i - prime;
                         if(temp > gap) {
                             gap = temp;
                         }
@@ -566,7 +566,7 @@ namespace Chalkboard {
          */
         export const sum = (formula: string, inf: number, sup: number): number => {
             let result = 0;
-            let f = Chalkboard.real.parse("n => " + formula);
+            const f = Chalkboard.real.parse("n => " + formula);
             for(let i = inf; i <= sup; i++) {
                 result += f(i);
             }

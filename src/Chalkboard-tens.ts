@@ -17,7 +17,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const absolute = (tens: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.absolute(tens[i]);
@@ -35,7 +35,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const add = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
                 for(let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
                     result[i] = Chalkboard.tens.add(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
@@ -54,7 +54,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const concat = (tens1: ChalkboardTensor, tens2: ChalkboardTensor, rank: number = 1): ChalkboardTensor => {
-            let concatAtRank = function(arr1: ChalkboardTensor, arr2: ChalkboardTensor, currentRank: number): ChalkboardTensor {
+            const concatAtRank = function(arr1: ChalkboardTensor, arr2: ChalkboardTensor, currentRank: number): ChalkboardTensor {
                 if(currentRank === rank) {
                     return Chalkboard.tens.init((arr1 as ChalkboardTensor[]).concat(arr2));
                 }
@@ -72,7 +72,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const constrain = (tens: ChalkboardTensor, range: [number, number] = [0, 1]): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.constrain(tens[i], range);
@@ -105,7 +105,7 @@ namespace Chalkboard {
          */
         export const copy = (tens: ChalkboardTensor): ChalkboardTensor => {
             if(Array.isArray(tens)) {
-                let result = Chalkboard.tens.init() as ChalkboardTensor[];
+                const result = Chalkboard.tens.init() as ChalkboardTensor[];
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.copy(tens[i]);
                 }
@@ -124,13 +124,13 @@ namespace Chalkboard {
             if(Array.isArray(size[0])) {
                 size = size[0];
             }
-            let newNDArray = function(size: number[]): ChalkboardTensor | null {
+            const newNDArray = function(size: number[]): ChalkboardTensor | null {
                 if(size.length === 0) {
                     return null;
                 }
-                let curr = size[0];
-                let rest = size.slice(1);
-                let result: ChalkboardTensor = [];
+                const curr = size[0];
+                const rest = size.slice(1);
+                const result: ChalkboardTensor = [];
                 for(let i = 0; i < curr; i++) {
                     result[i] = newNDArray(rest) as ChalkboardTensor;
                 }
@@ -149,13 +149,13 @@ namespace Chalkboard {
             if(Array.isArray(size[0])) {
                 size = size[0];
             }
-            let newNDArray = function(size: number[]): ChalkboardTensor {
+            const newNDArray = function(size: number[]): ChalkboardTensor {
                 if(size.length === 0) {
                     return element;
                 }
-                let curr = size[0];
-                let rest = size.slice(1);
-                let result = [];
+                const curr = size[0];
+                const rest = size.slice(1);
+                const result = [];
                 for(let i = 0; i < curr; i++) {
                     result[i] = newNDArray(rest);
                 }
@@ -183,7 +183,7 @@ namespace Chalkboard {
             } else {
                 tensor = tensor;
             }
-            let newNDArray = function(arr: ChalkboardTensor[]): ChalkboardTensor[] {
+            const newNDArray = function(arr: ChalkboardTensor[]): ChalkboardTensor[] {
                 return arr.map(function(subarr) {
                     if(Array.isArray(subarr)) {
                         return newNDArray(subarr);
@@ -202,10 +202,10 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const mul = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
                 for(let i = 0; i < tens1.length; i++) {
-                    let subarr = Chalkboard.tens.init() as ChalkboardTensor[];
+                    const subarr = Chalkboard.tens.init() as ChalkboardTensor[];
                     for(let j = 0; j < tens2.length; j++) {
                         subarr[j] = Chalkboard.tens.mul(tens1[i], tens2[j]);
                     }
@@ -223,7 +223,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const negate = (tens: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.negate(tens[i]);
@@ -295,13 +295,13 @@ namespace Chalkboard {
             if(Array.isArray(size[0])) {
                 size = size[0];
             }
-            let newNDArray = function(size: number[]): ChalkboardTensor {
+            const newNDArray = function(size: number[]): ChalkboardTensor {
                 if(size.length === 0) {
                     return Chalkboard.numb.random(inf, sup);
                 }
-                let curr = size[0];
-                let rest = size.slice(1);
-                let result = [];
+                const curr = size[0];
+                const rest = size.slice(1);
+                const result = [];
                 for(let i = 0; i < curr; i++) {
                     result[i] = newNDArray(rest);
                 }
@@ -333,7 +333,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const reciprocate = (tens: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.reciprocate(tens[i]);
@@ -354,8 +354,8 @@ namespace Chalkboard {
             if(Array.isArray(size[0])) {
                 size = size[0];
             }
-            let result = Chalkboard.tens.fill(0, ...size);
-            let refill = function(arr1: ChalkboardTensor[], arr2: ChalkboardTensor[]): void {
+            const result = Chalkboard.tens.fill(0, ...size);
+            const refill = function(arr1: ChalkboardTensor[], arr2: ChalkboardTensor[]): void {
                 for(let i = 0; i < arr2.length; i++) {
                     if(Array.isArray(arr2[i])) {
                         refill(arr1, (arr2 as ChalkboardTensor[][])[i]);
@@ -374,7 +374,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const round = (tens: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.round(tens[i]);
@@ -392,7 +392,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const scl = (tens: ChalkboardTensor, num: number): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.scl(tens[i], num);
@@ -427,7 +427,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const sub = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens1) && Array.isArray(tens2)) {
                 for(let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
                     result[i] = Chalkboard.tens.sub(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
@@ -444,8 +444,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const toArray = (tens: ChalkboardTensor): number[] => {
-            let result: number[] = [];
-            let flatten = function(tens: ChalkboardTensor): void {
+            const result: number[] = [];
+            const flatten = function(tens: ChalkboardTensor): void {
                 for(let i = 0; i < (tens as ChalkboardTensor[]).length; i++) {
                     if(Array.isArray((tens as ChalkboardTensor[])[i])) {
                         flatten((tens as ChalkboardTensor[])[i]);
@@ -464,8 +464,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const toMatrix = (tens: ChalkboardTensor): ChalkboardMatrix => {
-            let result = Chalkboard.matr.init();
-            let flatten = function(tens: ChalkboardTensor, result: ChalkboardMatrix): void {
+            const result = Chalkboard.matr.init();
+            const flatten = function(tens: ChalkboardTensor, result: ChalkboardMatrix): void {
                 for(let i = 0; i < (tens as ChalkboardTensor[]).length; i++) {
                     if(Array.isArray((tens as ChalkboardTensor[])[i])) {
                         flatten((tens as ChalkboardTensor[])[i], result);
@@ -474,9 +474,9 @@ namespace Chalkboard {
                     }
                 }
             };
-            let matr = Chalkboard.matr.init();
+            const matr = Chalkboard.matr.init();
             flatten(tens, matr);
-            let rows = (tens as ChalkboardTensor[]).length || 1;
+            const rows = (tens as ChalkboardTensor[]).length || 1;
             for(let j = 0; j < rows; j++) {
                 result.push(matr.slice(j * matr.length / rows, (j + 1) * matr.length / rows) as unknown as number[]);
             }
@@ -490,7 +490,7 @@ namespace Chalkboard {
          */
         export const toObject = (tens: ChalkboardTensor): object | number => {
             if(Array.isArray(tens)) {
-                let result: {[key: string]: number | object} = {};
+                const result: {[key: string]: number | object} = {};
                 for(let i = 0; i < tens.length; i++) {
                     result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
                 }
@@ -531,7 +531,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const toVector = (tens: ChalkboardTensor, dimension: number, index: number = 0): ChalkboardVector => {
-            let arr = Chalkboard.tens.toArray(tens);
+            const arr = Chalkboard.tens.toArray(tens);
             if(dimension === 2) {
                 return Chalkboard.vect.init(arr[index], arr[index + 1]);
             } else if(dimension === 3) {
@@ -558,7 +558,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const zero = (tens: ChalkboardTensor): ChalkboardTensor => {
-            let result = Chalkboard.tens.init() as ChalkboardTensor[];
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
             if(Array.isArray(tens)) {
                 for(let i = 0; i < tens.length; i++) {
                     result[i] = Chalkboard.tens.zero(tens[i]);
