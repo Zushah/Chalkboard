@@ -1,27 +1,56 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "1.7.0",
+  "version": "2.0.0",
   "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
-  "main": "src/Chalkboard.js",
+  "main": "dist/Chalkboard.js",
+  "files": ["dist", "examples", "CHANGELOG.md", "LICENSE.md", "package.json", "README.md"],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc --project tsconfig.json",
+    "eslint": "eslint src/**",
+    "eslint:fix": "eslint --fix src/**",
+    "prettier": "prettier src",
+    "prettier:fix": "prettier --write src",
+    "docs": "typedoc --options typedoc.json"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Zushah/Chalkboard.git"
   },
   "keywords": [
-    "mathematics",
+    "algebra",
+    "calculus",
+    "complex",
+    "geometry",
     "khan-academy",
-    "processing"
+    "mathematics",
+    "number",
+    "plot",
+    "quaternion",
+    "statistics",
+    "tensor",
+    "trigonometry",
+    "typescript",
+    "matrix",
+    "vector"
   ],
   "author": "Zushah",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Zushah/Chalkboard/issues"
   },
-  "homepage": "https://zushah.github.io/Chalkboard/home.html",
+  "homepage": "https://zushah.github.io/Chalkboard",
   "publishConfig": {
     "access": "public"
+  },
+  "save-prefix": "",
+  "devDependencies": {
+    "@types/node": "20.10.6",
+    "@typescript-eslint/eslint-plugin": "6.17.0",
+    "@typescript-eslint/parser": "6.17.0",
+    "eslint": "8.56.0",
+    "prettier": "3.1.1",
+    "typedoc": "0.25.6",
+    "typedoc-material-theme": "1.0.2",
+    "typescript": "5.3.3"
   }
 }

@@ -1,13 +1,13 @@
 /*
     The Chalkboard Library
-    Version 1.7.0 Descartes released 01/01/2024
+    Version 2.0.0 al-Khwarizmi released 01/08/2024
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
     The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
 
     Repository ===> https://www.github.com/Zushah/Chalkboard
-    Website ===> https://zushah.github.io/Chalkboard/home.html
+    Website ===> https://zushah.github.io/Chalkboard
 */
 
 /**
@@ -67,6 +67,58 @@ type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
  */
 namespace Chalkboard {
     /**
+     * Applies a callback function in an element-wise manner on a complex number, matrix, quaternion, tensor, or vector.
+     * @param {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector} object - The complex number, matrix, quaternion, tensor, or vector
+     * @param {Function} callback - The callback function to apply
+     * @returns {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector}
+     * @example
+     * // Returns the vector (1, 2, 6, 24)
+     * let v = Chalkboard.vect.init(1, 2, 3, 4);
+     * let factorialv = Chalkboard.APPLY(v, (x) => {
+     *     return Chalkboard.numb.factorial(x)
+     * });
+     */
+    export const APPLY = (object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector, callback: Function): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
+        const comp = object as ChalkboardComplex;
+        const matr = object as ChalkboardMatrix;
+        const quat = object as ChalkboardQuaternion;
+        const tens = object as ChalkboardTensor;
+        const vect = object as ChalkboardVector;
+        if (typeof comp.a !== "undefined" && typeof comp.b !== "undefined" && typeof quat.c === "undefined" && typeof quat.d === "undefined") {
+            return Chalkboard.comp.init(callback(comp.a), callback(comp.b))
+        } else if (Array.isArray(matr) && Array.isArray(matr[0]) && !Array.isArray(matr[0][0])) {
+            const result = Chalkboard.matr.init();
+            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                result[i] = [];
+                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    result[i][j] = callback(matr[i][j]);
+                }
+            }
+            return result;
+        } else if (typeof quat.a !== "undefined" && typeof quat.b !== "undefined" && typeof quat.c !== "undefined" && typeof quat.d !== "undefined") {
+            return Chalkboard.quat.init(callback(quat.a), callback(quat.b), callback(quat.c), callback(quat.d));
+        } else if (Array.isArray(tens) && Array.isArray(tens[0])) {
+            const result = Chalkboard.tens.init() as ChalkboardTensor[];
+            if (Array.isArray(tens)) {
+                for (let i = 0; i < tens.length; i++) {
+                    result[i] = Chalkboard.APPLY(tens[i], callback) as ChalkboardTensor;
+                }
+                return result;
+            } else {
+                return callback(tens);
+            }
+        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            return Chalkboard.vect.init(callback(vect.x), callback(vect.y));
+        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w === "undefined") {
+            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z));
+        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w !== "undefined") {
+            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
+        } else {
+            throw new TypeError("Parameter \"object\" must be of type \"ChalkboardComplex\", \"ChalkboardMatrix\", \"ChalkboardQuaternion\", \"ChalkboardTensor\", or \"ChalkboardVector\".");
+        }
+    }
+
+    /**
      * The variable for setting the default JavaScript Canvas API context for Chalkboard to use.
      * @type {string}
      * @example
@@ -75,7 +127,7 @@ namespace Chalkboard {
      * const context = document.getElementById("canvas").getContext("2d");
      * Chalkboard.CONTEXT = "context";
      */
-    export let CONTEXT: string = "ctx";
+    export let CONTEXT: string = typeof window !== "undefined" ? "ctx" : "0";
 
     /**
      * Computes the number e.
@@ -145,7 +197,7 @@ namespace Chalkboard {
      * const twentyfour = Chalkboard.real.parse("Math.factorial(4)");
      */
     export let PARSEPREFIX: string = "";
-    Chalkboard.PARSEPREFIX += "const ctx = document.querySelector('canvas').getContext('2d');";
+    if (typeof window !== "undefined") Chalkboard.PARSEPREFIX += "const ctx = document.querySelector('canvas').getContext('2d');";
 
     /**
      * Computes the number pi.
@@ -181,7 +233,7 @@ namespace Chalkboard {
                 Chalkboard.VERSION +
                 " " +
                 Chalkboard.VERSIONALIAS +
-                " released 01/01/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard/home.html"
+                " released 01/08/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
         );
     };
 
@@ -189,19 +241,19 @@ namespace Chalkboard {
      * The version of Chalkboard.
      * @type {string}
      * @example
-     * // Returns 1.7.0
+     * // Returns 2.0.0
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "1.7.0" = "1.7.0";
+    export const VERSION: "2.0.0" = "2.0.0";
 
     /**
      * The alias of the version of Chalkboard.
      * @type {string}
      * @example
-     * // Returns Descartes
+     * // Returns al-Khwarizmi
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "Descartes" = "Descartes";
+    export const VERSIONALIAS: "al-Khwarizmi" = "al-Khwarizmi";
 }
 
 if (typeof window === "undefined") {

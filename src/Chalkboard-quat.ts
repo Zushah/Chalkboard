@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Quaternion Namespace
-    Version 1.7.0 Descartes
+    Version 2.0.0 al-Khwarizmi
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -123,9 +123,9 @@ namespace Chalkboard {
         /**
          * Initializes a new quaternion
          * @param {number} a - The real part
-         * @param {number} b - The first imaginary part
-         * @param {number} c - The second imaginary part
-         * @param {number} d - The third imaginary part
+         * @param {number} [b=0] - The first imaginary part
+         * @param {number} [c=0] - The second imaginary part
+         * @param {number} [d=0] - The third imaginary part
          * @returns {ChalkboardQuaternion}
          */
         export const init = (a: number, b: number = 0, c: number = 0, d: number = 0): ChalkboardQuaternion => {

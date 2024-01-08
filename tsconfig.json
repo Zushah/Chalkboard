@@ -1,0 +1,17 @@
+{
+  "include": ["./src/**/*"],
+  "compilerOptions": {
+    "target": "es5",
+    "moduleResolution": "node",
+    "lib": ["es2023", "dom"],
+    "rootDir": "./src/",
+    "outFile": "./dist/Chalkboard.js",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "esModuleInterop": false,
+    "strict": true,
+    "removeComments": true,
+    "skipLibCheck": true
+  }
+}

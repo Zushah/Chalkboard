@@ -1,5 +1,5 @@
 # Chalkboard examples
-Six basic programs made by Zushah that utilize [Chalkboard v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) are located in this directory.
+Six basic programs made by Zushah that utilize [Chalkboard v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) are located in this directory.
 
 They can be viewed in action here:
 - [fluid.js](https://zushah.github.io/Chalkboard/examples/fluid.html)
@@ -9,4 +9,4 @@ They can be viewed in action here:
 - [newton.js](https://zushah.github.io/Chalkboard/examples/newton.html)
 - [quat-donut.js](https://zushah.github.io/Chalkboard/examples/quat-donut.html)
 
-The main webpage for the examples can be visited at the [Chalkboard website](https://zushah.github.io/Chalkboard/examples.html).
+The main webpage for the examples can be visited at the [Chalkboard website](https://zushah.github.io/Chalkboard/examples/index.html).

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Statistics Namespace
-    Version 1.7.0 Descartes
+    Version 2.0.0 al-Khwarizmi
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -622,7 +622,7 @@ namespace Chalkboard {
 
         /**
          * Calculates a regression model for an array of data.
-         * @param {number[][]} data
+         * @param {number[][]} data - The data, an array of arrays that represent an ordered pair of 2D coordinates
          * @param {"linear" | "polynomial" | "power" | "exponential" | "logarithmic"} [type="linear"] - The type of regression model, which can be "linear", "polynomial", "power", "exponential", or "logarithmic"
          * @param {number} [degree=2] - The degree of the leading coefficient of the polynomial regression model
          * @returns {ChalkboardFunction}

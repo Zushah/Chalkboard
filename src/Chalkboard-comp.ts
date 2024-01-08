@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Complex Numbers Namespace
-    Version 1.7.0 Descartes
+    Version 2.0.0 al-Khwarizmi
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -138,7 +138,7 @@ namespace Chalkboard {
         /**
          * Initializes a new complex number
          * @param {number} a - The real part
-         * @param {number} b - The imaginary part
+         * @param {number} [b=0] - The imaginary part
          * @returns {ChalkboardComplex}
          */
         export const init = (a: number, b: number = 0): ChalkboardComplex => {

@@ -1,6 +1,24 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) - 01/08/2024
+The tenth release of the Chalkboard library.
+Commits: [`v1.7.0...v2.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.7.0...v2.0.0)
+- Rewrote everything in TypeScript, applied ESLint and Prettier, and remade the website with TypeDoc
+- Added `APPLY` which applies a callback function in an element-wise manner on a complex number, matrix, quaternion, tensor, or vector
+- Added the `vect` category which merges the `vec2`, `vec3`, and `vec4` categories into one
+- Added `VERSION` and `VERSIONALIAS` which return the installed version and its alias, respectively
+- Removed the `vec2`, `vec3`, and `vec4` categories
+- Removed `quat.fromVector` because it's been replaced by `vect.toQuaternion`
+- Removed `plot.vec3` because it was weird
+- Changed everything due to the TypeScript rewrite and the vector categories merge
+- Changed all of the `.new` commands to be renamed as `.init`
+- Changed `real.function` to be renamed as `real.define`, `comp.function` to be renamed as `comp.define`, and `plot.function` to be renamed as `plot.definition`
+- Changed `LOGO` to draw the logo as a circle instead of a square
+- Changed `matr.mulvec` to be renamed as `matr.mulVector`
+- Fixed `matr.mulVector`` which didn't work when the rows of the matrix equaled the dimension of the vector
+- Discontinued the Processsing.js edition of the library, meaning it will no longer be updated and it will only be available on the Khan Academy release (it will no longer be available on GitHub)
+
 ## [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) - 01/01/2024
 The ninth release of the Chalkboard library.
 Commits: [`v1.6.0...v1.7.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.6.0...v1.7.0)

@@ -1,0 +1,15 @@
+{
+    "entryPoints": ["./src/Chalkboard.ts"],
+    "entryPointStrategy": "resolve",
+    "out": "../zushah.github.io/Chalkboard/",
+    "cleanOutputDir": false,
+    "readme": "./README.md",
+    "name": "Chalkboard",
+    "includeVersion": true,
+    "sidebarLinks": {
+        "Source code": "https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.0.0/dist/Chalkboard.js",
+        "Examples": "./examples/index.html"
+    },
+    "plugin": ["typedoc-material-theme"],
+    "themeColor": "#013d57"
+}

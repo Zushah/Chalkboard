@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Geometry Namespace
-    Version 1.7.0 Descartes
+    Version 2.0.0 al-Khwarizmi
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {

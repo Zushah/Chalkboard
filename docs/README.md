@@ -1,2 +1,2 @@
 # Chalkboard documentation
-The documentation for [Chalkboard v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) can be visited [here](https://zushah.github.io/Chalkboard/documentation.html/). Its source code is located [here](https://www.github.com/Zushah/zushah.github.io/blob/main/Chalkboard/documentation.html).
+The documentation for [Chalkboard v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) can be visited [here](https://zushah.github.io/Chalkboard). Its source code is located [here](https://www.github.com/Zushah/zushah.github.io/blob/main/Chalkboard).

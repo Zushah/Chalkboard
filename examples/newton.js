@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 1.7.0 Descartes Example Program: Newton's Method
+    Version 2.0.0 al-Khwarizmi Example Program: Newton's Method
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -12,16 +12,12 @@ canvas.height = window.innerHeight;
 var cb = Chalkboard; // Initialize Chalkboard as cb
 
 // Random fourth-degree polynomial function
-var c1 = cb.numb.random(-3, 3);
-var c2 = cb.numb.random(-3, 3);
-var c3 = cb.numb.random(-3, 3);
-var c4 = cb.numb.random(-3, 3);
-var c5 = cb.numb.random(-3, 3);
-var f = cb.real.function(c1 + " * x * x * x * x + " + c2 + " * x * x * x + " + c3 + " * x * x + " + c4 + " * x + " + c5);
+var c = cb.stat.random(-3, 3, 5);
+var f = cb.real.define(c[0] + " * x * x * x * x + " + c[1] + " * x * x * x + " + c[2] + " * x * x + " + c[3] + " * x + " + c[4]);
 
 // Newton's method's solution and tangent line (see: https://en.wikipedia.org/wiki/Newton's_method)
 var root = cb.calc.Newton(f, [-5, 5]);
-var y = cb.real.function(cb.calc.dfdx(f, root) + " * (x - " + root + ") + " + cb.real.val(f, root));
+var y = cb.real.define(cb.calc.dfdx(f, root) + " * (x - " + root + ") + " + cb.real.val(f, root));
 
 function main() {
     ctx.fillStyle = "rgb(255, 255, 255)";
@@ -29,16 +25,16 @@ function main() {
     cb.plot.xyplane({lineWidth: 2});
 
     // Draw the polynomial
-    cb.plot.function(f, {strokeStyle: "rgb(100, 100, 255)", lineWidth: 4});
+    cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", lineWidth: 4});
     ctx.fillStyle = "rgb(0, 0, 0)";
     ctx.font = "50px Times New Roman";
-    ctx.fillText("f(x) = " + c1.toFixed(2) + "x⁴ + " + c2.toFixed(2) + "x³ + " + c3.toFixed(2) + "x² + " + c4.toFixed(2) + "x + " + c5.toFixed(2), 20, 70);
+    ctx.fillText("f(x) = " + c[0].toFixed(2) + "x⁴ + " + c[1].toFixed(2) + "x³ + " + c[2].toFixed(2) + "x² + " + c[3].toFixed(2) + "x + " + c[4].toFixed(2), 20, 70);
     
-    // Only draw the solution and the tangent line if the solution is correct
-    if(cb.real.val(f, root).toFixed(1) == 0) {
+    // Draw the solution and the tangent line if the solution is correct
+    if (cb.real.val(f, root).toFixed(1) == 0) {
         ctx.fillText("y = " + cb.calc.dfdx(f, root).toFixed(2) + "x - " + (cb.calc.dfdx(f, root) * root).toFixed(2), 20, 120);
         ctx.fillText("A possible root is at x = " + root.toFixed(2), 20, 170);
-        cb.plot.function(y, {strokeStyle: "rgb(255, 100, 100)", lineWidth: 4});
+        cb.plot.definition(y, {strokeStyle: "rgb(255, 100, 100)", lineWidth: 4});
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
         ctx.beginPath();
