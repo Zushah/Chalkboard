@@ -15,14 +15,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Math.abs(matr[i][j]);
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])],
+                                            [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Math.abs(matr[i][j]);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -33,14 +38,19 @@ namespace Chalkboard {
          */
         export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                const result = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                    result[i] = [];
-                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                        result[i][j] = matr1[i][j] + matr2[i][j];
+                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]],
+                                                [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
+                } else {
+                    const result = Chalkboard.matr.init();
+                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                            result[i][j] = matr1[i][j] + matr2[i][j];
+                        }
                     }
+                    return result;
                 }
-                return result;
             } else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
@@ -143,17 +153,29 @@ namespace Chalkboard {
         export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
             if (type === "row") {
                 if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
-                    return Chalkboard.matr.init(matr1.concat(matr2));
+                    if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1]],
+                                                    [matr1[1][0], matr1[1][1]],
+                                                    [matr2[0][0], matr2[0][1]],
+                                                    [matr2[1][0], matr2[1][1]]);
+                    } else {
+                        return Chalkboard.matr.init(matr1.concat(matr2));
+                    }
                 } else {
                     throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
                 }
             } else if (type === "col") {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                    const result = Chalkboard.matr.init();
-                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                        result.push(matr1[i].concat(matr2[i]));
+                    if (Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]],
+                                                    [matr1[1][0], matr1[1][1], matr2[1][0], matr2[1][1]]);
+                    } else {
+                        const result = Chalkboard.matr.init();
+                        for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                            result.push(matr1[i].concat(matr2[i]));
+                        }
+                        return result;
                     }
-                    return result;
                 } else {
                     throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of columns.');
                 }
@@ -169,14 +191,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Chalkboard.numb.constrain(matr[i][j], range);
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)],
+                                            [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Chalkboard.numb.constrain(matr[i][j], range);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -185,14 +212,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result.push([]);
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i].push(matr[i][j]);
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([matr[0][0], matr[0][1]],
+                                            [matr[1][0], matr[1][1]]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result.push([]);
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i].push(matr[i][j]);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -202,12 +234,12 @@ namespace Chalkboard {
          */
         export const det = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                let result = 0;
                 if (Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
                 } else if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0];
                 } else {
+                    let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                         const cofactor = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 1, i + 1));
                         result += i % 2 === 0 ? cofactor : -cofactor;
@@ -226,14 +258,20 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < rows; i++) {
-                result.push([]);
-                for (let j = 0; j < cols; j++) {
-                    result[i].push(null as unknown as number);
+            const _null = null as unknown as number;
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([_null, _null],
+                                            [_null, _null]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < rows; i++) {
+                    result.push([]);
+                    for (let j = 0; j < cols; j++) {
+                        result[i].push(_null);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -242,15 +280,20 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const exchange = (size: number): ChalkboardMatrix => {
-            const result = Chalkboard.matr.fill(0, size, size);
-            for (let i = 0; i < size; i++) {
-                for (let j = 0; j < size; j++) {
-                    if (i + j === size - 1) {
-                        result[i][j] = 1;
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 1],
+                                            [1, 0]);
+            } else {
+                const result = Chalkboard.matr.fill(0, size, size);
+                for (let i = 0; i < size; i++) {
+                    for (let j = 0; j < size; j++) {
+                        if (i + j === size - 1) {
+                            result[i][j] = 1;
+                        }
                     }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -261,14 +304,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < rows; i++) {
-                result.push([]);
-                for (let j = 0; j < cols; j++) {
-                    result[i].push(element);
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([element, element],
+                                            [element, element]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < rows; i++) {
+                    result.push([]);
+                    for (let j = 0; j < cols; j++) {
+                        result[i].push(element);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -277,14 +325,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const Hilbert = (size: number): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < size; i++) {
-                result.push([]);
-                for (let j = 0; j < size; j++) {
-                    result[i].push(1 / (i + j + 1));
+            if (size === 2) {
+                return Chalkboard.matr.init([1/1, 1/2],
+                                            [1/2, 1/3]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push([]);
+                    for (let j = 0; j < size; j++) {
+                        result[i].push(1 / (i + j + 1));
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -293,12 +346,17 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const identity = (size: number): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < size; i++) {
-                result.push(Array(size).fill(0));
-                result[i][i] = 1;
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 0],
+                                            [0, 1]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push(Array(size).fill(0));
+                    result[i][i] = 1;
+                }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -331,42 +389,48 @@ namespace Chalkboard {
          */
         export const invert = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                const result = Chalkboard.matr.init();
-                const augmented = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
-                    augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
-                }
-                for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
-                    let diagonal = augmented[row][row];
-                    if (diagonal === 0) {
-                        let max = row;
-                        for (let i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
-                            if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
-                                max = i;
+                if (Chalkboard.matr.rows(matr) === 2) {
+                    const det = Chalkboard.matr.det(matr);
+                    return Chalkboard.matr.init([matr[1][1] / det, -matr[0][1] / det],
+                                                [-matr[1][0] / det, matr[0][0] / det]);
+                } else {
+                    const result = Chalkboard.matr.init();
+                    const augmented = Chalkboard.matr.init();
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
+                        augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
+                    }
+                    for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
+                        let diagonal = augmented[row][row];
+                        if (diagonal === 0) {
+                            let max = row;
+                            for (let i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
+                                if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
+                                    max = i;
+                                }
+                            }
+                            const temp = augmented[row];
+                            augmented[row] = augmented[max];
+                            augmented[max] = temp;
+                            diagonal = augmented[row][row];
+                        }
+                        for (let col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
+                            augmented[row][col] /= diagonal;
+                        }
+                        for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                            if (i !== row) {
+                                const coeff = augmented[i][row];
+                                for (let j = 0; j < 2 * Chalkboard.matr.cols(matr); j++) {
+                                    augmented[i][j] -= coeff * augmented[row][j];
+                                }
                             }
                         }
-                        const temp = augmented[row];
-                        augmented[row] = augmented[max];
-                        augmented[max] = temp;
-                        diagonal = augmented[row][row];
-                    }
-                    for (let col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
-                        augmented[row][col] /= diagonal;
                     }
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        if (i !== row) {
-                            const coeff = augmented[i][row];
-                            for (let j = 0; j < 2 * Chalkboard.matr.cols(matr); j++) {
-                                augmented[i][j] -= coeff * augmented[row][j];
-                            }
-                        }
+                        result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
                     }
+                    return result;
                 }
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
-                }
-                return result;
             } else {
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
@@ -378,14 +442,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const Lehmer = (size: number): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < size; i++) {
-                result.push([]);
-                for (let j = 0; j < size; j++) {
-                    result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
+            if (size === 2) {
+                return Chalkboard.matr.init([1/1, 1/2],
+                                            [1/2, 1/1]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push([]);
+                    for (let j = 0; j < size; j++) {
+                        result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -395,8 +464,7 @@ namespace Chalkboard {
          */
         export const LUdecomp = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
-                    U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
+                const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
                 for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
                     for (let i = 0; i <= j; i++) {
                         let sum = 0;
@@ -427,17 +495,25 @@ namespace Chalkboard {
          */
         export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
-                const result = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                    result[i] = [];
-                    for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
-                        result[i][j] = 0;
-                        for (let k = 0; k < Chalkboard.matr.cols(matr1); k++) {
-                            result[i][j] += matr1[i][k] * matr2[k][j];
+                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 1) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]],
+                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
+                } else if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1]],
+                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1]]);
+                } else {
+                    const result = Chalkboard.matr.init();
+                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
+                            result[i][j] = 0;
+                            for (let k = 0; k < Chalkboard.matr.cols(matr1); k++) {
+                                result[i][j] += matr1[i][k] * matr2[k][j];
+                            }
                         }
                     }
+                    return result;
                 }
-                return result;
             } else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
             }
@@ -450,20 +526,27 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                    for (let k = 0; k < Chalkboard.matr.rows(matr2); k++) {
-                        for (let l = 0; l < Chalkboard.matr.cols(matr2); l++) {
-                            if (!result[i * Chalkboard.matr.rows(matr2) + k]) {
-                                result[i * Chalkboard.matr.rows(matr2) + k] = [];
+            if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]],
+                                            [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]],
+                                            [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]],
+                                            [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        for (let k = 0; k < Chalkboard.matr.rows(matr2); k++) {
+                            for (let l = 0; l < Chalkboard.matr.cols(matr2); l++) {
+                                if (!result[i * Chalkboard.matr.rows(matr2) + k]) {
+                                    result[i * Chalkboard.matr.rows(matr2) + k] = [];
+                                }
+                                result[i * Chalkboard.matr.rows(matr2) + k][j * Chalkboard.matr.cols(matr2) + l] = matr1[i][j] * matr2[k][l];
                             }
-                            result[i * Chalkboard.matr.rows(matr2) + k][j * Chalkboard.matr.cols(matr2) + l] = matr1[i][j] * matr2[k][l];
                         }
                     }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -502,14 +585,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = -matr[i][j];
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1]],
+                                            [-matr[1][0], -matr[1][1]]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = -matr[i][j];
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -615,8 +703,7 @@ namespace Chalkboard {
          * @returns {{Q: ChalkboardMatrix, R: ChalkboardMatrix}}
          */
         export const QRdecomp = (matr: ChalkboardMatrix): { Q: ChalkboardMatrix; R: ChalkboardMatrix } => {
-            const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
-                R = Chalkboard.matr.copy(matr);
+            const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
             for (let j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
                 let norm = 0;
                 for (let i = j; i < Chalkboard.matr.rows(matr); i++) {
@@ -671,6 +758,10 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+            }
             const result = Chalkboard.matr.init();
             for (let i = 0; i < rows; i++) {
                 result.push([]);
@@ -700,14 +791,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = 1 / matr[i][j];
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]],
+                                            [1 / matr[1][0], 1 / matr[1][1]]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = 1 / matr[i][j];
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -756,13 +852,10 @@ namespace Chalkboard {
          * Returns a matrix with the number of rows and columns changed.
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} rows - The number of rows to change to
-         * @param {nmber} cols - The number of columns to change to
+         * @param {nmber} [cols=rows] - The number of columns to change to
          * @returns {ChalkboardMatrix}
          */
-        export const resize = (matr: ChalkboardMatrix, rows: number, cols: number): ChalkboardMatrix => {
-            if (cols === undefined) {
-                cols = rows;
-            }
+        export const resize = (matr: ChalkboardMatrix, rows: number, cols: number = rows): ChalkboardMatrix => {
             const result = Chalkboard.matr.init();
             const flat = Chalkboard.matr.toArray(matr);
             let index = 0;
@@ -799,14 +892,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Math.round(matr[i][j]);
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])],
+                                            [Math.round(matr[1][0]), Math.round(matr[1][1])]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Math.round(matr[i][j]);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -855,14 +953,23 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = matr[i][j] * num;
-                }
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 1) {
+                return Chalkboard.matr.init([matr[0][0] * num],
+                                            [matr[1][0] * num]);
             }
-            return result;
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num],
+                                            [matr[1][0] * num, matr[1][1] * num]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] * num;
+                    }
+                }
+                return result;
+            }
         };
 
         /**
@@ -912,14 +1019,19 @@ namespace Chalkboard {
          */
         export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                const result = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                    result[i] = [];
-                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                        result[i][j] = matr1[i][j] - matr2[i][j];
+                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]],
+                                                [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
+                } else {
+                    const result = Chalkboard.matr.init();
+                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                            result[i][j] = matr1[i][j] - matr2[i][j];
+                        }
                     }
+                    return result;
                 }
-                return result;
             } else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
@@ -931,13 +1043,17 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const toArray = (matr: ChalkboardMatrix): number[] => {
-            const result = [];
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result.push(matr[i][j]);
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
+            } else {
+                const result = [];
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result.push(matr[i][j]);
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -946,14 +1062,21 @@ namespace Chalkboard {
          * @returns {object}
          */
         export const toObject = (matr: ChalkboardMatrix): object => {
-            const result: { [key: string]: { [key: string]: number } } = {};
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result["i" + (i + 1)] = {};
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return {
+                    i1: { j1: matr[0][0], j2: matr[0][1] },
+                    i2: { j1: matr[1][0], j2: matr[1][1] }
+                };
+            } else {
+                const result: { [key: string]: { [key: string]: number } } = {};
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result["i" + (i + 1)] = {};
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -962,15 +1085,19 @@ namespace Chalkboard {
          * @returns {string}
          */
         export const toString = (matr: ChalkboardMatrix): string => {
-            let result = "";
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result += "[ ";
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result += matr[i][j].toString() + " ";
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
+            } else {
+                let result = "";
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result += "[ ";
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result += matr[i][j].toString() + " ";
+                    }
+                    result = result.trimEnd() + " ]\n";
                 }
-                result = result.trimEnd() + " ]\n";
+                return result;
             }
-            return result;
         };
 
         /**
@@ -1032,11 +1159,15 @@ namespace Chalkboard {
          */
         export const trace = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                let result = 0;
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    result += matr[i][i];
+                if (Chalkboard.matr.rows(matr) === 2) {
+                    return matr[0][0] + matr[1][1];
+                } else {
+                    let result = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        result += matr[i][i];
+                    }
+                    return result;
                 }
-                return result;
             } else {
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
@@ -1048,14 +1179,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.rows(matr); j++) {
-                    result[i][j] = matr[j][i];
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([matr[0][0], matr[1][0]],
+                                            [matr[0][1], matr[1][1]]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.cols(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.rows(matr); j++) {
+                        result[i][j] = matr[j][i];
+                    }
                 }
+                return result;
             }
-            return result;
         };
 
         /**
@@ -1081,14 +1217,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = matr[i][j] * 0;
+            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0],
+                                            [matr[1][0] * 0, matr[1][1] * 0]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] * 0;
+                    }
                 }
+                return result;
             }
-            return result;
         };
     }
 }
