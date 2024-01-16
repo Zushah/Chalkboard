@@ -347,6 +347,50 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the dominant eigenvalue of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [maxIterations=100] - The number of iterations the algorithm runs
+         * @returns {number}
+         */
+        export const eigenvalue = (matr: ChalkboardMatrix, maxIterations: number = 100): number => {
+            let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
+            for (let i = 0; i < maxIterations; i++) {
+                const matrv = Chalkboard.matr.mul(matr, v);
+                const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
+                    return i / max;
+                }), Chalkboard.matr.rows(matr), 1);
+            }
+            const dot = function (v1: number[], v2: number[]): number {
+                let result = 0;
+                for (let i = 0; i < v1.length; i++) {
+                    result += v1[i] * v2[i];
+                }
+                return result;
+            }
+            return dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) / dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v));
+        };
+
+        /**
+         * Calculates the dominant eigenvector of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [maxIterations=100] - The number of iterations the algorithm runs
+         * @returns {number[]}
+         */
+        export const eigenvector = (matr: ChalkboardMatrix, maxIterations: number = 100): number[] => {
+            let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
+            for (let i = 0; i < maxIterations; i++) {
+                const matrv = Chalkboard.matr.mul(matr, v);
+                const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
+                    return i / max;
+                }), Chalkboard.matr.rows(matr), 1);
+            }
+            const result = Chalkboard.matr.toArray(v);
+            return result;
+        };
+
+        /**
          * Initializes an empty matrix.
          * @param {number} rows - The number of rows
          * @param {number} cols - The number of columns
