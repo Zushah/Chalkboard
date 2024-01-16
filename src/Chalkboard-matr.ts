@@ -317,6 +317,36 @@ namespace Chalkboard {
         };
 
         /**
+         * Initializes a diagonal matrix.
+         * @param {number} size - The number of rows or columns
+         * @param {number[]} elements - The elements on the main diagonal
+         * @returns {ChalkboardMatrix}
+         */
+        export const diagonal = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0], 0],
+                                            [0, elements[1]]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([elements[0], 0, 0],
+                                            [0, elements[1], 0],
+                                            [0, 0, elements[2]]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([elements[0], 0, 0, 0],
+                                            [0, elements[1], 0, 0],
+                                            [0, 0, elements[2], 0],
+                                            [0, 0, 0, elements[3]]);
+            } else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push(Array(size).fill(0));
+                    result[i][i] = elements[i] || 0;
+                }
+                return result;
+            }
+        };
+
+        /**
          * Initializes an empty matrix.
          * @param {number} rows - The number of rows
          * @param {number} cols - The number of columns
@@ -570,6 +600,112 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two matrices are approximately equal.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {boolean}
+         */
+        export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
+                const n = 0.000001;
+                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n;
+                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n;
+                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[0][3] - matr2[0][3]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[1][3] - matr2[1][3]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n && Math.abs(matr1[2][3] - matr2[2][3]) < n && Math.abs(matr1[3][0] - matr2[3][0]) < n && Math.abs(matr1[3][1] - matr2[3][1]) < n && Math.abs(matr1[3][2] - matr2[3][2]) < n && Math.abs(matr1[3][3] - matr2[3][3]) < n;
+                } else {
+                    let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
+                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
+                            if (Math.abs(matr1[i][j] - matr2[i][j]) < n) score--;
+                        }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if two matrices are equal.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {boolean}
+         */
+        export const isEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
+                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
+                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2];
+                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[0][3] === matr2[0][3] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[1][3] === matr2[1][3] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2] && matr1[2][3] === matr2[2][3] && matr1[3][0] === matr2[3][0] && matr1[3][1] === matr2[3][1] && matr1[3][2] === matr2[3][2] && matr1[3][3] === matr2[3][3];
+                } else {
+                    let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
+                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
+                            if (matr1[i][j] === matr2[i][j]) score--;
+                        }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if a matrix is invertible.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isInvertible = (matr: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr) && Chalkboard.matr.det(matr) !== 0;
+        };
+
+        /**
+         * Checks if a matrix is orthogonal.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isOrthogonal = (matr: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.isInvertible(matr)) {
+                return Chalkboard.matr.isApproxEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if a matrix is skew-symmetric.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isSkewSymmetric = (matr: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.negate(matr));
+        };
+
+        /**
+         * Checks if a matrix is square.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isSquare = (matr: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr);
+        };
+
+        /**
+         * Checks if a matrix is symmetric.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isSymmetric = (matr: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
+        };
+
+        /**
          * Initializes a Lehmer matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
@@ -593,6 +729,39 @@ namespace Chalkboard {
                     result.push([]);
                     for (let j = 0; j < size; j++) {
                         result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
+         * Initializes a lower triangular matrix.
+         * @param {number} size - The number of rows or columns
+         * @param {number[]} elements - The elements on and below the main diagonal
+         * @returns {ChalkboardMatrix}
+         */
+        export const lowerTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0], 0],
+                                            [elements[1], elements[2]]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([elements[0], 0, 0],
+                                            [elements[1], elements[2], 0],
+                                            [elements[3], elements[4], elements[5]]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([elements[0], 0, 0, 0],
+                                            [elements[1], elements[2], 0, 0],
+                                            [elements[3], elements[4], elements[5], 0],
+                                            [elements[6], elements[7], elements[8], elements[9]]);
+            } else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                const result = Chalkboard.matr.init();
+                let index = 0;
+                for (let i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        result[i][j] = j <= i ? elements[index++] || 0 : 0;
                     }
                 }
                 return result;
@@ -1356,7 +1525,7 @@ namespace Chalkboard {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
             } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " ]";
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " " + matr[0][3].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " " + matr[1][3].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " " + matr[2][3].toString() + " ]\n[ " + matr[3][0].toString() + " " + matr[3][1].toString() + " " + matr[3][2].toString() + " " + matr[3][3].toString() + " ]";
             } else {
                 let result = "";
@@ -1378,9 +1547,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const toTensor = (matr: ChalkboardMatrix, ...size: number[]): ChalkboardTensor => {
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             return Chalkboard.tens.resize(matr, ...size);
         };
 
@@ -1492,6 +1659,39 @@ namespace Chalkboard {
                 return Chalkboard.matr.init([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             } else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+            }
+        };
+
+        /**
+         * Initializes an upper triangular matrix.
+         * @param {number} size - The number of rows or columns
+         * @param {number[]} elements - The elements on and above the main diagonal
+         * @returns {ChalkboardMatrix}
+         */
+        export const upperTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0], elements[1]],
+                                            [0, elements[2]]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([elements[0], elements[1], elements[2]],
+                                            [0, elements[3], elements[4]],
+                                            [0, 0, elements[5]]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([elements[0], elements[1], elements[2], elements[3]],
+                                            [0, elements[4], elements[5], elements[6]],
+                                            [0, 0, elements[7], elements[8]],
+                                            [0, 0, 0, elements[9]]);
+            } else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                const result = Chalkboard.matr.init();
+                let index = 0;
+                for (let i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        result[i][j] = j >= i ? elements[index++] || 0 : 0;
+                    }
+                }
+                return result;
             }
         };
 
