@@ -15,14 +15,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])],
                                             [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2])],
                                             [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2])],
                                             [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2])]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2]), Math.abs(matr[0][3])],
                                             [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2]), Math.abs(matr[1][3])],
                                             [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2]), Math.abs(matr[2][3])],
@@ -46,15 +46,15 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]],
                                                 [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
                     return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2]],
                                                 [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2]],
                                                 [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2]]);
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
                     return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2], matr1[0][3] + matr2[0][3]],
                                                 [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2], matr1[1][3] + matr2[1][3]],
                                                 [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2], matr1[2][3] + matr2[2][3]],
@@ -171,19 +171,19 @@ namespace Chalkboard {
         export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
             if (type === "row") {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                    if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2) {
+                    if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.rows(matr2) === 2) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1]],
                                                     [matr1[1][0], matr1[1][1]],
                                                     [matr2[0][0], matr2[0][1]],
                                                     [matr2[1][0], matr2[1][1]]);
-                    } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3 && Chalkboard.matr.rows(matr2) === 3) {
+                    } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.rows(matr2) === 3) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2]],
                                                     [matr1[1][0], matr1[1][1], matr1[1][2]],
                                                     [matr1[2][0], matr1[2][1], matr1[2][2]],
                                                     [matr2[0][0], matr2[0][1], matr2[0][2]],
                                                     [matr2[1][0], matr2[1][1], matr2[1][2]],
                                                     [matr2[2][0], matr2[2][1], matr2[2][2]]);
-                    } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4 && Chalkboard.matr.rows(matr2) === 4) {
+                    } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.rows(matr2) === 4) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3]],
                                                     [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3]],
                                                     [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3]],
@@ -200,14 +200,14 @@ namespace Chalkboard {
                 }
             } else if (type === "col") {
                 if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
-                    if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+                    if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.cols(matr2) === 2) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]],
                                                     [matr1[1][0], matr1[1][1], matr2[1][0], matr2[1][1]]);
-                    } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3 && Chalkboard.matr.cols(matr2) === 3) {
+                    } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.cols(matr2) === 3) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr2[0][0], matr2[0][1], matr2[0][2]],
                                                     [matr1[1][0], matr1[1][1], matr1[1][2], matr2[1][0], matr2[1][1], matr2[1][2]],
                                                     [matr1[2][0], matr1[2][1], matr1[2][2], matr2[2][0], matr2[2][1], matr2[2][2]]);
-                    } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4 && Chalkboard.matr.cols(matr2) === 4) {
+                    } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.cols(matr2) === 4) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3], matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]],
                                                     [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3], matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]],
                                                     [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3], matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]],
@@ -234,14 +234,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)],
                                             [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range)],
                                             [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range)],
                                             [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range)]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range), Chalkboard.numb.constrain(matr[0][3], range)],
                                             [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range), Chalkboard.numb.constrain(matr[1][3], range)],
                                             [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range), Chalkboard.numb.constrain(matr[2][3], range)],
@@ -264,14 +264,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1]],
                                             [matr[1][0], matr[1][1]]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2]],
                                             [matr[1][0], matr[1][1], matr[1][2]],
                                             [matr[2][0], matr[2][1], matr[2][2]]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2], matr[0][3]],
                                             [matr[1][0], matr[1][1], matr[1][2], matr[1][3]],
                                             [matr[2][0], matr[2][1], matr[2][2], matr[2][3]],
@@ -294,7 +294,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const det = (matr: ChalkboardMatrix): number => {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+            if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
                 } else if (Chalkboard.matr.rows(matr) === 2) {
@@ -392,8 +392,8 @@ namespace Chalkboard {
 
         /**
          * Initializes an empty matrix.
-         * @param {number} rows - The number of rows
-         * @param {number} cols - The number of columns
+         * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
+         * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
          */
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
@@ -455,9 +455,9 @@ namespace Chalkboard {
 
         /**
          * Initializes a matrix filled with one number.
-         * @param {number} element - The numberto fill the elements with
-         * @param {number} rows - The number of rows
-         * @param {number} cols - The number of columns
+         * @param {number} element - The number to fill the elements with
+         * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
+         * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
          */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
@@ -572,7 +572,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const invert = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+            if (Chalkboard.matr.isInvertible(matr)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     const det = Chalkboard.matr.det(matr);
                     return Chalkboard.matr.init([matr[1][1] / det, -matr[0][1] / det],
@@ -639,7 +639,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square and has a non-zero determinant.');
             }
         };
 
@@ -650,13 +650,13 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 const n = 0.000001;
-                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n;
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
                     return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n;
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
                     return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[0][3] - matr2[0][3]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[1][3] - matr2[1][3]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n && Math.abs(matr1[2][3] - matr2[2][3]) < n && Math.abs(matr1[3][0] - matr2[3][0]) < n && Math.abs(matr1[3][1] - matr2[3][1]) < n && Math.abs(matr1[3][2] - matr2[3][2]) < n && Math.abs(matr1[3][3] - matr2[3][3]) < n;
                 } else {
                     let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
@@ -673,18 +673,45 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if a matrix is a diagonal matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isDiagonal = (matr: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][1] !== 0 && matr[1][0] !== 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[0][3] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[1][3] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0 && matr[2][3] !== 0 && matr[3][0] !== 0 && matr[3][1] !== 0 && matr[3][2] !== 0;
+                } else {
+                    let score = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                            if (i !== j && matr[i][j] !== 0) score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
          * Checks if two matrices are equal.
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {boolean}
          */
         export const isEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2];
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[0][3] === matr2[0][3] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[1][3] === matr2[1][3] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2] && matr1[2][3] === matr2[2][3] && matr1[3][0] === matr2[3][0] && matr1[3][1] === matr2[3][1] && matr1[3][2] === matr2[3][2] && matr1[3][3] === matr2[3][3];
                 } else {
                     let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
@@ -692,6 +719,31 @@ namespace Chalkboard {
                         for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
                             if (matr1[i][j] === matr2[i][j]) score--;
                         }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if a matrix is an identity matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isIdentity = (matr: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.isDiagonal(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1;
+                } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1;
+                } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1 && matr[3][3] === 1;
+                } else {
+                    let score = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        if (matr[i][i] !== 1) score++;
                     }
                     return score === 0;
                 }
@@ -710,6 +762,33 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if a matrix is a lower triangular matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isLowerTriangular = (matr: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][1] === 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[1][2] === 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[0][3] === 0 && matr[1][2] === 0 && matr[1][3] === 0 && matr[2][3] === 0;
+                } else {
+                    let score = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (let j = i + 1; j < Chalkboard.matr.cols(matr); j++) {
+                            if (matr[i][j] !== 0) score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
          * Checks if a matrix is orthogonal.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
@@ -720,6 +799,26 @@ namespace Chalkboard {
             } else {
                 return false;
             }
+        };
+
+        /**
+         * Checks if two matrices have equal sizes.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {boolean}
+         */
+        export const isSizeEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2);
+        };
+
+        /**
+         * Checks if a matrix is of a particular size.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
+         * @param {number} [cols=rows] - The number of columns
+         */
+        export const isSizeOf = (matr: ChalkboardMatrix, rows: number, cols: number = rows): boolean => {
+            return Chalkboard.matr.rows(matr) === rows && Chalkboard.matr.cols(matr) === cols;
         };
 
         /**
@@ -747,6 +846,42 @@ namespace Chalkboard {
          */
         export const isSymmetric = (matr: ChalkboardMatrix): boolean => {
             return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
+        };
+
+        /**
+         * Checks if a matrix is an upper triangular matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isUpperTriangular = (matr: ChalkboardMatrix): boolean => {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[1][0] === 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0;
+                } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0 && matr[3][0] === 0 && matr[3][1] === 0 && matr[3][2] === 0;
+                } else {
+                    let score = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (let j = 0; j < i; j++) {
+                            if (matr[i][j] !== 0) score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if a matrix is a zero matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {boolean}
+         */
+        export const isZero = (matr: ChalkboardMatrix): boolean => {
+            return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
 
         /**
@@ -818,7 +953,7 @@ namespace Chalkboard {
          * @returns {{L: ChalkboardMatrix, U: ChalkboardMatrix}}
          */
         export const LUdecomp = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+            if (Chalkboard.matr.isSquare(matr)) {
                 const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
                 for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
                     for (let i = 0; i <= j; i++) {
@@ -850,26 +985,26 @@ namespace Chalkboard {
          */
         export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
-                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 1) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2, 1)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
-                } else if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1]]);
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3 && Chalkboard.matr.rows(matr2) === 3 && Chalkboard.matr.cols(matr2) === 1) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3, 1)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0]],
                                                 [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0]]);
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3 && Chalkboard.matr.rows(matr2) === 3 && Chalkboard.matr.cols(matr2) === 3) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1], matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1], matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2]],
                                                 [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0], matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1], matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2]]);
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4 && Chalkboard.matr.rows(matr2) === 4 && Chalkboard.matr.cols(matr2) === 1) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4, 1)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0]],
                                                 [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0]],
                                                 [matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0]]);
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4 && Chalkboard.matr.rows(matr2) === 4 && Chalkboard.matr.cols(matr2) === 4) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1] + matr1[0][3] * matr2[3][1], matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2] + matr1[0][3] * matr2[3][2], matr1[0][0] * matr2[0][3] + matr1[0][1] * matr2[1][3] + matr1[0][2] * matr2[2][3] + matr1[0][3] * matr2[3][3]],
                                                 [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1] + matr1[1][3] * matr2[3][1], matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2] + matr1[1][3] * matr2[3][2], matr1[1][0] * matr2[0][3] + matr1[1][1] * matr2[1][3] + matr1[1][2] * matr2[2][3] + matr1[1][3] * matr2[3][3]],
                                                 [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0], matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1] + matr1[2][3] * matr2[3][1], matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2] + matr1[2][3] * matr2[3][2], matr1[2][0] * matr2[0][3] + matr1[2][1] * matr2[1][3] + matr1[2][2] * matr2[2][3] + matr1[2][3] * matr2[3][3]],
@@ -899,12 +1034,12 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2 && Chalkboard.matr.rows(matr2) === 2 && Chalkboard.matr.cols(matr2) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
                 return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]],
                                             [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]],
                                             [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]],
                                             [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
-            } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3 && Chalkboard.matr.rows(matr2) === 3 && Chalkboard.matr.cols(matr2) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
                 return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][0] * matr2[0][2], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][1] * matr2[0][2], matr1[0][2] * matr2[0][0], matr1[0][2] * matr2[0][1], matr1[0][2] * matr2[0][2]],
                                             [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][0] * matr2[1][2], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1], matr1[0][1] * matr2[1][2], matr1[0][2] * matr2[1][0], matr1[0][2] * matr2[1][1], matr1[0][2] * matr2[1][2]],
                                             [matr1[0][0] * matr2[2][0], matr1[0][0] * matr2[2][1], matr1[0][0] * matr2[2][2], matr1[0][1] * matr2[2][0], matr1[0][1] * matr2[2][1], matr1[0][1] * matr2[2][2], matr1[0][2] * matr2[2][0], matr1[0][2] * matr2[2][1], matr1[0][2] * matr2[2][2]],
@@ -914,7 +1049,7 @@ namespace Chalkboard {
                                             [matr1[2][0] * matr2[0][0], matr1[2][0] * matr2[0][1], matr1[2][0] * matr2[0][2], matr1[2][1] * matr2[0][0], matr1[2][1] * matr2[0][1], matr1[2][1] * matr2[0][2], matr1[2][2] * matr2[0][0], matr1[2][2] * matr2[0][1], matr1[2][2] * matr2[0][2]],
                                             [matr1[2][0] * matr2[1][0], matr1[2][0] * matr2[1][1], matr1[2][0] * matr2[1][2], matr1[2][1] * matr2[1][0], matr1[2][1] * matr2[1][1], matr1[2][1] * matr2[1][2], matr1[2][2] * matr2[1][0], matr1[2][2] * matr2[1][1], matr1[2][2] * matr2[1][2]],
                                             [matr1[2][0] * matr2[2][0], matr1[2][0] * matr2[2][1], matr1[2][0] * matr2[2][2], matr1[2][1] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][1] * matr2[2][2], matr1[2][2] * matr2[2][0], matr1[2][2] * matr2[2][1], matr1[2][2] * matr2[2][2]]);
-            } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4 && Chalkboard.matr.rows(matr2) === 4 && Chalkboard.matr.cols(matr2) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
                 return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][0] * matr2[0][2], matr1[0][0] * matr2[0][3], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][1] * matr2[0][2], matr1[0][1] * matr2[0][3], matr1[0][2] * matr2[0][0], matr1[0][2] * matr2[0][1], matr1[0][2] * matr2[0][2], matr1[0][2] * matr2[0][3], matr1[0][3] * matr2[0][0], matr1[0][3] * matr2[0][1], matr1[0][3] * matr2[0][2], matr1[0][3] * matr2[0][3]],
                                             [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][0] * matr2[1][2], matr1[0][0] * matr2[1][3], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1], matr1[0][1] * matr2[1][2], matr1[0][1] * matr2[1][3], matr1[0][2] * matr2[1][0], matr1[0][2] * matr2[1][1], matr1[0][2] * matr2[1][2], matr1[0][2] * matr2[1][3], matr1[0][3] * matr2[1][0], matr1[0][3] * matr2[1][1], matr1[0][3] * matr2[1][2], matr1[0][3] * matr2[1][3]],
                                             [matr1[0][0] * matr2[2][0], matr1[0][0] * matr2[2][1], matr1[0][0] * matr2[2][2], matr1[0][0] * matr2[2][3], matr1[0][1] * matr2[2][0], matr1[0][1] * matr2[2][1], matr1[0][1] * matr2[2][2], matr1[0][1] * matr2[2][3], matr1[0][2] * matr2[2][0], matr1[0][2] * matr2[2][1], matr1[0][2] * matr2[2][2], matr1[0][2] * matr2[2][3], matr1[0][3] * matr2[2][0], matr1[0][3] * matr2[2][1], matr1[0][3] * matr2[2][2], matr1[0][3] * matr2[2][3]],
@@ -985,14 +1120,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1]],
                                             [-matr[1][0], -matr[1][1]]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2]],
                                             [-matr[1][0], -matr[1][1], -matr[1][2]],
                                             [-matr[2][0], -matr[2][1], -matr[2][2]]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2], -matr[0][3]],
                                             [-matr[1][0], -matr[1][1], -matr[1][2], -matr[1][3]],
                                             [-matr[2][0], -matr[2][1], -matr[2][2], -matr[2][3]],
@@ -1037,7 +1172,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const pow = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+            if (Chalkboard.matr.isSquare(matr)) {
                 if (num === 0) {
                     return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
                 } else {
@@ -1162,8 +1297,8 @@ namespace Chalkboard {
          * Initializes a random matrix.
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
-         * @param {number} rows - The number of rows
-         * @param {number} cols - The number of columns
+         * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
+         * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
          */
         export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
@@ -1210,14 +1345,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]],
                                             [1 / matr[1][0], 1 / matr[1][1]]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2]],
                                             [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2]],
                                             [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2]]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2], 1 / matr[0][3]],
                                             [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2], 1 / matr[1][3]],
                                             [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2], 1 / matr[2][3]],
@@ -1279,7 +1414,7 @@ namespace Chalkboard {
         /**
          * Returns a matrix with the number of rows and columns changed.
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {number} rows - The number of rows to change to
+         * @param {number} rows - The number of rows to change to or (if the cols parameter is blank) the number of rows or columns (the size) to change to
          * @param {nmber} [cols=rows] - The number of columns to change to
          * @returns {ChalkboardMatrix}
          */
@@ -1320,14 +1455,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])],
                                             [Math.round(matr[1][0]), Math.round(matr[1][1])]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2])],
                                             [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2])],
                                             [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2])]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2]), Math.round(matr[0][3])],
                                             [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2]), Math.round(matr[1][3])],
                                             [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2]), Math.round(matr[2][3])],
@@ -1390,26 +1525,26 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 1) {
+            if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num],
                                             [matr[1][0] * num]);
-            } else if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num],
                                             [matr[1][0] * num, matr[1][1] * num]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 1) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num],
                                             [matr[1][0] * num],
                                             [matr[2][0] * num]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num],
                                             [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num],
                                             [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 1) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num],
                                             [matr[1][0] * num],
                                             [matr[2][0] * num],
                                             [matr[3][0] * num]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num],
                                             [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num],
                                             [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num],
@@ -1433,7 +1568,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const shift = (size: number, shiftAmount: number = 1): ChalkboardMatrix => {
-            const result = Chalkboard.matr.fill(0, size, size);
+            const result = Chalkboard.matr.fill(0, size);
             for (let i = 0; i < size; i++) {
                 result[i] = [];
                 for (let j = 0; j < size; j++) {
@@ -1450,18 +1585,18 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const solve = (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.cols(matrA)) {
+            if (Chalkboard.matr.isSquare(matrA)) {
                 if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
                     if (Chalkboard.matr.det(matrA) !== 0) {
                         return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     } else {
-                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is invertible.');
+                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that has a non-zero determinant.');
                     }
                 } else {
                     throw new TypeError('Parameters "matrA" and "matrB" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
                 }
             } else {
-                throw new TypeError('Parameters "matrA" must be of type "ChalkboardMatrix" that is square.');
+                throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is square.');
             }
         };
 
@@ -1472,15 +1607,15 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                if (Chalkboard.matr.rows(matr1) === 2 && Chalkboard.matr.cols(matr1) === 2) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]],
                                                 [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
-                } else if (Chalkboard.matr.rows(matr1) === 3 && Chalkboard.matr.cols(matr1) === 3) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
                     return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2]],
                                                 [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2]],
                                                 [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2]]);
-                } else if (Chalkboard.matr.rows(matr1) === 4 && Chalkboard.matr.cols(matr1) === 4) {
+                } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
                     return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2], matr1[0][3] - matr2[0][3]],
                                                 [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2], matr1[1][3] - matr2[1][3]],
                                                 [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2], matr1[2][3] - matr2[2][3]],
@@ -1506,11 +1641,11 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const toArray = (matr: ChalkboardMatrix): number[] => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return [matr[0][0], matr[0][1], matr[0][2], matr[1][0], matr[1][1], matr[1][2], matr[2][0], matr[2][1], matr[2][2]];
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return [matr[0][0], matr[0][1], matr[0][2], matr[0][3], matr[1][0], matr[1][1], matr[1][2], matr[1][3], matr[2][0], matr[2][1], matr[2][2], matr[2][3], matr[3][0], matr[3][1], matr[3][2], matr[3][3]];
             } else {
                 const result = [];
@@ -1529,18 +1664,18 @@ namespace Chalkboard {
          * @returns {object}
          */
         export const toObject = (matr: ChalkboardMatrix): object => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1] },
                     i2: { j1: matr[1][0], j2: matr[1][1] }
                 };
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1], j3: matr[0][2] },
                     i2: { j1: matr[1][0], j2: matr[1][1], j3: matr[1][2] },
                     i3: { j1: matr[2][0], j2: matr[2][1], j3: matr[2][2] }
                 };
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1], j3: matr[0][2], j4: matr[0][3] },
                     i2: { j1: matr[1][0], j2: matr[1][1], j3: matr[1][2], j4: matr[1][3] },
@@ -1565,11 +1700,11 @@ namespace Chalkboard {
          * @returns {string}
          */
         export const toString = (matr: ChalkboardMatrix): string => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " ]";
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " " + matr[0][3].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " " + matr[1][3].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " " + matr[2][3].toString() + " ]\n[ " + matr[3][0].toString() + " " + matr[3][1].toString() + " " + matr[3][2].toString() + " " + matr[3][3].toString() + " ]";
             } else {
                 let result = "";
@@ -1640,7 +1775,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const trace = (matr: ChalkboardMatrix): number => {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
+            if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] + matr[1][1];
                 } else if (Chalkboard.matr.rows(matr) === 3) {
@@ -1665,14 +1800,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0]],
                                             [matr[0][1], matr[1][1]]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0]],
                                             [matr[0][1], matr[1][1], matr[2][1]],
                                             [matr[0][2], matr[1][2], matr[2][2]]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0], matr[3][0]],
                                             [matr[0][1], matr[1][1], matr[2][1], matr[3][1]],
                                             [matr[0][2], matr[1][2], matr[2][2], matr[3][2]],
@@ -1745,14 +1880,14 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr) === 2 && Chalkboard.matr.cols(matr) === 2) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0],
                                             [matr[1][0] * 0, matr[1][1] * 0]);
-            } else if (Chalkboard.matr.rows(matr) === 3 && Chalkboard.matr.cols(matr) === 3) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0],
                                             [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0],
                                             [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
-            } else if (Chalkboard.matr.rows(matr) === 4 && Chalkboard.matr.cols(matr) === 4) {
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
                 return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0],
                                             [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0],
                                             [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0],

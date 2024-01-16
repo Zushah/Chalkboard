@@ -273,6 +273,18 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a quaternion to a matrix.
+         * @param {ChalkboardQuaternion} quat - The quaternion
+         * @returns {ChalkboardMatrix}
+         */
+        export const toMatrix = (quat: ChalkboardQuaternion): ChalkboardMatrix => {
+            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d],
+                                        [quat.b, quat.a, -quat.d, quat.c],
+                                        [quat.c, quat.d, quat.a, -quat.b],
+                                        [quat.d, -quat.c, quat.b, quat.a]);
+        };
+
+        /**
          * Converts a quaternion to an axis-angle rotation.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @param {ChalkboardVector} vect - The vector to rotate around

@@ -389,6 +389,16 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a complex number to a matrix.
+         * @param {ChalkboardComplex} comp - The complex number
+         * @returns {ChalkboardMatrix}
+         */
+        export const toMatrix = (comp: ChalkboardComplex): ChalkboardMatrix => {
+            return Chalkboard.matr.init([comp.a, -comp.b],
+                                        [comp.b, comp.a]);
+        };
+
+        /**
          * Converts a complex number to a string
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {string}
