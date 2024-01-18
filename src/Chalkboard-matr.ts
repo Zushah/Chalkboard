@@ -1145,6 +1145,92 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the element-wise L_(p,q) norm of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
+         * @param {number} [q=2] - The numerator of the exponent of the sum of the rows and the denominator of the exponent of the sum of the summed rows
+         * @returns {number}
+         */
+        export const norm = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
+            if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]));
+            } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]));
+            } else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[0][3] * matr[0][3]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[1][3] * matr[1][3]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]) + (matr[2][3] * matr[2][3]) + (matr[3][0] * matr[3][0]) + (matr[3][1] * matr[3][1]) + (matr[3][2] * matr[3][2]) + (matr[3][3] * matr[3][3]));
+            } else {
+                let result = 0;
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    let rowResult = 0;
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                    }
+                    result += Chalkboard.real.pow(rowResult, q / p);
+                }
+                return Chalkboard.real.pow(result, 1 / q);
+            }
+        };
+
+        /**
+         * Calculates the normalization of a matrix with the element-wise L_(p, q) norm.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
+         * @param {number} [q=2] - The numerator of the exponent of the sum of the rows and the denominator of the exponent of the sum of the summed rows
+         * @returns {ChalkboardMatrix}
+         */
+        export const normalize = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): ChalkboardMatrix => {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]);
+            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q)]);
+            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q), matr[0][3] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q), matr[1][3] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q), matr[2][3] / Chalkboard.matr.norm(matr, p, q)],
+                                            [matr[3][0] / Chalkboard.matr.norm(matr, p, q), matr[3][1] / Chalkboard.matr.norm(matr, p, q), matr[3][2] / Chalkboard.matr.norm(matr, p, q), matr[3][3] / Chalkboard.matr.norm(matr, p, q)]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] / Chalkboard.matr.norm(matr, p, q);
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
+         * Calculates the element-wise L_(p,q) norm squared of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
+         * @param {number} [q=2] - The numerator of the exponent of the sum of the rows
+         * @returns {number}
+         */
+        export const normsq = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
+            if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
+                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]);
+            } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
+                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]);
+            } else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
+                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[0][3] * matr[0][3]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[1][3] * matr[1][3]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]) + (matr[2][3] * matr[2][3]) + (matr[3][0] * matr[3][0]) + (matr[3][1] * matr[3][1]) + (matr[3][2] * matr[3][2]) + (matr[3][3] * matr[3][3]);
+            } else {
+                let result = 0;
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    let rowResult = 0;
+                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                    }
+                    result += Chalkboard.real.pow(rowResult, q / p);
+                }
+                return result;
+            }
+        };
+
+        /**
          * Calculates the null space of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
