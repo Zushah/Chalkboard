@@ -416,28 +416,6 @@ namespace Chalkboard {
         };
 
         /**
-         * Checks if two vectors are approximately equal.
-         * @param {ChalkboardVector} vect1 - The first vector
-         * @param {ChalkboardVector} vect2 - The second vector
-         * @returns {boolean}
-         */
-        export const isApproxEqual = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
-            if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
-                if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
-                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y);
-                } else if (Chalkboard.vect.isDimensionOf(vect1, 3)) {
-                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y) && Chalkboard.numb.isApproxEqual(vect1.z as number, vect2.z as number);
-                } else if (Chalkboard.vect.isDimensionOf(vect1, 4)) {
-                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y) && Chalkboard.numb.isApproxEqual(vect1.z as number, vect2.z as number) && Chalkboard.numb.isApproxEqual(vect1.w as number, vect2.w as number);
-                } else {
-                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
-                }
-            } else {
-                return false;
-            }
-        };
-
-        /**
          * Checks if the dimensions of two vectors are equal.
          * @param {ChalkboardVector} vect1 - The first vector
          * @param {ChalkboardVector} vect2 - The second vector
@@ -493,7 +471,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isNormalized = (vect: ChalkboardVector): boolean => {
-            return Chalkboard.numb.isApproxEqual(Chalkboard.vect.magsq(vect), 1);
+            return Chalkboard.vect.magsq(vect) === 1;
         };
 
         /**
@@ -503,7 +481,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isOrthogonal = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
-            return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), 0);
+            return Chalkboard.vect.dot(vect1, vect2) === 0;
         };
 
         /**
@@ -522,7 +500,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (vect: ChalkboardVector): boolean => {
-            return Chalkboard.vect.isApproxEqual(vect, Chalkboard.vect.zero(vect));
+            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(vect));
         };
 
         /**

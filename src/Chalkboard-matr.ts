@@ -136,10 +136,10 @@ namespace Chalkboard {
          */
         export const cofactor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             return matr
-                .slice(0, row - 1)
-                .concat(matr.slice(row))
+                .slice(0, row)
+                .concat(matr.slice(row + 1))
                 .map(function (row) {
-                    return row.slice(0, col - 1).concat(row.slice(col));
+                    return row.slice(0, col).concat(row.slice(col + 1));
                 });
         };
 
@@ -302,7 +302,7 @@ namespace Chalkboard {
                 } else if (Chalkboard.matr.rows(matr) === 3) {
                     return matr[0][0] * (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) - matr[0][1] * (matr[1][0] * matr[2][2] - matr[1][2] * matr[2][0]) + matr[0][2] * (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]);
                 } else if (Chalkboard.matr.rows(matr) === 4) {
-                    return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) - matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) - matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0]));
+                    return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) + matr[1][3] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1])) - matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) - matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0]));
                 } else {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -367,7 +367,7 @@ namespace Chalkboard {
                     result += v1[i] * v2[i];
                 }
                 return result;
-            }
+            };
             return dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) / dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v));
         };
 
@@ -644,35 +644,6 @@ namespace Chalkboard {
         };
 
         /**
-         * Checks if two matrices are approximately equal.
-         * @param {ChalkboardMatrix} matr1 - The first matrix
-         * @param {ChalkboardMatrix} matr2 - The second matrix
-         * @returns {boolean}
-         */
-        export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
-            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
-                const n = 0.000001;
-                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
-                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n;
-                } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
-                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n;
-                } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
-                    return Math.abs(matr1[0][0] - matr2[0][0]) < n && Math.abs(matr1[0][1] - matr2[0][1]) < n && Math.abs(matr1[0][2] - matr2[0][2]) < n && Math.abs(matr1[0][3] - matr2[0][3]) < n && Math.abs(matr1[1][0] - matr2[1][0]) < n && Math.abs(matr1[1][1] - matr2[1][1]) < n && Math.abs(matr1[1][2] - matr2[1][2]) < n && Math.abs(matr1[1][3] - matr2[1][3]) < n && Math.abs(matr1[2][0] - matr2[2][0]) < n && Math.abs(matr1[2][1] - matr2[2][1]) < n && Math.abs(matr1[2][2] - matr2[2][2]) < n && Math.abs(matr1[2][3] - matr2[2][3]) < n && Math.abs(matr1[3][0] - matr2[3][0]) < n && Math.abs(matr1[3][1] - matr2[3][1]) < n && Math.abs(matr1[3][2] - matr2[3][2]) < n && Math.abs(matr1[3][3] - matr2[3][3]) < n;
-                } else {
-                    let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
-                    for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                        for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
-                            if (Math.abs(matr1[i][j] - matr2[i][j]) < n) score--;
-                        }
-                    }
-                    return score === 0;
-                }
-            } else {
-                return false;
-            }
-        };
-
-        /**
          * Checks if a matrix is a diagonal matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
@@ -758,7 +729,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isInvertible = (matr: ChalkboardMatrix): boolean => {
-            return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr) && Chalkboard.matr.det(matr) !== 0;
+            return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
         };
 
         /**
@@ -795,7 +766,7 @@ namespace Chalkboard {
          */
         export const isOrthogonal = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isInvertible(matr)) {
-                return Chalkboard.matr.isApproxEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
+                return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
             } else {
                 return false;
             }
@@ -881,7 +852,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (matr: ChalkboardMatrix): boolean => {
-            return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(matr));
         };
 
         /**

@@ -168,7 +168,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Initializes a new matrix.
+         * Initializes a new tensor.
          * @param {ChalkboardTensor[]} tensor - The n-dimensional array either as a sequence of arrays or one array
          * @returns {ChalkboardTensor}
          * @example
@@ -196,6 +196,90 @@ namespace Chalkboard {
                 });
             };
             return newNDArray(tensor);
+        };
+
+        /**
+         * Checks if two tensors are equal.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {boolean}
+         */
+        export const isEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
+            if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
+                tens1 = tens1 as ChalkboardTensor[], tens2 = tens2 as ChalkboardTensor[];
+                for (let i = 0; i < tens1.length; i++) {
+                    if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
+                        if (!Chalkboard.tens.isEqual(tens1[i], tens2[i])) return false;
+                    } else {
+                        if (tens1[i] !== tens2[i]) return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if two tensors have equal ranks.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {boolean}
+         */
+        export const isRankEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
+            return Chalkboard.tens.rank(tens1) === Chalkboard.tens.rank(tens2);
+        };
+
+        /**
+         * Checks if a tensor is of a particular rank.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} rank - The rank
+         * @returns {boolean}
+         */
+        export const isRankOf = (tens: ChalkboardTensor, rank: number): boolean => {
+            return Chalkboard.tens.rank(tens) === rank;
+        };
+
+        /**
+         * Checks if two tensors have equal sizes.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {boolean}
+         */
+        export const isSizeEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
+            if (Chalkboard.tens.isRankEqual(tens1, tens2)) {
+                let score = 0;
+                for (let i = 0; i < Chalkboard.tens.rank(tens1); i++) {
+                    if (Chalkboard.tens.size(tens1)[i] !== Chalkboard.tens.size(tens2)[i]) score++;
+                }
+                return score === 0;
+            } else {
+                return false;
+            }
+        };
+
+        /**
+         * Checks if a tensor is of a particular size.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number[]} size - The size
+         * @returns {boolean}
+         */
+        export const isSizeOf = (tens: ChalkboardTensor, ...size: number[]): boolean => {
+            size = Array.isArray(size[0]) ? size[0] : size;
+            return Chalkboard.tens.isSizeEqual(tens, Chalkboard.tens.empty(...size));
+        };
+
+        /**
+         * Checks if a tensor has a uniform size (analogous to checking if a matrix is square).
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {boolean}
+         */
+        export const isSizeUniform = (tens: ChalkboardTensor): boolean => {
+            let score = 0;
+            for (let i = 0; i < Chalkboard.tens.rank(tens); i++) {
+                if (Chalkboard.tens.size(tens)[i] !== Chalkboard.tens.size(tens)[0]) score++;
+            }
+            return score === 0;
         };
 
         /**
@@ -317,15 +401,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const rank = (tens: ChalkboardTensor): number => {
-            if (Array.isArray(tens)) {
-                let result = 0;
-                for (let i = 0; i < tens.length; i++) {
-                    result = Math.max(result, Chalkboard.tens.rank(tens[i]));
-                }
-                return result + 1;
-            } else {
-                return 0;
-            }
+            return Chalkboard.tens.size(tens).length;
         };
 
         /**
