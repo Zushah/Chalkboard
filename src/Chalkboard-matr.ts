@@ -165,11 +165,11 @@ namespace Chalkboard {
          * Calculates the concatentation of two matrices.
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
-         * @param {"row" | "col"} [type="row"] - Set to concatenate either the rows with "row" or the columns with "col"
+         * @param {number} [axis=0] - The axis to concatenate over, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardMatrix}
          */
-        export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type: "row" | "col" = "row"): ChalkboardMatrix => {
-            if (type === "row") {
+        export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, axis: 0 | 1 = 0): ChalkboardMatrix => {
+            if (axis === 0) {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                     if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.rows(matr2) === 2) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1]],
@@ -198,7 +198,7 @@ namespace Chalkboard {
                 } else {
                     throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of columns.');
                 }
-            } else if (type === "col") {
+            } else if (axis === 1) {
                 if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
                     if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.cols(matr2) === 2) {
                         return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]],
@@ -223,7 +223,7 @@ namespace Chalkboard {
                     throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
                 }
             } else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
 
@@ -324,17 +324,17 @@ namespace Chalkboard {
          */
         export const diagonal = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0], 0],
-                                            [0, elements[1]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0],
+                                            [0, elements[1] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0], 0, 0],
-                                            [0, elements[1], 0],
-                                            [0, 0, elements[2]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0],
+                                            [0, elements[1] || 0, 0],
+                                            [0, 0, elements[2] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0], 0, 0, 0],
-                                            [0, elements[1], 0, 0],
-                                            [0, 0, elements[2], 0],
-                                            [0, 0, 0, elements[3]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0],
+                                            [0, elements[1] || 0, 0, 0],
+                                            [0, 0, elements[2] || 0, 0],
+                                            [0, 0, 0, elements[3] || 0]);
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();
@@ -922,17 +922,17 @@ namespace Chalkboard {
          */
         export const lowerTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0], 0],
-                                            [elements[1], elements[2]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0],
+                                            [elements[1] || 0, elements[2] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0], 0, 0],
-                                            [elements[1], elements[2], 0],
-                                            [elements[3], elements[4], elements[5]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0],
+                                            [elements[1] || 0, elements[2] || 0, 0],
+                                            [elements[3] || 0, elements[4] || 0, elements[5] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0], 0, 0, 0],
-                                            [elements[1], elements[2], 0, 0],
-                                            [elements[3], elements[4], elements[5], 0],
-                                            [elements[6], elements[7], elements[8], elements[9]]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0],
+                                            [elements[1] || 0, elements[2] || 0, 0, 0],
+                                            [elements[3] || 0, elements[4] || 0, elements[5] || 0, 0],
+                                            [elements[6] || 0, elements[7] || 0, elements[8] || 0, elements[9] || 0]);
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();
@@ -1285,45 +1285,43 @@ namespace Chalkboard {
         /**
          * Returns a matrix with a row or column removed (pulled out).
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {"row" | "col"} type - Set to pull either a row with "row" or a column with "col"
-         * @param {number} rowORcol - The row or column to pull
+         * @param {number} index - The index of the row or column to pull
+         * @param {number} axis - The axis to pull from, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardMatrix}
          */
-        export const pull = (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number): ChalkboardMatrix => {
-            rowORcol -= 1;
-            if (type === "row") {
-                matr.splice(rowORcol, 1);
+        export const pull = (matr: ChalkboardMatrix, index: number, axis: 0 | 1): ChalkboardMatrix => {
+            if (axis === 0) {
+                matr.splice(index, 1);
                 return matr;
-            } else if (type === "col") {
+            } else if (axis === 1) {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    matr[i].splice(rowORcol, 1);
+                    matr[i].splice(index, 1);
                 }
                 return matr;
             } else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
 
         /**
          * Returns a matrix with a row or column added (pushed in).
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {"row" | "col"} type - Set to pull either a row with "row" or a column with "col"
-         * @param {number} rowORcol - The row or column to pull
+         * @param {number} index - The index of the row or column to push
+         * @param {number} axis - The axis to push to, which is 0 for the rows or 1 for the columns
          * @param {number[]} elements - The elements to push
          * @returns {ChalkboardMatrix}
          */
-        export const push = (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number, elements: number[]): ChalkboardMatrix => {
-            rowORcol -= 1;
-            if (type === "row") {
-                matr.splice(rowORcol, 0, elements);
+        export const push = (matr: ChalkboardMatrix, index: number, axis: 0 | 1, elements: number[]): ChalkboardMatrix => {
+            if (axis === 0) {
+                matr.splice(index, 0, elements);
                 return matr;
-            } else if (type === "col") {
+            } else if (axis === 1) {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    matr[i].splice(rowORcol, 0, elements[i]);
+                    matr[i].splice(index, 0, elements[i]);
                 }
                 return matr;
             } else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
 
@@ -1820,38 +1818,37 @@ namespace Chalkboard {
          * Converts a matrix to a vector.
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} dimension - The dimension of the vector which can be either 2, 3, or 4
-         * @param {"col" | "row"} [type="col"] - Whether the converted vector will be from the row or the column of the matrix
-         * @param {number} [rowORcol=1] - The row or column number to convert
+         * @param {number} index - The index of the row or column of the matrix which is the first component of the converted vector
+         * @param {number} [axis=0] - The axis of the matrix to convert, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardVector}
          */
-        export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, type: "col" | "row" = "col", rowORcol: number = 1): ChalkboardVector => {
-            rowORcol -= 1;
+        export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index: number = 0, axis: 0 | 1 = 0): ChalkboardVector => {
             if (dimension === 2) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol]);
-                } else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index]);
+                } else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1]);
                 } else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             } else if (dimension === 3) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
-                } else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index], matr[2][index]);
+                } else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2]);
                 } else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             } else if (dimension === 4) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
-                } else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index], matr[2][index], matr[3][index]);
+                } else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2], matr[index][3]);
                 } else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
 
@@ -1935,17 +1932,17 @@ namespace Chalkboard {
          */
         export const upperTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0], elements[1]],
-                                            [0, elements[2]]);
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0],
+                                            [0, elements[2] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0], elements[1], elements[2]],
-                                            [0, elements[3], elements[4]],
-                                            [0, 0, elements[5]]);
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0],
+                                            [0, elements[3] || 0, elements[4] || 0],
+                                            [0, 0, elements[5] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0], elements[1], elements[2], elements[3]],
-                                            [0, elements[4], elements[5], elements[6]],
-                                            [0, 0, elements[7], elements[8]],
-                                            [0, 0, 0, elements[9]]);
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0, elements[3] || 0],
+                                            [0, elements[4] || 0, elements[5] || 0, elements[6] || 0],
+                                            [0, 0, elements[7] || 0, elements[8] || 0],
+                                            [0, 0, 0, elements[9] || 0]);
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();

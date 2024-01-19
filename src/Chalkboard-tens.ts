@@ -128,9 +128,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const empty = (...size: number[]): ChalkboardTensor => {
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             const newNDArray = function (size: number[]): ChalkboardTensor | null {
                 if (size.length === 0) {
                     return null;
@@ -153,9 +151,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const fill = (element: number, ...size: number[]): ChalkboardTensor => {
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             const newNDArray = function (size: number[]): ChalkboardTensor {
                 if (size.length === 0) {
                     return element;
@@ -299,9 +295,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const random = (inf: number, sup: number, ...size: number[]): ChalkboardTensor => {
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             const newNDArray = function (size: number[]): ChalkboardTensor {
                 if (size.length === 0) {
                     return Chalkboard.numb.random(inf, sup);
@@ -358,9 +352,7 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const resize = (tens: ChalkboardTensor, ...size: number[]): ChalkboardTensor => {
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             const result = Chalkboard.tens.fill(0, ...size);
             const refill = function (arr1: ChalkboardTensor[], arr2: ChalkboardTensor[]): void {
                 for (let i = 0; i < arr2.length; i++) {

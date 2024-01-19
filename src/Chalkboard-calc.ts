@@ -329,8 +329,8 @@ namespace Chalkboard {
                     ds = (ssup! - sinf!) / 100;
                 for (let s = sinf; s! <= ssup!; s! += ds) {
                     for (let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, 0, 0);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, 1, 0);
                         result += Chalkboard.vect.mag(Chalkboard.vect.cross(drds, drdt));
                     }
                 }
@@ -376,8 +376,8 @@ namespace Chalkboard {
                     ds = (ssup! - sinf!) / 100;
                 for (let s = sinf; s! <= ssup!; s! += ds) {
                     for (let t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, 0, 0);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s!, t)) as ChalkboardMatrix, 3, 1, 0);
                         result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.init(s!, t)) as ChalkboardVector), drds, drdt);
                     }
                 }

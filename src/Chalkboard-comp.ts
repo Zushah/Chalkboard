@@ -33,10 +33,20 @@ namespace Chalkboard {
         /**
          * Calculates the argument of a complex number.
          * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * @returns {number}
          */
         export const arg = (comp: ChalkboardComplex): number => {
             return Chalkboard.trig.arctan2(comp.b, comp.a);
+        };
+
+        /**
+         * Calculates the argument between two complex numbers.
+         * @param {ChalkboardComplex} comp1 - The first complex number
+         * @param {ChalkboardComplex} comp2 - The second complex number
+         * @returns {number}
+         */
+        export const argBetween = (comp1: ChalkboardComplex, comp2: ChalkboardComplex): number => {
+            return Chalkboard.vect.angBetween(Chalkboard.comp.toVector(comp1), Chalkboard.comp.toVector(comp2));
         };
 
         /**

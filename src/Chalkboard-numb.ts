@@ -18,9 +18,6 @@ namespace Chalkboard {
          * const bernoulliRandom = Chalkboard.numb.Bernoullian();
          */
         export const Bernoullian = (p: number = 0.5): number => {
-            if (p === undefined) {
-                p = 0.5;
-            }
             return Math.random() < p ? 1 : 0;
         };
 
@@ -303,6 +300,20 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two numbers are approximately equal.
+         * @param {number} a - The first number
+         * @param {number} b - The second number
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const approx = Chalkboard.numb.isApproxEqual(0.1 + 0.2, 0.3);
+         */
+        export const isApproxEqual = (a: number, b: number, precision: number = 0.000001): boolean => {
+            return Math.abs(a - b) < precision;
+        };
+
+        /**
          * Returns whether or not a number is a prime number.
          * @param {number} num - Number
          * @returns {boolean}
@@ -368,6 +379,19 @@ namespace Chalkboard {
          */
         export const map = (num: number, range1: number[], range2: number[]): number => {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
+        };
+
+        /**
+         * Calculates the mathematically correct modulo of a mod b.
+         * @param {number} a - Number
+         * @param {number} b - Number
+         * @returns {number}
+         * @example
+         * // Returns -1 (instead of 2, which is what 5 % -3 would return)
+         * const mod = Chalkboard.numb.mod(5, -3);
+         */
+        export const mod = (a: number, b: number): number => {
+            return ((a % b) + b) % b;
         };
 
         /**
@@ -534,6 +558,19 @@ namespace Chalkboard {
          */
         export const random = (inf: number = 0, sup: number = 1): number => {
             return inf + (sup - inf) * Math.random();
+        };
+
+        /**
+         * Rounds a number to the nearest positional notation index (or the nearest place value).
+         * @param {number} num - Number
+         * @param {number} positionalIndex - The positional notation index (or place value)
+         * @returns {number}
+         * @example
+         * // Returns 1240
+         * const rounded = Chalkboard.numb.roundTo(1237, 10);
+         */
+        export const roundTo = (num: number, positionalIndex: number): number => {
+            return Math.round(num / positionalIndex) * positionalIndex;
         };
 
         /**
