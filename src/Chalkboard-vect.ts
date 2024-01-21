@@ -512,7 +512,7 @@ namespace Chalkboard {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z!! * vect.z!!);
+                return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z!);
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z! + vect.w! * vect.w!);
             } else {
@@ -539,9 +539,9 @@ namespace Chalkboard {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return vect.x * vect.x + vect.y * vect.y + vect.z!! * vect.z!;
+                return vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z!;
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
-                return vect.x * vect.x + vect.y * vect.y + vect.z!! * vect.z! + vect.w! * vect.w!;
+                return vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z! + vect.w! * vect.w!;
             } else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }

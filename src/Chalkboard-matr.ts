@@ -81,7 +81,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const addKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.cols(matr1) && Chalkboard.matr.rows(matr2) === Chalkboard.matr.cols(matr2)) {
+            if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
                 return Chalkboard.matr.add(
                     Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))),
                     Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2)
@@ -100,31 +100,6 @@ namespace Chalkboard {
          */
         export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
-        };
-
-        /**
-         * Initializes a binomial matrix.
-         * @param {number} size - The number of rows or columns of the matrix
-         * @param {"lower" | "upper" | "symmetric"} [type="lower"] - The type of layout for the matrix, either "lower", "upper", or "symmetric"
-         * @returns {ChalkboardMatrix}
-         */
-        export const binomial = (size: number, type: "lower" | "upper" | "symmetric" = "lower"): ChalkboardMatrix => {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < size; i++) {
-                result.push([]);
-                for (let j = 0; j < size; j++) {
-                    if (type === "lower") {
-                        result[i].push(Chalkboard.numb.binomial(i, j));
-                    } else if (type === "upper") {
-                        result[i].push(Chalkboard.numb.binomial(j, i));
-                    }
-                }
-            }
-            if (type === "symmetric") {
-                return Chalkboard.matr.mul(Chalkboard.matr.binomial(size, "lower"), Chalkboard.matr.binomial(size, "upper"));
-            } else {
-                return result;
-            }
         };
 
         /**
@@ -306,7 +281,7 @@ namespace Chalkboard {
                 } else {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        const cofactor = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 1, i + 1));
+                        const cofactor = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 0, i));
                         result += i % 2 === 0 ? cofactor : -cofactor;
                     }
                     return result;
@@ -886,6 +861,66 @@ namespace Chalkboard {
         };
 
         /**
+         * Initializes a lower binomial matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const lowerBinomial = (size: number): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 0],
+                                            [1, 1]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([1, 0, 0],
+                                            [1, 1, 0],
+                                            [1, 2, 1]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([1, 0, 0, 0],
+                                            [1, 1, 0, 0],
+                                            [1, 2, 1, 0],
+                                            [1, 3, 3, 1]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push([]);
+                    for (let j = 0; j < size; j++) {
+                        result[i].push(Chalkboard.numb.binomial(i, j));
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
+         * Initializes a lower shift matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const lowerShift = (size: number): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 0],
+                                            [1, 0]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([0, 0, 0],
+                                            [1, 0, 0],
+                                            [0, 1, 0]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([0, 0, 0, 0],
+                                            [1, 0, 0, 0],
+                                            [0, 1, 0, 0],
+                                            [0, 0, 1, 0]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        result[i][j] = Chalkboard.numb.Kronecker(i, j + 1);
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
          * Initializes a lower triangular matrix.
          * @param {number} size - The number of rows or columns
          * @param {number[]} elements - The elements on and below the main diagonal
@@ -1220,6 +1255,34 @@ namespace Chalkboard {
                 .map(function (row: number[]) {
                     return row.slice(Chalkboard.matr.rows(matr));
                 });
+        };
+
+        /**
+         * Calculates the permanent of a matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {number}
+         */
+        export const perm = (matr: ChalkboardMatrix): number => {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.rows(matr) === 1) {
+                    return matr[0][0];
+                } else if (Chalkboard.matr.rows(matr) === 2) {
+                    return matr[0][0] * matr[1][1] + matr[0][1] * matr[1][0];
+                } else if (Chalkboard.matr.rows(matr) === 3) {
+                    return matr[0][0] * (matr[1][1] * matr[2][2] + matr[1][2] * matr[2][1]) + matr[0][1] * (matr[1][0] * matr[2][2] + matr[1][2] * matr[2][0]) + matr[0][2] * (matr[1][0] * matr[2][1] + matr[1][1] * matr[2][0]);
+                } else if (Chalkboard.matr.rows(matr) === 4) {
+                    return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) + matr[1][2] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) + matr[1][3] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1])) + matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) + matr[1][2] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) + matr[1][1] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0])) + matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1]) + matr[1][1] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0]));
+                } else {
+                    let result = 0;
+                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        const cofactor = matr[0][i] * Chalkboard.matr.perm(Chalkboard.matr.cofactor(matr, 0, i));
+                        result += Math.abs(cofactor);
+                    }
+                    return result;
+                }
+            } else {
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+            }
         };
 
         /**
@@ -1617,23 +1680,6 @@ namespace Chalkboard {
         };
 
         /**
-         * Initializes a shift matrix.
-         * @param {number} size - The number of rows or columns of the matrix
-         * @param {number} shiftAmount - The number of diagonals to shift by, where positive is rightward-shifts and negative is leftward-shifts
-         * @returns {ChalkboardMatrix}
-         */
-        export const shift = (size: number, shiftAmount: number = 1): ChalkboardMatrix => {
-            const result = Chalkboard.matr.fill(0, size);
-            for (let i = 0; i < size; i++) {
-                result[i] = [];
-                for (let j = 0; j < size; j++) {
-                    result[i][j] = Chalkboard.numb.Kronecker(i + shiftAmount, j);
-                }
-            }
-            return result;
-        };
-
-        /**
          * Calculates the solution to a system of linear equations defined by a coefficients matrix and a constants matrix.
          * @param {ChalkboardMatrix} matrA - The coefficients matrix
          * @param {ChalkboardMatrix} matrB - The constants matrix
@@ -1687,6 +1733,29 @@ namespace Chalkboard {
                 }
             } else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
+            }
+        };
+
+        /**
+         * Initializes a symmetric binomial matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const symmetricBinomial = (size: number): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 1],
+                                            [1, 2]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([1, 1, 1],
+                                            [1, 2, 3],
+                                            [1, 3, 6]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([1, 1, 1, 1],
+                                            [1, 2, 3, 4],
+                                            [1, 3, 6, 10],
+                                            [1, 4, 10, 20]);
+            } else {
+                return Chalkboard.matr.mul(Chalkboard.matr.lowerBinomial(size), Chalkboard.matr.upperBinomial(size));
             }
         };
 
@@ -1892,6 +1961,66 @@ namespace Chalkboard {
                 return Chalkboard.matr.init([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             } else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+            }
+        };
+
+        /**
+         * Initializes an upper binomial matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const upperBinomial = (size: number): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 1],
+                                            [0, 1]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([1, 2, 1],
+                                            [0, 1, 1],
+                                            [0, 0, 1]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([1, 3, 3, 1],
+                                            [0, 1, 2, 1],
+                                            [0, 0, 1, 1],
+                                            [0, 0, 0, 1]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result.push([]);
+                    for (let j = 0; j < size; j++) {
+                        result[i].push(Chalkboard.numb.binomial(j, i));
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
+         * Initializes an upper shift matrix.
+         * @param {number} size - The number of rows or columns of the matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const upperShift = (size: number): ChalkboardMatrix => {
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 1],
+                                            [0, 0]);
+            } else if (size === 3) {
+                return Chalkboard.matr.init([0, 1, 0],
+                                            [0, 0, 1],
+                                            [0, 0, 0]);
+            } else if (size === 4) {
+                return Chalkboard.matr.init([0, 1, 0, 0],
+                                            [0, 0, 1, 0],
+                                            [0, 0, 0, 1],
+                                            [0, 0, 0, 0]);
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (let j = 0; j < size; j++) {
+                        result[i][j] = Chalkboard.numb.Kronecker(i + 1, j);
+                    }
+                }
+                return result;
             }
         };
 
