@@ -7,8 +7,8 @@
     "name": "Chalkboard",
     "includeVersion": true,
     "sidebarLinks": {
-        "Source code": "https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.0.0/dist/Chalkboard.js",
-        "Examples": "./examples/index.html"
+        "Source code": "https://raw.githubusercontent.com/Zushah/Chalkboard/main/dist/Chalkboard.js",
+        "Examples": "https://zushah.github.io/Chalkboard/examples/index.html"
     },
     "plugin": ["typedoc-material-theme"],
     "themeColor": "#013d57"

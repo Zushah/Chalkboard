@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Tensor Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -206,7 +206,7 @@ namespace Chalkboard {
          */
         export const isEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
             if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
-                tens1 = tens1 as ChalkboardTensor[], tens2 = tens2 as ChalkboardTensor[];
+                (tens1 = tens1 as ChalkboardTensor[]), (tens2 = tens2 as ChalkboardTensor[]);
                 for (let i = 0; i < tens1.length; i++) {
                     if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
                         if (!Chalkboard.tens.isEqual(tens1[i], tens2[i])) return false;

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Vector Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -133,17 +133,17 @@ namespace Chalkboard {
             const vect = vectORvectfield as ChalkboardVector;
             const vectfield = vectORvectfield as ChalkboardVectorField;
             if (
-                (Chalkboard.vect.isDimensionOf(vect, 2)) ||
+                (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") ||
                 (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "undefined" && typeof vectfield.s === "undefined")
             ) {
                 return 2;
             } else if (
-                (Chalkboard.vect.isDimensionOf(vect, 3)) ||
+                (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") ||
                 (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "string" && typeof vectfield.s === "undefined")
             ) {
                 return 3;
             } else if (
-                (Chalkboard.vect.isDimensionOf(vect, 4)) ||
+                (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") ||
                 (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "string" && typeof vectfield.s === "string")
             ) {
                 return 4;
@@ -165,7 +165,10 @@ namespace Chalkboard {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!));
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.real.sqrt(
-                    (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) + (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!)
+                    (vect2.x - vect1.x) * (vect2.x - vect1.x) +
+                        (vect2.y - vect1.y) * (vect2.y - vect1.y) +
+                        (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) +
+                        (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!)
                 );
             } else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
@@ -184,7 +187,12 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!);
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
-                return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) + (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!);
+                return (
+                    (vect2.x - vect1.x) * (vect2.x - vect1.x) +
+                    (vect2.y - vect1.y) * (vect2.y - vect1.y) +
+                    (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) +
+                    (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!)
+                );
             } else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
@@ -426,18 +434,18 @@ namespace Chalkboard {
         };
 
         /**
-         * Checks if a vector is of a particular dimension.
-         * @param {ChalkboardVector} vect - The vector
+         * Checks if a vector or vector field is of a particular dimension.
+         * @param {ChalkboardVector | ChalkboardVectorField} vectORvectfield - The vector or vector field
          * @param {number} dimension - The dimension, which must be 2, 3, or 4
          * @returns {boolean}
          */
-        export const isDimensionOf = (vect: ChalkboardVector, dimension: 2 | 3 | 4): boolean => {
+        export const isDimensionOf = (vectORvectfield: ChalkboardVector | ChalkboardVectorField, dimension: 2 | 3 | 4): boolean => {
             if (dimension === 2) {
-                return Chalkboard.vect.isDimensionOf(vect, 2);
+                return Chalkboard.vect.dimension(vectORvectfield) === 2;
             } else if (dimension === 3) {
-                return Chalkboard.vect.isDimensionOf(vect, 3);
+                return Chalkboard.vect.dimension(vectORvectfield) === 3;
             } else if (dimension === 4) {
-                return Chalkboard.vect.isDimensionOf(vect, 4);
+                return Chalkboard.vect.dimension(vectORvectfield) === 4;
             } else {
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }

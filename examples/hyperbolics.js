@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.0.0 al-Khwarizmi Example Program: Hyperbolic Functions
+    Version 2.1.0 Seki Example Program: Hyperbolic Functions
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

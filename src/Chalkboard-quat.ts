@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Quaternion Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -278,10 +278,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const toMatrix = (quat: ChalkboardQuaternion): ChalkboardMatrix => {
-            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d],
-                                        [quat.b, quat.a, -quat.d, quat.c],
-                                        [quat.c, quat.d, quat.a, -quat.b],
-                                        [quat.d, -quat.c, quat.b, quat.a]);
+            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
         };
 
         /**

@@ -1,8 +1,8 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/Chalkboard-logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0"><img src="https://img.shields.io/badge/release-v2.0.0_al--Khwarizmi-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0"><img src="https://img.shields.io/badge/release-v2.1.0_Seki-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
     <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://img.shields.io/codefactor/grade/github/Zushah/Chalkboard?color=blue&logo=codefactor&logoColor=white" alt="CodeFactor grade"></a>
-    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.0.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=darkgreen&logo=files&logoColor=white" alt="Minified size"></a>
+    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.1.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=darkgreen&logo=files&logoColor=white" alt="Minified size"></a>
     <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?logo=npm&logoColor=white" alt="npm downloads"></a>
     <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/Zushah/Chalkboard?color=yellow&logo=opensourceinitiative&logoColor=white" alt="MIT License"></a>
     <a href="https://en.wikipedia.org/wiki/TypeScript"><img src="https://img.shields.io/github/languages/top/Zushah/Chalkboard?color=orange&logo=typescript&logoColor=white" alt="Written in TypeScript"></a>
@@ -23,18 +23,18 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0), Chalkboard has 410 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.1.0 Seki](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0), Chalkboard has 455 different commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
 
 # Installation
 If your JavaScript project is being run on the client-side within a webpage, you can install Chalkboard with this HTML tag:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.0.0/dist/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.1.0/dist/Chalkboard.min.js"></script>
 ```
 If your JavaScript project is being run on the server-side within the [Node.js](https://nodejs.org/en) environment, you can install Chalkboard with this console command:
 ```bash
 npm install @zushah/chalkboard
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0) and put the relevant files in your project's directory.
 
 Chalkboard can also be downloaded on [Khan Academy](https://www.khanacademy.org) from the code in the corresponding [release](https://www.khanacademy.org/cs/chalkboard/6708642430369792).
 
@@ -93,7 +93,7 @@ let dfdx = cb.calc.dfdx(f, 2); // Derivative of f at x = 0
 let fxdx = cb.calc.fxdx(f, 0, 2); // Antiderivative of f from x = 0 to x = 2
 let fourier = cb.calc.Fourier(f, 2); // Fourier transform of f at x = 2
 
-let f = cb.vec3.field("x", "y", "z"); // f(x, y, z) = (x, y, z)
+let f = cb.vect.field("x", "y", "z"); // f(x, y, z) = (x, y, z)
 let r = cb.real.define(["Math.cos(s) * Math.cos(t)", "Math.sin(s) * Math.cos(t)", "Math.sin(t)"], "surf"); // r(s, t) = (cos(s)cos(t), sin(s)cos(t), sin(t))
 let fnds = cb.calc.fnds(f, r, cb.PI(-1/2), cb.PI(1/2), 0, cb.PI(2)); // Flux of the radial vector field through the unit sphere
 
@@ -141,7 +141,7 @@ let tt = cb.tens.mul(t, t); // tt is a 2x2x2x2x2x2 rank-6 tensor
 let ttm = cb.tens.resize(tt, 8, 8); // ttm is an 8x8 matrix (or rank-2 tensor)
 cb.tens.print(tt); // Prints tt in the console just to see what it looks like for fun
 
-// Takes the factorial of each element of t
+// Calculates the factorial of each element of t
 let factorialt = cb.APPLY(t, (x) => {
     return cb.numb.factorial(x);
 });

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Number Theory Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {

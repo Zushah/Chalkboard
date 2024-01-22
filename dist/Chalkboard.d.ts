@@ -30,12 +30,12 @@ declare namespace Chalkboard {
     const APPLY: (object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector, callback: Function) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector;
     let CONTEXT: string;
     const E: (exponent?: number) => number;
-    const LOGO: (x?: number, y?: number, s?: number, context?: CanvasRenderingContext2D) => void;
+    const LOGO: (x?: number, y?: number, size?: number, context?: CanvasRenderingContext2D) => void;
     let PARSEPREFIX: string;
     const PI: (coefficient?: number) => number;
     const README: () => void;
-    const VERSION: "2.0.0";
-    const VERSIONALIAS: "al-Khwarizmi";
+    const VERSION: "2.1.0";
+    const VERSIONALIAS: "Seki";
 }
 declare namespace Chalkboard {
     namespace calc {
@@ -76,6 +76,7 @@ declare namespace Chalkboard {
         const absolute: (comp: ChalkboardComplex) => ChalkboardComplex;
         const add: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
         const arg: (comp: ChalkboardComplex) => number;
+        const argBetween: (comp1: ChalkboardComplex, comp2: ChalkboardComplex) => number;
         const conjugate: (comp: ChalkboardComplex) => ChalkboardComplex;
         const constrain: (comp: ChalkboardComplex, range?: [number, number]) => ChalkboardComplex;
         const copy: (comp: ChalkboardComplex) => ChalkboardComplex;
@@ -109,6 +110,7 @@ declare namespace Chalkboard {
         const sqrt: (comp: ChalkboardComplex) => ChalkboardComplex;
         const sub: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
         const toArray: (comp: ChalkboardComplex) => [number, number];
+        const toMatrix: (comp: ChalkboardComplex) => ChalkboardMatrix;
         const toString: (comp: ChalkboardComplex) => string;
         const toVector: (comp: ChalkboardComplex) => ChalkboardVector;
         const val: (func: ChalkboardFunction, comp: ChalkboardComplex) => ChalkboardComplex;
@@ -161,22 +163,41 @@ declare namespace Chalkboard {
         const add: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const addKronecker: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const adjugate: (matr: ChalkboardMatrix, row: number, col: number) => ChalkboardMatrix;
-        const binomial: (size: number, type?: "lower" | "upper" | "symmetric") => ChalkboardMatrix;
         const cofactor: (matr: ChalkboardMatrix, row: number, col: number) => ChalkboardMatrix;
         const cols: (matr: ChalkboardMatrix) => number;
         const colspace: (matr: ChalkboardMatrix) => ChalkboardMatrix;
-        const concat: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, type?: "row" | "col") => ChalkboardMatrix;
+        const concat: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, axis?: 0 | 1) => ChalkboardMatrix;
         const constrain: (matr: ChalkboardMatrix, range?: [number, number]) => ChalkboardMatrix;
         const copy: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const det: (matr: ChalkboardMatrix) => number;
+        const diagonal: (size: number, ...elements: number[]) => ChalkboardMatrix;
+        const eigenvalue: (matr: ChalkboardMatrix, maxIterations?: number) => number;
+        const eigenvector: (matr: ChalkboardMatrix, maxIterations?: number) => number[];
         const empty: (rows: number, cols?: number) => ChalkboardMatrix;
         const exchange: (size: number) => ChalkboardMatrix;
         const fill: (element: number, rows: number, cols?: number) => ChalkboardMatrix;
+        const Gaussian: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const Hilbert: (size: number) => ChalkboardMatrix;
         const identity: (size: number) => ChalkboardMatrix;
         const init: (...matrix: number[][] | number[][][]) => ChalkboardMatrix;
         const invert: (matr: ChalkboardMatrix) => ChalkboardMatrix;
+        const isDiagonal: (matr: ChalkboardMatrix) => boolean;
+        const isEqual: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => boolean;
+        const isIdentity: (matr: ChalkboardMatrix) => boolean;
+        const isInvertible: (matr: ChalkboardMatrix) => boolean;
+        const isLowerTriangular: (matr: ChalkboardMatrix) => boolean;
+        const isOrthogonal: (matr: ChalkboardMatrix) => boolean;
+        const isSizeEqual: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => boolean;
+        const isSizeOf: (matr: ChalkboardMatrix, rows: number, cols?: number) => boolean;
+        const isSkewSymmetric: (matr: ChalkboardMatrix) => boolean;
+        const isSquare: (matr: ChalkboardMatrix) => boolean;
+        const isSymmetric: (matr: ChalkboardMatrix) => boolean;
+        const isUpperTriangular: (matr: ChalkboardMatrix) => boolean;
+        const isZero: (matr: ChalkboardMatrix) => boolean;
         const Lehmer: (size: number) => ChalkboardMatrix;
+        const lowerBinomial: (size: number) => ChalkboardMatrix;
+        const lowerShift: (size: number) => ChalkboardMatrix;
+        const lowerTriangular: (size: number, ...elements: number[]) => ChalkboardMatrix;
         const LUdecomp: (matr: ChalkboardMatrix) => {
             L: ChalkboardMatrix;
             U: ChalkboardMatrix;
@@ -185,11 +206,15 @@ declare namespace Chalkboard {
         const mulKronecker: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const mulVector: (matr: ChalkboardMatrix, vect: ChalkboardVector) => ChalkboardMatrix | ChalkboardVector;
         const negate: (matr: ChalkboardMatrix) => ChalkboardMatrix;
+        const norm: (matr: ChalkboardMatrix, p?: number, q?: number) => number;
+        const normalize: (matr: ChalkboardMatrix, p?: number, q?: number) => ChalkboardMatrix;
+        const normsq: (matr: ChalkboardMatrix, p?: number, q?: number) => number;
         const nullspace: (matr: ChalkboardMatrix) => ChalkboardMatrix;
+        const perm: (matr: ChalkboardMatrix) => number;
         const pow: (matr: ChalkboardMatrix, num: number) => ChalkboardMatrix;
         const print: (matr: ChalkboardMatrix) => void;
-        const pull: (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number) => ChalkboardMatrix;
-        const push: (matr: ChalkboardMatrix, type: "row" | "col", rowORcol: number, elements: number[]) => ChalkboardMatrix;
+        const pull: (matr: ChalkboardMatrix, index: number, axis: 0 | 1) => ChalkboardMatrix;
+        const push: (matr: ChalkboardMatrix, index: number, axis: 0 | 1, elements: number[]) => ChalkboardMatrix;
         const QRdecomp: (matr: ChalkboardMatrix) => {
             Q: ChalkboardMatrix;
             R: ChalkboardMatrix;
@@ -197,25 +222,27 @@ declare namespace Chalkboard {
         const random: (inf: number, sup: number, rows: number, cols?: number) => ChalkboardMatrix;
         const rank: (matr: ChalkboardMatrix) => number;
         const reciprocate: (matr: ChalkboardMatrix) => ChalkboardMatrix;
-        const reduce: (matr: ChalkboardMatrix) => ChalkboardMatrix;
-        const resize: (matr: ChalkboardMatrix, rows: number, cols: number) => ChalkboardMatrix;
+        const resize: (matr: ChalkboardMatrix, rows: number, cols?: number) => ChalkboardMatrix;
         const rotator: (radx: number, rady?: number, radz?: number) => ChalkboardMatrix;
         const round: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const rows: (matr: ChalkboardMatrix) => number;
         const rowspace: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const scaler: (vect: ChalkboardVector) => ChalkboardMatrix;
         const scl: (matr: ChalkboardMatrix, num: number) => ChalkboardMatrix;
-        const shift: (size: number, shiftAmount?: number) => ChalkboardMatrix;
         const solve: (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix) => ChalkboardMatrix;
         const sub: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
+        const symmetricBinomial: (size: number) => ChalkboardMatrix;
         const toArray: (matr: ChalkboardMatrix) => number[];
         const toObject: (matr: ChalkboardMatrix) => object;
         const toString: (matr: ChalkboardMatrix) => string;
         const toTensor: (matr: ChalkboardMatrix, ...size: number[]) => ChalkboardTensor;
-        const toVector: (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, type?: "col" | "row", rowORcol?: number) => ChalkboardVector;
+        const toVector: (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index?: number, axis?: 0 | 1) => ChalkboardVector;
         const trace: (matr: ChalkboardMatrix) => number;
         const transpose: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const translator: (vect: ChalkboardVector) => ChalkboardMatrix;
+        const upperBinomial: (size: number) => ChalkboardMatrix;
+        const upperShift: (size: number) => ChalkboardMatrix;
+        const upperTriangular: (size: number, ...elements: number[]) => ChalkboardMatrix;
         const zero: (matr: ChalkboardMatrix) => ChalkboardMatrix;
     }
 }
@@ -237,10 +264,12 @@ declare namespace Chalkboard {
         const Gaussian: (height: number, mean: number, deviation: number) => number;
         const gcd: (a: number, b: number) => number;
         const Goldbach: (num: number) => [number, number] | undefined;
+        const isApproxEqual: (a: number, b: number, precision?: number) => boolean;
         const isPrime: (num: number) => boolean;
         const Kronecker: (a: number, b: number) => 1 | 0;
         const lcm: (a: number, b: number) => number;
         const map: (num: number, range1: number[], range2: number[]) => number;
+        const mod: (a: number, b: number) => number;
         const mul: (formula: string, inf: number, sup: number) => number;
         const nextPrime: (num: number) => number;
         const permutation: (n: number, r: number) => number;
@@ -250,6 +279,7 @@ declare namespace Chalkboard {
         const primeCount: (inf: number, sup: number) => number;
         const primeGap: (inf: number, sup: number) => number;
         const random: (inf?: number, sup?: number) => number;
+        const roundTo: (num: number, positionalIndex: number) => number;
         const sgn: (num: number) => -1 | 0 | 1;
         const sum: (formula: string, inf: number, sup: number) => number;
     }
@@ -486,6 +516,7 @@ declare namespace Chalkboard {
         const scl: (quat: ChalkboardQuaternion, num: number) => ChalkboardQuaternion;
         const sub: (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number) => ChalkboardQuaternion;
         const toArray: (quat: ChalkboardQuaternion) => [number, number, number, number];
+        const toMatrix: (quat: ChalkboardQuaternion) => ChalkboardMatrix;
         const toRotation: (quat: ChalkboardQuaternion, vect: ChalkboardVector) => ChalkboardVector;
         const toString: (quat: ChalkboardQuaternion) => string;
         const toVector: (quat: ChalkboardQuaternion) => ChalkboardVector;
@@ -547,6 +578,12 @@ declare namespace Chalkboard {
         const empty: (...size: number[]) => ChalkboardTensor;
         const fill: (element: number, ...size: number[]) => ChalkboardTensor;
         const init: (...tensor: ChalkboardTensor[]) => ChalkboardTensor;
+        const isEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
+        const isRankEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
+        const isRankOf: (tens: ChalkboardTensor, rank: number) => boolean;
+        const isSizeEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
+        const isSizeOf: (tens: ChalkboardTensor, ...size: number[]) => boolean;
+        const isSizeUniform: (tens: ChalkboardTensor) => boolean;
         const mul: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
         const negate: (tens: ChalkboardTensor) => ChalkboardTensor;
         const print: (tens: ChalkboardTensor) => void;
@@ -624,6 +661,13 @@ declare namespace Chalkboard {
         const fromVector: (vect: ChalkboardVector) => ChalkboardVector;
         const init: (x: number, y: number, z?: number, w?: number) => ChalkboardVector;
         const interp: (vect: ChalkboardVector, a: number, b: number, c?: number, d?: number) => ChalkboardVector;
+        const isDimensionEqual: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
+        const isDimensionOf: (vectORvectfield: ChalkboardVector | ChalkboardVectorField, dimension: 2 | 3 | 4) => boolean;
+        const isEqual: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
+        const isNormalized: (vect: ChalkboardVector) => boolean;
+        const isOrthogonal: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
+        const isParallel: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
+        const isZero: (vect: ChalkboardVector) => boolean;
         const mag: (vect: ChalkboardVector) => number;
         const magset: (vect: ChalkboardVector, num: number) => ChalkboardVector;
         const magsq: (vect: ChalkboardVector) => number;
@@ -644,7 +688,7 @@ declare namespace Chalkboard {
         const sub: (vect1: ChalkboardVector, vect2: ChalkboardVector) => ChalkboardVector;
         const toArray: (vect: ChalkboardVector) => [number, number] | [number, number, number] | [number, number, number, number];
         const toComplex: (vect: ChalkboardVector) => ChalkboardComplex;
-        const toMatrix: (vect: ChalkboardVector, type?: "col" | "row") => ChalkboardMatrix;
+        const toMatrix: (vect: ChalkboardVector, axis?: 0 | 1) => ChalkboardMatrix;
         const toQuaternion: (vect: ChalkboardVector) => ChalkboardQuaternion;
         const toString: (vect: ChalkboardVector) => string;
         const toTensor: (vect: ChalkboardVector, ...size: number[]) => ChalkboardTensor;

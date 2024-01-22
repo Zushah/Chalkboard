@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Complex Numbers Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -404,8 +404,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const toMatrix = (comp: ChalkboardComplex): ChalkboardMatrix => {
-            return Chalkboard.matr.init([comp.a, -comp.b],
-                                        [comp.b, comp.a]);
+            return Chalkboard.matr.init([comp.a, -comp.b], [comp.b, comp.a]);
         };
 
         /**

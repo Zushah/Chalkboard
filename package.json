@@ -1,15 +1,16 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
   "main": "dist/Chalkboard.js",
-  "files": ["dist", "examples", "CHANGELOG.md", "LICENSE.md", "package.json", "README.md"],
+  "types": "dist/Chalkboard.d.ts",
+  "files": ["dist", "CHANGELOG.md", "LICENSE.md", "package.json", "README.md"],
   "scripts": {
     "build": "tsc --project tsconfig.json",
-    "eslint": "eslint src/**",
-    "eslint:fix": "eslint --fix src/**",
-    "prettier": "prettier src",
-    "prettier:fix": "prettier --write src",
+    "lint": "eslint src/**",
+    "lint:fix": "eslint --fix src/**",
+    "format": "prettier src",
+    "format:fix": "prettier --write src",
     "docs": "typedoc --options typedoc.json"
   },
   "repository": {

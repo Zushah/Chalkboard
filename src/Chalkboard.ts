@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library
-    Version 2.0.0 al-Khwarizmi released 01/08/2024
+    Version 2.1.0 Seki released 01/22/2024
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
@@ -78,14 +78,17 @@ namespace Chalkboard {
      *     return Chalkboard.numb.factorial(x)
      * });
      */
-    export const APPLY = (object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector, callback: Function): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
+    export const APPLY = (
+        object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector,
+        callback: Function
+    ): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
         const comp = object as ChalkboardComplex;
         const matr = object as ChalkboardMatrix;
         const quat = object as ChalkboardQuaternion;
         const tens = object as ChalkboardTensor;
         const vect = object as ChalkboardVector;
         if (typeof comp.a !== "undefined" && typeof comp.b !== "undefined" && typeof quat.c === "undefined" && typeof quat.d === "undefined") {
-            return Chalkboard.comp.init(callback(comp.a), callback(comp.b))
+            return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
         } else if (Array.isArray(matr) && Array.isArray(matr[0]) && !Array.isArray(matr[0][0])) {
             const result = Chalkboard.matr.init();
             for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -114,9 +117,9 @@ namespace Chalkboard {
         } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w !== "undefined") {
             return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
         } else {
-            throw new TypeError("Parameter \"object\" must be of type \"ChalkboardComplex\", \"ChalkboardMatrix\", \"ChalkboardQuaternion\", \"ChalkboardTensor\", or \"ChalkboardVector\".");
+            throw new TypeError('Parameter "object" must be of type "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", or "ChalkboardVector".');
         }
-    }
+    };
 
     /**
      * The variable for setting the default JavaScript Canvas API context for Chalkboard to use.
@@ -145,7 +148,7 @@ namespace Chalkboard {
      * Draws the Chalkboard logo.
      * @param {number} [x=canvas.width/2] - The x-position
      * @param {number} [y=canvas.height/2] - The y-position
-     * @param {number} [s=1] - The size
+     * @param {number} [size=1] - The size
      * @param {CanvasRenderingContext2D} [context=Chalkboard.CONTEXT] - The JavaScript Canvas API context
      * @returns {void}
      * @example
@@ -155,12 +158,12 @@ namespace Chalkboard {
     export const LOGO = (
         x: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.width / 2,
         y: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.height / 2,
-        s: number = 1,
+        size: number = 1,
         context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D
     ): void => {
         context.save();
         context.translate(x, y);
-        context.scale(s, s);
+        context.scale(size, size);
         context.fillStyle = "rgb(25, 25, 25)";
         context.beginPath();
         context.ellipse(0, 0, 50, 50, 0, 0, Chalkboard.PI(2));
@@ -218,14 +221,14 @@ namespace Chalkboard {
      * Chalkboard.README();
      * // Returns in the console:
      * //   The Chalkboard Library
-     * //   Version 1.7.0 Descartes released 01/01/2024
+     * //   Version 2.1.0 Seki released 01/22/2024
      * //   Authored by Zushah ===> https://www.github.com/Zushah
      * //   Available under the MIT License ===> https://www.opensource.org/license/mit/
      * //
      * //   The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
      * //
      * //   Repository ===> https://www.github.com/Zushah/Chalkboard
-     * //   Website ===> https://zushah.github.io/Chalkboard/home.html
+     * //   Website ===> https://zushah.github.io/Chalkboard
      */
     export const README = (): void => {
         console.log(
@@ -233,7 +236,7 @@ namespace Chalkboard {
                 Chalkboard.VERSION +
                 " " +
                 Chalkboard.VERSIONALIAS +
-                " released 01/08/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
+                " released 01/22/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
         );
     };
 
@@ -241,19 +244,19 @@ namespace Chalkboard {
      * The version of Chalkboard.
      * @type {string}
      * @example
-     * // Returns 2.0.0
+     * // Returns "2.1.0"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "2.0.0" = "2.0.0";
+    export const VERSION: "2.1.0" = "2.1.0";
 
     /**
      * The alias of the version of Chalkboard.
      * @type {string}
      * @example
-     * // Returns al-Khwarizmi
+     * // Returns "Seki"
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "al-Khwarizmi" = "al-Khwarizmi";
+    export const VERSIONALIAS: "Seki" = "Seki";
 }
 
 if (typeof window === "undefined") {

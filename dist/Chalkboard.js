@@ -54,7 +54,7 @@ var Chalkboard;
             return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
         }
         else {
-            throw new TypeError("Parameter \"object\" must be of type \"ChalkboardComplex\", \"ChalkboardMatrix\", \"ChalkboardQuaternion\", \"ChalkboardTensor\", or \"ChalkboardVector\".");
+            throw new TypeError('Parameter "object" must be of type "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", or "ChalkboardVector".');
         }
     };
     Chalkboard.CONTEXT = typeof window !== "undefined" ? "ctx" : "0";
@@ -62,14 +62,14 @@ var Chalkboard;
         if (exponent === void 0) { exponent = 1; }
         return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
     };
-    Chalkboard.LOGO = function (x, y, s, context) {
+    Chalkboard.LOGO = function (x, y, size, context) {
         if (x === void 0) { x = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2; }
         if (y === void 0) { y = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2; }
-        if (s === void 0) { s = 1; }
+        if (size === void 0) { size = 1; }
         if (context === void 0) { context = Chalkboard.real.parse(Chalkboard.CONTEXT); }
         context.save();
         context.translate(x, y);
-        context.scale(s, s);
+        context.scale(size, size);
         context.fillStyle = "rgb(25, 25, 25)";
         context.beginPath();
         context.ellipse(0, 0, 50, 50, 0, 0, Chalkboard.PI(2));
@@ -105,10 +105,10 @@ var Chalkboard;
             Chalkboard.VERSION +
             " " +
             Chalkboard.VERSIONALIAS +
-            " released 01/08/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
+            " released 01/22/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
     };
-    Chalkboard.VERSION = "2.0.0";
-    Chalkboard.VERSIONALIAS = "al-Khwarizmi";
+    Chalkboard.VERSION = "2.1.0";
+    Chalkboard.VERSIONALIAS = "Seki";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined") {
     module.exports = Chalkboard;
@@ -319,8 +319,8 @@ var Chalkboard;
                 var dt = (tsup - tinf) / 100, ds = (ssup - sinf) / 100;
                 for (var s = sinf; s <= ssup; s += ds) {
                     for (var t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, 0, 0);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, 1, 0);
                         result += Chalkboard.vect.mag(Chalkboard.vect.cross(drds, drdt));
                     }
                 }
@@ -357,8 +357,8 @@ var Chalkboard;
                 var dt = (tsup - tinf) / 100, ds = (ssup - sinf) / 100;
                 for (var s = sinf; s <= ssup; s += ds) {
                     for (var t = tinf; t <= tsup; t += dt) {
-                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, "col", 1);
-                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, "col", 2);
+                        drds = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, 0, 0);
+                        drdt = Chalkboard.matr.toVector(Chalkboard.calc.grad(func, Chalkboard.vect.init(s, t)), 3, 1, 0);
                         result += Chalkboard.vect.scalarTriple(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, Chalkboard.vect.init(s, t))), drds, drdt);
                     }
                 }
@@ -670,6 +670,9 @@ var Chalkboard;
         comp_1.arg = function (comp) {
             return Chalkboard.trig.arctan2(comp.b, comp.a);
         };
+        comp_1.argBetween = function (comp1, comp2) {
+            return Chalkboard.vect.angBetween(Chalkboard.comp.toVector(comp1), Chalkboard.comp.toVector(comp2));
+        };
         comp_1.conjugate = function (comp) {
             return Chalkboard.comp.init(comp.a, -comp.b);
         };
@@ -809,6 +812,9 @@ var Chalkboard;
         };
         comp_1.toArray = function (comp) {
             return [comp.a, comp.b];
+        };
+        comp_1.toMatrix = function (comp) {
+            return Chalkboard.matr.init([comp.a, -comp.b], [comp.b, comp.a]);
         };
         comp_1.toString = function (comp) {
             if (comp.b >= 0) {
@@ -995,32 +1001,54 @@ var Chalkboard;
     var matr;
     (function (matr_1) {
         matr_1.absolute = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Math.abs(matr[i][j]);
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
             }
-            return result;
-        };
-        matr_1.add = function (matr1, matr2) {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2])], [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2])], [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2])]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2]), Math.abs(matr[0][3])], [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2]), Math.abs(matr[1][3])], [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2]), Math.abs(matr[2][3])], [Math.abs(matr[3][0]), Math.abs(matr[3][1]), Math.abs(matr[3][2]), Math.abs(matr[3][3])]);
+            }
+            else {
                 var result = Chalkboard.matr.init();
-                for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     result[i] = [];
-                    for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                        result[i][j] = matr1[i][j] + matr2[i][j];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Math.abs(matr[i][j]);
                     }
                 }
                 return result;
+            }
+        };
+        matr_1.add = function (matr1, matr2) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
+                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]], [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
+                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2]], [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2]], [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
+                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2], matr1[0][3] + matr2[0][3]], [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2], matr1[1][3] + matr2[1][3]], [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2], matr1[2][3] + matr2[2][3]], [matr1[3][0] + matr2[3][0], matr1[3][1] + matr2[3][1], matr1[3][2] + matr2[3][2], matr1[3][3] + matr2[3][3]]);
+                }
+                else {
+                    var result = Chalkboard.matr.init();
+                    for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                            result[i][j] = matr1[i][j] + matr2[i][j];
+                        }
+                    }
+                    return result;
+                }
             }
             else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
         };
         matr_1.addKronecker = function (matr1, matr2) {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.cols(matr1) && Chalkboard.matr.rows(matr2) === Chalkboard.matr.cols(matr2)) {
+            if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
                 return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2));
             }
             else {
@@ -1030,33 +1058,12 @@ var Chalkboard;
         matr_1.adjugate = function (matr, row, col) {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         };
-        matr_1.binomial = function (size, type) {
-            if (type === void 0) { type = "lower"; }
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < size; i++) {
-                result.push([]);
-                for (var j = 0; j < size; j++) {
-                    if (type === "lower") {
-                        result[i].push(Chalkboard.numb.binomial(i, j));
-                    }
-                    else if (type === "upper") {
-                        result[i].push(Chalkboard.numb.binomial(j, i));
-                    }
-                }
-            }
-            if (type === "symmetric") {
-                return Chalkboard.matr.mul(Chalkboard.matr.binomial(size, "lower"), Chalkboard.matr.binomial(size, "upper"));
-            }
-            else {
-                return result;
-            }
-        };
         matr_1.cofactor = function (matr, row, col) {
             return matr
-                .slice(0, row - 1)
-                .concat(matr.slice(row))
+                .slice(0, row)
+                .concat(matr.slice(row + 1))
                 .map(function (row) {
-                return row.slice(0, col - 1).concat(row.slice(col));
+                return row.slice(0, col).concat(row.slice(col + 1));
             });
         };
         matr_1.cols = function (matr) {
@@ -1065,65 +1072,152 @@ var Chalkboard;
         matr_1.colspace = function (matr) {
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         };
-        matr_1.concat = function (matr1, matr2, type) {
-            if (type === void 0) { type = "row"; }
-            if (type === "row") {
-                if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
-                    return Chalkboard.matr.init(matr1.concat(matr2));
-                }
-                else {
-                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
-                }
-            }
-            else if (type === "col") {
+        matr_1.concat = function (matr1, matr2, axis) {
+            if (axis === void 0) { axis = 0; }
+            if (axis === 0) {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                    var result = Chalkboard.matr.init();
-                    for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                        result.push(matr1[i].concat(matr2[i]));
+                    if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.rows(matr2) === 2) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1]], [matr1[1][0], matr1[1][1]], [matr2[0][0], matr2[0][1]], [matr2[1][0], matr2[1][1]]);
                     }
-                    return result;
+                    else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.rows(matr2) === 3) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2]], [matr1[1][0], matr1[1][1], matr1[1][2]], [matr1[2][0], matr1[2][1], matr1[2][2]], [matr2[0][0], matr2[0][1], matr2[0][2]], [matr2[1][0], matr2[1][1], matr2[1][2]], [matr2[2][0], matr2[2][1], matr2[2][2]]);
+                    }
+                    else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.rows(matr2) === 4) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3]], [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3]], [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3]], [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3]], [matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]], [matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]], [matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]], [matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]);
+                    }
+                    else {
+                        return Chalkboard.matr.init(matr1.concat(matr2));
+                    }
                 }
                 else {
                     throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of columns.');
                 }
             }
+            else if (axis === 1) {
+                if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
+                    if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.cols(matr2) === 2) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]], [matr1[1][0], matr1[1][1], matr2[1][0], matr2[1][1]]);
+                    }
+                    else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.cols(matr2) === 3) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr2[0][0], matr2[0][1], matr2[0][2]], [matr1[1][0], matr1[1][1], matr1[1][2], matr2[1][0], matr2[1][1], matr2[1][2]], [matr1[2][0], matr1[2][1], matr1[2][2], matr2[2][0], matr2[2][1], matr2[2][2]]);
+                    }
+                    else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.cols(matr2) === 4) {
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3], matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]], [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3], matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]], [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3], matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]], [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3], matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]);
+                    }
+                    else {
+                        var result = Chalkboard.matr.init();
+                        for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                            result.push(matr1[i].concat(matr2[i]));
+                        }
+                        return result;
+                    }
+                }
+                else {
+                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
+                }
+            }
             else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
         matr_1.constrain = function (matr, range) {
             if (range === void 0) { range = [0, 1]; }
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Chalkboard.numb.constrain(matr[i][j], range);
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)], [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range)], [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range)], [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range)]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([
+                    Chalkboard.numb.constrain(matr[0][0], range),
+                    Chalkboard.numb.constrain(matr[0][1], range),
+                    Chalkboard.numb.constrain(matr[0][2], range),
+                    Chalkboard.numb.constrain(matr[0][3], range)
+                ], [
+                    Chalkboard.numb.constrain(matr[1][0], range),
+                    Chalkboard.numb.constrain(matr[1][1], range),
+                    Chalkboard.numb.constrain(matr[1][2], range),
+                    Chalkboard.numb.constrain(matr[1][3], range)
+                ], [
+                    Chalkboard.numb.constrain(matr[2][0], range),
+                    Chalkboard.numb.constrain(matr[2][1], range),
+                    Chalkboard.numb.constrain(matr[2][2], range),
+                    Chalkboard.numb.constrain(matr[2][3], range)
+                ], [
+                    Chalkboard.numb.constrain(matr[3][0], range),
+                    Chalkboard.numb.constrain(matr[3][1], range),
+                    Chalkboard.numb.constrain(matr[3][2], range),
+                    Chalkboard.numb.constrain(matr[3][3], range)
+                ]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Chalkboard.numb.constrain(matr[i][j], range);
+                    }
+                }
+                return result;
+            }
         };
         matr_1.copy = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result.push([]);
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i].push(matr[i][j]);
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0], matr[0][1]], [matr[1][0], matr[1][1]]);
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2]], [matr[1][0], matr[1][1], matr[1][2]], [matr[2][0], matr[2][1], matr[2][2]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2], matr[0][3]], [matr[1][0], matr[1][1], matr[1][2], matr[1][3]], [matr[2][0], matr[2][1], matr[2][2], matr[2][3]], [matr[3][0], matr[3][1], matr[3][2], matr[3][3]]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result.push([]);
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i].push(matr[i][j]);
+                    }
+                }
+                return result;
+            }
         };
         matr_1.det = function (matr) {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                var result = 0;
+            if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
                 }
                 else if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0];
                 }
+                else if (Chalkboard.matr.rows(matr) === 3) {
+                    return (matr[0][0] * (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) -
+                        matr[0][1] * (matr[1][0] * matr[2][2] - matr[1][2] * matr[2][0]) +
+                        matr[0][2] * (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]));
+                }
+                else if (Chalkboard.matr.rows(matr) === 4) {
+                    return (matr[0][0] *
+                        (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) -
+                            matr[1][2] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) +
+                            matr[1][3] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1])) -
+                        matr[0][1] *
+                            (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) -
+                                matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) +
+                        matr[0][2] *
+                            (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) -
+                                matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) -
+                        matr[0][3] *
+                            (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) -
+                                matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) +
+                                matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])));
+                }
                 else {
+                    var result = 0;
                     for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        var cofactor_1 = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 1, i + 1));
+                        var cofactor_1 = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 0, i));
                         result += i % 2 === 0 ? cofactor_1 : -cofactor_1;
                     }
                     return result;
@@ -1133,365 +1227,137 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.empty = function (rows, cols) {
-            if (cols === void 0) { cols = rows; }
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < rows; i++) {
-                result.push([]);
-                for (var j = 0; j < cols; j++) {
-                    result[i].push(null);
-                }
+        matr_1.diagonal = function (size) {
+            var elements = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                elements[_i - 1] = arguments[_i];
             }
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0] || 0, 0], [0, elements[1] || 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0], [0, elements[1] || 0, 0], [0, 0, elements[2] || 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0], [0, elements[1] || 0, 0, 0], [0, 0, elements[2] || 0, 0], [0, 0, 0, elements[3] || 0]);
+            }
+            else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push(Array(size).fill(0));
+                    result[i][i] = elements[i] || 0;
+                }
+                return result;
+            }
+        };
+        matr_1.eigenvalue = function (matr, maxIterations) {
+            if (maxIterations === void 0) { maxIterations = 100; }
+            var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
+            var _loop_1 = function (i) {
+                var matrv = Chalkboard.matr.mul(matr, v);
+                var max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
+                    return i / max;
+                }), Chalkboard.matr.rows(matr), 1);
+            };
+            for (var i = 0; i < maxIterations; i++) {
+                _loop_1(i);
+            }
+            var dot = function (v1, v2) {
+                var result = 0;
+                for (var i = 0; i < v1.length; i++) {
+                    result += v1[i] * v2[i];
+                }
+                return result;
+            };
+            return (dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) /
+                dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v)));
+        };
+        matr_1.eigenvector = function (matr, maxIterations) {
+            if (maxIterations === void 0) { maxIterations = 100; }
+            var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
+            var _loop_2 = function (i) {
+                var matrv = Chalkboard.matr.mul(matr, v);
+                var max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
+                    return i / max;
+                }), Chalkboard.matr.rows(matr), 1);
+            };
+            for (var i = 0; i < maxIterations; i++) {
+                _loop_2(i);
+            }
+            var result = Chalkboard.matr.toArray(v);
             return result;
         };
-        matr_1.exchange = function (size) {
-            var result = Chalkboard.matr.fill(0, size, size);
-            for (var i = 0; i < size; i++) {
-                for (var j = 0; j < size; j++) {
-                    if (i + j === size - 1) {
-                        result[i][j] = 1;
+        matr_1.empty = function (rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            var _null = null;
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([_null, _null], [_null, _null]);
+            }
+            else if (rows === 3 && cols === 3) {
+                return Chalkboard.matr.init([_null, _null, _null], [_null, _null, _null], [_null, _null, _null]);
+            }
+            else if (rows === 4 && cols === 4) {
+                return Chalkboard.matr.init([_null, _null, _null, _null], [_null, _null, _null, _null], [_null, _null, _null, _null], [_null, _null, _null, _null]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < rows; i++) {
+                    result.push([]);
+                    for (var j = 0; j < cols; j++) {
+                        result[i].push(_null);
                     }
                 }
+                return result;
             }
-            return result;
+        };
+        matr_1.exchange = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 1], [1, 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([0, 0, 1], [0, 1, 0], [1, 0, 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]);
+            }
+            else {
+                var result = Chalkboard.matr.fill(0, size, size);
+                for (var i = 0; i < size; i++) {
+                    for (var j = 0; j < size; j++) {
+                        if (i + j === size - 1) {
+                            result[i][j] = 1;
+                        }
+                    }
+                }
+                return result;
+            }
         };
         matr_1.fill = function (element, rows, cols) {
             if (cols === void 0) { cols = rows; }
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < rows; i++) {
-                result.push([]);
-                for (var j = 0; j < cols; j++) {
-                    result[i].push(element);
-                }
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([element, element], [element, element]);
             }
-            return result;
-        };
-        matr_1.Hilbert = function (size) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < size; i++) {
-                result.push([]);
-                for (var j = 0; j < size; j++) {
-                    result[i].push(1 / (i + j + 1));
-                }
+            else if (rows === 3 && cols === 3) {
+                return Chalkboard.matr.init([element, element, element], [element, element, element], [element, element, element]);
             }
-            return result;
-        };
-        matr_1.identity = function (size) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < size; i++) {
-                result.push(Array(size).fill(0));
-                result[i][i] = 1;
-            }
-            return result;
-        };
-        matr_1.init = function () {
-            var matrix = [];
-            for (var _i = 0; _i < arguments.length; _i++) {
-                matrix[_i] = arguments[_i];
-            }
-            if (matrix.length === 0) {
-                return [];
-            }
-            else if (Array.isArray(matrix[0]) && Array.isArray(matrix[0][0])) {
-                return matrix[0];
+            else if (rows === 4 && cols === 4) {
+                return Chalkboard.matr.init([element, element, element, element], [element, element, element, element], [element, element, element, element], [element, element, element, element]);
             }
             else {
-                return matrix;
-            }
-        };
-        matr_1.invert = function (matr) {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
                 var result = Chalkboard.matr.init();
-                var augmented = Chalkboard.matr.init();
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
-                    augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
-                }
-                for (var row = 0; row < Chalkboard.matr.rows(matr); row++) {
-                    var diagonal = augmented[row][row];
-                    if (diagonal === 0) {
-                        var max = row;
-                        for (var i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
-                            if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
-                                max = i;
-                            }
-                        }
-                        var temp = augmented[row];
-                        augmented[row] = augmented[max];
-                        augmented[max] = temp;
-                        diagonal = augmented[row][row];
-                    }
-                    for (var col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
-                        augmented[row][col] /= diagonal;
-                    }
-                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        if (i !== row) {
-                            var coeff = augmented[i][row];
-                            for (var j = 0; j < 2 * Chalkboard.matr.cols(matr); j++) {
-                                augmented[i][j] -= coeff * augmented[row][j];
-                            }
-                        }
-                    }
-                }
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
-                }
-                return result;
-            }
-            else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
-            }
-        };
-        matr_1.Lehmer = function (size) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < size; i++) {
-                result.push([]);
-                for (var j = 0; j < size; j++) {
-                    result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
-                }
-            }
-            return result;
-        };
-        matr_1.LUdecomp = function (matr) {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                var L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    for (var i = 0; i <= j; i++) {
-                        var sum = 0;
-                        for (var k = 0; k < i; k++) {
-                            sum += L[i][k] * U[k][j];
-                        }
-                        U[i][j] = matr[i][j] - sum;
-                    }
-                    for (var i = j + 1; i < Chalkboard.matr.rows(matr); i++) {
-                        var sum = 0;
-                        for (var k = 0; k < j; k++) {
-                            sum += L[i][k] * U[k][j];
-                        }
-                        L[i][j] = (matr[i][j] - sum) / U[j][j];
-                    }
-                }
-                return { L: L, U: U };
-            }
-            else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
-            }
-        };
-        matr_1.mul = function (matr1, matr2) {
-            if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
-                var result = Chalkboard.matr.init();
-                for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                    result[i] = [];
-                    for (var j = 0; j < Chalkboard.matr.cols(matr2); j++) {
-                        result[i][j] = 0;
-                        for (var k = 0; k < Chalkboard.matr.cols(matr1); k++) {
-                            result[i][j] += matr1[i][k] * matr2[k][j];
-                        }
+                for (var i = 0; i < rows; i++) {
+                    result.push([]);
+                    for (var j = 0; j < cols; j++) {
+                        result[i].push(element);
                     }
                 }
                 return result;
             }
-            else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
-            }
         };
-        matr_1.mulKronecker = function (matr1, matr2) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                    for (var k = 0; k < Chalkboard.matr.rows(matr2); k++) {
-                        for (var l = 0; l < Chalkboard.matr.cols(matr2); l++) {
-                            if (!result[i * Chalkboard.matr.rows(matr2) + k]) {
-                                result[i * Chalkboard.matr.rows(matr2) + k] = [];
-                            }
-                            result[i * Chalkboard.matr.rows(matr2) + k][j * Chalkboard.matr.cols(matr2) + l] = matr1[i][j] * matr2[k][l];
-                        }
-                    }
-                }
-            }
-            return result;
-        };
-        matr_1.mulVector = function (matr, vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                if (Chalkboard.matr.rows(matr) === 2) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
-                }
-                else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
-                }
-            }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                if (Chalkboard.matr.rows(matr) === 3) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 3);
-                }
-                else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
-                }
-            }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                if (Chalkboard.matr.rows(matr) === 4) {
-                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 4);
-                }
-                else {
-                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
-                }
-            }
-            else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
-            }
-        };
-        matr_1.negate = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = -matr[i][j];
-                }
-            }
-            return result;
-        };
-        matr_1.nullspace = function (matr) {
-            var augmented = matr.map(function (row) {
-                return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
-            });
-            var reduced = Chalkboard.matr.reduce(augmented);
-            return reduced
-                .filter(function (row) {
-                return row.slice(0, Chalkboard.matr.rows(matr)).every(function (element) {
-                    return element === 0;
-                });
-            })
-                .map(function (row) {
-                return row.slice(Chalkboard.matr.rows(matr));
-            });
-        };
-        matr_1.pow = function (matr, num) {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                if (num === 0) {
-                    return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
-                }
-                else {
-                    var result = matr;
-                    for (var i = 1; i < num; i++) {
-                        result = Chalkboard.matr.mul(matr, result);
-                    }
-                    return result;
-                }
-            }
-            else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
-            }
-        };
-        matr_1.print = function (matr) {
-            console.log(Chalkboard.matr.toString(matr));
-        };
-        matr_1.pull = function (matr, type, rowORcol) {
-            rowORcol -= 1;
-            if (type === "row") {
-                matr.splice(rowORcol, 1);
-                return matr;
-            }
-            else if (type === "col") {
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    matr[i].splice(rowORcol, 1);
-                }
-                return matr;
-            }
-            else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
-            }
-        };
-        matr_1.push = function (matr, type, rowORcol, elements) {
-            rowORcol -= 1;
-            if (type === "row") {
-                matr.splice(rowORcol, 0, elements);
-                return matr;
-            }
-            else if (type === "col") {
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    matr[i].splice(rowORcol, 0, elements[i]);
-                }
-                return matr;
-            }
-            else {
-                throw new TypeError('Parameter "type" must be "row" or "col".');
-            }
-        };
-        matr_1.QRdecomp = function (matr) {
-            var Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
-            for (var j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
-                var norm = 0;
-                for (var i = j; i < Chalkboard.matr.rows(matr); i++) {
-                    norm += R[i][j] * R[i][j];
-                }
-                norm = Chalkboard.real.sqrt(norm);
-                var v = [];
-                v[0] = norm - R[j][j];
-                var normalizer = v[0] * v[0];
-                for (var i = 1; i < Chalkboard.matr.rows(matr) - j; i++) {
-                    v[i] = -R[i + j][j];
-                    normalizer += v[i] * v[i];
-                }
-                normalizer = 1 / Chalkboard.real.sqrt(normalizer);
-                for (var i = 0; i < v.length; i++) {
-                    v[i] *= normalizer;
-                }
-                R[j][j] = norm;
-                for (var i = j + 1; i < Chalkboard.matr.rows(R); i++) {
-                    R[i][j] = 0;
-                }
-                for (var k = j + 1; k < Chalkboard.matr.cols(R); k++) {
-                    var dot = 0;
-                    for (var i = 0; i < v.length; i++) {
-                        dot += v[i] * R[i + j][k];
-                    }
-                    dot *= 2;
-                    for (var i = 0; i < v.length; i++) {
-                        R[i + j][k] -= dot * v[i];
-                    }
-                }
-                for (var k = 0; k < Chalkboard.matr.cols(Q); k++) {
-                    var dot = 0;
-                    for (var i = 0; i < v.length; i++) {
-                        dot += v[i] * Q[k][i + j];
-                    }
-                    dot *= 2;
-                    for (var i = 0; i < v.length; i++) {
-                        Q[k][i + j] -= dot * v[i];
-                    }
-                }
-            }
-            return { Q: Q, R: R };
-        };
-        matr_1.random = function (inf, sup, rows, cols) {
-            if (cols === void 0) { cols = rows; }
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < rows; i++) {
-                result.push([]);
-                for (var j = 0; j < cols; j++) {
-                    result[i].push(Chalkboard.numb.random(inf, sup));
-                }
-            }
-            return result;
-        };
-        matr_1.rank = function (matr) {
-            return Chalkboard.matr.reduce(matr).filter(function (row) {
-                return row.some(function (element) {
-                    return element !== 0;
-                });
-            }).length;
-        };
-        matr_1.reciprocate = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = 1 / matr[i][j];
-                }
-            }
-            return result;
-        };
-        matr_1.reduce = function (matr) {
+        matr_1.Gaussian = function (matr) {
             var lead = 0;
             for (var row = 0; row < Chalkboard.matr.rows(matr); row++) {
                 if (lead >= Chalkboard.matr.cols(matr)) {
@@ -1527,10 +1393,1311 @@ var Chalkboard;
             }
             return matr;
         };
-        matr_1.resize = function (matr, rows, cols) {
-            if (cols === undefined) {
-                cols = rows;
+        matr_1.Hilbert = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 3]);
             }
+            else if (size === 3) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 3, 1 / 4], [1 / 3, 1 / 4, 1 / 5]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 3, 1 / 4, 1 / 5], [1 / 3, 1 / 4, 1 / 5, 1 / 6], [1 / 4, 1 / 5, 1 / 6, 1 / 7]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push([]);
+                    for (var j = 0; j < size; j++) {
+                        result[i].push(1 / (i + j + 1));
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.identity = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 0], [0, 1]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([1, 0, 0], [0, 1, 0], [0, 0, 1]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push(Array(size).fill(0));
+                    result[i][i] = 1;
+                }
+                return result;
+            }
+        };
+        matr_1.init = function () {
+            var matrix = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                matrix[_i] = arguments[_i];
+            }
+            if (matrix.length === 0) {
+                return [];
+            }
+            else if (Array.isArray(matrix[0]) && Array.isArray(matrix[0][0])) {
+                return matrix[0];
+            }
+            else {
+                return matrix;
+            }
+        };
+        matr_1.invert = function (matr) {
+            if (Chalkboard.matr.isInvertible(matr)) {
+                if (Chalkboard.matr.rows(matr) === 2) {
+                    var det_1 = Chalkboard.matr.det(matr);
+                    return Chalkboard.matr.init([matr[1][1] / det_1, -matr[0][1] / det_1], [-matr[1][0] / det_1, matr[0][0] / det_1]);
+                }
+                else if (Chalkboard.matr.rows(matr) === 3) {
+                    var det_2 = Chalkboard.matr.det(matr);
+                    return Chalkboard.matr.init([
+                        (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) / det_2,
+                        (matr[0][2] * matr[2][1] - matr[0][1] * matr[2][2]) / det_2,
+                        (matr[0][1] * matr[1][2] - matr[0][2] * matr[1][1]) / det_2
+                    ], [
+                        (matr[1][2] * matr[2][0] - matr[1][0] * matr[2][2]) / det_2,
+                        (matr[0][0] * matr[2][2] - matr[0][2] * matr[2][0]) / det_2,
+                        (matr[0][2] * matr[1][0] - matr[0][0] * matr[1][2]) / det_2
+                    ], [
+                        (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]) / det_2,
+                        (matr[0][1] * matr[2][0] - matr[0][0] * matr[2][1]) / det_2,
+                        (matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0]) / det_2
+                    ]);
+                }
+                else if (Chalkboard.matr.rows(matr) === 4) {
+                    var det_3 = Chalkboard.matr.det(matr);
+                    var adj00 = matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0], adj01 = matr[0][0] * matr[1][2] - matr[0][2] * matr[1][0], adj02 = matr[0][0] * matr[1][3] - matr[0][3] * matr[1][0], adj03 = matr[0][1] * matr[1][2] - matr[0][2] * matr[1][1], adj04 = matr[0][1] * matr[1][3] - matr[0][3] * matr[1][1], adj05 = matr[0][2] * matr[1][3] - matr[0][3] * matr[1][2], adj06 = matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0], adj07 = matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0], adj08 = matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0], adj09 = matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1], adj10 = matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1], adj11 = matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2];
+                    return Chalkboard.matr.init([
+                        (matr[1][1] * adj11 - matr[1][2] * adj10 + matr[1][3] * adj09) / det_3,
+                        (matr[0][2] * adj10 - matr[0][1] * adj11 - matr[0][3] * adj09) / det_3,
+                        (matr[3][1] * adj05 - matr[3][2] * adj04 + matr[3][3] * adj03) / det_3,
+                        (matr[2][2] * adj04 - matr[2][1] * adj05 - matr[2][3] * adj03) / det_3
+                    ], [
+                        (matr[1][2] * adj08 - matr[1][0] * adj11 - matr[1][3] * adj07) / det_3,
+                        (matr[0][0] * adj11 - matr[0][2] * adj08 + matr[0][3] * adj07) / det_3,
+                        (matr[3][2] * adj02 - matr[3][0] * adj05 - matr[3][3] * adj01) / det_3,
+                        (matr[2][0] * adj05 - matr[2][2] * adj02 + matr[2][3] * adj01) / det_3
+                    ], [
+                        (matr[1][0] * adj10 - matr[1][1] * adj08 + matr[1][3] * adj06) / det_3,
+                        (matr[0][1] * adj08 - matr[0][0] * adj10 - matr[0][3] * adj06) / det_3,
+                        (matr[3][0] * adj04 - matr[3][1] * adj02 + matr[3][3] * adj00) / det_3,
+                        (matr[2][1] * adj02 - matr[2][0] * adj04 - matr[2][3] * adj00) / det_3
+                    ], [
+                        (matr[1][1] * adj07 - matr[1][0] * adj09 - matr[1][2] * adj06) / det_3,
+                        (matr[0][0] * adj09 - matr[0][1] * adj07 + matr[0][2] * adj06) / det_3,
+                        (matr[3][1] * adj01 - matr[3][0] * adj03 - matr[3][2] * adj00) / det_3,
+                        (matr[2][0] * adj03 - matr[2][1] * adj01 + matr[2][2] * adj00) / det_3
+                    ]);
+                }
+                else {
+                    var result = Chalkboard.matr.init();
+                    var augmented = Chalkboard.matr.init();
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        augmented.push(matr[i].concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
+                        augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
+                    }
+                    for (var row = 0; row < Chalkboard.matr.rows(matr); row++) {
+                        var diagonal_1 = augmented[row][row];
+                        if (diagonal_1 === 0) {
+                            var max = row;
+                            for (var i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
+                                if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
+                                    max = i;
+                                }
+                            }
+                            var temp = augmented[row];
+                            augmented[row] = augmented[max];
+                            augmented[max] = temp;
+                            diagonal_1 = augmented[row][row];
+                        }
+                        for (var col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
+                            augmented[row][col] /= diagonal_1;
+                        }
+                        for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                            if (i !== row) {
+                                var coeff = augmented[i][row];
+                                for (var j = 0; j < 2 * Chalkboard.matr.cols(matr); j++) {
+                                    augmented[i][j] -= coeff * augmented[row][j];
+                                }
+                            }
+                        }
+                    }
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        result.push(augmented[i].slice(Chalkboard.matr.cols(matr), 2 * Chalkboard.matr.cols(matr)));
+                    }
+                    return result;
+                }
+            }
+            else {
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square and has a non-zero determinant.');
+            }
+        };
+        matr_1.isDiagonal = function (matr) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][1] !== 0 && matr[1][0] !== 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return (matr[0][1] !== 0 &&
+                        matr[0][2] !== 0 &&
+                        matr[0][3] !== 0 &&
+                        matr[1][0] !== 0 &&
+                        matr[1][2] !== 0 &&
+                        matr[1][3] !== 0 &&
+                        matr[2][0] !== 0 &&
+                        matr[2][1] !== 0 &&
+                        matr[2][3] !== 0 &&
+                        matr[3][0] !== 0 &&
+                        matr[3][1] !== 0 &&
+                        matr[3][2] !== 0);
+                }
+                else {
+                    var score = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                            if (i !== j && matr[i][j] !== 0)
+                                score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isEqual = function (matr1, matr2) {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
+                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
+                    return (matr1[0][0] === matr2[0][0] &&
+                        matr1[0][1] === matr2[0][1] &&
+                        matr1[0][2] === matr2[0][2] &&
+                        matr1[1][0] === matr2[1][0] &&
+                        matr1[1][1] === matr2[1][1] &&
+                        matr1[1][2] === matr2[1][2] &&
+                        matr1[2][0] === matr2[2][0] &&
+                        matr1[2][1] === matr2[2][1] &&
+                        matr1[2][2] === matr2[2][2]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
+                    return (matr1[0][0] === matr2[0][0] &&
+                        matr1[0][1] === matr2[0][1] &&
+                        matr1[0][2] === matr2[0][2] &&
+                        matr1[0][3] === matr2[0][3] &&
+                        matr1[1][0] === matr2[1][0] &&
+                        matr1[1][1] === matr2[1][1] &&
+                        matr1[1][2] === matr2[1][2] &&
+                        matr1[1][3] === matr2[1][3] &&
+                        matr1[2][0] === matr2[2][0] &&
+                        matr1[2][1] === matr2[2][1] &&
+                        matr1[2][2] === matr2[2][2] &&
+                        matr1[2][3] === matr2[2][3] &&
+                        matr1[3][0] === matr2[3][0] &&
+                        matr1[3][1] === matr2[3][1] &&
+                        matr1[3][2] === matr2[3][2] &&
+                        matr1[3][3] === matr2[3][3]);
+                }
+                else {
+                    var score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
+                    for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        for (var j = 0; j < Chalkboard.matr.cols(matr2); j++) {
+                            if (matr1[i][j] === matr2[i][j])
+                                score--;
+                        }
+                    }
+                    return score === 0;
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isIdentity = function (matr) {
+            if (Chalkboard.matr.isDiagonal(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1 && matr[3][3] === 1;
+                }
+                else {
+                    var score = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        if (matr[i][i] !== 1)
+                            score++;
+                    }
+                    return score === 0;
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isInvertible = function (matr) {
+            return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
+        };
+        matr_1.isLowerTriangular = function (matr) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[0][1] === 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[1][2] === 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[0][3] === 0 && matr[1][2] === 0 && matr[1][3] === 0 && matr[2][3] === 0;
+                }
+                else {
+                    var score = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (var j = i + 1; j < Chalkboard.matr.cols(matr); j++) {
+                            if (matr[i][j] !== 0)
+                                score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isOrthogonal = function (matr) {
+            if (Chalkboard.matr.isInvertible(matr)) {
+                return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isSizeEqual = function (matr1, matr2) {
+            return Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2);
+        };
+        matr_1.isSizeOf = function (matr, rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            return Chalkboard.matr.rows(matr) === rows && Chalkboard.matr.cols(matr) === cols;
+        };
+        matr_1.isSkewSymmetric = function (matr) {
+            return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.negate(matr));
+        };
+        matr_1.isSquare = function (matr) {
+            return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr);
+        };
+        matr_1.isSymmetric = function (matr) {
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
+        };
+        matr_1.isUpperTriangular = function (matr) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                    return matr[1][0] === 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0;
+                }
+                else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0 && matr[3][0] === 0 && matr[3][1] === 0 && matr[3][2] === 0;
+                }
+                else {
+                    var score = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        for (var j = 0; j < i; j++) {
+                            if (matr[i][j] !== 0)
+                                score++;
+                        }
+                    }
+                    return score === 0;
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        matr_1.isZero = function (matr) {
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(matr));
+        };
+        matr_1.Lehmer = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 1]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 1, 2 / 3], [1 / 3, 2 / 3, 1 / 1]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 1, 3 / 4, 1 / 1]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push([]);
+                    for (var j = 0; j < size; j++) {
+                        result[i].push(Math.min(i + 1, j + 1) / Math.max(i + 1, j + 1));
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.lowerBinomial = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 0], [1, 1]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([1, 0, 0], [1, 1, 0], [1, 2, 1]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1, 0, 0, 0], [1, 1, 0, 0], [1, 2, 1, 0], [1, 3, 3, 1]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push([]);
+                    for (var j = 0; j < size; j++) {
+                        result[i].push(Chalkboard.numb.binomial(i, j));
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.lowerShift = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 0], [1, 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([0, 0, 0], [1, 0, 0], [0, 1, 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (var j = 0; j < size; j++) {
+                        result[i][j] = Chalkboard.numb.Kronecker(i, j + 1);
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.lowerTriangular = function (size) {
+            var elements = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                elements[_i - 1] = arguments[_i];
+            }
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0] || 0, 0], [elements[1] || 0, elements[2] || 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0], [elements[1] || 0, elements[2] || 0, 0], [elements[3] || 0, elements[4] || 0, elements[5] || 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0], [elements[1] || 0, elements[2] || 0, 0, 0], [elements[3] || 0, elements[4] || 0, elements[5] || 0, 0], [elements[6] || 0, elements[7] || 0, elements[8] || 0, elements[9] || 0]);
+            }
+            else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                var result = Chalkboard.matr.init();
+                var index = 0;
+                for (var i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (var j = 0; j < size; j++) {
+                        result[i][j] = j <= i ? elements[index++] || 0 : 0;
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.LUdecomp = function (matr) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                var L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
+                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    for (var i = 0; i <= j; i++) {
+                        var sum = 0;
+                        for (var k = 0; k < i; k++) {
+                            sum += L[i][k] * U[k][j];
+                        }
+                        U[i][j] = matr[i][j] - sum;
+                    }
+                    for (var i = j + 1; i < Chalkboard.matr.rows(matr); i++) {
+                        var sum = 0;
+                        for (var k = 0; k < j; k++) {
+                            sum += L[i][k] * U[k][j];
+                        }
+                        L[i][j] = (matr[i][j] - sum) / U[j][j];
+                    }
+                }
+                return { L: L, U: U };
+            }
+            else {
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+            }
+        };
+        matr_1.mul = function (matr1, matr2) {
+            if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2, 1)) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3, 1)) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0]], [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
+                    return Chalkboard.matr.init([
+                        matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0],
+                        matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1],
+                        matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2]
+                    ], [
+                        matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0],
+                        matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1],
+                        matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2]
+                    ], [
+                        matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0],
+                        matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1],
+                        matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2]
+                    ]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4, 1)) {
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0]], [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0]], [matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
+                    return Chalkboard.matr.init([
+                        matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0],
+                        matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1] + matr1[0][3] * matr2[3][1],
+                        matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2] + matr1[0][3] * matr2[3][2],
+                        matr1[0][0] * matr2[0][3] + matr1[0][1] * matr2[1][3] + matr1[0][2] * matr2[2][3] + matr1[0][3] * matr2[3][3]
+                    ], [
+                        matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0],
+                        matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1] + matr1[1][3] * matr2[3][1],
+                        matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2] + matr1[1][3] * matr2[3][2],
+                        matr1[1][0] * matr2[0][3] + matr1[1][1] * matr2[1][3] + matr1[1][2] * matr2[2][3] + matr1[1][3] * matr2[3][3]
+                    ], [
+                        matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0],
+                        matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1] + matr1[2][3] * matr2[3][1],
+                        matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2] + matr1[2][3] * matr2[3][2],
+                        matr1[2][0] * matr2[0][3] + matr1[2][1] * matr2[1][3] + matr1[2][2] * matr2[2][3] + matr1[2][3] * matr2[3][3]
+                    ], [
+                        matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0],
+                        matr1[3][0] * matr2[0][1] + matr1[3][1] * matr2[1][1] + matr1[3][2] * matr2[2][1] + matr1[3][3] * matr2[3][1],
+                        matr1[3][0] * matr2[0][2] + matr1[3][1] * matr2[1][2] + matr1[3][2] * matr2[2][2] + matr1[3][3] * matr2[3][2],
+                        matr1[3][0] * matr2[0][3] + matr1[3][1] * matr2[1][3] + matr1[3][2] * matr2[2][3] + matr1[3][3] * matr2[3][3]
+                    ]);
+                }
+                else {
+                    var result = Chalkboard.matr.init();
+                    for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (var j = 0; j < Chalkboard.matr.cols(matr2); j++) {
+                            result[i][j] = 0;
+                            for (var k = 0; k < Chalkboard.matr.cols(matr1); k++) {
+                                result[i][j] += matr1[i][k] * matr2[k][j];
+                            }
+                        }
+                    }
+                    return result;
+                }
+            }
+            else {
+                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
+            }
+        };
+        matr_1.mulKronecker = function (matr1, matr2) {
+            if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
+                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]], [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]], [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]], [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
+                return Chalkboard.matr.init([
+                    matr1[0][0] * matr2[0][0],
+                    matr1[0][0] * matr2[0][1],
+                    matr1[0][0] * matr2[0][2],
+                    matr1[0][1] * matr2[0][0],
+                    matr1[0][1] * matr2[0][1],
+                    matr1[0][1] * matr2[0][2],
+                    matr1[0][2] * matr2[0][0],
+                    matr1[0][2] * matr2[0][1],
+                    matr1[0][2] * matr2[0][2]
+                ], [
+                    matr1[0][0] * matr2[1][0],
+                    matr1[0][0] * matr2[1][1],
+                    matr1[0][0] * matr2[1][2],
+                    matr1[0][1] * matr2[1][0],
+                    matr1[0][1] * matr2[1][1],
+                    matr1[0][1] * matr2[1][2],
+                    matr1[0][2] * matr2[1][0],
+                    matr1[0][2] * matr2[1][1],
+                    matr1[0][2] * matr2[1][2]
+                ], [
+                    matr1[0][0] * matr2[2][0],
+                    matr1[0][0] * matr2[2][1],
+                    matr1[0][0] * matr2[2][2],
+                    matr1[0][1] * matr2[2][0],
+                    matr1[0][1] * matr2[2][1],
+                    matr1[0][1] * matr2[2][2],
+                    matr1[0][2] * matr2[2][0],
+                    matr1[0][2] * matr2[2][1],
+                    matr1[0][2] * matr2[2][2]
+                ], [
+                    matr1[1][0] * matr2[0][0],
+                    matr1[1][0] * matr2[0][1],
+                    matr1[1][0] * matr2[0][2],
+                    matr1[1][1] * matr2[0][0],
+                    matr1[1][1] * matr2[0][1],
+                    matr1[1][1] * matr2[0][2],
+                    matr1[1][2] * matr2[0][0],
+                    matr1[1][2] * matr2[0][1],
+                    matr1[1][2] * matr2[0][2]
+                ], [
+                    matr1[1][0] * matr2[1][0],
+                    matr1[1][0] * matr2[1][1],
+                    matr1[1][0] * matr2[1][2],
+                    matr1[1][1] * matr2[1][0],
+                    matr1[1][1] * matr2[1][1],
+                    matr1[1][1] * matr2[1][2],
+                    matr1[1][2] * matr2[1][0],
+                    matr1[1][2] * matr2[1][1],
+                    matr1[1][2] * matr2[1][2]
+                ], [
+                    matr1[1][0] * matr2[2][0],
+                    matr1[1][0] * matr2[2][1],
+                    matr1[1][0] * matr2[2][2],
+                    matr1[1][1] * matr2[2][0],
+                    matr1[1][1] * matr2[2][1],
+                    matr1[1][1] * matr2[2][2],
+                    matr1[1][2] * matr2[2][0],
+                    matr1[1][2] * matr2[2][1],
+                    matr1[1][2] * matr2[2][2]
+                ], [
+                    matr1[2][0] * matr2[0][0],
+                    matr1[2][0] * matr2[0][1],
+                    matr1[2][0] * matr2[0][2],
+                    matr1[2][1] * matr2[0][0],
+                    matr1[2][1] * matr2[0][1],
+                    matr1[2][1] * matr2[0][2],
+                    matr1[2][2] * matr2[0][0],
+                    matr1[2][2] * matr2[0][1],
+                    matr1[2][2] * matr2[0][2]
+                ], [
+                    matr1[2][0] * matr2[1][0],
+                    matr1[2][0] * matr2[1][1],
+                    matr1[2][0] * matr2[1][2],
+                    matr1[2][1] * matr2[1][0],
+                    matr1[2][1] * matr2[1][1],
+                    matr1[2][1] * matr2[1][2],
+                    matr1[2][2] * matr2[1][0],
+                    matr1[2][2] * matr2[1][1],
+                    matr1[2][2] * matr2[1][2]
+                ], [
+                    matr1[2][0] * matr2[2][0],
+                    matr1[2][0] * matr2[2][1],
+                    matr1[2][0] * matr2[2][2],
+                    matr1[2][1] * matr2[2][0],
+                    matr1[2][1] * matr2[2][1],
+                    matr1[2][1] * matr2[2][2],
+                    matr1[2][2] * matr2[2][0],
+                    matr1[2][2] * matr2[2][1],
+                    matr1[2][2] * matr2[2][2]
+                ]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
+                return Chalkboard.matr.init([
+                    matr1[0][0] * matr2[0][0],
+                    matr1[0][0] * matr2[0][1],
+                    matr1[0][0] * matr2[0][2],
+                    matr1[0][0] * matr2[0][3],
+                    matr1[0][1] * matr2[0][0],
+                    matr1[0][1] * matr2[0][1],
+                    matr1[0][1] * matr2[0][2],
+                    matr1[0][1] * matr2[0][3],
+                    matr1[0][2] * matr2[0][0],
+                    matr1[0][2] * matr2[0][1],
+                    matr1[0][2] * matr2[0][2],
+                    matr1[0][2] * matr2[0][3],
+                    matr1[0][3] * matr2[0][0],
+                    matr1[0][3] * matr2[0][1],
+                    matr1[0][3] * matr2[0][2],
+                    matr1[0][3] * matr2[0][3]
+                ], [
+                    matr1[0][0] * matr2[1][0],
+                    matr1[0][0] * matr2[1][1],
+                    matr1[0][0] * matr2[1][2],
+                    matr1[0][0] * matr2[1][3],
+                    matr1[0][1] * matr2[1][0],
+                    matr1[0][1] * matr2[1][1],
+                    matr1[0][1] * matr2[1][2],
+                    matr1[0][1] * matr2[1][3],
+                    matr1[0][2] * matr2[1][0],
+                    matr1[0][2] * matr2[1][1],
+                    matr1[0][2] * matr2[1][2],
+                    matr1[0][2] * matr2[1][3],
+                    matr1[0][3] * matr2[1][0],
+                    matr1[0][3] * matr2[1][1],
+                    matr1[0][3] * matr2[1][2],
+                    matr1[0][3] * matr2[1][3]
+                ], [
+                    matr1[0][0] * matr2[2][0],
+                    matr1[0][0] * matr2[2][1],
+                    matr1[0][0] * matr2[2][2],
+                    matr1[0][0] * matr2[2][3],
+                    matr1[0][1] * matr2[2][0],
+                    matr1[0][1] * matr2[2][1],
+                    matr1[0][1] * matr2[2][2],
+                    matr1[0][1] * matr2[2][3],
+                    matr1[0][2] * matr2[2][0],
+                    matr1[0][2] * matr2[2][1],
+                    matr1[0][2] * matr2[2][2],
+                    matr1[0][2] * matr2[2][3],
+                    matr1[0][3] * matr2[2][0],
+                    matr1[0][3] * matr2[2][1],
+                    matr1[0][3] * matr2[2][2],
+                    matr1[0][3] * matr2[2][3]
+                ], [
+                    matr1[0][0] * matr2[3][0],
+                    matr1[0][0] * matr2[3][1],
+                    matr1[0][0] * matr2[3][2],
+                    matr1[0][0] * matr2[3][3],
+                    matr1[0][1] * matr2[3][0],
+                    matr1[0][1] * matr2[3][1],
+                    matr1[0][1] * matr2[3][2],
+                    matr1[0][1] * matr2[3][3],
+                    matr1[0][2] * matr2[3][0],
+                    matr1[0][2] * matr2[3][1],
+                    matr1[0][2] * matr2[3][2],
+                    matr1[0][2] * matr2[3][3],
+                    matr1[0][3] * matr2[3][0],
+                    matr1[0][3] * matr2[3][1],
+                    matr1[0][3] * matr2[3][2],
+                    matr1[0][3] * matr2[3][3]
+                ], [
+                    matr1[1][0] * matr2[0][0],
+                    matr1[1][0] * matr2[0][1],
+                    matr1[1][0] * matr2[0][2],
+                    matr1[1][0] * matr2[0][3],
+                    matr1[1][1] * matr2[0][0],
+                    matr1[1][1] * matr2[0][1],
+                    matr1[1][1] * matr2[0][2],
+                    matr1[1][1] * matr2[0][3],
+                    matr1[1][2] * matr2[0][0],
+                    matr1[1][2] * matr2[0][1],
+                    matr1[1][2] * matr2[0][2],
+                    matr1[1][2] * matr2[0][3],
+                    matr1[1][3] * matr2[0][0],
+                    matr1[1][3] * matr2[0][1],
+                    matr1[1][3] * matr2[0][2],
+                    matr1[1][3] * matr2[0][3]
+                ], [
+                    matr1[1][0] * matr2[1][0],
+                    matr1[1][0] * matr2[1][1],
+                    matr1[1][0] * matr2[1][2],
+                    matr1[1][0] * matr2[1][3],
+                    matr1[1][1] * matr2[1][0],
+                    matr1[1][1] * matr2[1][1],
+                    matr1[1][1] * matr2[1][2],
+                    matr1[1][1] * matr2[1][3],
+                    matr1[1][2] * matr2[1][0],
+                    matr1[1][2] * matr2[1][1],
+                    matr1[1][2] * matr2[1][2],
+                    matr1[1][2] * matr2[1][3],
+                    matr1[1][3] * matr2[1][0],
+                    matr1[1][3] * matr2[1][1],
+                    matr1[1][3] * matr2[1][2],
+                    matr1[1][3] * matr2[1][3]
+                ], [
+                    matr1[1][0] * matr2[2][0],
+                    matr1[1][0] * matr2[2][1],
+                    matr1[1][0] * matr2[2][2],
+                    matr1[1][0] * matr2[2][3],
+                    matr1[1][1] * matr2[2][0],
+                    matr1[1][1] * matr2[2][1],
+                    matr1[1][1] * matr2[2][2],
+                    matr1[1][1] * matr2[2][3],
+                    matr1[1][2] * matr2[2][0],
+                    matr1[1][2] * matr2[2][1],
+                    matr1[1][2] * matr2[2][2],
+                    matr1[1][2] * matr2[2][3],
+                    matr1[1][3] * matr2[2][0],
+                    matr1[1][3] * matr2[2][1],
+                    matr1[1][3] * matr2[2][2],
+                    matr1[1][3] * matr2[2][3]
+                ], [
+                    matr1[1][0] * matr2[3][0],
+                    matr1[1][0] * matr2[3][1],
+                    matr1[1][0] * matr2[3][2],
+                    matr1[1][0] * matr2[3][3],
+                    matr1[1][1] * matr2[3][0],
+                    matr1[1][1] * matr2[3][1],
+                    matr1[1][1] * matr2[3][2],
+                    matr1[1][1] * matr2[3][3],
+                    matr1[1][2] * matr2[3][0],
+                    matr1[1][2] * matr2[3][1],
+                    matr1[1][2] * matr2[3][2],
+                    matr1[1][2] * matr2[3][3],
+                    matr1[1][3] * matr2[3][0],
+                    matr1[1][3] * matr2[3][1],
+                    matr1[1][3] * matr2[3][2],
+                    matr1[1][3] * matr2[3][3]
+                ], [
+                    matr1[2][0] * matr2[0][0],
+                    matr1[2][0] * matr2[0][1],
+                    matr1[2][0] * matr2[0][2],
+                    matr1[2][0] * matr2[0][3],
+                    matr1[2][1] * matr2[0][0],
+                    matr1[2][1] * matr2[0][1],
+                    matr1[2][1] * matr2[0][2],
+                    matr1[2][1] * matr2[0][3],
+                    matr1[2][2] * matr2[0][0],
+                    matr1[2][2] * matr2[0][1],
+                    matr1[2][2] * matr2[0][2],
+                    matr1[2][2] * matr2[0][3],
+                    matr1[2][3] * matr2[0][0],
+                    matr1[2][3] * matr2[0][1],
+                    matr1[2][3] * matr2[0][2],
+                    matr1[2][3] * matr2[0][3]
+                ], [
+                    matr1[2][0] * matr2[1][0],
+                    matr1[2][0] * matr2[1][1],
+                    matr1[2][0] * matr2[1][2],
+                    matr1[2][0] * matr2[1][3],
+                    matr1[2][1] * matr2[1][0],
+                    matr1[2][1] * matr2[1][1],
+                    matr1[2][1] * matr2[1][2],
+                    matr1[2][1] * matr2[1][3],
+                    matr1[2][2] * matr2[1][0],
+                    matr1[2][2] * matr2[1][1],
+                    matr1[2][2] * matr2[1][2],
+                    matr1[2][2] * matr2[1][3],
+                    matr1[2][3] * matr2[1][0],
+                    matr1[2][3] * matr2[1][1],
+                    matr1[2][3] * matr2[1][2],
+                    matr1[2][3] * matr2[1][3]
+                ], [
+                    matr1[2][0] * matr2[2][0],
+                    matr1[2][0] * matr2[2][1],
+                    matr1[2][0] * matr2[2][2],
+                    matr1[2][0] * matr2[2][3],
+                    matr1[2][1] * matr2[2][0],
+                    matr1[2][1] * matr2[2][1],
+                    matr1[2][1] * matr2[2][2],
+                    matr1[2][1] * matr2[2][3],
+                    matr1[2][2] * matr2[2][0],
+                    matr1[2][2] * matr2[2][1],
+                    matr1[2][2] * matr2[2][2],
+                    matr1[2][2] * matr2[2][3],
+                    matr1[2][3] * matr2[2][0],
+                    matr1[2][3] * matr2[2][1],
+                    matr1[2][3] * matr2[2][2],
+                    matr1[2][3] * matr2[2][3]
+                ], [
+                    matr1[2][0] * matr2[3][0],
+                    matr1[2][0] * matr2[3][1],
+                    matr1[2][0] * matr2[3][2],
+                    matr1[2][0] * matr2[3][3],
+                    matr1[2][1] * matr2[3][0],
+                    matr1[2][1] * matr2[3][1],
+                    matr1[2][1] * matr2[3][2],
+                    matr1[2][1] * matr2[3][3],
+                    matr1[2][2] * matr2[3][0],
+                    matr1[2][2] * matr2[3][1],
+                    matr1[2][2] * matr2[3][2],
+                    matr1[2][2] * matr2[3][3],
+                    matr1[2][3] * matr2[3][0],
+                    matr1[2][3] * matr2[3][1],
+                    matr1[2][3] * matr2[3][2],
+                    matr1[2][3] * matr2[3][3]
+                ], [
+                    matr1[3][0] * matr2[0][0],
+                    matr1[3][0] * matr2[0][1],
+                    matr1[3][0] * matr2[0][2],
+                    matr1[3][0] * matr2[0][3],
+                    matr1[3][1] * matr2[0][0],
+                    matr1[3][1] * matr2[0][1],
+                    matr1[3][1] * matr2[0][2],
+                    matr1[3][1] * matr2[0][3],
+                    matr1[3][2] * matr2[0][0],
+                    matr1[3][2] * matr2[0][1],
+                    matr1[3][2] * matr2[0][2],
+                    matr1[3][2] * matr2[0][3],
+                    matr1[3][3] * matr2[0][0],
+                    matr1[3][3] * matr2[0][1],
+                    matr1[3][3] * matr2[0][2],
+                    matr1[3][3] * matr2[0][3]
+                ], [
+                    matr1[3][0] * matr2[1][0],
+                    matr1[3][0] * matr2[1][1],
+                    matr1[3][0] * matr2[1][2],
+                    matr1[3][0] * matr2[1][3],
+                    matr1[3][1] * matr2[1][0],
+                    matr1[3][1] * matr2[1][1],
+                    matr1[3][1] * matr2[1][2],
+                    matr1[3][1] * matr2[1][3],
+                    matr1[3][2] * matr2[1][0],
+                    matr1[3][2] * matr2[1][1],
+                    matr1[3][2] * matr2[1][2],
+                    matr1[3][2] * matr2[1][3],
+                    matr1[3][3] * matr2[1][0],
+                    matr1[3][3] * matr2[1][1],
+                    matr1[3][3] * matr2[1][2],
+                    matr1[3][3] * matr2[1][3]
+                ], [
+                    matr1[3][0] * matr2[2][0],
+                    matr1[3][0] * matr2[2][1],
+                    matr1[3][0] * matr2[2][2],
+                    matr1[3][0] * matr2[2][3],
+                    matr1[3][1] * matr2[2][0],
+                    matr1[3][1] * matr2[2][1],
+                    matr1[3][1] * matr2[2][2],
+                    matr1[3][1] * matr2[2][3],
+                    matr1[3][2] * matr2[2][0],
+                    matr1[3][2] * matr2[2][1],
+                    matr1[3][2] * matr2[2][2],
+                    matr1[3][2] * matr2[2][3],
+                    matr1[3][3] * matr2[2][0],
+                    matr1[3][3] * matr2[2][1],
+                    matr1[3][3] * matr2[2][2],
+                    matr1[3][3] * matr2[2][3]
+                ], [
+                    matr1[3][0] * matr2[3][0],
+                    matr1[3][0] * matr2[3][1],
+                    matr1[3][0] * matr2[3][2],
+                    matr1[3][0] * matr2[3][3],
+                    matr1[3][1] * matr2[3][0],
+                    matr1[3][1] * matr2[3][1],
+                    matr1[3][1] * matr2[3][2],
+                    matr1[3][1] * matr2[3][3],
+                    matr1[3][2] * matr2[3][0],
+                    matr1[3][2] * matr2[3][1],
+                    matr1[3][2] * matr2[3][2],
+                    matr1[3][2] * matr2[3][3],
+                    matr1[3][3] * matr2[3][0],
+                    matr1[3][3] * matr2[3][1],
+                    matr1[3][3] * matr2[3][2],
+                    matr1[3][3] * matr2[3][3]
+                ]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                    for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        for (var k = 0; k < Chalkboard.matr.rows(matr2); k++) {
+                            for (var l = 0; l < Chalkboard.matr.cols(matr2); l++) {
+                                if (!result[i * Chalkboard.matr.rows(matr2) + k]) {
+                                    result[i * Chalkboard.matr.rows(matr2) + k] = [];
+                                }
+                                result[i * Chalkboard.matr.rows(matr2) + k][j * Chalkboard.matr.cols(matr2) + l] = matr1[i][j] * matr2[k][l];
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.mulVector = function (matr, vect) {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
+                if (Chalkboard.matr.rows(matr) === 2) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
+                }
+                else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
+                }
+            }
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
+                if (Chalkboard.matr.rows(matr) === 3) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 3);
+                }
+                else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
+                }
+            }
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
+                if (Chalkboard.matr.rows(matr) === 4) {
+                    return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 4);
+                }
+                else {
+                    return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
+                }
+            }
+            else {
+                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+            }
+        };
+        matr_1.negate = function (matr) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1]], [-matr[1][0], -matr[1][1]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2]], [-matr[1][0], -matr[1][1], -matr[1][2]], [-matr[2][0], -matr[2][1], -matr[2][2]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2], -matr[0][3]], [-matr[1][0], -matr[1][1], -matr[1][2], -matr[1][3]], [-matr[2][0], -matr[2][1], -matr[2][2], -matr[2][3]], [-matr[3][0], -matr[3][1], -matr[3][2], -matr[3][3]]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = -matr[i][j];
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.norm = function (matr, p, q) {
+            if (p === void 0) { p = 2; }
+            if (q === void 0) { q = 2; }
+            if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
+                return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[0][3] * matr[0][3] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[1][3] * matr[1][3] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2] +
+                    matr[2][3] * matr[2][3] +
+                    matr[3][0] * matr[3][0] +
+                    matr[3][1] * matr[3][1] +
+                    matr[3][2] * matr[3][2] +
+                    matr[3][3] * matr[3][3]);
+            }
+            else {
+                var result = 0;
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    var rowResult = 0;
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                    }
+                    result += Chalkboard.real.pow(rowResult, q / p);
+                }
+                return Chalkboard.real.pow(result, 1 / q);
+            }
+        };
+        matr_1.normalize = function (matr, p, q) {
+            if (p === void 0) { p = 2; }
+            if (q === void 0) { q = 2; }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)], [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q)], [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q)], [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q)]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([
+                    matr[0][0] / Chalkboard.matr.norm(matr, p, q),
+                    matr[0][1] / Chalkboard.matr.norm(matr, p, q),
+                    matr[0][2] / Chalkboard.matr.norm(matr, p, q),
+                    matr[0][3] / Chalkboard.matr.norm(matr, p, q)
+                ], [
+                    matr[1][0] / Chalkboard.matr.norm(matr, p, q),
+                    matr[1][1] / Chalkboard.matr.norm(matr, p, q),
+                    matr[1][2] / Chalkboard.matr.norm(matr, p, q),
+                    matr[1][3] / Chalkboard.matr.norm(matr, p, q)
+                ], [
+                    matr[2][0] / Chalkboard.matr.norm(matr, p, q),
+                    matr[2][1] / Chalkboard.matr.norm(matr, p, q),
+                    matr[2][2] / Chalkboard.matr.norm(matr, p, q),
+                    matr[2][3] / Chalkboard.matr.norm(matr, p, q)
+                ], [
+                    matr[3][0] / Chalkboard.matr.norm(matr, p, q),
+                    matr[3][1] / Chalkboard.matr.norm(matr, p, q),
+                    matr[3][2] / Chalkboard.matr.norm(matr, p, q),
+                    matr[3][3] / Chalkboard.matr.norm(matr, p, q)
+                ]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] / Chalkboard.matr.norm(matr, p, q);
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.normsq = function (matr, p, q) {
+            if (p === void 0) { p = 2; }
+            if (q === void 0) { q = 2; }
+            if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
+                return matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1];
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
+                return (matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
+                return (matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[0][3] * matr[0][3] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[1][3] * matr[1][3] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2] +
+                    matr[2][3] * matr[2][3] +
+                    matr[3][0] * matr[3][0] +
+                    matr[3][1] * matr[3][1] +
+                    matr[3][2] * matr[3][2] +
+                    matr[3][3] * matr[3][3]);
+            }
+            else {
+                var result = 0;
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    var rowResult = 0;
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                    }
+                    result += Chalkboard.real.pow(rowResult, q / p);
+                }
+                return result;
+            }
+        };
+        matr_1.nullspace = function (matr) {
+            var augmented = matr.map(function (row) {
+                return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
+            });
+            var rowEchelonForm = Chalkboard.matr.Gaussian(augmented);
+            return rowEchelonForm
+                .filter(function (row) {
+                return row.slice(0, Chalkboard.matr.rows(matr)).every(function (element) {
+                    return element === 0;
+                });
+            })
+                .map(function (row) {
+                return row.slice(Chalkboard.matr.rows(matr));
+            });
+        };
+        matr_1.perm = function (matr) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.rows(matr) === 1) {
+                    return matr[0][0];
+                }
+                else if (Chalkboard.matr.rows(matr) === 2) {
+                    return matr[0][0] * matr[1][1] + matr[0][1] * matr[1][0];
+                }
+                else if (Chalkboard.matr.rows(matr) === 3) {
+                    return (matr[0][0] * (matr[1][1] * matr[2][2] + matr[1][2] * matr[2][1]) +
+                        matr[0][1] * (matr[1][0] * matr[2][2] + matr[1][2] * matr[2][0]) +
+                        matr[0][2] * (matr[1][0] * matr[2][1] + matr[1][1] * matr[2][0]));
+                }
+                else if (Chalkboard.matr.rows(matr) === 4) {
+                    return (matr[0][0] *
+                        (matr[1][1] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) +
+                            matr[1][2] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) +
+                            matr[1][3] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1])) +
+                        matr[0][1] *
+                            (matr[1][0] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) +
+                                matr[1][2] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0])) +
+                        matr[0][2] *
+                            (matr[1][0] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) +
+                                matr[1][1] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0])) +
+                        matr[0][3] *
+                            (matr[1][0] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1]) +
+                                matr[1][1] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0]) +
+                                matr[1][2] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0])));
+                }
+                else {
+                    var result = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        var cofactor_2 = matr[0][i] * Chalkboard.matr.perm(Chalkboard.matr.cofactor(matr, 0, i));
+                        result += Math.abs(cofactor_2);
+                    }
+                    return result;
+                }
+            }
+            else {
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+            }
+        };
+        matr_1.pow = function (matr, num) {
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (num === 0) {
+                    return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
+                }
+                else {
+                    var result = matr;
+                    for (var i = 1; i < num; i++) {
+                        result = Chalkboard.matr.mul(matr, result);
+                    }
+                    return result;
+                }
+            }
+            else {
+                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+            }
+        };
+        matr_1.print = function (matr) {
+            console.log(Chalkboard.matr.toString(matr));
+        };
+        matr_1.pull = function (matr, index, axis) {
+            if (axis === 0) {
+                matr.splice(index, 1);
+                return matr;
+            }
+            else if (axis === 1) {
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    matr[i].splice(index, 1);
+                }
+                return matr;
+            }
+            else {
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
+            }
+        };
+        matr_1.push = function (matr, index, axis, elements) {
+            if (axis === 0) {
+                matr.splice(index, 0, elements);
+                return matr;
+            }
+            else if (axis === 1) {
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    matr[i].splice(index, 0, elements[i]);
+                }
+                return matr;
+            }
+            else {
+                throw new TypeError('Parameter "axis" must be 0 or 1.');
+            }
+        };
+        matr_1.QRdecomp = function (matr) {
+            var Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
+            for (var j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
+                var norm_1 = 0;
+                for (var i = j; i < Chalkboard.matr.rows(matr); i++) {
+                    norm_1 += R[i][j] * R[i][j];
+                }
+                norm_1 = Chalkboard.real.sqrt(norm_1);
+                var v = [];
+                v[0] = norm_1 - R[j][j];
+                var normalizer = v[0] * v[0];
+                for (var i = 1; i < Chalkboard.matr.rows(matr) - j; i++) {
+                    v[i] = -R[i + j][j];
+                    normalizer += v[i] * v[i];
+                }
+                normalizer = 1 / Chalkboard.real.sqrt(normalizer);
+                for (var i = 0; i < v.length; i++) {
+                    v[i] *= normalizer;
+                }
+                R[j][j] = norm_1;
+                for (var i = j + 1; i < Chalkboard.matr.rows(R); i++) {
+                    R[i][j] = 0;
+                }
+                for (var k = j + 1; k < Chalkboard.matr.cols(R); k++) {
+                    var dot = 0;
+                    for (var i = 0; i < v.length; i++) {
+                        dot += v[i] * R[i + j][k];
+                    }
+                    dot *= 2;
+                    for (var i = 0; i < v.length; i++) {
+                        R[i + j][k] -= dot * v[i];
+                    }
+                }
+                for (var k = 0; k < Chalkboard.matr.cols(Q); k++) {
+                    var dot = 0;
+                    for (var i = 0; i < v.length; i++) {
+                        dot += v[i] * Q[k][i + j];
+                    }
+                    dot *= 2;
+                    for (var i = 0; i < v.length; i++) {
+                        Q[k][i + j] -= dot * v[i];
+                    }
+                }
+            }
+            return { Q: Q, R: R };
+        };
+        matr_1.random = function (inf, sup, rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            if (rows === 2 && cols === 2) {
+                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+            }
+            else if (rows === 3 && cols === 3) {
+                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+            }
+            else if (rows === 4 && cols === 4) {
+                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < rows; i++) {
+                    result.push([]);
+                    for (var j = 0; j < cols; j++) {
+                        result[i].push(Chalkboard.numb.random(inf, sup));
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.rank = function (matr) {
+            return Chalkboard.matr.Gaussian(matr).filter(function (row) {
+                return row.some(function (element) {
+                    return element !== 0;
+                });
+            }).length;
+        };
+        matr_1.reciprocate = function (matr) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]], [1 / matr[1][0], 1 / matr[1][1]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2]], [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2]], [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2], 1 / matr[0][3]], [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2], 1 / matr[1][3]], [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2], 1 / matr[2][3]], [1 / matr[3][0], 1 / matr[3][1], 1 / matr[3][2], 1 / matr[3][3]]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = 1 / matr[i][j];
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.resize = function (matr, rows, cols) {
+            if (cols === void 0) { cols = rows; }
             var result = Chalkboard.matr.init();
             var flat = Chalkboard.matr.toArray(matr);
             var index = 0;
@@ -1552,20 +2719,31 @@ var Chalkboard;
             }
         };
         matr_1.round = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = Math.round(matr[i][j]);
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])], [Math.round(matr[1][0]), Math.round(matr[1][1])]);
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2])], [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2])], [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2])]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2]), Math.round(matr[0][3])], [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2]), Math.round(matr[1][3])], [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2]), Math.round(matr[2][3])], [Math.round(matr[3][0]), Math.round(matr[3][1]), Math.round(matr[3][2]), Math.round(matr[3][3])]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = Math.round(matr[i][j]);
+                    }
+                }
+                return result;
+            }
         };
         matr_1.rows = function (matr) {
             return matr.length;
         };
         matr_1.rowspace = function (matr) {
-            return Chalkboard.matr.reduce(matr).filter(function (row) {
+            return Chalkboard.matr.Gaussian(matr).filter(function (row) {
                 return row.some(function (element) {
                     return element !== 0;
                 });
@@ -1586,34 +2764,43 @@ var Chalkboard;
             }
         };
         matr_1.scl = function (matr, num) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = matr[i][j] * num;
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num]);
             }
-            return result;
-        };
-        matr_1.shift = function (size, shiftAmount) {
-            if (shiftAmount === void 0) { shiftAmount = 1; }
-            var result = Chalkboard.matr.fill(0, size, size);
-            for (var i = 0; i < size; i++) {
-                result[i] = [];
-                for (var j = 0; j < size; j++) {
-                    result[i][j] = Chalkboard.numb.Kronecker(i + shiftAmount, j);
-                }
+            else if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num], [matr[1][0] * num, matr[1][1] * num]);
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3, 1)) {
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num], [matr[2][0] * num]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4, 1)) {
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num], [matr[2][0] * num], [matr[3][0] * num]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num], [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num], [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num], [matr[3][0] * num, matr[3][1] * num, matr[3][2] * num, matr[3][3] * num]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] * num;
+                    }
+                }
+                return result;
+            }
         };
         matr_1.solve = function (matrA, matrB) {
-            if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.cols(matrA)) {
+            if (Chalkboard.matr.isSquare(matrA)) {
                 if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
                     if (Chalkboard.matr.det(matrA) !== 0) {
                         return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     }
                     else {
-                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is invertible.');
+                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that has a non-zero determinant.');
                     }
                 }
                 else {
@@ -1621,53 +2808,190 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameters "matrA" must be of type "ChalkboardMatrix" that is square.');
+                throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is square.');
             }
         };
         matr_1.sub = function (matr1, matr2) {
-            if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
-                var result = Chalkboard.matr.init();
-                for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
-                    result[i] = [];
-                    for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
-                        result[i][j] = matr1[i][j] - matr2[i][j];
-                    }
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                if (Chalkboard.matr.isSizeOf(matr1, 2)) {
+                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]], [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
                 }
-                return result;
+                else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
+                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2]], [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2]], [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2]]);
+                }
+                else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
+                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2], matr1[0][3] - matr2[0][3]], [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2], matr1[1][3] - matr2[1][3]], [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2], matr1[2][3] - matr2[2][3]], [matr1[3][0] - matr2[3][0], matr1[3][1] - matr2[3][1], matr1[3][2] - matr2[3][2], matr1[3][3] - matr2[3][3]]);
+                }
+                else {
+                    var result = Chalkboard.matr.init();
+                    for (var i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                        result[i] = [];
+                        for (var j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                            result[i][j] = matr1[i][j] - matr2[i][j];
+                        }
+                    }
+                    return result;
+                }
             }
             else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
         };
-        matr_1.toArray = function (matr) {
-            var result = [];
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result.push(matr[i][j]);
-                }
+        matr_1.symmetricBinomial = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 1], [1, 2]);
             }
-            return result;
+            else if (size === 3) {
+                return Chalkboard.matr.init([1, 1, 1], [1, 2, 3], [1, 3, 6]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1, 1, 1, 1], [1, 2, 3, 4], [1, 3, 6, 10], [1, 4, 10, 20]);
+            }
+            else {
+                return Chalkboard.matr.mul(Chalkboard.matr.lowerBinomial(size), Chalkboard.matr.upperBinomial(size));
+            }
+        };
+        matr_1.toArray = function (matr) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return [matr[0][0], matr[0][1], matr[0][2], matr[1][0], matr[1][1], matr[1][2], matr[2][0], matr[2][1], matr[2][2]];
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return [
+                    matr[0][0],
+                    matr[0][1],
+                    matr[0][2],
+                    matr[0][3],
+                    matr[1][0],
+                    matr[1][1],
+                    matr[1][2],
+                    matr[1][3],
+                    matr[2][0],
+                    matr[2][1],
+                    matr[2][2],
+                    matr[2][3],
+                    matr[3][0],
+                    matr[3][1],
+                    matr[3][2],
+                    matr[3][3]
+                ];
+            }
+            else {
+                var result = [];
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result.push(matr[i][j]);
+                    }
+                }
+                return result;
+            }
         };
         matr_1.toObject = function (matr) {
-            var result = {};
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result["i" + (i + 1)] = {};
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return {
+                    i1: { j1: matr[0][0], j2: matr[0][1] },
+                    i2: { j1: matr[1][0], j2: matr[1][1] }
+                };
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return {
+                    i1: { j1: matr[0][0], j2: matr[0][1], j3: matr[0][2] },
+                    i2: { j1: matr[1][0], j2: matr[1][1], j3: matr[1][2] },
+                    i3: { j1: matr[2][0], j2: matr[2][1], j3: matr[2][2] }
+                };
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return {
+                    i1: { j1: matr[0][0], j2: matr[0][1], j3: matr[0][2], j4: matr[0][3] },
+                    i2: { j1: matr[1][0], j2: matr[1][1], j3: matr[1][2], j4: matr[1][3] },
+                    i3: { j1: matr[2][0], j2: matr[2][1], j3: matr[2][2], j4: matr[2][3] },
+                    i4: { j1: matr[3][0], j2: matr[3][1], j3: matr[3][2], j4: matr[3][3] }
+                };
+            }
+            else {
+                var result = {};
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result["i" + (i + 1)] = {};
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result["i" + (i + 1)]["j" + (j + 1)] = matr[i][j];
+                    }
+                }
+                return result;
+            }
         };
         matr_1.toString = function (matr) {
-            var result = "";
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result += "[ ";
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result += matr[i][j].toString() + " ";
-                }
-                result = result.trimEnd() + " ]\n";
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return ("[ " +
+                    matr[0][0].toString() +
+                    " " +
+                    matr[0][1].toString() +
+                    " " +
+                    matr[0][2].toString() +
+                    " ]\n[ " +
+                    matr[1][0].toString() +
+                    " " +
+                    matr[1][1].toString() +
+                    " " +
+                    matr[1][2].toString() +
+                    " ]\n[ " +
+                    matr[2][0].toString() +
+                    " " +
+                    matr[2][1].toString() +
+                    " " +
+                    matr[2][2].toString() +
+                    " ]");
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return ("[ " +
+                    matr[0][0].toString() +
+                    " " +
+                    matr[0][1].toString() +
+                    " " +
+                    matr[0][2].toString() +
+                    " " +
+                    matr[0][3].toString() +
+                    " ]\n[ " +
+                    matr[1][0].toString() +
+                    " " +
+                    matr[1][1].toString() +
+                    " " +
+                    matr[1][2].toString() +
+                    " " +
+                    matr[1][3].toString() +
+                    " ]\n[ " +
+                    matr[2][0].toString() +
+                    " " +
+                    matr[2][1].toString() +
+                    " " +
+                    matr[2][2].toString() +
+                    " " +
+                    matr[2][3].toString() +
+                    " ]\n[ " +
+                    matr[3][0].toString() +
+                    " " +
+                    matr[3][1].toString() +
+                    " " +
+                    matr[3][2].toString() +
+                    " " +
+                    matr[3][3].toString() +
+                    " ]");
+            }
+            else {
+                var result = "";
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result += "[ ";
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result += matr[i][j].toString() + " ";
+                    }
+                    result = result.trimEnd() + " ]\n";
+                }
+                return result;
+            }
         };
         matr_1.toTensor = function (matr) {
             var _a;
@@ -1675,73 +2999,92 @@ var Chalkboard;
             for (var _i = 1; _i < arguments.length; _i++) {
                 size[_i - 1] = arguments[_i];
             }
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([matr], size, false));
         };
-        matr_1.toVector = function (matr, dimension, type, rowORcol) {
-            if (type === void 0) { type = "col"; }
-            if (rowORcol === void 0) { rowORcol = 1; }
-            rowORcol -= 1;
+        matr_1.toVector = function (matr, dimension, index, axis) {
+            if (index === void 0) { index = 0; }
+            if (axis === void 0) { axis = 0; }
             if (dimension === 2) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index]);
                 }
-                else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1]);
+                else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
             else if (dimension === 3) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index], matr[2][index]);
                 }
-                else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2]);
+                else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
             else if (dimension === 4) {
-                if (type === "col") {
-                    return Chalkboard.vect.init(matr[0][rowORcol], matr[1][rowORcol], matr[2][rowORcol], matr[3][rowORcol]);
+                if (axis === 0) {
+                    return Chalkboard.vect.init(matr[0][index], matr[1][index], matr[2][index], matr[3][index]);
                 }
-                else if (type === "row") {
-                    return Chalkboard.vect.init(matr[rowORcol][0], matr[rowORcol][1], matr[rowORcol][2], matr[rowORcol][3]);
+                else if (axis === 1) {
+                    return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2], matr[index][3]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
         matr_1.trace = function (matr) {
-            if (Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr)) {
-                var result = 0;
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    result += matr[i][i];
+            if (Chalkboard.matr.isSquare(matr)) {
+                if (Chalkboard.matr.rows(matr) === 2) {
+                    return matr[0][0] + matr[1][1];
                 }
-                return result;
+                else if (Chalkboard.matr.rows(matr) === 3) {
+                    return matr[0][0] + matr[1][1] + matr[2][2];
+                }
+                else if (Chalkboard.matr.rows(matr) === 4) {
+                    return matr[0][0] + matr[1][1] + matr[2][2] + matr[3][3];
+                }
+                else {
+                    var result = 0;
+                    for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                        result += matr[i][i];
+                    }
+                    return result;
+                }
             }
             else {
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
         matr_1.transpose = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.cols(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.rows(matr); j++) {
-                    result[i][j] = matr[j][i];
-                }
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
             }
-            return result;
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0]], [matr[0][1], matr[1][1], matr[2][1]], [matr[0][2], matr[1][2], matr[2][2]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0], matr[3][0]], [matr[0][1], matr[1][1], matr[2][1], matr[3][1]], [matr[0][2], matr[1][2], matr[2][2], matr[3][2]], [matr[0][3], matr[1][3], matr[2][3], matr[3][3]]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.cols(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.rows(matr); j++) {
+                        result[i][j] = matr[j][i];
+                    }
+                }
+                return result;
+            }
         };
         matr_1.translator = function (vect) {
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
@@ -1757,15 +3100,95 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        matr_1.zero = function (matr) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = matr[i][j] * 0;
-                }
+        matr_1.upperBinomial = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([1, 1], [0, 1]);
             }
-            return result;
+            else if (size === 3) {
+                return Chalkboard.matr.init([1, 2, 1], [0, 1, 1], [0, 0, 1]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([1, 3, 3, 1], [0, 1, 2, 1], [0, 0, 1, 1], [0, 0, 0, 1]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result.push([]);
+                    for (var j = 0; j < size; j++) {
+                        result[i].push(Chalkboard.numb.binomial(j, i));
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.upperShift = function (size) {
+            if (size === 2) {
+                return Chalkboard.matr.init([0, 1], [0, 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([0, 1, 0], [0, 0, 1], [0, 0, 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (var j = 0; j < size; j++) {
+                        result[i][j] = Chalkboard.numb.Kronecker(i + 1, j);
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.upperTriangular = function (size) {
+            var elements = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                elements[_i - 1] = arguments[_i];
+            }
+            if (size === 2) {
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0], [0, elements[2] || 0]);
+            }
+            else if (size === 3) {
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0], [0, elements[3] || 0, elements[4] || 0], [0, 0, elements[5] || 0]);
+            }
+            else if (size === 4) {
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0, elements[3] || 0], [0, elements[4] || 0, elements[5] || 0, elements[6] || 0], [0, 0, elements[7] || 0, elements[8] || 0], [0, 0, 0, elements[9] || 0]);
+            }
+            else {
+                elements = Array.isArray(elements[0]) ? elements[0] : elements;
+                var result = Chalkboard.matr.init();
+                var index = 0;
+                for (var i = 0; i < size; i++) {
+                    result[i] = [];
+                    for (var j = 0; j < size; j++) {
+                        result[i][j] = j >= i ? elements[index++] || 0 : 0;
+                    }
+                }
+                return result;
+            }
+        };
+        matr_1.zero = function (matr) {
+            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0], [matr[1][0] * 0, matr[1][1] * 0]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0], [matr[3][0] * 0, matr[3][1] * 0, matr[3][2] * 0, matr[3][3] * 0]);
+            }
+            else {
+                var result = Chalkboard.matr.init();
+                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    result[i] = [];
+                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                        result[i][j] = matr[i][j] * 0;
+                    }
+                }
+                return result;
+            }
         };
     })(matr = Chalkboard.matr || (Chalkboard.matr = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -1775,9 +3198,6 @@ var Chalkboard;
     (function (numb) {
         numb.Bernoullian = function (p) {
             if (p === void 0) { p = 0.5; }
-            if (p === undefined) {
-                p = 0.5;
-            }
             return Math.random() < p ? 1 : 0;
         };
         numb.binomial = function (n, k) {
@@ -1914,6 +3334,10 @@ var Chalkboard;
                 return undefined;
             }
         };
+        numb.isApproxEqual = function (a, b, precision) {
+            if (precision === void 0) { precision = 0.000001; }
+            return Math.abs(a - b) < precision;
+        };
         numb.isPrime = function (num) {
             for (var i = 2; i <= Chalkboard.real.sqrt(num); i++) {
                 if (num % i === 0) {
@@ -1935,6 +3359,9 @@ var Chalkboard;
         };
         numb.map = function (num, range1, range2) {
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
+        };
+        numb.mod = function (a, b) {
+            return ((a % b) + b) % b;
         };
         numb.mul = function (formula, inf, sup) {
             var result = 1;
@@ -2016,6 +3443,9 @@ var Chalkboard;
             if (inf === void 0) { inf = 0; }
             if (sup === void 0) { sup = 1; }
             return inf + (sup - inf) * Math.random();
+        };
+        numb.roundTo = function (num, positionalIndex) {
+            return Math.round(num / positionalIndex) * positionalIndex;
         };
         numb.sgn = function (num) {
             if (num > 0) {
@@ -2999,6 +4429,9 @@ var Chalkboard;
         quat_1.toArray = function (quat) {
             return [quat.a, quat.b, quat.c, quat.d];
         };
+        quat_1.toMatrix = function (quat) {
+            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
+        };
         quat_1.toRotation = function (quat, vect) {
             var vector = Chalkboard.vect.toQuaternion(vect);
             var inverse = Chalkboard.quat.invert(quat);
@@ -3750,9 +5183,7 @@ var Chalkboard;
             for (var _i = 0; _i < arguments.length; _i++) {
                 size[_i] = arguments[_i];
             }
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             var newNDArray = function (size) {
                 if (size.length === 0) {
                     return null;
@@ -3772,9 +5203,7 @@ var Chalkboard;
             for (var _i = 1; _i < arguments.length; _i++) {
                 size[_i - 1] = arguments[_i];
             }
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             var newNDArray = function (size) {
                 if (size.length === 0) {
                     return element;
@@ -3814,6 +5243,61 @@ var Chalkboard;
                 });
             };
             return newNDArray(tensor);
+        };
+        tens_1.isEqual = function (tens1, tens2) {
+            if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
+                (tens1 = tens1), (tens2 = tens2);
+                for (var i = 0; i < tens1.length; i++) {
+                    if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
+                        if (!Chalkboard.tens.isEqual(tens1[i], tens2[i]))
+                            return false;
+                    }
+                    else {
+                        if (tens1[i] !== tens2[i])
+                            return false;
+                    }
+                }
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+        tens_1.isRankEqual = function (tens1, tens2) {
+            return Chalkboard.tens.rank(tens1) === Chalkboard.tens.rank(tens2);
+        };
+        tens_1.isRankOf = function (tens, rank) {
+            return Chalkboard.tens.rank(tens) === rank;
+        };
+        tens_1.isSizeEqual = function (tens1, tens2) {
+            if (Chalkboard.tens.isRankEqual(tens1, tens2)) {
+                var score = 0;
+                for (var i = 0; i < Chalkboard.tens.rank(tens1); i++) {
+                    if (Chalkboard.tens.size(tens1)[i] !== Chalkboard.tens.size(tens2)[i])
+                        score++;
+                }
+                return score === 0;
+            }
+            else {
+                return false;
+            }
+        };
+        tens_1.isSizeOf = function (tens) {
+            var _a;
+            var size = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                size[_i - 1] = arguments[_i];
+            }
+            size = Array.isArray(size[0]) ? size[0] : size;
+            return Chalkboard.tens.isSizeEqual(tens, (_a = Chalkboard.tens).empty.apply(_a, size));
+        };
+        tens_1.isSizeUniform = function (tens) {
+            var score = 0;
+            for (var i = 0; i < Chalkboard.tens.rank(tens); i++) {
+                if (Chalkboard.tens.size(tens)[i] !== Chalkboard.tens.size(tens)[0])
+                    score++;
+            }
+            return score === 0;
         };
         tens_1.mul = function (tens1, tens2) {
             var result = Chalkboard.tens.init();
@@ -3877,9 +5361,7 @@ var Chalkboard;
             for (var _i = 2; _i < arguments.length; _i++) {
                 size[_i - 2] = arguments[_i];
             }
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             var newNDArray = function (size) {
                 if (size.length === 0) {
                     return Chalkboard.numb.random(inf, sup);
@@ -3895,16 +5377,7 @@ var Chalkboard;
             return newNDArray(size);
         };
         tens_1.rank = function (tens) {
-            if (Array.isArray(tens)) {
-                var result = 0;
-                for (var i = 0; i < tens.length; i++) {
-                    result = Math.max(result, Chalkboard.tens.rank(tens[i]));
-                }
-                return result + 1;
-            }
-            else {
-                return 0;
-            }
+            return Chalkboard.tens.size(tens).length;
         };
         tens_1.reciprocate = function (tens) {
             var result = Chalkboard.tens.init();
@@ -3924,9 +5397,7 @@ var Chalkboard;
             for (var _i = 1; _i < arguments.length; _i++) {
                 size[_i - 1] = arguments[_i];
             }
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
+            size = Array.isArray(size[0]) ? size[0] : size;
             var result = (_a = Chalkboard.tens).fill.apply(_a, __spreadArray([0], size, false));
             var refill = function (arr1, arr2) {
                 for (var i = 0; i < arr2.length; i++) {
@@ -4310,13 +5781,13 @@ var Chalkboard;
     var vect;
     (function (vect_3) {
         vect_3.absolute = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z), Math.abs(vect.w));
             }
             else {
@@ -4324,34 +5795,13 @@ var Chalkboard;
             }
         };
         vect_3.add = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y, vect1.z + vect2.z);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "number" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y, vect1.z + vect2.z, vect1.w + vect2.w);
             }
             else {
@@ -4359,13 +5809,13 @@ var Chalkboard;
             }
         };
         vect_3.ang = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.trig.arctan2(vect.y, vect.x);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return [Math.acos(vect.x / Chalkboard.vect.mag(vect)), Math.acos(vect.y / Chalkboard.vect.mag(vect)), Math.acos(vect.z / Chalkboard.vect.mag(vect))];
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return [
                     Math.acos(vect.x / Chalkboard.vect.mag(vect)),
                     Math.acos(vect.y / Chalkboard.vect.mag(vect)),
@@ -4382,13 +5832,13 @@ var Chalkboard;
         };
         vect_3.constrain = function (vect, range) {
             if (range === void 0) { range = [0, 1]; }
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range), Chalkboard.numb.constrain(vect.w, range));
             }
             else {
@@ -4399,24 +5849,10 @@ var Chalkboard;
             return Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
         };
         vect_3.cross = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(0, 0, vect1.x * vect2.y - vect1.y * vect2.x);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return Chalkboard.vect.init(vect1.y * vect2.z - vect1.z * vect2.y, vect1.z * vect2.x - vect1.x * vect2.z, vect1.x * vect2.y - vect1.y * vect2.x);
             }
             else {
@@ -4443,104 +5879,47 @@ var Chalkboard;
             }
         };
         vect_3.dist = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y));
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z));
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "number" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "number") {
-                return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w));
+            else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
+                return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) +
+                    (vect2.y - vect1.y) * (vect2.y - vect1.y) +
+                    (vect2.z - vect1.z) * (vect2.z - vect1.z) +
+                    (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
         vect_3.distsq = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "number" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "number") {
-                return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w);
+            else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
+                return ((vect2.x - vect1.x) * (vect2.x - vect1.x) +
+                    (vect2.y - vect1.y) * (vect2.y - vect1.y) +
+                    (vect2.z - vect1.z) * (vect2.z - vect1.z) +
+                    (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
         vect_3.dot = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y;
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y + vect1.z * vect2.z;
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "number" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y + vect1.z * vect2.z + vect1.w * vect2.w;
             }
             else {
@@ -4588,16 +5967,16 @@ var Chalkboard;
             }
         };
         vect_3.fromAlternateToCartesian = function (vect, type) {
-            if (type === "polar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             }
-            else if (type === "bipolar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            else if (type === "bipolar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init((vect.x * vect.x - vect.y * vect.y) / 4, Chalkboard.real.sqrt(16 * vect.x * vect.x - (vect.x * vect.x - vect.y * vect.y + 4) * (vect.x * vect.x - vect.y * vect.y + 4)));
             }
-            else if (type === "cylindrical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (type === "cylindrical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.y), vect.z);
             }
-            else if (type === "spherical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (type === "spherical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z));
             }
             else {
@@ -4613,16 +5992,16 @@ var Chalkboard;
             }
         };
         vect_3.fromCartesianToAlternate = function (vect, type) {
-            if (type === "polar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect));
             }
-            else if (type === "bipolar" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            else if (type === "bipolar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init((vect.x + 1) * (vect.x + 1) + vect.y * vect.y, (vect.x - 1) * (vect.x - 1) + vect.y * vect.y);
             }
-            else if (type === "cylindrical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (type === "cylindrical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(Chalkboard.vect.init(vect.x, vect.y)), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)), vect.z);
             }
-            else if (type === "spherical" && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (type === "spherical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)), Chalkboard.vect.ang(vect)[2]);
             }
             else {
@@ -4630,15 +6009,15 @@ var Chalkboard;
             }
         };
         vect_3.fromField = function (vectfield, vect) {
-            if (Chalkboard.vect.dimension(vectfield) === 2 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.dimension(vectfield) === 2 && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 var p = Chalkboard.real.parse("(x, y) => " + vectfield.p), q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
                 return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
             }
-            else if (Chalkboard.vect.dimension(vectfield) === 3 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.dimension(vectfield) === 3 && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 var p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p), q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q), r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
                 return Chalkboard.vect.init(p(vect.x, vect.y, vect.z), q(vect.x, vect.y, vect.z), r(vect.x, vect.y, vect.z));
             }
-            else if (Chalkboard.vect.dimension(vectfield) === 4 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.dimension(vectfield) === 4 && Chalkboard.vect.isDimensionOf(vect, 4)) {
                 var p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p), q = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.q), r = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.r), s = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.s);
                 return Chalkboard.vect.init(p(vect.x, vect.y, vect.z, vect.w), q(vect.x, vect.y, vect.z, vect.w), r(vect.x, vect.y, vect.z, vect.w), s(vect.x, vect.y, vect.z, vect.w));
             }
@@ -4647,13 +6026,13 @@ var Chalkboard;
             }
         };
         vect_3.fromVector = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x, vect.y, 0);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x, vect.y, vect.z, 0);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x, vect.y);
             }
             else {
@@ -4672,27 +6051,75 @@ var Chalkboard;
             }
         };
         vect_3.interp = function (vect, a, b, c, d) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined" && typeof c === "undefined" && typeof d === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2) && typeof c === "undefined" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y) / (a + b), (a * vect.x + b * vect.y) / (a + b));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined" && typeof c === "number" && typeof d === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3) && typeof c === "number" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y + c * vect.z) / (a + b + c), (a * vect.x + b * vect.y + c * vect.z) / (a + b + c), (a * vect.x + b * vect.y + c * vect.z) / (a + b + c));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number" && typeof c === "number" && typeof d === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4) && typeof c === "number" && typeof d === "number") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d));
             }
             else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
+        vect_3.isDimensionEqual = function (vect1, vect2) {
+            return Chalkboard.vect.dimension(vect1) === Chalkboard.vect.dimension(vect2);
+        };
+        vect_3.isDimensionOf = function (vectORvectfield, dimension) {
+            if (dimension === 2) {
+                return Chalkboard.vect.dimension(vectORvectfield) === 2;
+            }
+            else if (dimension === 3) {
+                return Chalkboard.vect.dimension(vectORvectfield) === 3;
+            }
+            else if (dimension === 4) {
+                return Chalkboard.vect.dimension(vectORvectfield) === 4;
+            }
+            else {
+                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+            }
+        };
+        vect_3.isEqual = function (vect1, vect2) {
+            if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
+                if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
+                    return vect1.x === vect2.x && vect1.y === vect2.y;
+                }
+                else if (Chalkboard.vect.isDimensionOf(vect1, 3)) {
+                    return vect1.x === vect2.x && vect1.y === vect2.y && vect1.z === vect2.z;
+                }
+                else if (Chalkboard.vect.isDimensionOf(vect1, 4)) {
+                    return vect1.x === vect2.x && vect1.y === vect2.y && vect1.z === vect2.z && vect1.w === vect2.w;
+                }
+                else {
+                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                }
+            }
+            else {
+                return false;
+            }
+        };
+        vect_3.isNormalized = function (vect) {
+            return Chalkboard.vect.magsq(vect) === 1;
+        };
+        vect_3.isOrthogonal = function (vect1, vect2) {
+            return Chalkboard.vect.dot(vect1, vect2) === 0;
+        };
+        vect_3.isParallel = function (vect1, vect2) {
+            return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2));
+        };
+        vect_3.isZero = function (vect) {
+            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(vect));
+        };
         vect_3.mag = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z * vect.z);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z * vect.z + vect.w * vect.w);
             }
             else {
@@ -4703,13 +6130,13 @@ var Chalkboard;
             return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
         };
         vect_3.magsq = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return vect.x * vect.x + vect.y * vect.y + vect.z * vect.z;
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return vect.x * vect.x + vect.y * vect.y + vect.z * vect.z + vect.w * vect.w;
             }
             else {
@@ -4717,13 +6144,13 @@ var Chalkboard;
             }
         };
         vect_3.negate = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z, -vect.w);
             }
             else {
@@ -4731,13 +6158,13 @@ var Chalkboard;
             }
         };
         vect_3.normalize = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect), vect.w / Chalkboard.vect.mag(vect));
             }
             else {
@@ -4768,13 +6195,13 @@ var Chalkboard;
             }
         };
         vect_3.reciprocate = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z, 1 / vect.w);
             }
             else {
@@ -4795,13 +6222,13 @@ var Chalkboard;
             }
         };
         vect_3.round = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z));
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z), Math.round(vect.w));
             }
             else {
@@ -4815,13 +6242,13 @@ var Chalkboard;
             return Chalkboard.vect.dot(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
         vect_3.scl = function (vect, num) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z * num);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z * num, vect.w * num);
             }
             else {
@@ -4829,13 +6256,13 @@ var Chalkboard;
             }
         };
         vect_3.slope = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.y / vect.x;
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return vect.z / Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return vect.w / Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z * vect.z);
             }
             else {
@@ -4843,34 +6270,13 @@ var Chalkboard;
             }
         };
         vect_3.sub = function (vect1, vect2) {
-            if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "undefined" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "undefined" &&
-                typeof vect2.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "undefined" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y, vect1.z - vect2.z);
             }
-            else if (typeof vect1.x === "number" &&
-                typeof vect1.y === "number" &&
-                typeof vect1.z === "number" &&
-                typeof vect1.w === "number" &&
-                typeof vect2.x === "number" &&
-                typeof vect2.y === "number" &&
-                typeof vect2.z === "number" &&
-                typeof vect2.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y, vect1.z - vect2.z, vect1.w - vect2.w);
             }
             else {
@@ -4878,13 +6284,13 @@ var Chalkboard;
             }
         };
         vect_3.toArray = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return [vect.x, vect.y];
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return [vect.x, vect.y, vect.z];
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return [vect.x, vect.y, vect.z, vect.w];
             }
             else {
@@ -4894,39 +6300,39 @@ var Chalkboard;
         vect_3.toComplex = function (vect) {
             return Chalkboard.comp.init(vect.x, vect.y);
         };
-        vect_3.toMatrix = function (vect, type) {
-            if (type === void 0) { type = "col"; }
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-                if (type === "col") {
+        vect_3.toMatrix = function (vect, axis) {
+            if (axis === void 0) { axis = 0; }
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
+                if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y]);
                 }
-                else if (type === "row") {
+                else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
-                if (type === "col") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
+                if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y], [vect.z]);
                 }
-                else if (type === "row") {
+                else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
-                if (type === "col") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
+                if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y], [vect.z], [vect.w]);
                 }
-                else if (type === "row") {
+                else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z, vect.w]);
                 }
                 else {
-                    throw new TypeError('Parameter "type" must be "col" or "row".');
+                    throw new TypeError('Parameter "axis" must be 0 or 1.');
                 }
             }
             else {
@@ -4934,13 +6340,13 @@ var Chalkboard;
             }
         };
         vect_3.toQuaternion = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.quat.init(0, vect.x, vect.y, vect.z);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.quat.init(vect.x, vect.y, vect.z, vect.w);
             }
             else {
@@ -4948,13 +6354,13 @@ var Chalkboard;
             }
         };
         vect_3.toString = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ")";
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ", " + vect.w.toString() + ")";
             }
             else {
@@ -4979,13 +6385,13 @@ var Chalkboard;
             return Chalkboard.vect.cross(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
         vect_3.zero = function (vect) {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * 0, vect.y * 0);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0);
             }
-            else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0, vect.w * 0);
             }
             else {

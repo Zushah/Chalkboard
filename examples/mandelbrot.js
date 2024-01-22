@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.0.0 al-Khwarizmi Example Program: Mandelbrot Set
+    Version 2.1.0 Seki Example Program: Mandelbrot Set
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

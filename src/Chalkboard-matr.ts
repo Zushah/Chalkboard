@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Matrix Namespace
-    Version 2.0.0 al-Khwarizmi
+    Version 2.1.0 Seki
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -16,17 +16,20 @@ namespace Chalkboard {
          */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])],
-                                            [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
+                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2])],
-                                            [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2])],
-                                            [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2])]);
+                return Chalkboard.matr.init(
+                    [Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2])],
+                    [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2])],
+                    [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2])]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2]), Math.abs(matr[0][3])],
-                                            [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2]), Math.abs(matr[1][3])],
-                                            [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2]), Math.abs(matr[2][3])],
-                                            [Math.abs(matr[3][0]), Math.abs(matr[3][1]), Math.abs(matr[3][2]), Math.abs(matr[3][3])]);
+                return Chalkboard.matr.init(
+                    [Math.abs(matr[0][0]), Math.abs(matr[0][1]), Math.abs(matr[0][2]), Math.abs(matr[0][3])],
+                    [Math.abs(matr[1][0]), Math.abs(matr[1][1]), Math.abs(matr[1][2]), Math.abs(matr[1][3])],
+                    [Math.abs(matr[2][0]), Math.abs(matr[2][1]), Math.abs(matr[2][2]), Math.abs(matr[2][3])],
+                    [Math.abs(matr[3][0]), Math.abs(matr[3][1]), Math.abs(matr[3][2]), Math.abs(matr[3][3])]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -48,17 +51,20 @@ namespace Chalkboard {
         export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
-                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]],
-                                                [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
+                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]], [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
                 } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
-                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2]],
-                                                [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2]],
-                                                [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2]],
+                        [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2]],
+                        [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2]]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
-                    return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2], matr1[0][3] + matr2[0][3]],
-                                                [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2], matr1[1][3] + matr2[1][3]],
-                                                [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2], matr1[2][3] + matr2[2][3]],
-                                                [matr1[3][0] + matr2[3][0], matr1[3][1] + matr2[3][1], matr1[3][2] + matr2[3][2], matr1[3][3] + matr2[3][3]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1], matr1[0][2] + matr2[0][2], matr1[0][3] + matr2[0][3]],
+                        [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1], matr1[1][2] + matr2[1][2], matr1[1][3] + matr2[1][3]],
+                        [matr1[2][0] + matr2[2][0], matr1[2][1] + matr2[2][1], matr1[2][2] + matr2[2][2], matr1[2][3] + matr2[2][3]],
+                        [matr1[3][0] + matr2[3][0], matr1[3][1] + matr2[3][1], matr1[3][2] + matr2[3][2], matr1[3][3] + matr2[3][3]]
+                    );
                 } else {
                     const result = Chalkboard.matr.init();
                     for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -147,26 +153,27 @@ namespace Chalkboard {
             if (axis === 0) {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
                     if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.rows(matr2) === 2) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1]],
-                                                    [matr1[1][0], matr1[1][1]],
-                                                    [matr2[0][0], matr2[0][1]],
-                                                    [matr2[1][0], matr2[1][1]]);
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1]], [matr1[1][0], matr1[1][1]], [matr2[0][0], matr2[0][1]], [matr2[1][0], matr2[1][1]]);
                     } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.rows(matr2) === 3) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2]],
-                                                    [matr1[1][0], matr1[1][1], matr1[1][2]],
-                                                    [matr1[2][0], matr1[2][1], matr1[2][2]],
-                                                    [matr2[0][0], matr2[0][1], matr2[0][2]],
-                                                    [matr2[1][0], matr2[1][1], matr2[1][2]],
-                                                    [matr2[2][0], matr2[2][1], matr2[2][2]]);
+                        return Chalkboard.matr.init(
+                            [matr1[0][0], matr1[0][1], matr1[0][2]],
+                            [matr1[1][0], matr1[1][1], matr1[1][2]],
+                            [matr1[2][0], matr1[2][1], matr1[2][2]],
+                            [matr2[0][0], matr2[0][1], matr2[0][2]],
+                            [matr2[1][0], matr2[1][1], matr2[1][2]],
+                            [matr2[2][0], matr2[2][1], matr2[2][2]]
+                        );
                     } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.rows(matr2) === 4) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3]],
-                                                    [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3]],
-                                                    [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3]],
-                                                    [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3]],
-                                                    [matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]],
-                                                    [matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]],
-                                                    [matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]],
-                                                    [matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]);
+                        return Chalkboard.matr.init(
+                            [matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3]],
+                            [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3]],
+                            [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3]],
+                            [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3]],
+                            [matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]],
+                            [matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]],
+                            [matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]],
+                            [matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]
+                        );
                     } else {
                         return Chalkboard.matr.init(matr1.concat(matr2));
                     }
@@ -176,17 +183,20 @@ namespace Chalkboard {
             } else if (axis === 1) {
                 if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
                     if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.cols(matr2) === 2) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]],
-                                                    [matr1[1][0], matr1[1][1], matr2[1][0], matr2[1][1]]);
+                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr2[0][0], matr2[0][1]], [matr1[1][0], matr1[1][1], matr2[1][0], matr2[1][1]]);
                     } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.cols(matr2) === 3) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr2[0][0], matr2[0][1], matr2[0][2]],
-                                                    [matr1[1][0], matr1[1][1], matr1[1][2], matr2[1][0], matr2[1][1], matr2[1][2]],
-                                                    [matr1[2][0], matr1[2][1], matr1[2][2], matr2[2][0], matr2[2][1], matr2[2][2]]);
+                        return Chalkboard.matr.init(
+                            [matr1[0][0], matr1[0][1], matr1[0][2], matr2[0][0], matr2[0][1], matr2[0][2]],
+                            [matr1[1][0], matr1[1][1], matr1[1][2], matr2[1][0], matr2[1][1], matr2[1][2]],
+                            [matr1[2][0], matr1[2][1], matr1[2][2], matr2[2][0], matr2[2][1], matr2[2][2]]
+                        );
                     } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.cols(matr2) === 4) {
-                        return Chalkboard.matr.init([matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3], matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]],
-                                                    [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3], matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]],
-                                                    [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3], matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]],
-                                                    [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3], matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]);
+                        return Chalkboard.matr.init(
+                            [matr1[0][0], matr1[0][1], matr1[0][2], matr1[0][3], matr2[0][0], matr2[0][1], matr2[0][2], matr2[0][3]],
+                            [matr1[1][0], matr1[1][1], matr1[1][2], matr1[1][3], matr2[1][0], matr2[1][1], matr2[1][2], matr2[1][3]],
+                            [matr1[2][0], matr1[2][1], matr1[2][2], matr1[2][3], matr2[2][0], matr2[2][1], matr2[2][2], matr2[2][3]],
+                            [matr1[3][0], matr1[3][1], matr1[3][2], matr1[3][3], matr2[3][0], matr2[3][1], matr2[3][2], matr2[3][3]]
+                        );
                     } else {
                         const result = Chalkboard.matr.init();
                         for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -210,17 +220,43 @@ namespace Chalkboard {
          */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)],
-                                            [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
+                return Chalkboard.matr.init(
+                    [Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)],
+                    [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range)],
-                                            [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range)],
-                                            [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range)]);
+                return Chalkboard.matr.init(
+                    [Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range)],
+                    [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range)],
+                    [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range)]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range), Chalkboard.numb.constrain(matr[0][2], range), Chalkboard.numb.constrain(matr[0][3], range)],
-                                            [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range), Chalkboard.numb.constrain(matr[1][2], range), Chalkboard.numb.constrain(matr[1][3], range)],
-                                            [Chalkboard.numb.constrain(matr[2][0], range), Chalkboard.numb.constrain(matr[2][1], range), Chalkboard.numb.constrain(matr[2][2], range), Chalkboard.numb.constrain(matr[2][3], range)],
-                                            [Chalkboard.numb.constrain(matr[3][0], range), Chalkboard.numb.constrain(matr[3][1], range), Chalkboard.numb.constrain(matr[3][2], range), Chalkboard.numb.constrain(matr[3][3], range)]);
+                return Chalkboard.matr.init(
+                    [
+                        Chalkboard.numb.constrain(matr[0][0], range),
+                        Chalkboard.numb.constrain(matr[0][1], range),
+                        Chalkboard.numb.constrain(matr[0][2], range),
+                        Chalkboard.numb.constrain(matr[0][3], range)
+                    ],
+                    [
+                        Chalkboard.numb.constrain(matr[1][0], range),
+                        Chalkboard.numb.constrain(matr[1][1], range),
+                        Chalkboard.numb.constrain(matr[1][2], range),
+                        Chalkboard.numb.constrain(matr[1][3], range)
+                    ],
+                    [
+                        Chalkboard.numb.constrain(matr[2][0], range),
+                        Chalkboard.numb.constrain(matr[2][1], range),
+                        Chalkboard.numb.constrain(matr[2][2], range),
+                        Chalkboard.numb.constrain(matr[2][3], range)
+                    ],
+                    [
+                        Chalkboard.numb.constrain(matr[3][0], range),
+                        Chalkboard.numb.constrain(matr[3][1], range),
+                        Chalkboard.numb.constrain(matr[3][2], range),
+                        Chalkboard.numb.constrain(matr[3][3], range)
+                    ]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -240,17 +276,16 @@ namespace Chalkboard {
          */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0], matr[0][1]],
-                                            [matr[1][0], matr[1][1]]);
+                return Chalkboard.matr.init([matr[0][0], matr[0][1]], [matr[1][0], matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2]],
-                                            [matr[1][0], matr[1][1], matr[1][2]],
-                                            [matr[2][0], matr[2][1], matr[2][2]]);
+                return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2]], [matr[1][0], matr[1][1], matr[1][2]], [matr[2][0], matr[2][1], matr[2][2]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2], matr[0][3]],
-                                            [matr[1][0], matr[1][1], matr[1][2], matr[1][3]],
-                                            [matr[2][0], matr[2][1], matr[2][2], matr[2][3]],
-                                            [matr[3][0], matr[3][1], matr[3][2], matr[3][3]]);
+                return Chalkboard.matr.init(
+                    [matr[0][0], matr[0][1], matr[0][2], matr[0][3]],
+                    [matr[1][0], matr[1][1], matr[1][2], matr[1][3]],
+                    [matr[2][0], matr[2][1], matr[2][2], matr[2][3]],
+                    [matr[3][0], matr[3][1], matr[3][2], matr[3][3]]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -275,9 +310,30 @@ namespace Chalkboard {
                 } else if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0];
                 } else if (Chalkboard.matr.rows(matr) === 3) {
-                    return matr[0][0] * (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) - matr[0][1] * (matr[1][0] * matr[2][2] - matr[1][2] * matr[2][0]) + matr[0][2] * (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]);
+                    return (
+                        matr[0][0] * (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) -
+                        matr[0][1] * (matr[1][0] * matr[2][2] - matr[1][2] * matr[2][0]) +
+                        matr[0][2] * (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0])
+                    );
                 } else if (Chalkboard.matr.rows(matr) === 4) {
-                    return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) + matr[1][3] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1])) - matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) - matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0]));
+                    return (
+                        matr[0][0] *
+                            (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) -
+                                matr[1][2] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) +
+                                matr[1][3] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1])) -
+                        matr[0][1] *
+                            (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) -
+                                matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) +
+                        matr[0][2] *
+                            (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) -
+                                matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) -
+                        matr[0][3] *
+                            (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) -
+                                matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) +
+                                matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0]))
+                    );
                 } else {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -299,17 +355,11 @@ namespace Chalkboard {
          */
         export const diagonal = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0] || 0, 0],
-                                            [0, elements[1] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, 0], [0, elements[1] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0] || 0, 0, 0],
-                                            [0, elements[1] || 0, 0],
-                                            [0, 0, elements[2] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0], [0, elements[1] || 0, 0], [0, 0, elements[2] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0],
-                                            [0, elements[1] || 0, 0, 0],
-                                            [0, 0, elements[2] || 0, 0],
-                                            [0, 0, 0, elements[3] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0], [0, elements[1] || 0, 0, 0], [0, 0, elements[2] || 0, 0], [0, 0, 0, elements[3] || 0]);
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();
@@ -332,9 +382,13 @@ namespace Chalkboard {
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
                 const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
-                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
-                    return i / max;
-                }), Chalkboard.matr.rows(matr), 1);
+                v = Chalkboard.stat.toMatrix(
+                    Chalkboard.matr.toArray(matrv).map(function (i) {
+                        return i / max;
+                    }),
+                    Chalkboard.matr.rows(matr),
+                    1
+                );
             }
             const dot = function (v1: number[], v2: number[]): number {
                 let result = 0;
@@ -343,7 +397,10 @@ namespace Chalkboard {
                 }
                 return result;
             };
-            return dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) / dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v));
+            return (
+                dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) /
+                dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v))
+            );
         };
 
         /**
@@ -357,9 +414,13 @@ namespace Chalkboard {
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
                 const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
-                v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
-                    return i / max;
-                }), Chalkboard.matr.rows(matr), 1);
+                v = Chalkboard.stat.toMatrix(
+                    Chalkboard.matr.toArray(matrv).map(function (i) {
+                        return i / max;
+                    }),
+                    Chalkboard.matr.rows(matr),
+                    1
+                );
             }
             const result = Chalkboard.matr.toArray(v);
             return result;
@@ -374,17 +435,11 @@ namespace Chalkboard {
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
             const _null = null as unknown as number;
             if (rows === 2 && cols === 2) {
-                return Chalkboard.matr.init([_null, _null],
-                                            [_null, _null]);
+                return Chalkboard.matr.init([_null, _null], [_null, _null]);
             } else if (rows === 3 && cols === 3) {
-                return Chalkboard.matr.init([_null, _null, _null],
-                                            [_null, _null, _null],
-                                            [_null, _null, _null]);
+                return Chalkboard.matr.init([_null, _null, _null], [_null, _null, _null], [_null, _null, _null]);
             } else if (rows === 4 && cols === 4) {
-                return Chalkboard.matr.init([_null, _null, _null, _null],
-                                            [_null, _null, _null, _null],
-                                            [_null, _null, _null, _null],
-                                            [_null, _null, _null, _null]);
+                return Chalkboard.matr.init([_null, _null, _null, _null], [_null, _null, _null, _null], [_null, _null, _null, _null], [_null, _null, _null, _null]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < rows; i++) {
@@ -404,17 +459,11 @@ namespace Chalkboard {
          */
         export const exchange = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([0, 1],
-                                            [1, 0]);
+                return Chalkboard.matr.init([0, 1], [1, 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([0, 0, 1],
-                                            [0, 1, 0],
-                                            [1, 0, 0]);
+                return Chalkboard.matr.init([0, 0, 1], [0, 1, 0], [1, 0, 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([0, 0, 0, 1],
-                                            [0, 0, 1, 0],
-                                            [0, 1, 0, 0],
-                                            [1, 0, 0, 0]);
+                return Chalkboard.matr.init([0, 0, 0, 1], [0, 0, 1, 0], [0, 1, 0, 0], [1, 0, 0, 0]);
             } else {
                 const result = Chalkboard.matr.fill(0, size, size);
                 for (let i = 0; i < size; i++) {
@@ -437,17 +486,11 @@ namespace Chalkboard {
          */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
             if (rows === 2 && cols === 2) {
-                return Chalkboard.matr.init([element, element],
-                                            [element, element]);
+                return Chalkboard.matr.init([element, element], [element, element]);
             } else if (rows === 3 && cols === 3) {
-                return Chalkboard.matr.init([element, element, element],
-                                            [element, element, element],
-                                            [element, element, element]);
+                return Chalkboard.matr.init([element, element, element], [element, element, element], [element, element, element]);
             } else if (rows === 4 && cols === 4) {
-                return Chalkboard.matr.init([element, element, element, element],
-                                            [element, element, element, element],
-                                            [element, element, element, element],
-                                            [element, element, element, element]);
+                return Chalkboard.matr.init([element, element, element, element], [element, element, element, element], [element, element, element, element], [element, element, element, element]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < rows; i++) {
@@ -461,23 +504,59 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the row echelon form of a matrix (performs Gaussian elimination on it).
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardMatrix}
+         */
+        export const Gaussian = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            let lead = 0;
+            for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
+                if (lead >= Chalkboard.matr.cols(matr)) {
+                    break;
+                }
+                let i = row;
+                while (matr[i][lead] === 0) {
+                    i++;
+                    if (i === Chalkboard.matr.rows(matr)) {
+                        i = row;
+                        lead++;
+                        if (Chalkboard.matr.cols(matr) === lead) {
+                            return matr;
+                        }
+                    }
+                }
+                const temp = matr[i];
+                matr[i] = matr[row];
+                matr[row] = temp;
+                const scl = matr[row][lead];
+                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    matr[row][j] /= scl;
+                }
+                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                    if (i !== row) {
+                        const coeff = matr[i][lead];
+                        for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                            matr[i][j] -= coeff * matr[row][j];
+                        }
+                    }
+                }
+                lead++;
+            }
+            return matr;
+        };
+
+        /**
          * Initializes a Hilbert matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
          */
         export const Hilbert = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1/1, 1/2],
-                                            [1/2, 1/3]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 3]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1/1, 1/2, 1/3],
-                                            [1/2, 1/3, 1/4],
-                                            [1/3, 1/4, 1/5]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 3, 1 / 4], [1 / 3, 1 / 4, 1 / 5]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1/1, 1/2, 1/3, 1/4],
-                                            [1/2, 1/3, 1/4, 1/5],
-                                            [1/3, 1/4, 1/5, 1/6],
-                                            [1/4, 1/5, 1/6, 1/7]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 3, 1 / 4, 1 / 5], [1 / 3, 1 / 4, 1 / 5, 1 / 6], [1 / 4, 1 / 5, 1 / 6, 1 / 7]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -497,17 +576,11 @@ namespace Chalkboard {
          */
         export const identity = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1, 0],
-                                            [0, 1]);
+                return Chalkboard.matr.init([1, 0], [0, 1]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1, 0, 0],
-                                            [0, 1, 0],
-                                            [0, 0, 1]);
+                return Chalkboard.matr.init([1, 0, 0], [0, 1, 0], [0, 0, 1]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1, 0, 0, 0],
-                                            [0, 1, 0, 0],
-                                            [0, 0, 1, 0],
-                                            [0, 0, 0, 1]);
+                return Chalkboard.matr.init([1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -550,13 +623,26 @@ namespace Chalkboard {
             if (Chalkboard.matr.isInvertible(matr)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     const det = Chalkboard.matr.det(matr);
-                    return Chalkboard.matr.init([matr[1][1] / det, -matr[0][1] / det],
-                                                [-matr[1][0] / det, matr[0][0] / det]);
+                    return Chalkboard.matr.init([matr[1][1] / det, -matr[0][1] / det], [-matr[1][0] / det, matr[0][0] / det]);
                 } else if (Chalkboard.matr.rows(matr) === 3) {
                     const det = Chalkboard.matr.det(matr);
-                    return Chalkboard.matr.init([((matr[1][1] * matr[2][2]) - (matr[1][2] * matr[2][1])) / det, ((matr[0][2] * matr[2][1]) - (matr[0][1] * matr[2][2])) / det, ((matr[0][1] * matr[1][2]) - (matr[0][2] * matr[1][1])) / det],
-                                                [((matr[1][2] * matr[2][0]) - (matr[1][0] * matr[2][2])) / det, ((matr[0][0] * matr[2][2]) - (matr[0][2] * matr[2][0])) / det, ((matr[0][2] * matr[1][0]) - (matr[0][0] * matr[1][2])) / det],
-                                                [((matr[1][0] * matr[2][1]) - (matr[1][1] * matr[2][0])) / det, ((matr[0][1] * matr[2][0]) - (matr[0][0] * matr[2][1])) / det, ((matr[0][0] * matr[1][1]) - (matr[0][1] * matr[1][0])) / det]);
+                    return Chalkboard.matr.init(
+                        [
+                            (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) / det,
+                            (matr[0][2] * matr[2][1] - matr[0][1] * matr[2][2]) / det,
+                            (matr[0][1] * matr[1][2] - matr[0][2] * matr[1][1]) / det
+                        ],
+                        [
+                            (matr[1][2] * matr[2][0] - matr[1][0] * matr[2][2]) / det,
+                            (matr[0][0] * matr[2][2] - matr[0][2] * matr[2][0]) / det,
+                            (matr[0][2] * matr[1][0] - matr[0][0] * matr[1][2]) / det
+                        ],
+                        [
+                            (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]) / det,
+                            (matr[0][1] * matr[2][0] - matr[0][0] * matr[2][1]) / det,
+                            (matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0]) / det
+                        ]
+                    );
                 } else if (Chalkboard.matr.rows(matr) === 4) {
                     const det = Chalkboard.matr.det(matr);
                     const adj00 = matr[0][0] * matr[1][1] - matr[0][1] * matr[1][0],
@@ -571,10 +657,32 @@ namespace Chalkboard {
                         adj09 = matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1],
                         adj10 = matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1],
                         adj11 = matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2];
-                    return Chalkboard.matr.init([(matr[1][1] * adj11 - matr[1][2] * adj10 + matr[1][3] * adj09) / det, (matr[0][2] * adj10 - matr[0][1] * adj11 - matr[0][3] * adj09) / det, (matr[3][1] * adj05 - matr[3][2] * adj04 + matr[3][3] * adj03) / det, (matr[2][2] * adj04 - matr[2][1] * adj05 - matr[2][3] * adj03) / det],
-                                                [(matr[1][2] * adj08 - matr[1][0] * adj11 - matr[1][3] * adj07) / det, (matr[0][0] * adj11 - matr[0][2] * adj08 + matr[0][3] * adj07) / det, (matr[3][2] * adj02 - matr[3][0] * adj05 - matr[3][3] * adj01) / det, (matr[2][0] * adj05 - matr[2][2] * adj02 + matr[2][3] * adj01) / det],
-                                                [(matr[1][0] * adj10 - matr[1][1] * adj08 + matr[1][3] * adj06) / det, (matr[0][1] * adj08 - matr[0][0] * adj10 - matr[0][3] * adj06) / det, (matr[3][0] * adj04 - matr[3][1] * adj02 + matr[3][3] * adj00) / det, (matr[2][1] * adj02 - matr[2][0] * adj04 - matr[2][3] * adj00) / det],
-                                                [(matr[1][1] * adj07 - matr[1][0] * adj09 - matr[1][2] * adj06) / det, (matr[0][0] * adj09 - matr[0][1] * adj07 + matr[0][2] * adj06) / det, (matr[3][1] * adj01 - matr[3][0] * adj03 - matr[3][2] * adj00) / det, (matr[2][0] * adj03 - matr[2][1] * adj01 + matr[2][2] * adj00) / det]);
+                    return Chalkboard.matr.init(
+                        [
+                            (matr[1][1] * adj11 - matr[1][2] * adj10 + matr[1][3] * adj09) / det,
+                            (matr[0][2] * adj10 - matr[0][1] * adj11 - matr[0][3] * adj09) / det,
+                            (matr[3][1] * adj05 - matr[3][2] * adj04 + matr[3][3] * adj03) / det,
+                            (matr[2][2] * adj04 - matr[2][1] * adj05 - matr[2][3] * adj03) / det
+                        ],
+                        [
+                            (matr[1][2] * adj08 - matr[1][0] * adj11 - matr[1][3] * adj07) / det,
+                            (matr[0][0] * adj11 - matr[0][2] * adj08 + matr[0][3] * adj07) / det,
+                            (matr[3][2] * adj02 - matr[3][0] * adj05 - matr[3][3] * adj01) / det,
+                            (matr[2][0] * adj05 - matr[2][2] * adj02 + matr[2][3] * adj01) / det
+                        ],
+                        [
+                            (matr[1][0] * adj10 - matr[1][1] * adj08 + matr[1][3] * adj06) / det,
+                            (matr[0][1] * adj08 - matr[0][0] * adj10 - matr[0][3] * adj06) / det,
+                            (matr[3][0] * adj04 - matr[3][1] * adj02 + matr[3][3] * adj00) / det,
+                            (matr[2][1] * adj02 - matr[2][0] * adj04 - matr[2][3] * adj00) / det
+                        ],
+                        [
+                            (matr[1][1] * adj07 - matr[1][0] * adj09 - matr[1][2] * adj06) / det,
+                            (matr[0][0] * adj09 - matr[0][1] * adj07 + matr[0][2] * adj06) / det,
+                            (matr[3][1] * adj01 - matr[3][0] * adj03 - matr[3][2] * adj00) / det,
+                            (matr[2][0] * adj03 - matr[2][1] * adj01 + matr[2][2] * adj00) / det
+                        ]
+                    );
                 } else {
                     const result = Chalkboard.matr.init();
                     const augmented = Chalkboard.matr.init();
@@ -630,7 +738,20 @@ namespace Chalkboard {
                 } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                     return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0;
                 } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[0][3] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[1][3] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0 && matr[2][3] !== 0 && matr[3][0] !== 0 && matr[3][1] !== 0 && matr[3][2] !== 0;
+                    return (
+                        matr[0][1] !== 0 &&
+                        matr[0][2] !== 0 &&
+                        matr[0][3] !== 0 &&
+                        matr[1][0] !== 0 &&
+                        matr[1][2] !== 0 &&
+                        matr[1][3] !== 0 &&
+                        matr[2][0] !== 0 &&
+                        matr[2][1] !== 0 &&
+                        matr[2][3] !== 0 &&
+                        matr[3][0] !== 0 &&
+                        matr[3][1] !== 0 &&
+                        matr[3][2] !== 0
+                    );
                 } else {
                     let score = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -656,9 +777,36 @@ namespace Chalkboard {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
                 } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
-                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2];
+                    return (
+                        matr1[0][0] === matr2[0][0] &&
+                        matr1[0][1] === matr2[0][1] &&
+                        matr1[0][2] === matr2[0][2] &&
+                        matr1[1][0] === matr2[1][0] &&
+                        matr1[1][1] === matr2[1][1] &&
+                        matr1[1][2] === matr2[1][2] &&
+                        matr1[2][0] === matr2[2][0] &&
+                        matr1[2][1] === matr2[2][1] &&
+                        matr1[2][2] === matr2[2][2]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
-                    return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[0][3] === matr2[0][3] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[1][3] === matr2[1][3] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2] && matr1[2][3] === matr2[2][3] && matr1[3][0] === matr2[3][0] && matr1[3][1] === matr2[3][1] && matr1[3][2] === matr2[3][2] && matr1[3][3] === matr2[3][3];
+                    return (
+                        matr1[0][0] === matr2[0][0] &&
+                        matr1[0][1] === matr2[0][1] &&
+                        matr1[0][2] === matr2[0][2] &&
+                        matr1[0][3] === matr2[0][3] &&
+                        matr1[1][0] === matr2[1][0] &&
+                        matr1[1][1] === matr2[1][1] &&
+                        matr1[1][2] === matr2[1][2] &&
+                        matr1[1][3] === matr2[1][3] &&
+                        matr1[2][0] === matr2[2][0] &&
+                        matr1[2][1] === matr2[2][1] &&
+                        matr1[2][2] === matr2[2][2] &&
+                        matr1[2][3] === matr2[2][3] &&
+                        matr1[3][0] === matr2[3][0] &&
+                        matr1[3][1] === matr2[3][1] &&
+                        matr1[3][2] === matr2[3][2] &&
+                        matr1[3][3] === matr2[3][3]
+                    );
                 } else {
                     let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
                     for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -837,17 +985,11 @@ namespace Chalkboard {
          */
         export const Lehmer = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1/1, 1/2],
-                                            [1/2, 1/1]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 1]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1/1, 1/2, 1/3],
-                                            [1/2, 1/1, 2/3],
-                                            [1/3, 2/3, 1/1]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 1, 2 / 3], [1 / 3, 2 / 3, 1 / 1]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1/1, 1/2, 1/3, 1/4],
-                                            [1/2, 1/1, 2/3, 1/2],
-                                            [1/3, 2/3, 1/1, 3/4],
-                                            [1/4, 1/1, 3/4, 1/1]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 1, 3 / 4, 1 / 1]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -867,17 +1009,11 @@ namespace Chalkboard {
          */
         export const lowerBinomial = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1, 0],
-                                            [1, 1]);
+                return Chalkboard.matr.init([1, 0], [1, 1]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1, 0, 0],
-                                            [1, 1, 0],
-                                            [1, 2, 1]);
+                return Chalkboard.matr.init([1, 0, 0], [1, 1, 0], [1, 2, 1]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1, 0, 0, 0],
-                                            [1, 1, 0, 0],
-                                            [1, 2, 1, 0],
-                                            [1, 3, 3, 1]);
+                return Chalkboard.matr.init([1, 0, 0, 0], [1, 1, 0, 0], [1, 2, 1, 0], [1, 3, 3, 1]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -897,17 +1033,11 @@ namespace Chalkboard {
          */
         export const lowerShift = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([0, 0],
-                                            [1, 0]);
+                return Chalkboard.matr.init([0, 0], [1, 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([0, 0, 0],
-                                            [1, 0, 0],
-                                            [0, 1, 0]);
+                return Chalkboard.matr.init([0, 0, 0], [1, 0, 0], [0, 1, 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([0, 0, 0, 0],
-                                            [1, 0, 0, 0],
-                                            [0, 1, 0, 0],
-                                            [0, 0, 1, 0]);
+                return Chalkboard.matr.init([0, 0, 0, 0], [1, 0, 0, 0], [0, 1, 0, 0], [0, 0, 1, 0]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -928,17 +1058,16 @@ namespace Chalkboard {
          */
         export const lowerTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0] || 0, 0],
-                                            [elements[1] || 0, elements[2] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, 0], [elements[1] || 0, elements[2] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0] || 0, 0, 0],
-                                            [elements[1] || 0, elements[2] || 0, 0],
-                                            [elements[3] || 0, elements[4] || 0, elements[5] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, 0, 0], [elements[1] || 0, elements[2] || 0, 0], [elements[3] || 0, elements[4] || 0, elements[5] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0] || 0, 0, 0, 0],
-                                            [elements[1] || 0, elements[2] || 0, 0, 0],
-                                            [elements[3] || 0, elements[4] || 0, elements[5] || 0, 0],
-                                            [elements[6] || 0, elements[7] || 0, elements[8] || 0, elements[9] || 0]);
+                return Chalkboard.matr.init(
+                    [elements[0] || 0, 0, 0, 0],
+                    [elements[1] || 0, elements[2] || 0, 0, 0],
+                    [elements[3] || 0, elements[4] || 0, elements[5] || 0, 0],
+                    [elements[6] || 0, elements[7] || 0, elements[8] || 0, elements[9] || 0]
+                );
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();
@@ -960,7 +1089,8 @@ namespace Chalkboard {
          */
         export const LUdecomp = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (Chalkboard.matr.isSquare(matr)) {
-                const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
+                const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
+                    U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
                 for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
                     for (let i = 0; i <= j; i++) {
                         let sum = 0;
@@ -992,29 +1122,70 @@ namespace Chalkboard {
         export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2, 1)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
+                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
                 } else if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1]],
+                        [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1]]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3, 1)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0]],
-                                                [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0]],
+                        [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0]],
+                        [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0]]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1], matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1], matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2]],
-                                                [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0], matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1], matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2]]);
+                    return Chalkboard.matr.init(
+                        [
+                            matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0],
+                            matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1],
+                            matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2]
+                        ],
+                        [
+                            matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0],
+                            matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1],
+                            matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2]
+                        ],
+                        [
+                            matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0],
+                            matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1],
+                            matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2]
+                        ]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4, 1)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0]],
-                                                [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0]],
-                                                [matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0]],
+                        [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0]],
+                        [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0]],
+                        [matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0]]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
-                    return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0], matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1] + matr1[0][3] * matr2[3][1], matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2] + matr1[0][3] * matr2[3][2], matr1[0][0] * matr2[0][3] + matr1[0][1] * matr2[1][3] + matr1[0][2] * matr2[2][3] + matr1[0][3] * matr2[3][3]],
-                                                [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0], matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1] + matr1[1][3] * matr2[3][1], matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2] + matr1[1][3] * matr2[3][2], matr1[1][0] * matr2[0][3] + matr1[1][1] * matr2[1][3] + matr1[1][2] * matr2[2][3] + matr1[1][3] * matr2[3][3]],
-                                                [matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0], matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1] + matr1[2][3] * matr2[3][1], matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2] + matr1[2][3] * matr2[3][2], matr1[2][0] * matr2[0][3] + matr1[2][1] * matr2[1][3] + matr1[2][2] * matr2[2][3] + matr1[2][3] * matr2[3][3]],
-                                                [matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0], matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1] + matr1[2][3] * matr2[3][1], matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2] + matr1[2][3] * matr2[3][2], matr1[2][0] * matr2[0][3] + matr1[2][1] * matr2[1][3] + matr1[2][2] * matr2[2][3] + matr1[2][3] * matr2[3][3]]);
+                    return Chalkboard.matr.init(
+                        [
+                            matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0] + matr1[0][2] * matr2[2][0] + matr1[0][3] * matr2[3][0],
+                            matr1[0][0] * matr2[0][1] + matr1[0][1] * matr2[1][1] + matr1[0][2] * matr2[2][1] + matr1[0][3] * matr2[3][1],
+                            matr1[0][0] * matr2[0][2] + matr1[0][1] * matr2[1][2] + matr1[0][2] * matr2[2][2] + matr1[0][3] * matr2[3][2],
+                            matr1[0][0] * matr2[0][3] + matr1[0][1] * matr2[1][3] + matr1[0][2] * matr2[2][3] + matr1[0][3] * matr2[3][3]
+                        ],
+                        [
+                            matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0] + matr1[1][2] * matr2[2][0] + matr1[1][3] * matr2[3][0],
+                            matr1[1][0] * matr2[0][1] + matr1[1][1] * matr2[1][1] + matr1[1][2] * matr2[2][1] + matr1[1][3] * matr2[3][1],
+                            matr1[1][0] * matr2[0][2] + matr1[1][1] * matr2[1][2] + matr1[1][2] * matr2[2][2] + matr1[1][3] * matr2[3][2],
+                            matr1[1][0] * matr2[0][3] + matr1[1][1] * matr2[1][3] + matr1[1][2] * matr2[2][3] + matr1[1][3] * matr2[3][3]
+                        ],
+                        [
+                            matr1[2][0] * matr2[0][0] + matr1[2][1] * matr2[1][0] + matr1[2][2] * matr2[2][0] + matr1[2][3] * matr2[3][0],
+                            matr1[2][0] * matr2[0][1] + matr1[2][1] * matr2[1][1] + matr1[2][2] * matr2[2][1] + matr1[2][3] * matr2[3][1],
+                            matr1[2][0] * matr2[0][2] + matr1[2][1] * matr2[1][2] + matr1[2][2] * matr2[2][2] + matr1[2][3] * matr2[3][2],
+                            matr1[2][0] * matr2[0][3] + matr1[2][1] * matr2[1][3] + matr1[2][2] * matr2[2][3] + matr1[2][3] * matr2[3][3]
+                        ],
+                        [
+                            matr1[3][0] * matr2[0][0] + matr1[3][1] * matr2[1][0] + matr1[3][2] * matr2[2][0] + matr1[3][3] * matr2[3][0],
+                            matr1[3][0] * matr2[0][1] + matr1[3][1] * matr2[1][1] + matr1[3][2] * matr2[2][1] + matr1[3][3] * matr2[3][1],
+                            matr1[3][0] * matr2[0][2] + matr1[3][1] * matr2[1][2] + matr1[3][2] * matr2[2][2] + matr1[3][3] * matr2[3][2],
+                            matr1[3][0] * matr2[0][3] + matr1[3][1] * matr2[1][3] + matr1[3][2] * matr2[2][3] + matr1[3][3] * matr2[3][3]
+                        ]
+                    );
                 } else {
                     const result = Chalkboard.matr.init();
                     for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -1041,37 +1212,405 @@ namespace Chalkboard {
          */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
-                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]],
-                                            [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]],
-                                            [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]],
-                                            [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
+                return Chalkboard.matr.init(
+                    [matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]],
+                    [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]],
+                    [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]],
+                    [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr1, 3) && Chalkboard.matr.isSizeOf(matr2, 3)) {
-                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][0] * matr2[0][2], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][1] * matr2[0][2], matr1[0][2] * matr2[0][0], matr1[0][2] * matr2[0][1], matr1[0][2] * matr2[0][2]],
-                                            [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][0] * matr2[1][2], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1], matr1[0][1] * matr2[1][2], matr1[0][2] * matr2[1][0], matr1[0][2] * matr2[1][1], matr1[0][2] * matr2[1][2]],
-                                            [matr1[0][0] * matr2[2][0], matr1[0][0] * matr2[2][1], matr1[0][0] * matr2[2][2], matr1[0][1] * matr2[2][0], matr1[0][1] * matr2[2][1], matr1[0][1] * matr2[2][2], matr1[0][2] * matr2[2][0], matr1[0][2] * matr2[2][1], matr1[0][2] * matr2[2][2]],
-                                            [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][0] * matr2[0][2], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1], matr1[1][1] * matr2[0][2], matr1[1][2] * matr2[0][0], matr1[1][2] * matr2[0][1], matr1[1][2] * matr2[0][2]],
-                                            [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][0] * matr2[1][2], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][1] * matr2[1][2], matr1[1][2] * matr2[1][0], matr1[1][2] * matr2[1][1], matr1[1][2] * matr2[1][2]],
-                                            [matr1[1][0] * matr2[2][0], matr1[1][0] * matr2[2][1], matr1[1][0] * matr2[2][2], matr1[1][1] * matr2[2][0], matr1[1][1] * matr2[2][1], matr1[1][1] * matr2[2][2], matr1[1][2] * matr2[2][0], matr1[1][2] * matr2[2][1], matr1[1][2] * matr2[2][2]],
-                                            [matr1[2][0] * matr2[0][0], matr1[2][0] * matr2[0][1], matr1[2][0] * matr2[0][2], matr1[2][1] * matr2[0][0], matr1[2][1] * matr2[0][1], matr1[2][1] * matr2[0][2], matr1[2][2] * matr2[0][0], matr1[2][2] * matr2[0][1], matr1[2][2] * matr2[0][2]],
-                                            [matr1[2][0] * matr2[1][0], matr1[2][0] * matr2[1][1], matr1[2][0] * matr2[1][2], matr1[2][1] * matr2[1][0], matr1[2][1] * matr2[1][1], matr1[2][1] * matr2[1][2], matr1[2][2] * matr2[1][0], matr1[2][2] * matr2[1][1], matr1[2][2] * matr2[1][2]],
-                                            [matr1[2][0] * matr2[2][0], matr1[2][0] * matr2[2][1], matr1[2][0] * matr2[2][2], matr1[2][1] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][1] * matr2[2][2], matr1[2][2] * matr2[2][0], matr1[2][2] * matr2[2][1], matr1[2][2] * matr2[2][2]]);
+                return Chalkboard.matr.init(
+                    [
+                        matr1[0][0] * matr2[0][0],
+                        matr1[0][0] * matr2[0][1],
+                        matr1[0][0] * matr2[0][2],
+                        matr1[0][1] * matr2[0][0],
+                        matr1[0][1] * matr2[0][1],
+                        matr1[0][1] * matr2[0][2],
+                        matr1[0][2] * matr2[0][0],
+                        matr1[0][2] * matr2[0][1],
+                        matr1[0][2] * matr2[0][2]
+                    ],
+                    [
+                        matr1[0][0] * matr2[1][0],
+                        matr1[0][0] * matr2[1][1],
+                        matr1[0][0] * matr2[1][2],
+                        matr1[0][1] * matr2[1][0],
+                        matr1[0][1] * matr2[1][1],
+                        matr1[0][1] * matr2[1][2],
+                        matr1[0][2] * matr2[1][0],
+                        matr1[0][2] * matr2[1][1],
+                        matr1[0][2] * matr2[1][2]
+                    ],
+                    [
+                        matr1[0][0] * matr2[2][0],
+                        matr1[0][0] * matr2[2][1],
+                        matr1[0][0] * matr2[2][2],
+                        matr1[0][1] * matr2[2][0],
+                        matr1[0][1] * matr2[2][1],
+                        matr1[0][1] * matr2[2][2],
+                        matr1[0][2] * matr2[2][0],
+                        matr1[0][2] * matr2[2][1],
+                        matr1[0][2] * matr2[2][2]
+                    ],
+                    [
+                        matr1[1][0] * matr2[0][0],
+                        matr1[1][0] * matr2[0][1],
+                        matr1[1][0] * matr2[0][2],
+                        matr1[1][1] * matr2[0][0],
+                        matr1[1][1] * matr2[0][1],
+                        matr1[1][1] * matr2[0][2],
+                        matr1[1][2] * matr2[0][0],
+                        matr1[1][2] * matr2[0][1],
+                        matr1[1][2] * matr2[0][2]
+                    ],
+                    [
+                        matr1[1][0] * matr2[1][0],
+                        matr1[1][0] * matr2[1][1],
+                        matr1[1][0] * matr2[1][2],
+                        matr1[1][1] * matr2[1][0],
+                        matr1[1][1] * matr2[1][1],
+                        matr1[1][1] * matr2[1][2],
+                        matr1[1][2] * matr2[1][0],
+                        matr1[1][2] * matr2[1][1],
+                        matr1[1][2] * matr2[1][2]
+                    ],
+                    [
+                        matr1[1][0] * matr2[2][0],
+                        matr1[1][0] * matr2[2][1],
+                        matr1[1][0] * matr2[2][2],
+                        matr1[1][1] * matr2[2][0],
+                        matr1[1][1] * matr2[2][1],
+                        matr1[1][1] * matr2[2][2],
+                        matr1[1][2] * matr2[2][0],
+                        matr1[1][2] * matr2[2][1],
+                        matr1[1][2] * matr2[2][2]
+                    ],
+                    [
+                        matr1[2][0] * matr2[0][0],
+                        matr1[2][0] * matr2[0][1],
+                        matr1[2][0] * matr2[0][2],
+                        matr1[2][1] * matr2[0][0],
+                        matr1[2][1] * matr2[0][1],
+                        matr1[2][1] * matr2[0][2],
+                        matr1[2][2] * matr2[0][0],
+                        matr1[2][2] * matr2[0][1],
+                        matr1[2][2] * matr2[0][2]
+                    ],
+                    [
+                        matr1[2][0] * matr2[1][0],
+                        matr1[2][0] * matr2[1][1],
+                        matr1[2][0] * matr2[1][2],
+                        matr1[2][1] * matr2[1][0],
+                        matr1[2][1] * matr2[1][1],
+                        matr1[2][1] * matr2[1][2],
+                        matr1[2][2] * matr2[1][0],
+                        matr1[2][2] * matr2[1][1],
+                        matr1[2][2] * matr2[1][2]
+                    ],
+                    [
+                        matr1[2][0] * matr2[2][0],
+                        matr1[2][0] * matr2[2][1],
+                        matr1[2][0] * matr2[2][2],
+                        matr1[2][1] * matr2[2][0],
+                        matr1[2][1] * matr2[2][1],
+                        matr1[2][1] * matr2[2][2],
+                        matr1[2][2] * matr2[2][0],
+                        matr1[2][2] * matr2[2][1],
+                        matr1[2][2] * matr2[2][2]
+                    ]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr1, 4) && Chalkboard.matr.isSizeOf(matr2, 4)) {
-                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][0] * matr2[0][2], matr1[0][0] * matr2[0][3], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][1] * matr2[0][2], matr1[0][1] * matr2[0][3], matr1[0][2] * matr2[0][0], matr1[0][2] * matr2[0][1], matr1[0][2] * matr2[0][2], matr1[0][2] * matr2[0][3], matr1[0][3] * matr2[0][0], matr1[0][3] * matr2[0][1], matr1[0][3] * matr2[0][2], matr1[0][3] * matr2[0][3]],
-                                            [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][0] * matr2[1][2], matr1[0][0] * matr2[1][3], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1], matr1[0][1] * matr2[1][2], matr1[0][1] * matr2[1][3], matr1[0][2] * matr2[1][0], matr1[0][2] * matr2[1][1], matr1[0][2] * matr2[1][2], matr1[0][2] * matr2[1][3], matr1[0][3] * matr2[1][0], matr1[0][3] * matr2[1][1], matr1[0][3] * matr2[1][2], matr1[0][3] * matr2[1][3]],
-                                            [matr1[0][0] * matr2[2][0], matr1[0][0] * matr2[2][1], matr1[0][0] * matr2[2][2], matr1[0][0] * matr2[2][3], matr1[0][1] * matr2[2][0], matr1[0][1] * matr2[2][1], matr1[0][1] * matr2[2][2], matr1[0][1] * matr2[2][3], matr1[0][2] * matr2[2][0], matr1[0][2] * matr2[2][1], matr1[0][2] * matr2[2][2], matr1[0][2] * matr2[2][3], matr1[0][3] * matr2[2][0], matr1[0][3] * matr2[2][1], matr1[0][3] * matr2[2][2], matr1[0][3] * matr2[2][3]],
-                                            [matr1[0][0] * matr2[3][0], matr1[0][0] * matr2[3][1], matr1[0][0] * matr2[3][2], matr1[0][0] * matr2[3][3], matr1[0][1] * matr2[3][0], matr1[0][1] * matr2[3][1], matr1[0][1] * matr2[3][2], matr1[0][1] * matr2[3][3], matr1[0][2] * matr2[3][0], matr1[0][2] * matr2[3][1], matr1[0][2] * matr2[3][2], matr1[0][2] * matr2[3][3], matr1[0][3] * matr2[3][0], matr1[0][3] * matr2[3][1], matr1[0][3] * matr2[3][2], matr1[0][3] * matr2[3][3]],
-                                            [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][0] * matr2[0][2], matr1[1][0] * matr2[0][3], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1], matr1[1][1] * matr2[0][2], matr1[1][1] * matr2[0][3], matr1[1][2] * matr2[0][0], matr1[1][2] * matr2[0][1], matr1[1][2] * matr2[0][2], matr1[1][2] * matr2[0][3], matr1[1][3] * matr2[0][0], matr1[1][3] * matr2[0][1], matr1[1][3] * matr2[0][2], matr1[1][3] * matr2[0][3]],
-                                            [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][0] * matr2[1][2], matr1[1][0] * matr2[1][3], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][1] * matr2[1][2], matr1[1][1] * matr2[1][3], matr1[1][2] * matr2[1][0], matr1[1][2] * matr2[1][1], matr1[1][2] * matr2[1][2], matr1[1][2] * matr2[1][3], matr1[1][3] * matr2[1][0], matr1[1][3] * matr2[1][1], matr1[1][3] * matr2[1][2], matr1[1][3] * matr2[1][3]],
-                                            [matr1[1][0] * matr2[2][0], matr1[1][0] * matr2[2][1], matr1[1][0] * matr2[2][2], matr1[1][0] * matr2[2][3], matr1[1][1] * matr2[2][0], matr1[1][1] * matr2[2][1], matr1[1][1] * matr2[2][2], matr1[1][1] * matr2[2][3], matr1[1][2] * matr2[2][0], matr1[1][2] * matr2[2][1], matr1[1][2] * matr2[2][2], matr1[1][2] * matr2[2][3], matr1[1][3] * matr2[2][0], matr1[1][3] * matr2[2][1], matr1[1][3] * matr2[2][2], matr1[1][3] * matr2[2][3]],
-                                            [matr1[1][0] * matr2[3][0], matr1[1][0] * matr2[3][1], matr1[1][0] * matr2[3][2], matr1[1][0] * matr2[3][3], matr1[1][1] * matr2[3][0], matr1[1][1] * matr2[3][1], matr1[1][1] * matr2[3][2], matr1[1][1] * matr2[3][3], matr1[1][2] * matr2[3][0], matr1[1][2] * matr2[3][1], matr1[1][2] * matr2[3][2], matr1[1][2] * matr2[3][3], matr1[1][3] * matr2[3][0], matr1[1][3] * matr2[3][1], matr1[1][3] * matr2[3][2], matr1[1][3] * matr2[3][3]],
-                                            [matr1[2][0] * matr2[0][0], matr1[2][0] * matr2[0][1], matr1[2][0] * matr2[0][2], matr1[2][0] * matr2[0][3], matr1[2][1] * matr2[0][0], matr1[2][1] * matr2[0][1], matr1[2][1] * matr2[0][2], matr1[2][1] * matr2[0][3], matr1[2][2] * matr2[0][0], matr1[2][2] * matr2[0][1], matr1[2][2] * matr2[0][2], matr1[2][2] * matr2[0][3], matr1[2][3] * matr2[0][0], matr1[2][3] * matr2[0][1], matr1[2][3] * matr2[0][2], matr1[2][3] * matr2[0][3]],
-                                            [matr1[2][0] * matr2[1][0], matr1[2][0] * matr2[1][1], matr1[2][0] * matr2[1][2], matr1[2][0] * matr2[1][3], matr1[2][1] * matr2[1][0], matr1[2][1] * matr2[1][1], matr1[2][1] * matr2[1][2], matr1[2][1] * matr2[1][3], matr1[2][2] * matr2[1][0], matr1[2][2] * matr2[1][1], matr1[2][2] * matr2[1][2], matr1[2][2] * matr2[1][3], matr1[2][3] * matr2[1][0], matr1[2][3] * matr2[1][1], matr1[2][3] * matr2[1][2], matr1[2][3] * matr2[1][3]],
-                                            [matr1[2][0] * matr2[2][0], matr1[2][0] * matr2[2][1], matr1[2][0] * matr2[2][2], matr1[2][0] * matr2[2][3], matr1[2][1] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][1] * matr2[2][2], matr1[2][1] * matr2[2][3], matr1[2][2] * matr2[2][0], matr1[2][2] * matr2[2][1], matr1[2][2] * matr2[2][2], matr1[2][2] * matr2[2][3], matr1[2][3] * matr2[2][0], matr1[2][3] * matr2[2][1], matr1[2][3] * matr2[2][2], matr1[2][3] * matr2[2][3]],
-                                            [matr1[2][0] * matr2[3][0], matr1[2][0] * matr2[3][1], matr1[2][0] * matr2[3][2], matr1[2][0] * matr2[3][3], matr1[2][1] * matr2[3][0], matr1[2][1] * matr2[3][1], matr1[2][1] * matr2[3][2], matr1[2][1] * matr2[3][3], matr1[2][2] * matr2[3][0], matr1[2][2] * matr2[3][1], matr1[2][2] * matr2[3][2], matr1[2][2] * matr2[3][3], matr1[2][3] * matr2[3][0], matr1[2][3] * matr2[3][1], matr1[2][3] * matr2[3][2], matr1[2][3] * matr2[3][3]],
-                                            [matr1[3][0] * matr2[0][0], matr1[3][0] * matr2[0][1], matr1[3][0] * matr2[0][2], matr1[3][0] * matr2[0][3], matr1[3][1] * matr2[0][0], matr1[3][1] * matr2[0][1], matr1[3][1] * matr2[0][2], matr1[3][1] * matr2[0][3], matr1[3][2] * matr2[0][0], matr1[3][2] * matr2[0][1], matr1[3][2] * matr2[0][2], matr1[3][2] * matr2[0][3], matr1[3][3] * matr2[0][0], matr1[3][3] * matr2[0][1], matr1[3][3] * matr2[0][2], matr1[3][3] * matr2[0][3]],
-                                            [matr1[3][0] * matr2[1][0], matr1[3][0] * matr2[1][1], matr1[3][0] * matr2[1][2], matr1[3][0] * matr2[1][3], matr1[3][1] * matr2[1][0], matr1[3][1] * matr2[1][1], matr1[3][1] * matr2[1][2], matr1[3][1] * matr2[1][3], matr1[3][2] * matr2[1][0], matr1[3][2] * matr2[1][1], matr1[3][2] * matr2[1][2], matr1[3][2] * matr2[1][3], matr1[3][3] * matr2[1][0], matr1[3][3] * matr2[1][1], matr1[3][3] * matr2[1][2], matr1[3][3] * matr2[1][3]],
-                                            [matr1[3][0] * matr2[2][0], matr1[3][0] * matr2[2][1], matr1[3][0] * matr2[2][2], matr1[3][0] * matr2[2][3], matr1[3][1] * matr2[2][0], matr1[3][1] * matr2[2][1], matr1[3][1] * matr2[2][2], matr1[3][1] * matr2[2][3], matr1[3][2] * matr2[2][0], matr1[3][2] * matr2[2][1], matr1[3][2] * matr2[2][2], matr1[3][2] * matr2[2][3], matr1[3][3] * matr2[2][0], matr1[3][3] * matr2[2][1], matr1[3][3] * matr2[2][2], matr1[3][3] * matr2[2][3]],
-                                            [matr1[3][0] * matr2[3][0], matr1[3][0] * matr2[3][1], matr1[3][0] * matr2[3][2], matr1[3][0] * matr2[3][3], matr1[3][1] * matr2[3][0], matr1[3][1] * matr2[3][1], matr1[3][1] * matr2[3][2], matr1[3][1] * matr2[3][3], matr1[3][2] * matr2[3][0], matr1[3][2] * matr2[3][1], matr1[3][2] * matr2[3][2], matr1[3][2] * matr2[3][3], matr1[3][3] * matr2[3][0], matr1[3][3] * matr2[3][1], matr1[3][3] * matr2[3][2], matr1[3][3] * matr2[3][3]]);
+                return Chalkboard.matr.init(
+                    [
+                        matr1[0][0] * matr2[0][0],
+                        matr1[0][0] * matr2[0][1],
+                        matr1[0][0] * matr2[0][2],
+                        matr1[0][0] * matr2[0][3],
+                        matr1[0][1] * matr2[0][0],
+                        matr1[0][1] * matr2[0][1],
+                        matr1[0][1] * matr2[0][2],
+                        matr1[0][1] * matr2[0][3],
+                        matr1[0][2] * matr2[0][0],
+                        matr1[0][2] * matr2[0][1],
+                        matr1[0][2] * matr2[0][2],
+                        matr1[0][2] * matr2[0][3],
+                        matr1[0][3] * matr2[0][0],
+                        matr1[0][3] * matr2[0][1],
+                        matr1[0][3] * matr2[0][2],
+                        matr1[0][3] * matr2[0][3]
+                    ],
+                    [
+                        matr1[0][0] * matr2[1][0],
+                        matr1[0][0] * matr2[1][1],
+                        matr1[0][0] * matr2[1][2],
+                        matr1[0][0] * matr2[1][3],
+                        matr1[0][1] * matr2[1][0],
+                        matr1[0][1] * matr2[1][1],
+                        matr1[0][1] * matr2[1][2],
+                        matr1[0][1] * matr2[1][3],
+                        matr1[0][2] * matr2[1][0],
+                        matr1[0][2] * matr2[1][1],
+                        matr1[0][2] * matr2[1][2],
+                        matr1[0][2] * matr2[1][3],
+                        matr1[0][3] * matr2[1][0],
+                        matr1[0][3] * matr2[1][1],
+                        matr1[0][3] * matr2[1][2],
+                        matr1[0][3] * matr2[1][3]
+                    ],
+                    [
+                        matr1[0][0] * matr2[2][0],
+                        matr1[0][0] * matr2[2][1],
+                        matr1[0][0] * matr2[2][2],
+                        matr1[0][0] * matr2[2][3],
+                        matr1[0][1] * matr2[2][0],
+                        matr1[0][1] * matr2[2][1],
+                        matr1[0][1] * matr2[2][2],
+                        matr1[0][1] * matr2[2][3],
+                        matr1[0][2] * matr2[2][0],
+                        matr1[0][2] * matr2[2][1],
+                        matr1[0][2] * matr2[2][2],
+                        matr1[0][2] * matr2[2][3],
+                        matr1[0][3] * matr2[2][0],
+                        matr1[0][3] * matr2[2][1],
+                        matr1[0][3] * matr2[2][2],
+                        matr1[0][3] * matr2[2][3]
+                    ],
+                    [
+                        matr1[0][0] * matr2[3][0],
+                        matr1[0][0] * matr2[3][1],
+                        matr1[0][0] * matr2[3][2],
+                        matr1[0][0] * matr2[3][3],
+                        matr1[0][1] * matr2[3][0],
+                        matr1[0][1] * matr2[3][1],
+                        matr1[0][1] * matr2[3][2],
+                        matr1[0][1] * matr2[3][3],
+                        matr1[0][2] * matr2[3][0],
+                        matr1[0][2] * matr2[3][1],
+                        matr1[0][2] * matr2[3][2],
+                        matr1[0][2] * matr2[3][3],
+                        matr1[0][3] * matr2[3][0],
+                        matr1[0][3] * matr2[3][1],
+                        matr1[0][3] * matr2[3][2],
+                        matr1[0][3] * matr2[3][3]
+                    ],
+                    [
+                        matr1[1][0] * matr2[0][0],
+                        matr1[1][0] * matr2[0][1],
+                        matr1[1][0] * matr2[0][2],
+                        matr1[1][0] * matr2[0][3],
+                        matr1[1][1] * matr2[0][0],
+                        matr1[1][1] * matr2[0][1],
+                        matr1[1][1] * matr2[0][2],
+                        matr1[1][1] * matr2[0][3],
+                        matr1[1][2] * matr2[0][0],
+                        matr1[1][2] * matr2[0][1],
+                        matr1[1][2] * matr2[0][2],
+                        matr1[1][2] * matr2[0][3],
+                        matr1[1][3] * matr2[0][0],
+                        matr1[1][3] * matr2[0][1],
+                        matr1[1][3] * matr2[0][2],
+                        matr1[1][3] * matr2[0][3]
+                    ],
+                    [
+                        matr1[1][0] * matr2[1][0],
+                        matr1[1][0] * matr2[1][1],
+                        matr1[1][0] * matr2[1][2],
+                        matr1[1][0] * matr2[1][3],
+                        matr1[1][1] * matr2[1][0],
+                        matr1[1][1] * matr2[1][1],
+                        matr1[1][1] * matr2[1][2],
+                        matr1[1][1] * matr2[1][3],
+                        matr1[1][2] * matr2[1][0],
+                        matr1[1][2] * matr2[1][1],
+                        matr1[1][2] * matr2[1][2],
+                        matr1[1][2] * matr2[1][3],
+                        matr1[1][3] * matr2[1][0],
+                        matr1[1][3] * matr2[1][1],
+                        matr1[1][3] * matr2[1][2],
+                        matr1[1][3] * matr2[1][3]
+                    ],
+                    [
+                        matr1[1][0] * matr2[2][0],
+                        matr1[1][0] * matr2[2][1],
+                        matr1[1][0] * matr2[2][2],
+                        matr1[1][0] * matr2[2][3],
+                        matr1[1][1] * matr2[2][0],
+                        matr1[1][1] * matr2[2][1],
+                        matr1[1][1] * matr2[2][2],
+                        matr1[1][1] * matr2[2][3],
+                        matr1[1][2] * matr2[2][0],
+                        matr1[1][2] * matr2[2][1],
+                        matr1[1][2] * matr2[2][2],
+                        matr1[1][2] * matr2[2][3],
+                        matr1[1][3] * matr2[2][0],
+                        matr1[1][3] * matr2[2][1],
+                        matr1[1][3] * matr2[2][2],
+                        matr1[1][3] * matr2[2][3]
+                    ],
+                    [
+                        matr1[1][0] * matr2[3][0],
+                        matr1[1][0] * matr2[3][1],
+                        matr1[1][0] * matr2[3][2],
+                        matr1[1][0] * matr2[3][3],
+                        matr1[1][1] * matr2[3][0],
+                        matr1[1][1] * matr2[3][1],
+                        matr1[1][1] * matr2[3][2],
+                        matr1[1][1] * matr2[3][3],
+                        matr1[1][2] * matr2[3][0],
+                        matr1[1][2] * matr2[3][1],
+                        matr1[1][2] * matr2[3][2],
+                        matr1[1][2] * matr2[3][3],
+                        matr1[1][3] * matr2[3][0],
+                        matr1[1][3] * matr2[3][1],
+                        matr1[1][3] * matr2[3][2],
+                        matr1[1][3] * matr2[3][3]
+                    ],
+                    [
+                        matr1[2][0] * matr2[0][0],
+                        matr1[2][0] * matr2[0][1],
+                        matr1[2][0] * matr2[0][2],
+                        matr1[2][0] * matr2[0][3],
+                        matr1[2][1] * matr2[0][0],
+                        matr1[2][1] * matr2[0][1],
+                        matr1[2][1] * matr2[0][2],
+                        matr1[2][1] * matr2[0][3],
+                        matr1[2][2] * matr2[0][0],
+                        matr1[2][2] * matr2[0][1],
+                        matr1[2][2] * matr2[0][2],
+                        matr1[2][2] * matr2[0][3],
+                        matr1[2][3] * matr2[0][0],
+                        matr1[2][3] * matr2[0][1],
+                        matr1[2][3] * matr2[0][2],
+                        matr1[2][3] * matr2[0][3]
+                    ],
+                    [
+                        matr1[2][0] * matr2[1][0],
+                        matr1[2][0] * matr2[1][1],
+                        matr1[2][0] * matr2[1][2],
+                        matr1[2][0] * matr2[1][3],
+                        matr1[2][1] * matr2[1][0],
+                        matr1[2][1] * matr2[1][1],
+                        matr1[2][1] * matr2[1][2],
+                        matr1[2][1] * matr2[1][3],
+                        matr1[2][2] * matr2[1][0],
+                        matr1[2][2] * matr2[1][1],
+                        matr1[2][2] * matr2[1][2],
+                        matr1[2][2] * matr2[1][3],
+                        matr1[2][3] * matr2[1][0],
+                        matr1[2][3] * matr2[1][1],
+                        matr1[2][3] * matr2[1][2],
+                        matr1[2][3] * matr2[1][3]
+                    ],
+                    [
+                        matr1[2][0] * matr2[2][0],
+                        matr1[2][0] * matr2[2][1],
+                        matr1[2][0] * matr2[2][2],
+                        matr1[2][0] * matr2[2][3],
+                        matr1[2][1] * matr2[2][0],
+                        matr1[2][1] * matr2[2][1],
+                        matr1[2][1] * matr2[2][2],
+                        matr1[2][1] * matr2[2][3],
+                        matr1[2][2] * matr2[2][0],
+                        matr1[2][2] * matr2[2][1],
+                        matr1[2][2] * matr2[2][2],
+                        matr1[2][2] * matr2[2][3],
+                        matr1[2][3] * matr2[2][0],
+                        matr1[2][3] * matr2[2][1],
+                        matr1[2][3] * matr2[2][2],
+                        matr1[2][3] * matr2[2][3]
+                    ],
+                    [
+                        matr1[2][0] * matr2[3][0],
+                        matr1[2][0] * matr2[3][1],
+                        matr1[2][0] * matr2[3][2],
+                        matr1[2][0] * matr2[3][3],
+                        matr1[2][1] * matr2[3][0],
+                        matr1[2][1] * matr2[3][1],
+                        matr1[2][1] * matr2[3][2],
+                        matr1[2][1] * matr2[3][3],
+                        matr1[2][2] * matr2[3][0],
+                        matr1[2][2] * matr2[3][1],
+                        matr1[2][2] * matr2[3][2],
+                        matr1[2][2] * matr2[3][3],
+                        matr1[2][3] * matr2[3][0],
+                        matr1[2][3] * matr2[3][1],
+                        matr1[2][3] * matr2[3][2],
+                        matr1[2][3] * matr2[3][3]
+                    ],
+                    [
+                        matr1[3][0] * matr2[0][0],
+                        matr1[3][0] * matr2[0][1],
+                        matr1[3][0] * matr2[0][2],
+                        matr1[3][0] * matr2[0][3],
+                        matr1[3][1] * matr2[0][0],
+                        matr1[3][1] * matr2[0][1],
+                        matr1[3][1] * matr2[0][2],
+                        matr1[3][1] * matr2[0][3],
+                        matr1[3][2] * matr2[0][0],
+                        matr1[3][2] * matr2[0][1],
+                        matr1[3][2] * matr2[0][2],
+                        matr1[3][2] * matr2[0][3],
+                        matr1[3][3] * matr2[0][0],
+                        matr1[3][3] * matr2[0][1],
+                        matr1[3][3] * matr2[0][2],
+                        matr1[3][3] * matr2[0][3]
+                    ],
+                    [
+                        matr1[3][0] * matr2[1][0],
+                        matr1[3][0] * matr2[1][1],
+                        matr1[3][0] * matr2[1][2],
+                        matr1[3][0] * matr2[1][3],
+                        matr1[3][1] * matr2[1][0],
+                        matr1[3][1] * matr2[1][1],
+                        matr1[3][1] * matr2[1][2],
+                        matr1[3][1] * matr2[1][3],
+                        matr1[3][2] * matr2[1][0],
+                        matr1[3][2] * matr2[1][1],
+                        matr1[3][2] * matr2[1][2],
+                        matr1[3][2] * matr2[1][3],
+                        matr1[3][3] * matr2[1][0],
+                        matr1[3][3] * matr2[1][1],
+                        matr1[3][3] * matr2[1][2],
+                        matr1[3][3] * matr2[1][3]
+                    ],
+                    [
+                        matr1[3][0] * matr2[2][0],
+                        matr1[3][0] * matr2[2][1],
+                        matr1[3][0] * matr2[2][2],
+                        matr1[3][0] * matr2[2][3],
+                        matr1[3][1] * matr2[2][0],
+                        matr1[3][1] * matr2[2][1],
+                        matr1[3][1] * matr2[2][2],
+                        matr1[3][1] * matr2[2][3],
+                        matr1[3][2] * matr2[2][0],
+                        matr1[3][2] * matr2[2][1],
+                        matr1[3][2] * matr2[2][2],
+                        matr1[3][2] * matr2[2][3],
+                        matr1[3][3] * matr2[2][0],
+                        matr1[3][3] * matr2[2][1],
+                        matr1[3][3] * matr2[2][2],
+                        matr1[3][3] * matr2[2][3]
+                    ],
+                    [
+                        matr1[3][0] * matr2[3][0],
+                        matr1[3][0] * matr2[3][1],
+                        matr1[3][0] * matr2[3][2],
+                        matr1[3][0] * matr2[3][3],
+                        matr1[3][1] * matr2[3][0],
+                        matr1[3][1] * matr2[3][1],
+                        matr1[3][1] * matr2[3][2],
+                        matr1[3][1] * matr2[3][3],
+                        matr1[3][2] * matr2[3][0],
+                        matr1[3][2] * matr2[3][1],
+                        matr1[3][2] * matr2[3][2],
+                        matr1[3][2] * matr2[3][3],
+                        matr1[3][3] * matr2[3][0],
+                        matr1[3][3] * matr2[3][1],
+                        matr1[3][3] * matr2[3][2],
+                        matr1[3][3] * matr2[3][3]
+                    ]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -1097,19 +1636,19 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix | ChalkboardVector}
          */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
-            if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
+            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
                 } else {
                     return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
-            } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
+            } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 if (Chalkboard.matr.rows(matr) === 3) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 3);
                 } else {
                     return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
-            } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
+            } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 if (Chalkboard.matr.rows(matr) === 4) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 4);
                 } else {
@@ -1127,17 +1666,16 @@ namespace Chalkboard {
          */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([-matr[0][0], -matr[0][1]],
-                                            [-matr[1][0], -matr[1][1]]);
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1]], [-matr[1][0], -matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2]],
-                                            [-matr[1][0], -matr[1][1], -matr[1][2]],
-                                            [-matr[2][0], -matr[2][1], -matr[2][2]]);
+                return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2]], [-matr[1][0], -matr[1][1], -matr[1][2]], [-matr[2][0], -matr[2][1], -matr[2][2]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([-matr[0][0], -matr[0][1], -matr[0][2], -matr[0][3]],
-                                            [-matr[1][0], -matr[1][1], -matr[1][2], -matr[1][3]],
-                                            [-matr[2][0], -matr[2][1], -matr[2][2], -matr[2][3]],
-                                            [-matr[3][0], -matr[3][1], -matr[3][2], -matr[3][3]]);
+                return Chalkboard.matr.init(
+                    [-matr[0][0], -matr[0][1], -matr[0][2], -matr[0][3]],
+                    [-matr[1][0], -matr[1][1], -matr[1][2], -matr[1][3]],
+                    [-matr[2][0], -matr[2][1], -matr[2][2], -matr[2][3]],
+                    [-matr[3][0], -matr[3][1], -matr[3][2], -matr[3][3]]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1159,11 +1697,38 @@ namespace Chalkboard {
          */
         export const norm = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
-                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]));
+                return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
-                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]));
+                return Chalkboard.real.sqrt(
+                    matr[0][0] * matr[0][0] +
+                        matr[0][1] * matr[0][1] +
+                        matr[0][2] * matr[0][2] +
+                        matr[1][0] * matr[1][0] +
+                        matr[1][1] * matr[1][1] +
+                        matr[1][2] * matr[1][2] +
+                        matr[2][0] * matr[2][0] +
+                        matr[2][1] * matr[2][1] +
+                        matr[2][2] * matr[2][2]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
-                return Chalkboard.real.sqrt((matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[0][3] * matr[0][3]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[1][3] * matr[1][3]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]) + (matr[2][3] * matr[2][3]) + (matr[3][0] * matr[3][0]) + (matr[3][1] * matr[3][1]) + (matr[3][2] * matr[3][2]) + (matr[3][3] * matr[3][3]));
+                return Chalkboard.real.sqrt(
+                    matr[0][0] * matr[0][0] +
+                        matr[0][1] * matr[0][1] +
+                        matr[0][2] * matr[0][2] +
+                        matr[0][3] * matr[0][3] +
+                        matr[1][0] * matr[1][0] +
+                        matr[1][1] * matr[1][1] +
+                        matr[1][2] * matr[1][2] +
+                        matr[1][3] * matr[1][3] +
+                        matr[2][0] * matr[2][0] +
+                        matr[2][1] * matr[2][1] +
+                        matr[2][2] * matr[2][2] +
+                        matr[2][3] * matr[2][3] +
+                        matr[3][0] * matr[3][0] +
+                        matr[3][1] * matr[3][1] +
+                        matr[3][2] * matr[3][2] +
+                        matr[3][3] * matr[3][3]
+                );
             } else {
                 let result = 0;
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1186,17 +1751,43 @@ namespace Chalkboard {
          */
         export const normalize = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]);
+                return Chalkboard.matr.init(
+                    [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)],
+                    [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q)]);
+                return Chalkboard.matr.init(
+                    [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q)],
+                    [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q)],
+                    [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q)]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q), matr[0][3] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q), matr[1][3] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q), matr[2][3] / Chalkboard.matr.norm(matr, p, q)],
-                                            [matr[3][0] / Chalkboard.matr.norm(matr, p, q), matr[3][1] / Chalkboard.matr.norm(matr, p, q), matr[3][2] / Chalkboard.matr.norm(matr, p, q), matr[3][3] / Chalkboard.matr.norm(matr, p, q)]);
+                return Chalkboard.matr.init(
+                    [
+                        matr[0][0] / Chalkboard.matr.norm(matr, p, q),
+                        matr[0][1] / Chalkboard.matr.norm(matr, p, q),
+                        matr[0][2] / Chalkboard.matr.norm(matr, p, q),
+                        matr[0][3] / Chalkboard.matr.norm(matr, p, q)
+                    ],
+                    [
+                        matr[1][0] / Chalkboard.matr.norm(matr, p, q),
+                        matr[1][1] / Chalkboard.matr.norm(matr, p, q),
+                        matr[1][2] / Chalkboard.matr.norm(matr, p, q),
+                        matr[1][3] / Chalkboard.matr.norm(matr, p, q)
+                    ],
+                    [
+                        matr[2][0] / Chalkboard.matr.norm(matr, p, q),
+                        matr[2][1] / Chalkboard.matr.norm(matr, p, q),
+                        matr[2][2] / Chalkboard.matr.norm(matr, p, q),
+                        matr[2][3] / Chalkboard.matr.norm(matr, p, q)
+                    ],
+                    [
+                        matr[3][0] / Chalkboard.matr.norm(matr, p, q),
+                        matr[3][1] / Chalkboard.matr.norm(matr, p, q),
+                        matr[3][2] / Chalkboard.matr.norm(matr, p, q),
+                        matr[3][3] / Chalkboard.matr.norm(matr, p, q)
+                    ]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1218,11 +1809,38 @@ namespace Chalkboard {
          */
         export const normsq = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
-                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]);
+                return matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1];
             } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
-                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]);
+                return (
+                    matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4) && p === 2 && q === 2) {
-                return (matr[0][0] * matr[0][0]) + (matr[0][1] * matr[0][1]) + (matr[0][2] * matr[0][2]) + (matr[0][3] * matr[0][3]) + (matr[1][0] * matr[1][0]) + (matr[1][1] * matr[1][1]) + (matr[1][2] * matr[1][2]) + (matr[1][3] * matr[1][3]) + (matr[2][0] * matr[2][0]) + (matr[2][1] * matr[2][1]) + (matr[2][2] * matr[2][2]) + (matr[2][3] * matr[2][3]) + (matr[3][0] * matr[3][0]) + (matr[3][1] * matr[3][1]) + (matr[3][2] * matr[3][2]) + (matr[3][3] * matr[3][3]);
+                return (
+                    matr[0][0] * matr[0][0] +
+                    matr[0][1] * matr[0][1] +
+                    matr[0][2] * matr[0][2] +
+                    matr[0][3] * matr[0][3] +
+                    matr[1][0] * matr[1][0] +
+                    matr[1][1] * matr[1][1] +
+                    matr[1][2] * matr[1][2] +
+                    matr[1][3] * matr[1][3] +
+                    matr[2][0] * matr[2][0] +
+                    matr[2][1] * matr[2][1] +
+                    matr[2][2] * matr[2][2] +
+                    matr[2][3] * matr[2][3] +
+                    matr[3][0] * matr[3][0] +
+                    matr[3][1] * matr[3][1] +
+                    matr[3][2] * matr[3][2] +
+                    matr[3][3] * matr[3][3]
+                );
             } else {
                 let result = 0;
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1245,8 +1863,8 @@ namespace Chalkboard {
             const augmented = matr.map(function (row) {
                 return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
             });
-            const reduced = Chalkboard.matr.reduce(augmented);
-            return reduced
+            const rowEchelonForm = Chalkboard.matr.Gaussian(augmented);
+            return rowEchelonForm
                 .filter(function (row: number[]) {
                     return row.slice(0, Chalkboard.matr.rows(matr)).every(function (element) {
                         return element === 0;
@@ -1269,9 +1887,30 @@ namespace Chalkboard {
                 } else if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] * matr[1][1] + matr[0][1] * matr[1][0];
                 } else if (Chalkboard.matr.rows(matr) === 3) {
-                    return matr[0][0] * (matr[1][1] * matr[2][2] + matr[1][2] * matr[2][1]) + matr[0][1] * (matr[1][0] * matr[2][2] + matr[1][2] * matr[2][0]) + matr[0][2] * (matr[1][0] * matr[2][1] + matr[1][1] * matr[2][0]);
+                    return (
+                        matr[0][0] * (matr[1][1] * matr[2][2] + matr[1][2] * matr[2][1]) +
+                        matr[0][1] * (matr[1][0] * matr[2][2] + matr[1][2] * matr[2][0]) +
+                        matr[0][2] * (matr[1][0] * matr[2][1] + matr[1][1] * matr[2][0])
+                    );
                 } else if (Chalkboard.matr.rows(matr) === 4) {
-                    return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) + matr[1][2] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) + matr[1][3] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1])) + matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) + matr[1][2] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) + matr[1][1] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0])) + matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1]) + matr[1][1] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0]));
+                    return (
+                        matr[0][0] *
+                            (matr[1][1] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) +
+                                matr[1][2] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) +
+                                matr[1][3] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1])) +
+                        matr[0][1] *
+                            (matr[1][0] * (matr[2][2] * matr[3][3] + matr[2][3] * matr[3][2]) +
+                                matr[1][2] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0])) +
+                        matr[0][2] *
+                            (matr[1][0] * (matr[2][1] * matr[3][3] + matr[2][3] * matr[3][1]) +
+                                matr[1][1] * (matr[2][0] * matr[3][3] + matr[2][3] * matr[3][0]) +
+                                matr[1][3] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0])) +
+                        matr[0][3] *
+                            (matr[1][0] * (matr[2][1] * matr[3][2] + matr[2][2] * matr[3][1]) +
+                                matr[1][1] * (matr[2][0] * matr[3][2] + matr[2][2] * matr[3][0]) +
+                                matr[1][2] * (matr[2][0] * matr[3][1] + matr[2][1] * matr[3][0]))
+                    );
                 } else {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1365,7 +2004,8 @@ namespace Chalkboard {
          * @returns {{Q: ChalkboardMatrix, R: ChalkboardMatrix}}
          */
         export const QRdecomp = (matr: ChalkboardMatrix): { Q: ChalkboardMatrix; R: ChalkboardMatrix } => {
-            const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
+            const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
+                R = Chalkboard.matr.copy(matr);
             for (let j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
                 let norm = 0;
                 for (let i = j; i < Chalkboard.matr.rows(matr); i++) {
@@ -1421,17 +2061,20 @@ namespace Chalkboard {
          */
         export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
             if (rows === 2 && cols === 2) {
-                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
             } else if (rows === 3 && cols === 3) {
-                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+                return Chalkboard.matr.init(
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]
+                );
             } else if (rows === 4 && cols === 4) {
-                return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
-                                            [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
+                return Chalkboard.matr.init(
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)],
+                    [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < rows; i++) {
@@ -1450,7 +2093,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const rank = (matr: ChalkboardMatrix): number => {
-            return Chalkboard.matr.reduce(matr).filter(function (row: number[]) {
+            return Chalkboard.matr.Gaussian(matr).filter(function (row: number[]) {
                 return row.some(function (element) {
                     return element !== 0;
                 });
@@ -1464,17 +2107,16 @@ namespace Chalkboard {
          */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]],
-                                            [1 / matr[1][0], 1 / matr[1][1]]);
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]], [1 / matr[1][0], 1 / matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2]],
-                                            [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2]],
-                                            [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2]]);
+                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2]], [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2]], [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2], 1 / matr[0][3]],
-                                            [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2], 1 / matr[1][3]],
-                                            [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2], 1 / matr[2][3]],
-                                            [1 / matr[3][0], 1 / matr[3][1], 1 / matr[3][2], 1 / matr[3][3]]);
+                return Chalkboard.matr.init(
+                    [1 / matr[0][0], 1 / matr[0][1], 1 / matr[0][2], 1 / matr[0][3]],
+                    [1 / matr[1][0], 1 / matr[1][1], 1 / matr[1][2], 1 / matr[1][3]],
+                    [1 / matr[2][0], 1 / matr[2][1], 1 / matr[2][2], 1 / matr[2][3]],
+                    [1 / matr[3][0], 1 / matr[3][1], 1 / matr[3][2], 1 / matr[3][3]]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1485,48 +2127,6 @@ namespace Chalkboard {
                 }
                 return result;
             }
-        };
-
-        /**
-         * Calculates the row echelon form of a matrix (performs Gaussian elimination on it).
-         * @param {ChalkboardMatrix} matr - The matrix
-         * @returns {ChalkboardMatrix}
-         */
-        export const reduce = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            let lead = 0;
-            for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
-                if (lead >= Chalkboard.matr.cols(matr)) {
-                    break;
-                }
-                let i = row;
-                while (matr[i][lead] === 0) {
-                    i++;
-                    if (i === Chalkboard.matr.rows(matr)) {
-                        i = row;
-                        lead++;
-                        if (Chalkboard.matr.cols(matr) === lead) {
-                            return matr;
-                        }
-                    }
-                }
-                const temp = matr[i];
-                matr[i] = matr[row];
-                matr[row] = temp;
-                const scl = matr[row][lead];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    matr[row][j] /= scl;
-                }
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    if (i !== row) {
-                        const coeff = matr[i][lead];
-                        for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                            matr[i][j] -= coeff * matr[row][j];
-                        }
-                    }
-                }
-                lead++;
-            }
-            return matr;
         };
 
         /**
@@ -1574,17 +2174,20 @@ namespace Chalkboard {
          */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])],
-                                            [Math.round(matr[1][0]), Math.round(matr[1][1])]);
+                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])], [Math.round(matr[1][0]), Math.round(matr[1][1])]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2])],
-                                            [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2])],
-                                            [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2])]);
+                return Chalkboard.matr.init(
+                    [Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2])],
+                    [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2])],
+                    [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2])]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2]), Math.round(matr[0][3])],
-                                            [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2]), Math.round(matr[1][3])],
-                                            [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2]), Math.round(matr[2][3])],
-                                            [Math.round(matr[3][0]), Math.round(matr[3][1]), Math.round(matr[3][2]), Math.round(matr[3][3])]);
+                return Chalkboard.matr.init(
+                    [Math.round(matr[0][0]), Math.round(matr[0][1]), Math.round(matr[0][2]), Math.round(matr[0][3])],
+                    [Math.round(matr[1][0]), Math.round(matr[1][1]), Math.round(matr[1][2]), Math.round(matr[1][3])],
+                    [Math.round(matr[2][0]), Math.round(matr[2][1]), Math.round(matr[2][2]), Math.round(matr[2][3])],
+                    [Math.round(matr[3][0]), Math.round(matr[3][1]), Math.round(matr[3][2]), Math.round(matr[3][3])]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1612,7 +2215,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const rowspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            return Chalkboard.matr.reduce(matr).filter(function (row: number[]) {
+            return Chalkboard.matr.Gaussian(matr).filter(function (row: number[]) {
                 return row.some(function (element) {
                     return element !== 0;
                 });
@@ -1644,29 +2247,26 @@ namespace Chalkboard {
          */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
-                return Chalkboard.matr.init([matr[0][0] * num],
-                                            [matr[1][0] * num]);
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num]);
             } else if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num],
-                                            [matr[1][0] * num, matr[1][1] * num]);
+                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num], [matr[1][0] * num, matr[1][1] * num]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3, 1)) {
-                return Chalkboard.matr.init([matr[0][0] * num],
-                                            [matr[1][0] * num],
-                                            [matr[2][0] * num]);
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num], [matr[2][0] * num]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num],
-                                            [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num],
-                                            [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num]);
+                return Chalkboard.matr.init(
+                    [matr[0][0] * num, matr[0][1] * num, matr[0][2] * num],
+                    [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num],
+                    [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num]
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4, 1)) {
-                return Chalkboard.matr.init([matr[0][0] * num],
-                                            [matr[1][0] * num],
-                                            [matr[2][0] * num],
-                                            [matr[3][0] * num]);
+                return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num], [matr[2][0] * num], [matr[3][0] * num]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num],
-                                            [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num],
-                                            [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num],
-                                            [matr[3][0] * num, matr[3][1] * num, matr[3][2] * num, matr[3][3] * num]);
+                return Chalkboard.matr.init(
+                    [matr[0][0] * num, matr[0][1] * num, matr[0][2] * num, matr[0][3] * num],
+                    [matr[1][0] * num, matr[1][1] * num, matr[1][2] * num, matr[1][3] * num],
+                    [matr[2][0] * num, matr[2][1] * num, matr[2][2] * num, matr[2][3] * num],
+                    [matr[3][0] * num, matr[3][1] * num, matr[3][2] * num, matr[3][3] * num]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1710,17 +2310,20 @@ namespace Chalkboard {
         export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
-                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]],
-                                                [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
+                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]], [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
                 } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
-                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2]],
-                                                [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2]],
-                                                [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2]],
+                        [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2]],
+                        [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2]]
+                    );
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
-                    return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2], matr1[0][3] - matr2[0][3]],
-                                                [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2], matr1[1][3] - matr2[1][3]],
-                                                [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2], matr1[2][3] - matr2[2][3]],
-                                                [matr1[3][0] - matr2[3][0], matr1[3][1] - matr2[3][1], matr1[3][2] - matr2[3][2], matr1[3][3] - matr2[3][3]]);
+                    return Chalkboard.matr.init(
+                        [matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1], matr1[0][2] - matr2[0][2], matr1[0][3] - matr2[0][3]],
+                        [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1], matr1[1][2] - matr2[1][2], matr1[1][3] - matr2[1][3]],
+                        [matr1[2][0] - matr2[2][0], matr1[2][1] - matr2[2][1], matr1[2][2] - matr2[2][2], matr1[2][3] - matr2[2][3]],
+                        [matr1[3][0] - matr2[3][0], matr1[3][1] - matr2[3][1], matr1[3][2] - matr2[3][2], matr1[3][3] - matr2[3][3]]
+                    );
                 } else {
                     const result = Chalkboard.matr.init();
                     for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
@@ -1743,17 +2346,11 @@ namespace Chalkboard {
          */
         export const symmetricBinomial = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1, 1],
-                                            [1, 2]);
+                return Chalkboard.matr.init([1, 1], [1, 2]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1, 1, 1],
-                                            [1, 2, 3],
-                                            [1, 3, 6]);
+                return Chalkboard.matr.init([1, 1, 1], [1, 2, 3], [1, 3, 6]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1, 1, 1, 1],
-                                            [1, 2, 3, 4],
-                                            [1, 3, 6, 10],
-                                            [1, 4, 10, 20]);
+                return Chalkboard.matr.init([1, 1, 1, 1], [1, 2, 3, 4], [1, 3, 6, 10], [1, 4, 10, 20]);
             } else {
                 return Chalkboard.matr.mul(Chalkboard.matr.lowerBinomial(size), Chalkboard.matr.upperBinomial(size));
             }
@@ -1770,7 +2367,24 @@ namespace Chalkboard {
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
                 return [matr[0][0], matr[0][1], matr[0][2], matr[1][0], matr[1][1], matr[1][2], matr[2][0], matr[2][1], matr[2][2]];
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return [matr[0][0], matr[0][1], matr[0][2], matr[0][3], matr[1][0], matr[1][1], matr[1][2], matr[1][3], matr[2][0], matr[2][1], matr[2][2], matr[2][3], matr[3][0], matr[3][1], matr[3][2], matr[3][3]];
+                return [
+                    matr[0][0],
+                    matr[0][1],
+                    matr[0][2],
+                    matr[0][3],
+                    matr[1][0],
+                    matr[1][1],
+                    matr[1][2],
+                    matr[1][3],
+                    matr[2][0],
+                    matr[2][1],
+                    matr[2][2],
+                    matr[2][3],
+                    matr[3][0],
+                    matr[3][1],
+                    matr[3][2],
+                    matr[3][3]
+                ];
             } else {
                 const result = [];
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1827,9 +2441,63 @@ namespace Chalkboard {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " ]";
+                return (
+                    "[ " +
+                    matr[0][0].toString() +
+                    " " +
+                    matr[0][1].toString() +
+                    " " +
+                    matr[0][2].toString() +
+                    " ]\n[ " +
+                    matr[1][0].toString() +
+                    " " +
+                    matr[1][1].toString() +
+                    " " +
+                    matr[1][2].toString() +
+                    " ]\n[ " +
+                    matr[2][0].toString() +
+                    " " +
+                    matr[2][1].toString() +
+                    " " +
+                    matr[2][2].toString() +
+                    " ]"
+                );
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " " + matr[0][2].toString() + " " + matr[0][3].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " " + matr[1][2].toString() + " " + matr[1][3].toString() + " ]\n[ " + matr[2][0].toString() + " " + matr[2][1].toString() + " " + matr[2][2].toString() + " " + matr[2][3].toString() + " ]\n[ " + matr[3][0].toString() + " " + matr[3][1].toString() + " " + matr[3][2].toString() + " " + matr[3][3].toString() + " ]";
+                return (
+                    "[ " +
+                    matr[0][0].toString() +
+                    " " +
+                    matr[0][1].toString() +
+                    " " +
+                    matr[0][2].toString() +
+                    " " +
+                    matr[0][3].toString() +
+                    " ]\n[ " +
+                    matr[1][0].toString() +
+                    " " +
+                    matr[1][1].toString() +
+                    " " +
+                    matr[1][2].toString() +
+                    " " +
+                    matr[1][3].toString() +
+                    " ]\n[ " +
+                    matr[2][0].toString() +
+                    " " +
+                    matr[2][1].toString() +
+                    " " +
+                    matr[2][2].toString() +
+                    " " +
+                    matr[2][3].toString() +
+                    " ]\n[ " +
+                    matr[3][0].toString() +
+                    " " +
+                    matr[3][1].toString() +
+                    " " +
+                    matr[3][2].toString() +
+                    " " +
+                    matr[3][3].toString() +
+                    " ]"
+                );
             } else {
                 let result = "";
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -1924,17 +2592,16 @@ namespace Chalkboard {
          */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0], matr[1][0]],
-                                            [matr[0][1], matr[1][1]]);
+                return Chalkboard.matr.init([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0]],
-                                            [matr[0][1], matr[1][1], matr[2][1]],
-                                            [matr[0][2], matr[1][2], matr[2][2]]);
+                return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0]], [matr[0][1], matr[1][1], matr[2][1]], [matr[0][2], matr[1][2], matr[2][2]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0], matr[1][0], matr[2][0], matr[3][0]],
-                                            [matr[0][1], matr[1][1], matr[2][1], matr[3][1]],
-                                            [matr[0][2], matr[1][2], matr[2][2], matr[3][2]],
-                                            [matr[0][3], matr[1][3], matr[2][3], matr[3][3]]);
+                return Chalkboard.matr.init(
+                    [matr[0][0], matr[1][0], matr[2][0], matr[3][0]],
+                    [matr[0][1], matr[1][1], matr[2][1], matr[3][1]],
+                    [matr[0][2], matr[1][2], matr[2][2], matr[3][2]],
+                    [matr[0][3], matr[1][3], matr[2][3], matr[3][3]]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.cols(matr); i++) {
@@ -1971,17 +2638,11 @@ namespace Chalkboard {
          */
         export const upperBinomial = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([1, 1],
-                                            [0, 1]);
+                return Chalkboard.matr.init([1, 1], [0, 1]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([1, 2, 1],
-                                            [0, 1, 1],
-                                            [0, 0, 1]);
+                return Chalkboard.matr.init([1, 2, 1], [0, 1, 1], [0, 0, 1]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1, 3, 3, 1],
-                                            [0, 1, 2, 1],
-                                            [0, 0, 1, 1],
-                                            [0, 0, 0, 1]);
+                return Chalkboard.matr.init([1, 3, 3, 1], [0, 1, 2, 1], [0, 0, 1, 1], [0, 0, 0, 1]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -2001,17 +2662,11 @@ namespace Chalkboard {
          */
         export const upperShift = (size: number): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([0, 1],
-                                            [0, 0]);
+                return Chalkboard.matr.init([0, 1], [0, 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([0, 1, 0],
-                                            [0, 0, 1],
-                                            [0, 0, 0]);
+                return Chalkboard.matr.init([0, 1, 0], [0, 0, 1], [0, 0, 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([0, 1, 0, 0],
-                                            [0, 0, 1, 0],
-                                            [0, 0, 0, 1],
-                                            [0, 0, 0, 0]);
+                return Chalkboard.matr.init([0, 1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1], [0, 0, 0, 0]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
@@ -2032,17 +2687,16 @@ namespace Chalkboard {
          */
         export const upperTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (size === 2) {
-                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0],
-                                            [0, elements[2] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0], [0, elements[2] || 0]);
             } else if (size === 3) {
-                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0],
-                                            [0, elements[3] || 0, elements[4] || 0],
-                                            [0, 0, elements[5] || 0]);
+                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0], [0, elements[3] || 0, elements[4] || 0], [0, 0, elements[5] || 0]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0, elements[2] || 0, elements[3] || 0],
-                                            [0, elements[4] || 0, elements[5] || 0, elements[6] || 0],
-                                            [0, 0, elements[7] || 0, elements[8] || 0],
-                                            [0, 0, 0, elements[9] || 0]);
+                return Chalkboard.matr.init(
+                    [elements[0] || 0, elements[1] || 0, elements[2] || 0, elements[3] || 0],
+                    [0, elements[4] || 0, elements[5] || 0, elements[6] || 0],
+                    [0, 0, elements[7] || 0, elements[8] || 0],
+                    [0, 0, 0, elements[9] || 0]
+                );
             } else {
                 elements = Array.isArray(elements[0]) ? elements[0] : elements;
                 const result = Chalkboard.matr.init();
@@ -2064,17 +2718,16 @@ namespace Chalkboard {
          */
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0],
-                                            [matr[1][0] * 0, matr[1][1] * 0]);
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0], [matr[1][0] * 0, matr[1][1] * 0]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0],
-                                            [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0],
-                                            [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
+                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0],
-                                            [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0],
-                                            [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0],
-                                            [matr[3][0] * 0, matr[3][1] * 0, matr[3][2] * 0, matr[3][3] * 0]);
+                return Chalkboard.matr.init(
+                    [matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0],
+                    [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0],
+                    [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0],
+                    [matr[3][0] * 0, matr[3][1] * 0, matr[3][2] * 0, matr[3][3] * 0]
+                );
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {

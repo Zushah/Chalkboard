@@ -1,6 +1,32 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v2.1.0 Seki](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0) - 01/22/2024
+The eleventh release of the Chalkboard library.
+Commits: [`v2.0.0...v2.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.0.0...v2.1.0)
+- Added a total of 26 `.isFoo` commands in the `matr`, `tens`, and `vect` categories that check if a matrix, tensor, or vector fulfills a particular property (for example, `matr.isDiagonal` checks if a matrix is a diagonal matrix)
+- Added `matr.norm`, `matr.normsq`, and `matr.normalize` to calculate the norm of a matrix or normalize a matrix
+- Added `matr.eigenvalue` and `matr.eigenvector` to calculate the dominant eigenvalue and eigenvector of a matrix
+- Added `matr.diagonal`, `matr.lowerTriangular`, and `matr.upperTriangular` to initialize a diagonal or triangular matrix
+- Added `matr.lowerBinomial`, `matr.symmetricBinomial`, `matr.upperBinomial`, `matr.lowerShift`, and `matr.upperShift` to replace the removed `matr.binomial` and `matr.shift` commands
+- Added `matr.perm` to calculate the permanent of a matrix
+- Added `comp.toMatrix` and `quat.toMatrix` to convert a complex number or a quaternion to a matrix
+- Added `comp.argBetween` to calculate the argument between two complex numbers
+- Added `numb.isApproxEqual` to check if two numbers are approximately equal
+- Added `numb.mod` to calculate the mathematically-correct modulo (instead of the symmetric modulo which is what the `%` operator does)
+- Added `numb.roundTo` to round a number to the nearest inputted positional index (or place value)
+- Removed `matr.binomial` and `matr.shift`
+- Changed nearly all of the `matr` commands to work significantly faster for 2x2, 3x3, and 4x4 matrices (for example, multiplications are about 67% faster, inversions are about 85% faster, and determinants are about 95% faster) when compared with previous versions of Chalkboard
+- Changed `matr.adjugate`, `matr.cofactor`, `matr.push`, `matr.pull`, and `matr.toVector` to use a zero-based index instead of a one-based index
+- Changed `matr.concat`, `matr.push`, `matr.pull`, `matr.toVector`, and `vect.toMatrix` to use an `axis` parameter instead of a `type` parameter
+- Changed `matr.push`, `matr.pull`, and `matr.toVector` to have their `rowORcol` parameter be renamed as `index`
+- Changed `calc.fds` and `calc.fnds` to work with the changes in `matr.toVector`
+- Changed `matr.reduce` to be renamed as `matr.Gaussian`
+- Changed nearly all of the `vect` commands to use the new `vect.isDimensionOf` command instead of a ridiculous amount of `typeof` operators
+- Changed `tens.rank` to use the length of `tens.size` instead of doing its own calculation
+- Changed `tens.empty`, `tens.fill`, `tens.random`, and `tens.resize` to use a ternary operator instead of an `if` statement to check whether a sequence of arguments or an array is inputted into their `size` parameters
+- Changed `numb.Bernoullian` to not have an unnecessary `if` statement for its optional parameter
+
 ## [v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) - 01/08/2024
 The tenth release of the Chalkboard library.
 Commits: [`v1.7.0...v2.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.7.0...v2.0.0)
@@ -48,7 +74,6 @@ Commits: [`v1.6.0...v1.7.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Fixed (rewrote) `numb.binomial` which kept giving "callstack size exceeded" errors for some reason
 - Fixed (rewrote) `matr.QRdecomp` thanks to [@JentGent](https://www.github.com/JentGent)'s [implementation](https://www.github.com/JentGent/linalg/blob/main/linalg.js#L519)
 
-
 ## [v1.6.0 Fermat](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0) - 12/25/2023
 The eighth release of the Chalkboard library.
 Commits: [`v1.5.0...v1.6.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.5.0...v1.6.0)
@@ -73,7 +98,6 @@ Commits: [`v1.5.0...v1.6.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Fixed (rewrote) `numb.Gaussian` which basically didn't work at all
 - Fixed `real.pow` which returned `NaN` for 0 raised to the power of 0
 - Fixed the default domain for `plot.function` which was incorrectly using the domain for domain colorings instead of normal graphs
-
 
 ## [v1.5.0 Cauchy](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) - 12/18/2023
 The seventh release of the Chalkboard library.

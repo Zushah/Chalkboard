@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.0.0 al-Khwarizmi Example Program: Matrix Donut
+    Version 2.1.0 Seki Example Program: Matrix Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
