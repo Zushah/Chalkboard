@@ -18,6 +18,13 @@
 type ChalkboardComplex = { a: number; b: number };
 
 /**
+ * The type for dual numbers.
+ * @property {number} a - The real part
+ * @property {number} b - The imaginary part
+ */
+type ChalkboardDual = { a: number; b: number };
+
+/**
  * The type for mathematical functions.
  * @property {string | string[]} definition - The function's definition
  * @property {"expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"} type - The function's type, which can be "expl" for explicit functions, "inve" for inverse functions, "pola" for polar functions, "curv" for parametric curves, "surf" for parametric surfaces, "mult" for explicit multivariable functions, or "comp" for explicit complex-valued functions
@@ -67,10 +74,10 @@ type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
  */
 namespace Chalkboard {
     /**
-     * Applies a callback function in an element-wise manner on a complex number, matrix, quaternion, tensor, or vector.
-     * @param {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector} object - The complex number, matrix, quaternion, tensor, or vector
+     * Applies a callback function in an element-wise manner on a complex number, dual number, matrix, quaternion, tensor, or vector.
+     * @param {ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector} object - The complex number, dual number, matrix, quaternion, tensor, or vector
      * @param {Function} callback - The callback function to apply
-     * @returns {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector}
+     * @returns {ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector}
      * @example
      * // Returns the vector (1, 2, 6, 24)
      * let v = Chalkboard.vect.init(1, 2, 3, 4);
@@ -79,16 +86,19 @@ namespace Chalkboard {
      * });
      */
     export const APPLY = (
-        object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector,
+        object: ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector,
         callback: Function
-    ): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
+    ): ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
         const comp = object as ChalkboardComplex;
+        const dual = object as ChalkboardDual;
         const matr = object as ChalkboardMatrix;
         const quat = object as ChalkboardQuaternion;
         const tens = object as ChalkboardTensor;
         const vect = object as ChalkboardVector;
         if (typeof comp.a !== "undefined" && typeof comp.b !== "undefined" && typeof quat.c === "undefined" && typeof quat.d === "undefined") {
             return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
+        } else if (typeof dual.a !== "undefined" && typeof dual.b !== "undefined") { 
+            return Chalkboard.dual.init(callback(dual.a), callback(dual.b));
         } else if (Array.isArray(matr) && Array.isArray(matr[0]) && !Array.isArray(matr[0][0])) {
             const result = Chalkboard.matr.init();
             for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
