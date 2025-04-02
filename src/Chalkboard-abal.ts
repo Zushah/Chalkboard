@@ -12,9 +12,9 @@ namespace Chalkboard {
          */
         export const A = (n: number): ChalkboardSet<number[]> => {
             if (!Number.isInteger(n) || n <= 0) {
-                throw new Error("The parameter 'n' must be a positive integer.");
+                throw new Error('The parameter "n" must be a positive integer.');
             }
-            const SnSet = Chalkboard.abal.S(n);
+            const Sn = Chalkboard.abal.S(n);
             const isEvenPermutation = (perm: number[]): boolean => {
                 let inversions = 0;
                 for (let i = 0; i < perm.length; i++) {
@@ -24,7 +24,7 @@ namespace Chalkboard {
                 }
                 return inversions % 2 === 0;
             };
-            const elements = (SnSet.elements || []).filter(isEvenPermutation);
+            const elements = (Sn.elements || []).filter(isEvenPermutation);
             return {
                 contains: (element: number[]) => elements.some((perm) => JSON.stringify(perm) === JSON.stringify(element)),
                 elements: elements,
@@ -50,17 +50,17 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const cardinality = <T>(structure: ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>): number => {
-            const id = 'set' in structure && structure.set ? structure.set.id : ('id' in structure ? structure.id : undefined);
+            const id = "set" in structure && structure.set ? structure.set.id : ("id" in structure ? structure.id : undefined);
             if (id === "Z" || id === "Q" || id === "R" || id === "C" || id?.startsWith("M(")) {
                 return Infinity;
             }
-            if ('elements' in structure && structure.elements) {
+            if ("elements" in structure && structure.elements) {
                 return structure.elements.length;
             }
-            if ('set' in structure && structure.set.elements) {
+            if ("set" in structure && structure.set.elements) {
                 return structure.set.elements.length;
             }
-            throw new Error('The inputted structure does not have a finite cardinality or is missing elements.');
+            throw new Error("The inputted structure does not have a finite cardinality or is missing elements.");
         };
 
         /**
@@ -77,11 +77,11 @@ namespace Chalkboard {
                     result.push([a, b]);
                 }
             }
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
-         * Finds the center of a group.
+         * Calculates the center of a group.
          * @template T
          * @param {ChalkboardGroup<T>} group - The group
          * @returns {ChalkboardSet<T>}
@@ -89,23 +89,23 @@ namespace Chalkboard {
         export const center = <T>(group: ChalkboardGroup<T>): ChalkboardSet<T> => {
             const { set, operation } = group;
             if (!set.elements) {
-                return Chalkboard.abal.define<T>([]);
+                return Chalkboard.abal.set<T>([]);
             }
             const result = set.elements.filter((z) =>
                 (set.elements ?? []).every((g) => operation(z, g) === operation(g, z))
             );
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
-         * Calculates the complement of a set relative to a universal set.
+         * Calculates the complement of a set relative to a super set.
          * @template T
-         * @param {ChalkboardSet<T>} set - The universal set
-         * @param {ChalkboardSet<T>} subset - The subset of the universal set
+         * @param {ChalkboardSet<T>} set - The set
+         * @param {ChalkboardSet<T>} superset - The superset
          * @returns {ChalkboardSet<T>}
          */
-        export const complement = <T>(set: ChalkboardSet<T>, subset: ChalkboardSet<T>): ChalkboardSet<T> => {
-            return Chalkboard.abal.define((set.elements || []).filter((element) => !subset.contains(element)));
+        export const complement = <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>): ChalkboardSet<T> => {
+            return Chalkboard.abal.set((superset.elements || []).filter((element) => !set.contains(element)));
         };
 
         /**
@@ -122,7 +122,7 @@ namespace Chalkboard {
                 result.push(current);
                 current = group.operation(current, element);
             } while (!result.includes(current));
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
@@ -132,7 +132,7 @@ namespace Chalkboard {
          */
         export const D = (n: number): ChalkboardSet<string> => {
             if (!Number.isInteger(n) || n <= 0) {
-                throw new Error("The parameter 'n' must be a positive integer.");
+                throw new Error('The parameter "n" must be a positive integer.');
             }
             const elements: string[] = [];
             for (let i = 0; i < n; i++) {
@@ -149,16 +149,6 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a finite set of elements.
-         * @param {T[]} elements - The elements of the set
-         * @returns {ChalkboardSet<T>}
-         */
-        export const define = <T>(elements: T[]): ChalkboardSet<T> => ({
-            contains: (element: T) => elements.includes(element),
-            elements: elements
-        });
-
-        /**
          * Calculates the difference of two sets.
          * @template T
          * @param {ChalkboardSet<T>} set1 - The first set
@@ -167,11 +157,11 @@ namespace Chalkboard {
          */
         export const difference = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
             const result = (set1.elements || []).filter((element) => !set2.contains(element));
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
-         * Defines the direct product or direct sum of two algebraic structures.
+         * Calculates the direct product or direct sum of two algebraic structures.
          * @template T, U
          * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} structure1 - The first structure
          * @param {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} structure2 - The second structure
@@ -242,15 +232,15 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines the algebraic structure known as a field.
+         * Defines an algebraic structure known as a field.
          * @template T
          * @param {ChalkboardSet<T>} set - The set of the field
          * @param {(a: T, b: T) => T} add - The additive operation of the field
          * @param {(a: T, b: T) => T} mul - The multiplicative operation of the field
          * @param {T} [addIdentity] - The additive identity element of the field
          * @param {T} [mulIdentity] - The multiplicative identity element of the field
-         * @param {(a: T) => T} [addInverter] - The function to compute the additive inverse of an element of the field
-         * @param {(a: T) => T} [mulInverter] - The function to compute the multiplicative inverse of an element of the field
+         * @param {(a: T) => T} [addInverter] - The function to calculate the additive inverse of an element of the field (optional if the set is Z, Q, R, C, or M)
+         * @param {(a: T) => T} [mulInverter] - The function to calculate the multiplicative inverse of an element of the field (optional if the set is Z, Q, R, C, or M)
          * @returns {ChalkboardField<T>}
          */
         export const field = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T): ChalkboardField<T> => {
@@ -284,12 +274,12 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines the algebraic structure known as a group.
+         * Defines an algebraic structure known as a group.
          * @template T
          * @param {ChalkboardSet<T>} set - The set of the group
          * @param {(a: T, b: T) => T} operation - The operation of the group
          * @param {T} [identity] - The identity element of the group (optional if the set is Z, Q, R, C, or M)
-         * @param {(a: T) => T} [inverter] - The function to compute the inverse of an element of the group (optional if the set is Z, Q, R, C, or M)
+         * @param {(a: T) => T} [inverter] - The function to calculate the inverse of an element of the group (optional if the set is Z, Q, R, C, or M)
          * @returns {ChalkboardGroup<T>}
          */
         export const group = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T): ChalkboardGroup<T> => {
@@ -343,7 +333,7 @@ namespace Chalkboard {
          */
         export const intersection = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
             const result = (set1.elements || []).filter((element) => set2.contains(element));
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
@@ -455,7 +445,7 @@ namespace Chalkboard {
                     generatedElements.push(current);
                     current = operation(current, generator);
                 } while (!generatedElements.includes(current));
-                const generatedSet = Chalkboard.abal.define(generatedElements);
+                const generatedSet = Chalkboard.abal.set(generatedElements);
                 if (Chalkboard.abal.isSubset(subgroup, generatedSet)) {
                     return true;
                 }
@@ -848,7 +838,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Computes the power set of a set.
+         * Calculates the power set of a set.
          * @template T
          * @param {ChalkboardSet<T>} set - The set
          * @returns {ChalkboardSet<ChalkboardSet<T>>}
@@ -864,9 +854,9 @@ namespace Chalkboard {
                         subset.push(elements[j]);
                     }
                 }
-                result.push(Chalkboard.abal.define(subset));
+                result.push(Chalkboard.abal.set(subset));
             }
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
@@ -897,7 +887,7 @@ namespace Chalkboard {
                     }
                 }
             }
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**
@@ -921,14 +911,14 @@ namespace Chalkboard {
         });
 
         /**
-         * Defines the algebraic structure known as a ring.
+         * Defines an algebraic structure known as a ring.
          * @template T
          * @param {ChalkboardSet<T>} set - The set of the ring
          * @param {(a: T, b: T) => T} add - The additive operation of the ring
          * @param {(a: T, b: T) => T} mul - The multiplicative operation of the ring
-         * @param {T} [addIdentity] - The additive identity element of the ring
-         * @param {T} [mulIdentity] - The multiplicative identity element of the ring
-         * @param {(a: T) => T} [addInverter] - The function to compute the additive inverse of an element of the ring
+         * @param {T} [addIdentity] - The additive identity element of the ring (optional if the set is Z, Q, R, C, or M)
+         * @param {T} [mulIdentity] - The multiplicative identity element of the ring (optional if the set is Z, Q, R, C, or M)
+         * @param {(a: T) => T} [addInverter] - The function to calculate the additive inverse of an element of the ring (optional if the set is Z, Q, R, C, or M)
          * @returns {ChalkboardRing<T>}
          */
         export const ring = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T): ChalkboardRing<T> => {
@@ -987,7 +977,7 @@ namespace Chalkboard {
          */
         export const S = (n: number): ChalkboardSet<number[]> => {
             if (!Number.isInteger(n) || n <= 0) {
-                throw new Error("The parameter 'n' must be a positive integer.");
+                throw new Error('The parameter "n" must be a positive integer.');
             }
             const generatePermutations = (arr: number[]): number[][] => {
                 if (arr.length === 0) return [[]];
@@ -1010,6 +1000,16 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines a finite set of elements.
+         * @param {T[]} elements - The elements of the set
+         * @returns {ChalkboardSet<T>}
+         */
+        export const set = <T>(elements: T[]): ChalkboardSet<T> => ({
+            contains: (element: T) => elements.includes(element),
+            elements: elements
+        });
+
+        /**
          * Calculates the symmetric difference of two sets.
          * @template T
          * @param {ChalkboardSet<T>} set1 - The first set
@@ -1019,7 +1019,7 @@ namespace Chalkboard {
         export const symmetricDifference = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
             const diffA = Chalkboard.abal.difference(set1, set2).elements || [];
             const diffB = Chalkboard.abal.difference(set2, set1).elements || [];
-            return Chalkboard.abal.define([...diffA, ...diffB]);
+            return Chalkboard.abal.set([...diffA, ...diffB]);
         };
 
         /**
@@ -1031,7 +1031,7 @@ namespace Chalkboard {
          */
         export const union = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
             const result = Array.from(new Set([...(set1.elements || []), ...(set2.elements || [])]));
-            return Chalkboard.abal.define(result);
+            return Chalkboard.abal.set(result);
         };
 
         /**

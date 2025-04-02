@@ -10,6 +10,28 @@ namespace Chalkboard {
      */
     export namespace stat {
         /**
+         * Calculates the absolute value of all the elements of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const absolute = (arr: number[]): number[] => {
+            return arr.map(x => Math.abs(x));
+        };
+
+        /**
+         * Calculates the addition of two arrays.
+         * @param {number[]} arr1 - The first array
+         * @param {number[]} arr2 - The second array
+         * @returns {number[]}
+         */
+        export const add = (arr1: number[], arr2: number[]): number[] => {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            return arr1.map((x, i) => x + arr2[i]);
+        };
+
+        /**
          * Returns an array with linearly-spaced elements.
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
@@ -35,21 +57,34 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the posterior probability using Bayes' theorem.
+         * @param {number} pA - The prior probability of A (i.e. P(A))
+         * @param {number} pGivenA - The probability of B given A (i.e. P(B|A))
+         * @param {number} pGivenNotA - The probability of B given not A (i.e. P(B|!A))
+         * @returns {number}
+         */
+        export const Bayes = (pA: number, pGivenA: number, pGivenNotA: number): number => {
+            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1) {
+                throw new RangeError('All probabilities must be between 0 and 1.');
+            }
+            return (pGivenA * pA) / (pGivenA * pA + pGivenNotA * (1 - pA));
+        };
+
+        /**
          * Calculates the change of two arrays.
          * @param {number[]} arr1 - The first array
          * @param {number[]} arr2 - The second array
          * @returns {number[]}
          */
         export const change = (arr1: number[], arr2: number[]): number[] => {
-            const result = [];
-            if (arr1.length === arr2.length) {
-                for (let i = 0; i < arr1.length; i++) {
-                    result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
-                }
-                return result;
-            } else {
-                throw new RangeError('Parameters "arr1" and "arr2" must be of type "number[]" with the same "length" property.');
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
             }
+            const result = [];
+            for (let i = 0; i < arr1.length; i++) {
+                result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
+            }
+            return result;
         };
 
         /**
@@ -59,15 +94,14 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const chiSquared = (arr1: number[], arr2: number[]): number[] => {
-            const result = [];
-            if (arr1.length === arr2.length) {
-                for (let i = 0; i < arr1.length; i++) {
-                    result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
-                }
-                return result;
-            } else {
-                throw new RangeError('Parameters "arr1" and "arr2" must be of type "number[]" with the same "length" property.');
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
             }
+            const result = [];
+            for (let i = 0; i < arr1.length; i++) {
+                result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
+            }
+            return result;
         };
 
         /**
@@ -75,11 +109,14 @@ namespace Chalkboard {
          * @param {number[]} arr - The array
          * @returns {number[]}
          */
-        export const confidenceInterval = (arr: number[]): [number, number] => {
-            return [
-                Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)),
-                Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))
-            ];
+        export const confidenceInterval = (arr: number[], confidence: number = 0.95): [number, number] => {
+            if (confidence <= 0 || confidence >= 1) {
+                throw new RangeError('Parameter "confidence" must be between 0 and 1 (exclusive).');
+            }
+            const z = Chalkboard.stat.inormal(1 - (1 - confidence) / 2);
+            const mean = Chalkboard.stat.mean(arr);
+            const standardError = Chalkboard.stat.error(arr);
+            return [mean - z * standardError, mean + z * standardError];
         };
 
         /**
@@ -133,6 +170,95 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the Pearson correlation coefficient of two arrays.
+         * @param {number[]} arr1 - The first array
+         * @param {number[]} arr2 - The second array
+         * @returns {number}
+         */
+        export const correlationCoefficient = (arr1: number[], arr2: number[]): number => {
+            return Chalkboard.stat.covariance(arr1, arr2) / (Chalkboard.stat.deviation(arr1) * Chalkboard.stat.deviation(arr2));
+        };
+
+        /**
+         * Calculates the covariance of two arrays.
+         * @param {number[]} arr1 - The first array
+         * @param {number[]} arr2 - The second array
+         * @returns {number}
+         */
+        export const covariance = (arr1: number[], arr2: number[]): number => {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            const mean1 = Chalkboard.stat.mean(arr1);
+            const mean2 = Chalkboard.stat.mean(arr2);
+            let sum = 0;
+            for (let i = 0; i < arr1.length; i++) {
+                sum += (arr1[i] - mean1) * (arr2[i] - mean2);
+            }
+            return sum / arr1.length;
+        };
+
+        /**
+         * Calculates the cumulative sum of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const cumsum = (arr: number[]): number[] => {
+            const result = [];
+            let sum = 0;
+            for (let i = 0; i < arr.length; i++) {
+                sum += arr[i];
+                result.push(sum);
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the cumulative maximum of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const cummax = (arr: number[]): number[] => {
+            const result = [];
+            let max = -Infinity;
+            for (const value of arr) {
+                max = Math.max(max, value);
+                result.push(max);
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the cumulative minimum of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const cummin = (arr: number[]): number[] => {
+            const result = [];
+            let min = Infinity;
+            for (const value of arr) {
+                min = Math.min(min, value);
+                result.push(min);
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the cumulative product of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const cummul = (arr: number[]): number[] => {
+            const result = [];
+            let mul = 0;
+            for (let i = 0; i < arr.length; i++) {
+                mul *= arr[i];
+                result.push(mul);
+            }
+            return result;
+        };
+
+        /**
          * Calculates the standard deviation of an array.
          * @param {number[]} arr - The array
          * @returns {number}
@@ -143,6 +269,19 @@ namespace Chalkboard {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
             }
             return Chalkboard.real.sqrt(result / arr.length);
+        };
+
+        /**
+         * Calculates the dot product of two arrays.
+         * @param {number[]} arr1 - The first array
+         * @param {number[]} arr2 - The second array
+         * @returns {number}
+         */
+        export const dot = (arr1: number[], arr2: number[]): number => {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            return arr1.reduce((sum, x, i) => sum + x * arr2[i], 0);
         };
 
         /**
@@ -178,6 +317,22 @@ namespace Chalkboard {
                 }
             }
             return result;
+        };
+        
+        /**
+         * Calculates the expected value of an array.
+         * @param {number[]} arr - The array
+         * @param {number[]} [probabilities] - The probabilities of the corresponding elements of the array (optional, defaults to equiprobable)
+         * @returns {number}
+         */
+        export const expected = (arr: number[], probabilities?: number[]): number => {
+            if (!probabilities) {
+                probabilities = Array(arr.length).fill(1 / arr.length);
+            }
+            if (arr.length !== probabilities.length) {
+                throw new RangeError('Parameters "values" and "probabilities" must have the same length.');
+            }
+            return arr.reduce((sum, x, i) => sum + x * probabilities[i], 0);
         };
 
         /**
@@ -298,6 +453,83 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates an approximation of the inverse of the cumulative distribution function (CDF) of the standard normal distribution using the Beasley-Springer-Moro algorithm.
+         * @param {number} p - The probability (must be between 0 and 1)
+         * @returns {number}
+         */
+        export const inormal = (p: number): number => {
+            if (p <= 0 || p >= 1) {
+                throw new RangeError('Parameter "p" must be between 0 and 1 (exclusive).');
+            }
+            const a = [2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637];
+            const b = [-8.4735109309, 23.08336743743, -21.06224101826, 3.13082909833];
+            const c = [0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
+                    0.0276438810333863, 0.0038405729373609, 0.0003951896511919,
+                    0.0000321767881768, 0.0000002888167364, 0.0000003960315187];
+            let x = p - 0.5;
+            if (Math.abs(x) < 0.42) {
+                const r = x * x;
+                return x * (((a[3] * r + a[2]) * r + a[1]) * r + a[0]) /
+                        ((((b[3] * r + b[2]) * r + b[1]) * r + b[0]) * r + 1);
+            } else {
+                const r = p < 0.5 ? p : 1 - p;
+                const s = Math.log(-Math.log(r));
+                let t = c[0];
+                for (let i = 1; i < c.length; i++) {
+                    t += c[i] * Math.pow(s, i);
+                }
+                return p < 0.5 ? -t : t;
+            }
+        };
+
+        /**
+         * Interpolates missing values (null or undefined) in an array using linear or quadratic interpolation.
+         * @param {(number | null | undefined)[]} arr - The array with missing values
+         * @param {"linear" | "quadratic"} [type="linear"] - The interpolation method, either "linear" or "quadratic"
+         * @returns {number[]}
+         */
+        export const interpolate = (arr: (number | null | undefined)[], type: "linear" | "quadratic" = "linear"): number[] => {
+            const result = arr.slice();
+            for (let i = 0; i < result.length; i++) {
+                if (result[i] == null) {
+                    let prevIndex = i - 1;
+                    let nextIndex = i + 1;
+                    while (prevIndex >= 0 && result[prevIndex] == null) prevIndex--;
+                    while (nextIndex < result.length && result[nextIndex] == null) nextIndex++;
+                    const prevValue = prevIndex >= 0 ? result[prevIndex] as number : 0;
+                    const nextValue = nextIndex < result.length ? result[nextIndex] as number : 0;
+                    if (type === "linear") {
+                        const t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.lerp([prevValue, nextValue], t);
+                    } else if (type === "quadratic" && prevIndex > 0 && nextIndex < result.length) {
+                        const prevPrevIndex = prevIndex - 1;
+                        const prevPrevValue = prevPrevIndex >= 0 ? result[prevPrevIndex] as number : prevValue;
+                        const t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.qerp(
+                            [prevPrevIndex, prevPrevValue],
+                            [prevIndex, prevValue],
+                            [nextIndex, nextValue],
+                            prevIndex + t * (nextIndex - prevIndex)
+                        );
+                    } else {
+                        const t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.lerp([prevValue, nextValue], t);
+                    }
+                }
+            }
+            return result as number[];
+        };
+
+        /**
+         * Calculates the interquartile range of an array.
+         * @param {number[]} arr - The array
+         * @returns {number}
+         */
+        export const interquartileRange = (arr: number[]): number => {
+            return Chalkboard.stat.quartile(arr, "Q3") - Chalkboard.stat.quartile(arr, "Q1");
+        };
+
+        /**
          * Calculates the kurtosis of an array.
          * @param {number[]} arr - The array
          * @returns {number}
@@ -408,6 +640,42 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the moving mean of an array.
+         * @param {number[]} arr - The array
+         * @param {number} windowSize - The size of the moving window
+         * @returns {number[]}
+         */
+        export const meanMoving = (arr: number[], windowSize: number): number[] => {
+            if (windowSize <= 0 || windowSize > arr.length) {
+                throw new RangeError('Parameter "windowSize" must be greater than 0 and less than or equal to the array length.');
+            }
+            const result = [];
+            for (let i = 0; i <= arr.length - windowSize; i++) {
+                const windowArr = arr.slice(i, i + windowSize);
+                result.push(Chalkboard.stat.sum(windowArr) / windowSize);
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the weighted mean of an array.
+         * @param {number[]} arr - The array
+         * @param {number[]} weights - The weights
+         * @returns {number}
+         */
+        export const meanWeighted = (arr: number[], weights: number[]): number => {
+            if (arr.length !== weights.length) {
+                throw new RangeError('Parameters "values" and "weights" must have the same length.');
+            }
+            let sum = 0, weightSum = 0;
+            for (let i = 0; i < arr.length; i++) {
+                sum += arr[i] * weights[i];
+                weightSum += weights[i];
+            }
+            return sum / weightSum;
+        };
+
+        /**
          * Returns the median value of an array.
          * @param {number[]} arr - The array
          * @returns {number}
@@ -470,6 +738,24 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the product of all elements in an array.
+         * @param {number[]} arr - The array
+         * @returns {number}
+         */
+        export const mul = (arr: number[]): number => {
+            return arr.reduce((result, x) => result * x, 1);
+        };
+
+        /**
+         * Calculates the negation of all the elements of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const negate = (arr: number[]): number[] => {
+            return arr.map(x => -x);
+        };
+
+        /**
          * Calculates the norm of an array.
          * @param {number[]} arr - The array
          * @param {"L0" | "L1" | "L2" | "LInfinity"} [type="L2"] - The type of norm, which can be "L0", "L1", "L2", or "LInfinity"
@@ -499,6 +785,18 @@ namespace Chalkboard {
             } else {
                 throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
             }
+        };
+
+        /**
+         * Calculates the value of the standard normal distribution at a given point.
+         * @param {number} x - The point
+         * @returns {number}
+         */
+        export const normal = (x: number): number => {
+            const standardNormal = Chalkboard.real.define(
+                "1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x)"
+            );
+            return Chalkboard.real.val(standardNormal, x) as number;
         };
 
         /**
@@ -546,6 +844,21 @@ namespace Chalkboard {
             } else {
                 throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
             }
+        };
+
+        /**
+         * Pads an array with a specified number to a given length.
+         * @param {number[]} arr - The array
+         * @param {number} length - The desired length of the array
+         * @param {number} [num=0] - The number to pad with (default is 0)
+         * @returns {number[]}
+         */
+        export const pad = (arr: number[], length: number, num: number = 0): number[] => {
+            const result = arr.slice();
+            while (result.length < length) {
+                result.push(num);
+            }
+            return result;
         };
 
         /**
@@ -708,6 +1021,68 @@ namespace Chalkboard {
         };
 
         /**
+         * Performs resampling on an array depending on the specified resampling method.
+         * @param {number[]} arr - The array
+         * @param {number} [samples] - The number of samples (optional, default is 100 for "bootstrap" and the length of the array for "jackknife")
+         * @param {"bootstrap" | "jackknife"} [type="bootstrap"] - The type of resampling method, which can be "bootstrap" or "jackknife"
+         * @returns {number[][]}
+         */
+        export const resampling = (arr: number[], samples?: number, type: "bootstrap" | "jackknife" = "bootstrap"): number[][] => {
+            if (type === "bootstrap") {
+                const numSamples = samples ?? 100;
+                const result = [];
+                for (let i = 0; i < numSamples; i++) {
+                    const sample = [];
+                    for (let j = 0; j < arr.length; j++) {
+                        sample.push(arr[Math.floor(Math.random() * arr.length)]);
+                    }
+                    result.push(sample);
+                }
+                return result;
+            } else if (type === "jackknife") {
+                const numSamples = samples ?? arr.length;
+                const allJackknifeSamples = [];
+                for (let i = 0; i < arr.length; i++) {
+                    allJackknifeSamples.push(arr.slice(0, i).concat(arr.slice(i + 1)));
+                }
+                if (numSamples < allJackknifeSamples.length) {
+                    const selectedSamples = [];
+                    const usedIndices = new Set<number>();
+                    while (selectedSamples.length < numSamples) {
+                        const randomIndex = Math.floor(Math.random() * allJackknifeSamples.length);
+                        if (!usedIndices.has(randomIndex)) {
+                            usedIndices.add(randomIndex);
+                            selectedSamples.push(allJackknifeSamples[randomIndex]);
+                        }
+                    }
+                    return selectedSamples;
+                }
+                return allJackknifeSamples;
+            } else {
+                throw new TypeError('Parameter "type" must be "bootstrap" or "jackknife".');
+            }
+        };
+
+        /**
+         * Reverses the elements of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const reverse = (arr: number[]): number[] => {
+            return arr.slice().reverse();
+        };
+
+        /**
+         * Scales the elements of an array by a given factor.
+         * @param {number[]} arr - The array
+         * @param {number} num - The scalar
+         * @returns {number[]}
+         */
+        export const scl = (arr: number[], num: number): number[] => {
+            return arr.map(value => value * num);
+        };
+
+        /**
          * Returns an array with its elements randomly shuffled.
          * @param {number[]} arr - The array
          * @returns {number[]}
@@ -739,6 +1114,19 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the subtraction of two arrays.
+         * @param {number[]} arr1 - The first array
+         * @param {number[]} arr2 - The second array
+         * @returns {number[]}
+         */
+        export const sub = (arr1: number[], arr2: number[]): number[] => {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            return arr1.map((x, i) => x - arr2[i]);
+        };
+
+        /**
          * Returns an array of all the subsets of an array.
          * @param {number[]} arr - The array
          * @returns {number[][]}
@@ -759,6 +1147,15 @@ namespace Chalkboard {
                 }
             }
             return result;
+        };
+
+        /**
+         * Calculates the sum of all elements in an array.
+         * @param {number[]} arr - The array
+         * @returns {number}
+         */
+        export const sum = (arr: number[]): number => {
+            return arr.reduce((result, x) => result + x, 0);
         };
 
         /**
@@ -840,6 +1237,15 @@ namespace Chalkboard {
         };
 
         /**
+         * Returns the unique elements of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const unique = (arr: number[]): number[] => {
+            return Array.from(new Set(arr));
+        };
+
+        /**
          * Calculates the variance of an array.
          * @param {number[]} arr - The array
          * @returns {number}
@@ -850,6 +1256,17 @@ namespace Chalkboard {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
             }
             return result / arr.length;
+        };
+
+        /**
+         * Calculates the standardization of the elements of an array according to their mean and standard deviation.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const zscored = (arr: number[]): number[] => {
+            const mean = Chalkboard.stat.mean(arr);
+            const deviation = Chalkboard.stat.deviation(arr);
+            return arr.map(value => (value - mean) / deviation);
         };
     }
 }
