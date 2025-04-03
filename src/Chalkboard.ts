@@ -20,7 +20,7 @@ type ChalkboardComplex = { a: number; b: number };
 /**
  * The type for dual numbers.
  * @property {number} a - The real part
- * @property {number} b - The imaginary part
+ * @property {number} b - The dual part
  */
 type ChalkboardDual = { a: number; b: number };
 
@@ -65,6 +65,19 @@ type ChalkboardGroup<T> = {
     operation: (a: T, b: T) => T;
     identity: T;
     inverter: (a: T) => T;
+};
+
+/**
+ * The type for morphisms in abstract algebra.
+ * @template T, U
+ * @property {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc1 - The first algebraic structure which is the domain of the morphism
+ * @property {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} struc2 - The second algebraic structure which is the codomain of the morphism
+ * @property {(a: T) => U} mapping - The function that takes an element from the first structure and maps it to the second structure
+ */
+type ChalkboardMorphism<T, U> = {
+    struc1: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>;
+    struc2: ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>;
+    mapping: (a: T) => U;
 };
 
 /**
