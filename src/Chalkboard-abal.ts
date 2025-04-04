@@ -35,11 +35,11 @@ namespace Chalkboard {
         /**
          * Defines an automorphism of an algebraic structure.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure which is both the domain and codomain of the morphism
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure which is both the domain and codomain of the morphism
          * @param {(element: T) => T} mapping - The bijective function that takes an element from the structure and maps it to another element in the same structure
          * @returns {ChalkboardMorphism<T, T>}
          */
-        export const automorphism = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
+        export const automorphism = <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
             if (!Chalkboard.abal.isHomomorphism(morphism)) {
                 throw new Error("The mapping is not a homomorphism, so it cannot be an automorphism.");
@@ -64,10 +64,10 @@ namespace Chalkboard {
         /**
          * Calculates the cardinality of a set or algebraic structure.
          * @template T
-         * @param {ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure
+         * @param {ChalkboardSet<T> | ChalkboardStructure<T>} struc - The set or structure
          * @returns {number}
          */
-        export const cardinality = <T>(struc: ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>): number => {
+        export const cardinality = <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>): number => {
             const id = "set" in struc && struc.set ? struc.set.id : ("id" in struc ? struc.id : undefined);
             if (id === "Z" || id === "Q" || id === "R" || id === "C" || id?.startsWith("M(")) {
                 return Infinity;
@@ -101,12 +101,12 @@ namespace Chalkboard {
         /**
          * Calculates the center of a group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @returns {ChalkboardSet<T>}
          */
-        export const center = <T>(group: ChalkboardGroup<T>): ChalkboardSet<T> => {
+        export const center = <T>(group: ChalkboardStructure<T>): ChalkboardSet<T> => {
             const { set, operation } = group;
-            if (!set.elements) {
+            if (!set.elements || !operation) {
                 return Chalkboard.abal.set<T>([]);
             }
             const result = set.elements.filter((z) =>
@@ -145,13 +145,16 @@ namespace Chalkboard {
         /**
          * Generates the cyclic subgroup of an element in a group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {T} element - The generator of the cyclic subgroup
          * @returns {ChalkboardSet<T>}
          */
-        export const cyclicSubgroup = <T>(group: ChalkboardGroup<T>, element: T): ChalkboardSet<T> => {
+        export const cyclicSubgroup = <T>(group: ChalkboardStructure<T>, element: T): ChalkboardSet<T> => {
             const result: T[] = [];
             let current = element;
+            if (!group.operation) {
+                return Chalkboard.abal.set<T>([]);
+            }
             do {
                 result.push(current);
                 current = group.operation(current, element);
@@ -197,12 +200,12 @@ namespace Chalkboard {
         /**
          * Calculates the direct product or direct sum of two algebraic structures.
          * @template T, U
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc1 - The first structure
-         * @param {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} struc2 - The second structure
+         * @param {ChalkboardStructure<T>} struc1 - The first structure
+         * @param {ChalkboardStructure<U>} struc2 - The second structure
          * @param {"product" | "sum"} [type="product"] - The type of direct operation ("product" or "sum", defaults to "product").
-         * @returns {ChalkboardGroup<[T, U]> | ChalkboardRing<[T, U]> | ChalkboardField<[T, U]>}
+         * @returns {ChalkboardStructure<[T, U]>}
          */
-        export const direct = <T, U>(struc1: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, struc2: ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>, type: "product" | "sum" = "product"): ChalkboardGroup<[T, U]> | ChalkboardRing<[T, U]> | ChalkboardField<[T, U]> => {
+        export const direct = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, type: "product" | "sum" = "product"): ChalkboardStructure<[T, U]> => {
             const set = Chalkboard.abal.Cartesian(struc1.set, struc2.set);
             const add = (a: [T, U], b: [T, U]): [T, U] => [
                 (struc1 as any).add(a[0], b[0]),
@@ -230,13 +233,13 @@ namespace Chalkboard {
             ];
             if ("operation" in struc1 && "operation" in struc2) {
                 const operation = (a: [T, U], b: [T, U]): [T, U] => [
-                    struc1.operation(a[0], b[0]),
-                    struc2.operation(a[1], b[1])
+                    (struc1.operation as (x: T, y: T) => T)(a[0], b[0]),
+                    (struc2.operation as (x: U, y: U) => U)(a[1], b[1])
                 ];
-                const identity: [T, U] = [struc1.identity, struc2.identity];
+                const identity: [T, U] = [struc1.identity as T, struc2.identity as U];
                 const inverter = (a: [T, U]): [T, U] => [
-                    struc1.inverter(a[0]),
-                    struc2.inverter(a[1])
+                    (struc1.inverter as (x: T) => T)(a[0]),
+                    (struc2.inverter as (x: U) => U)(a[1])
                 ];
                 if (type === "sum") {
                     if (!struc1.set.elements || !struc2.set.elements) {
@@ -268,11 +271,11 @@ namespace Chalkboard {
         /**
          * Defines an endomorphism of an algebraic structure.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure which is both the domain and codomain of the morphism
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure which is both the domain and codomain of the morphism
          * @param {(element: T) => T} mapping - The function that takes an element from the structure and maps it to another element in the same structure
          * @returns {ChalkboardMorphism<T, T>}
          */
-        export const endomorphism = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
+        export const endomorphism = <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
             if (!Chalkboard.abal.isHomomorphism(morphism)) {
                 throw new Error("The mapping is not a homomorphism, so it cannot be an endomorphism.");
@@ -290,9 +293,9 @@ namespace Chalkboard {
          * @param {T} [mulIdentity] - The multiplicative identity element of the field
          * @param {(a: T) => T} [addInverter] - The function to calculate the additive inverse of an element of the field (optional if the set is Z, Q, R, C, or M)
          * @param {(a: T) => T} [mulInverter] - The function to calculate the multiplicative inverse of an element of the field (optional if the set is Z, Q, R, C, or M)
-         * @returns {ChalkboardField<T>}
+         * @returns {ChalkboardStructure<T>}
          */
-        export const field = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T): ChalkboardField<T> => {
+        export const field = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T): ChalkboardStructure<T> => {
             const presets = {
                 addition: {
                     Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
@@ -337,7 +340,7 @@ namespace Chalkboard {
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
             };
             const autoConfig = !addIdentity || !mulIdentity || !addInverter || !mulInverter ? autoconfig() : { addIdentity, mulIdentity, addInverter, mulInverter };
-            const field: ChalkboardField<T> = { set: _set, add: _add, mul: _mul, addIdentity: autoConfig.addIdentity, mulIdentity: autoConfig.mulIdentity, addInverter: autoConfig.addInverter, mulInverter: autoConfig.mulInverter };
+            const field: ChalkboardStructure<T> = { set: _set, add: _add, mul: _mul, addIdentity: autoConfig.addIdentity, mulIdentity: autoConfig.mulIdentity, addInverter: autoConfig.addInverter, mulInverter: autoConfig.mulInverter };
             if (!Chalkboard.abal.isField(field)) {
                 throw new Error('The inputted "set", "add", and "mul" do not form a field.');
             }
@@ -351,9 +354,9 @@ namespace Chalkboard {
          * @param {(a: T, b: T) => T} operation - The operation of the group
          * @param {T} [identity] - The identity element of the group (optional if the set is Z, Q, R, C, or M)
          * @param {(a: T) => T} [inverter] - The function to calculate the inverse of an element of the group (optional if the set is Z, Q, R, C, or M)
-         * @returns {ChalkboardGroup<T>}
+         * @returns {ChalkboardStructure<T>}
          */
-        export const group = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T): ChalkboardGroup<T> => {
+        export const group = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T): ChalkboardStructure<T> => {
             const presets = {
                 addition: {
                     Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
@@ -409,7 +412,7 @@ namespace Chalkboard {
                 throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
             };
             const autoConfig = !identity || !inverter ? autoconfig() : { identity, inverter: inverter };
-            const group: ChalkboardGroup<T> = { set: _set, operation: _operation, identity: autoConfig.identity, inverter: autoConfig.inverter };
+            const group: ChalkboardStructure<T> = { set: _set, operation: _operation, identity: autoConfig.identity, inverter: autoConfig.inverter };
             if (!Chalkboard.abal.isGroup(group)) {
                 throw new Error('The inputted "set" and "operation" do not form a group.');
             }
@@ -419,12 +422,12 @@ namespace Chalkboard {
         /**
          * Defines a homomorphism between two algebraic structures.
          * @template T, U
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc1 - The first algebraic structure which is the domain of the morphism
-         * @param {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} struc2 - The second algebraic structure which is the codomain of the morphism
+         * @param {ChalkboardStructure<T>} struc1 - The first algebraic structure which is the domain of the morphism
+         * @param {ChalkboardStructure<U>} struc2 - The second algebraic structure which is the codomain of the morphism
          * @param {(element: T) => U} mapping - The function that takes an element from the first structure and maps it to the second structure
          * @returns {ChalkboardMorphism<T, U>}
          */
-        export const homomorphism = <T, U>(struc1: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, struc2: ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
+        export const homomorphism = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
             const morphism: ChalkboardMorphism<T, U> = { struc1, struc2, mapping };
             if (!Chalkboard.abal.isHomomorphism(morphism)) {
                 throw new Error('The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.');
@@ -435,10 +438,10 @@ namespace Chalkboard {
         /**
          * Defines the identity morphism for an algebraic structure.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure which is the domain and codomain of the morphism
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure which is the domain and codomain of the morphism
          * @returns {ChalkboardMorphism<T, T>}
          */
-        export const idmorphism = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>): ChalkboardMorphism<T, T> => {
+        export const idmorphism = <T>(struc: ChalkboardStructure<T>): ChalkboardMorphism<T, T> => {
             return Chalkboard.abal.automorphism(struc, (x) => x);
         };
 
@@ -602,15 +605,15 @@ namespace Chalkboard {
         /**
          * Checks if an algebraic structure is commutative.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure
          * @returns {boolean}
          */
-        export const isCommutative = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>): boolean => {
+        export const isCommutative = <T>(struc: ChalkboardStructure<T>): boolean => {
             const { set } = struc;
             if (!set.elements) {
                 return false;
             }
-            if ('operation' in struc) {
+            if ("operation" in struc && struc.operation) {
                 const { operation } = struc;
                 for (const a of set.elements) {
                     for (const b of set.elements) {
@@ -621,7 +624,7 @@ namespace Chalkboard {
                 }
                 return true;
             }
-            if ('add' in struc && 'mul' in struc) {
+            if ("add" in struc && "mul" in struc && struc.add && struc.mul) {
                 const { add, mul } = struc;
                 for (const a of set.elements) {
                     for (const b of set.elements) {
@@ -630,7 +633,7 @@ namespace Chalkboard {
                         }
                     }
                 }
-                if ('mulIdentity' in struc) {
+                if ("mulIdentity" in struc) {
                     for (const a of set.elements) {
                         for (const b of set.elements) {
                             if (mul(a, b) !== mul(b, a)) {
@@ -647,12 +650,12 @@ namespace Chalkboard {
         /**
          * Checks if a subgroup of a group is a cyclic subgroup.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {ChalkboardSet<T>} subgroup - The subgroup
          * @returns {boolean}
          */
-        export const isCyclicSubgroup = <T>(group: ChalkboardGroup<T>, subgroup: ChalkboardSet<T>): boolean => {
-            if (!Chalkboard.abal.isSubgroup(group, subgroup)) {
+        export const isCyclicSubgroup = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
+            if (!Chalkboard.abal.isSubgroup(group, subgroup) || !group.operation) {
                 return false;
             }
             const { operation } = group;
@@ -674,10 +677,10 @@ namespace Chalkboard {
         /**
          * Checks if a set or algebraic structure is empty.
          * @template T
-         * @param {ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The structure to check
+         * @param {ChalkboardSet<T> | ChalkboardStructure<T>} struc - The structure to check
          * @returns {boolean}
          */
-        export const isEmpty = <T>(struc: ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>): boolean => {
+        export const isEmpty = <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>): boolean => {
             const id = 'set' in struc && struc.set ? struc.set.id : ('id' in struc ? struc.id : undefined);
             if (id === "Z" || id === "Q" || id === "R" || id === "C" || id?.startsWith("M(")) {
                 return false;
@@ -704,11 +707,11 @@ namespace Chalkboard {
         /**
          * Checks if two sets, algebraic structures, or morphisms are equal.
          * @template T, U
-         * @param {ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T> | ChalkboardMorphism<T, U>} struc1 - The first set, structure, or morphism
-         * @param {ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T> | ChalkboardMorphism<T, U>} struc2 - The second set, structure, or morphism
+         * @param {ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>} struc1 - The first set, structure, or morphism
+         * @param {ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>} struc2 - The second set, structure, or morphism
          * @returns {boolean}
          */
-        export const isEqual = <T, U>(struc1: ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T> | ChalkboardMorphism<T, U>, struc2: ChalkboardSet<T> | ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T> | ChalkboardMorphism<T, U>): boolean => {
+        export const isEqual = <T, U>(struc1: ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>, struc2: ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>): boolean => {
             if (struc1.constructor !== struc2.constructor) {
                 return false;
             }
@@ -724,38 +727,38 @@ namespace Chalkboard {
                 return set1.every((x) => struc2.contains(x)) && set2.every((x) => struc1.contains(x));
             }
             if ("operation" in struc1 && "operation" in struc2) {
-                const group1 = struc1 as ChalkboardGroup<T>;
-                const group2 = struc2 as ChalkboardGroup<T>;
+                const group1 = struc1 as ChalkboardStructure<T>;
+                const group2 = struc2 as ChalkboardStructure<T>;
                 return (
                     Chalkboard.abal.isEqual(group1.set, group2.set) &&
                     group1.identity === group2.identity &&
-                    group1.operation.toString() === group2.operation.toString() &&
-                    group1.inverter?.toString() === group2.inverter?.toString()
+                    (group1.operation as (x: T, y: T) => T).toString() === (group2.operation as (x: T, y: T) => T).toString() &&
+                    (group1.inverter as (x: T, y: T) => T).toString() === (group2.inverter as (x: T, y: T) => T).toString()
                 );
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
-                const ring1 = struc1 as ChalkboardRing<T>;
-                const ring2 = struc2 as ChalkboardRing<T>;
+                const ring1 = struc1 as ChalkboardStructure<T>;
+                const ring2 = struc2 as ChalkboardStructure<T>;
                 return (
                     Chalkboard.abal.isEqual(ring1.set, ring2.set) &&
                     ring1.addIdentity === ring2.addIdentity &&
                     ring1.mulIdentity === ring2.mulIdentity &&
-                    ring1.add.toString() === ring2.add.toString() &&
-                    ring1.mul.toString() === ring2.mul.toString() &&
-                    ring1.addInverter?.toString() === ring2.addInverter?.toString()
+                    (ring1.add as (x: T, y: T) => T).toString() === (ring2.add as (x: T, y: T) => T).toString() &&
+                    (ring1.mul as (x: T, y: T) => T).toString() === (ring2.mul as (x: T, y: T) => T).toString() &&
+                    (ring1.addInverter as (x: T, y: T) => T).toString() === (ring2.addInverter as (x: T, y: T) => T).toString()
                 );
             }
             if ("mulInverter" in struc1 && "mulInverter" in struc2) {
-                const field1 = struc1 as ChalkboardField<T>;
-                const field2 = struc2 as ChalkboardField<T>;
+                const field1 = struc1 as ChalkboardStructure<T>;
+                const field2 = struc2 as ChalkboardStructure<T>;
                 return (
                     Chalkboard.abal.isEqual(field1.set, field2.set) &&
                     field1.addIdentity === field2.addIdentity &&
                     field1.mulIdentity === field2.mulIdentity &&
-                    field1.add.toString() === field2.add.toString() &&
-                    field1.mul.toString() === field2.mul.toString() &&
-                    field1.addInverter?.toString() === field2.addInverter?.toString() &&
-                    field1.mulInverter?.toString() === field2.mulInverter?.toString()
+                    (field1.add as (x: T, y: T) => T).toString() === (field2.add as (x: T, y: T) => T).toString() &&
+                    (field1.mul as (x: T, y: T) => T).toString() === (field2.mul as (x: T, y: T) => T).toString() &&
+                    (field1.addInverter as (x: T, y: T) => T).toString() === (field2.addInverter as (x: T, y: T) => T).toString() &&
+                    (field1.mulInverter as (x: T, y: T) => T).toString() === (field2.mulInverter as (x: T, y: T) => T).toString()
                 );
             }
             if ("mapping" in struc1 && "mapping" in struc2) {
@@ -786,12 +789,15 @@ namespace Chalkboard {
         /**
          * Checks if an algebraic structure is a field.
          * @template T
-         * @param {ChalkboardField<T>} field - The field
+         * @param {ChalkboardStructure<T>} field - The field
          * @returns {boolean}
          */
-        export const isField = <T>(field: ChalkboardField<T>): boolean => {
+        export const isField = <T>(field: ChalkboardStructure<T>): boolean => {
             const { set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
-            const additiveGroup: ChalkboardGroup<T> = { set, operation: add, identity: addIdentity, inverter: addInverter };
+            if (!add || !mul || !addIdentity || !mulIdentity || !addInverter || !mulInverter) {
+                return false;
+            }
+            const additiveGroup: ChalkboardStructure<T> = { set, operation: add, identity: addIdentity, inverter: addInverter };
             if (!Chalkboard.abal.isGroup(additiveGroup) || !Chalkboard.abal.isCommutative(additiveGroup)) {
                 return false;
             }
@@ -821,13 +827,13 @@ namespace Chalkboard {
         /**
          * Checks if an algebraic structure is a group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @returns {boolean}
          */
-        export const isGroup = <T>(group: ChalkboardGroup<T>): boolean => {
+        export const isGroup = <T>(group: ChalkboardStructure<T>): boolean => {
             const { set, operation, identity, inverter } = group;
-            if (!set.elements) {
-                return false;
+            if (!set.elements || !operation || !identity || !inverter) {
+                return false;    
             }
             if (!Chalkboard.abal.isClosed(set, operation)) {
                 return false;
@@ -862,7 +868,7 @@ namespace Chalkboard {
          */
         export const isHomomorphism = <T, U>(morph: ChalkboardMorphism<T, U>): boolean => {
             const { struc1, struc2, mapping } = morph;
-            if ("operation" in struc1 && "operation" in struc2) {
+            if ("operation" in struc1 && "operation" in struc2 && struc1.operation && struc2.operation) {
                 const { operation: op1 } = struc1;
                 const { operation: op2 } = struc2;
                 for (const a of struc1.set.elements || []) {
@@ -874,7 +880,7 @@ namespace Chalkboard {
                 }
                 return true;
             }
-            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
+            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && struc1.add && struc2.add && struc1.mul && struc2.mul) {
                 const { add: add1, mul: mul1 } = struc1;
                 const { add: add2, mul: mul2 } = struc2;
                 for (const a of struc1.set.elements || []) {
@@ -895,12 +901,15 @@ namespace Chalkboard {
         /**
          * Checks if a subset is an ideal of a ring.
          * @template T
-         * @param {ChalkboardRing<T>} ring - The ring
+         * @param {ChalkboardStructure<T>} ring - The ring
          * @param {ChalkboardSet<T>} subset - The subset
          * @returns {boolean}
          */
-        export const isIdeal = <T>(ring: ChalkboardRing<T>, subset: ChalkboardSet<T>): boolean => {
+        export const isIdeal = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, addInverter } = ring;
+            if (!add || !mul || !addIdentity || !addInverter) {
+                return false;
+            }
             if (!Chalkboard.abal.isClosed(subset, add)) {
                 return false;
             }
@@ -925,20 +934,21 @@ namespace Chalkboard {
         /**
          * Checks if an element is the identity of an algebraic structure.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure
          * @param {T} element - The element
          * @param {"add" | "mul"} [type="add"] - The type of identity to check ("add" for additive identity, "mul" for multiplicative identity, defaults to "add")
          * @returns {boolean}
          */
-        export const isIdentity = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, element: T, type: "add" | "mul" = "add"): boolean => {
-            if (type === "add") {
+        export const isIdentity = <T>(struc: ChalkboardStructure<T>, element: T, type: "add" | "mul" = "add"): boolean => {
+            if (type === "add" && struc.add && struc.addIdentity) {
                 return (
-                    'add' in struc &&
+                    "add" in struc &&
                     struc.add(element, struc.addIdentity) === element &&
                     struc.add(struc.addIdentity, element) === element
                 );
-            } else if (type === "mul" && "mul" in struc && "mulIdentity" in struc) {
+            } else if (type === "mul" && struc.mul && struc.mulIdentity) {
                 return (
+                    "mul" in struc && "mulIdentity" in struc &&
                     struc.mul?.(element, struc.mulIdentity) === element &&
                     struc.mul?.(struc.mulIdentity, element) === element
                 );
@@ -962,13 +972,13 @@ namespace Chalkboard {
         /**
          * Checks if two elements are inverses of each other in an algebraic structure.
          * @template T
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc - The algebraic structure
+         * @param {ChalkboardStructure<T>} struc - The algebraic structure
          * @param {T} element1 - The first element
          * @param {T} element2 - The second element
          * @param {"add" | "mul"} [type="add"] - The type of inverse to check ("add" for additive inverse, "mul" for multiplicative inverse, defaults to "add")
          * @returns {boolean}
          */
-        export const isInverse = <T>(struc: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, element1: T, element2: T, type: "add" | "mul" = "add"): boolean => {
+        export const isInverse = <T>(struc: ChalkboardStructure<T>, element1: T, element2: T, type: "add" | "mul" = "add"): boolean => {
             if (type === "add") {
                 return (
                     'add' in struc &&
@@ -997,12 +1007,15 @@ namespace Chalkboard {
         /**
          * Checks if a subgroup of a group is a normal subgroup.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {ChalkboardSet<T>} subgroup - The subgroup
          * @returns {boolean}
          */
-        export const isNormalSubgroup = <T>(group: ChalkboardGroup<T>, subgroup: ChalkboardSet<T>): boolean => {
+        export const isNormalSubgroup = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
             const { set, operation, inverter } = group;
+            if (!operation || !inverter) {
+                return false;
+            }
             if (!Chalkboard.abal.isSubgroup(group, subgroup)) {
                 return false;
             }
@@ -1020,13 +1033,13 @@ namespace Chalkboard {
         /**
          * Defines an isomorphism between two algebraic structures.
          * @template T, U
-         * @param {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc1 - The first algebraic structure which is the domain of the morphism
-         * @param {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} struc2 - The second algebraic structure which is the codomain of the morphism
+         * @param {ChalkboardStructure<T>} struc1 - The first algebraic structure which is the domain of the morphism
+         * @param {ChalkboardStructure<U>} struc2 - The second algebraic structure which is the codomain of the morphism
          * @param {(element: T) => U} map - The bijective function that takes an element from the first structure and maps it to the second structure
          * @returns {ChalkboardMorphism<T, U>}
          */
-        export const isomorphism = <T, U>(struc1: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>, struc2: ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>, map: (element: T) => U): ChalkboardMorphism<T, U> => {
-            const morphism = Chalkboard.abal.homomorphism(struc1, struc2, map);
+        export const isomorphism = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
+            const morphism = Chalkboard.abal.homomorphism(struc1, struc2, mapping);
             if (!Chalkboard.abal.isHomomorphism(morphism)) {
                 throw new Error("The mapping is not a homomorphism, so it cannot be an isomorphism.");
             }
@@ -1039,11 +1052,11 @@ namespace Chalkboard {
         /**
          * Checks if an ideal is a principal ideal of a ring.
          * @template T
-         * @param {ChalkboardRing<T>} ring - The ring
+         * @param {ChalkboardStructure<T>} ring - The ring
          * @param {ChalkboardSet<T>} ideal - The ideal
          * @returns {boolean}
          */
-        export const isPrincipalIdeal = <T>(ring: ChalkboardRing<T>, ideal: ChalkboardSet<T>): boolean => {
+        export const isPrincipalIdeal = <T>(ring: ChalkboardStructure<T>, ideal: ChalkboardSet<T>): boolean => {
             for (const generator of ideal.elements || []) {
                 const principalIdeal = Chalkboard.abal.principalIdeal(ring, generator);
                 if (Chalkboard.abal.isSubset(ideal, principalIdeal) && Chalkboard.abal.isSubset(principalIdeal, ideal)) {
@@ -1056,12 +1069,15 @@ namespace Chalkboard {
         /**
          * Checks if an algebraic structure is a ring.
          * @template T
-         * @param {ChalkboardRing<T>} ring - The ring
+         * @param {ChalkboardStructure<T>} ring - The ring
          * @returns {boolean}
          */
-        export const isRing = <T>(ring: ChalkboardRing<T>): boolean => {
+        export const isRing = <T>(ring: ChalkboardStructure<T>): boolean => {
             const { set, add, mul, addIdentity, addInverter } = ring;
-            const additiveGroup: ChalkboardGroup<T> = { set, operation: add, identity: addIdentity, inverter: addInverter };
+            if (!add || !mul || !addIdentity || !addInverter) {
+                return false;
+            }
+            const additiveGroup: ChalkboardStructure<T> = { set, operation: add, identity: addIdentity, inverter: addInverter };
             if (!Chalkboard.abal.isGroup(additiveGroup) || !Chalkboard.abal.isCommutative(additiveGroup)) {
                 return false;
             }
@@ -1083,12 +1099,15 @@ namespace Chalkboard {
         /**
          * Checks if a subset is a subfield of a field.
          * @template T
-         * @param {ChalkboardField<T>} field - The field
+         * @param {ChalkboardStructure<T>} field - The field
          * @param {ChalkboardSet<T>} subset - The subset
          * @returns {boolean}
          */
-        export const isSubfield = <T>(field: ChalkboardField<T>, subset: ChalkboardSet<T>): boolean => {
+        export const isSubfield = <T>(field: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
+            if (!add || !mul || !addIdentity || !mulIdentity || !addInverter || !mulInverter) { 
+                return false;
+            }
             if (!subset.contains(addIdentity) || !subset.contains(mulIdentity)) {
                 return false;
             }
@@ -1111,12 +1130,15 @@ namespace Chalkboard {
         /**
          * Checks if a subset is a subgroup of a group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {ChalkboardSet<T>} subset - The subset
          * @returns {boolean}
          */
-        export const isSubgroup = <T>(group: ChalkboardGroup<T>, subset: ChalkboardSet<T>): boolean => {
+        export const isSubgroup = <T>(group: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { operation, identity, inverter } = group;
+            if (!operation || !identity || !inverter) {
+                return false;
+            }
             if (!subset.contains(identity)) {
                 return false;
             }
@@ -1134,12 +1156,15 @@ namespace Chalkboard {
         /**
          * Checks if a subset is a subring of a ring.
          * @template T
-         * @param {ChalkboardRing<T>} ring - The ring
+         * @param {ChalkboardStructure<T>} ring - The ring
          * @param {ChalkboardSet<T>} subset - The subset
          * @returns {boolean}
          */
-        export const isSubring = <T>(ring: ChalkboardRing<T>, subset: ChalkboardSet<T>): boolean => {
+        export const isSubring = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, addInverter } = ring;
+            if (!add || !mul || !addIdentity || !addInverter) {
+                return false;
+            }  
             if (!subset.contains(addIdentity)) {
                 return false;
             }
@@ -1205,9 +1230,9 @@ namespace Chalkboard {
             const _subset = subset?.elements || struc1.set.elements;
             let identity: U | undefined;
             if ("identity" in struc2) {
-                identity = (struc2 as ChalkboardGroup<U>).identity;
+                identity = (struc2 as ChalkboardStructure<U>).identity;
             } else if ("addIdentity" in struc2) {
-                identity = (struc2 as ChalkboardRing<U> | ChalkboardField<U>).addIdentity;
+                identity = (struc2 as ChalkboardStructure<U> | ChalkboardStructure<U>).addIdentity;
             } else {
                 throw new Error('The codomain of the "morph" must have an identity element to calculate the kernel.');
             }
@@ -1218,11 +1243,11 @@ namespace Chalkboard {
         /**
          * Checks if a group and a subgroup satisfy Lagrange's Theorem, i.e. the order of a subgroup divides the order of its group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {ChalkboardSet<T>} subgroup - The subgroup
          * @returns {boolean}
          */
-        export const Lagrange = <T>(group: ChalkboardGroup<T>, subgroup: ChalkboardSet<T>): boolean => {
+        export const Lagrange = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
             const groupOrder = Chalkboard.abal.cardinality(group);
             const subgroupOrder = Chalkboard.abal.cardinality(subgroup);
             if (!Number.isFinite(groupOrder) || !Number.isFinite(subgroupOrder)) {
@@ -1249,11 +1274,14 @@ namespace Chalkboard {
         /**
          * Calculates the order of an element in a group.
          * @template T
-         * @param {ChalkboardGroup<T>} group - The group
+         * @param {ChalkboardStructure<T>} group - The group
          * @param {T} element - The element
          * @returns {number}
          */
-        export const order = <T>(group: ChalkboardGroup<T>, element: T): number => {
+        export const order = <T>(group: ChalkboardStructure<T>, element: T): number => {
+            if (!group.operation) {
+                throw new Error('The "group" must have an "operation" property to calculate the order of an element.');
+            }
             let result = 1;
             let current = element;
             while (current !== group.identity) {
@@ -1311,13 +1339,16 @@ namespace Chalkboard {
         /**
          * Generates the principal ideal of an element in a ring.
          * @template T
-         * @param {ChalkboardRing<T>} ring - The ring
+         * @param {ChalkboardStructure<T>} ring - The ring
          * @param {T} element - The generator of the principal ideal
          * @returns {ChalkboardSet<T>}
          */
-        export const principalIdeal = <T>(ring: ChalkboardRing<T>, element: T): ChalkboardSet<T> => {
+        export const principalIdeal = <T>(ring: ChalkboardStructure<T>, element: T): ChalkboardSet<T> => {
             const result: T[] = [];
             const { mul, add } = ring;
+            if (!add || !mul) {
+                throw new Error('The "ring" must have "mul" and "add" properties to generate a principal ideal.');
+            }
             for (const r of ring.set.elements || []) {
                 const leftProduct = mul(element, r);
                 const rightProduct = mul(r, element);
@@ -1368,9 +1399,9 @@ namespace Chalkboard {
          * @param {T} [addIdentity] - The additive identity element of the ring (optional if the set is Z, Q, R, C, or M)
          * @param {T} [mulIdentity] - The multiplicative identity element of the ring (optional if the set is Z, Q, R, C, or M)
          * @param {(a: T) => T} [addInverter] - The function to calculate the additive inverse of an element of the ring (optional if the set is Z, Q, R, C, or M)
-         * @returns {ChalkboardRing<T>}
+         * @returns {ChalkboardStructure<T>}
          */
-        export const ring = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T): ChalkboardRing<T> => {
+        export const ring = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T): ChalkboardStructure<T> => {
             const presets = {
                 addition: {
                     Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
@@ -1436,7 +1467,7 @@ namespace Chalkboard {
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
             };
             const autoConfig = !addIdentity || !mulIdentity || !addInverter ? autoconfig() : { addIdentity, mulIdentity, addInverter };
-            const ring: ChalkboardRing<T> = { set: _set, add: _add, mul: _mul, addIdentity: autoConfig.addIdentity, mulIdentity: autoConfig.mulIdentity, addInverter: autoConfig.addInverter};
+            const ring: ChalkboardStructure<T> = { set: _set, add: _add, mul: _mul, addIdentity: autoConfig.addIdentity, mulIdentity: autoConfig.mulIdentity, addInverter: autoConfig.addInverter};
             if (!Chalkboard.abal.isRing(ring)) {
                 throw new Error('The inputted "set", "add", and "mul" do not form a ring.');
             }

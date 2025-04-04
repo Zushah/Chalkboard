@@ -25,27 +25,6 @@ type ChalkboardComplex = { a: number; b: number };
 type ChalkboardDual = { a: number; b: number };
 
 /**
- * The type for fields in abstract algebra.
- * @template T
- * @property {ChalkboardSet<T>} set - The set of the field
- * @property {(a: T, b: T) => T} add - The additive operation of the field
- * @property {(a: T, b: T) => T} mul - The multiplicative operation of the field
- * @property {T} addIdentity - The additive identity element of the field
- * @property {T} mulIdentity - The multiplicative identity element of the field
- * @property {(a: T) => T} addInverter - The function to compute the additive inverse of an element of the field
- * @property {(a: T) => T} mulInverter - The function to compute the multiplicative inverse of an element of the field
- */
-type ChalkboardField<T> = {
-    set: ChalkboardSet<T>;
-    add: (a: T, b: T) => T;
-    mul: (a: T, b: T) => T;
-    addIdentity: T;
-    mulIdentity: T;
-    addInverter: (a: T) => T;
-    mulInverter: (a: T) => T;
-};
-
-/**
  * The type for mathematical functions.
  * @property {string | string[]} definition - The function's definition
  * @property {"expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"} type - The function's type, which can be "expl" for explicit functions, "inve" for inverse functions, "pola" for polar functions, "curv" for parametric curves, "surf" for parametric surfaces, "mult" for explicit multivariable functions, or "comp" for explicit complex-valued functions
@@ -53,30 +32,15 @@ type ChalkboardField<T> = {
 type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp" };
 
 /**
- * The type for groups in abstract algebra.
- * @template T
- * @property {ChalkboardSet<T>} set - The set of the group
- * @property {(a: T, b: T) => T} operation - The operation of the group
- * @property {T} identity - The identity element of the group
- * @property {(a: T) => T} inverter - The function to compute the inverse of an element of the group
- */
-type ChalkboardGroup<T> = {
-    set: ChalkboardSet<T>;
-    operation: (a: T, b: T) => T;
-    identity: T;
-    inverter: (a: T) => T;
-};
-
-/**
  * The type for morphisms in abstract algebra.
  * @template T, U
- * @property {ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>} struc1 - The first algebraic structure which is the domain of the morphism
- * @property {ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>} struc2 - The second algebraic structure which is the codomain of the morphism
+ * @property {ChalkboardStructure<T>} struc1 - The first algebraic structure which is the domain of the morphism
+ * @property {ChalkboardStructure<U>} struc2 - The second algebraic structure which is the codomain of the morphism
  * @property {(a: T) => U} mapping - The function that takes an element from the first structure and maps it to the second structure
  */
 type ChalkboardMorphism<T, U> = {
-    struc1: ChalkboardGroup<T> | ChalkboardRing<T> | ChalkboardField<T>;
-    struc2: ChalkboardGroup<U> | ChalkboardRing<U> | ChalkboardField<U>;
+    struc1: ChalkboardStructure<T>;
+    struc2: ChalkboardStructure<U>;
     mapping: (a: T) => U;
 };
 
@@ -95,25 +59,6 @@ type ChalkboardMatrix = number[][];
 type ChalkboardQuaternion = { a: number; b: number; c: number; d: number };
 
 /**
- * The type for rings in abstract algebra.
- * @template T
- * @property {ChalkboardSet<T>} set - The set of the ring
- * @property {(a: T, b: T) => T} add - The additive operation of the ring
- * @property {(a: T, b: T) => T} mul - The multiplicative operation of the ring
- * @property {T} addIdentity - The additive identity element of the ring
- * @property {T} mulIdentity - The multiplicative identity element of the ring
- * @property {(a: T) => T} addInverter - The function to compute the additive inverse of an element of the ring
- */
-type ChalkboardRing<T> = {
-    set: ChalkboardSet<T>;
-    add: (a: T, b: T) => T;
-    mul: (a: T, b: T) => T;
-    addIdentity: T;
-    mulIdentity: T;
-    addInverter: (a: T) => T;
-};
-
-/**
  * The type for sets.
  * @property {Function} contains - Function to check if an element belongs to the set
  * @property {T[]} [elements] - Optional array for the elements of a finite set
@@ -124,6 +69,34 @@ type ChalkboardSet<T> = {
     elements?: T[];
     id?: string;
 };
+
+/**
+ * The type for algebraic structures.
+ * @template T
+ * @property {ChalkboardSet<T>} set - The set of the structure
+ * @property {(a: T, b: T) => T} [operation] - The binary operation (e.g., for groups/monoids)
+ * @property {T} [identity] - The identity element (e.g., for groups/monoids)
+ * @property {(a: T) => T} [inverter] - The function to compute inverses (e.g., for groups)
+ * @property {(a: T, b: T) => T} [add] - The additive operation (e.g., for rings/fields)
+ * @property {(a: T, b: T) => T} [mul] - The multiplicative operation (e.g., for rings/fields)
+ * @property {T} [addIdentity] - The additive identity element (e.g., for rings/fields)
+ * @property {T} [mulIdentity] - The multiplicative identity element (e.g., for rings/fields)
+ * @property {(a: T) => T} [addInverter] - The function to compute additive inverses (e.g., for rings/fields)
+ * @property {(a: T) => T} [mulInverter] - The function to compute multiplicative inverses (e.g., for fields)
+ */
+type ChalkboardStructure<T> = {
+    set: ChalkboardSet<T>;
+    operation?: (a: T, b: T) => T;
+    identity?: T;
+    inverter?: (a: T) => T;
+    add?: (a: T, b: T) => T;
+    mul?: (a: T, b: T) => T;
+    addIdentity?: T;
+    mulIdentity?: T;
+    addInverter?: (a: T) => T;
+    mulInverter?: (a: T) => T;
+};
+
 
 /**
  * The type for tensors.
