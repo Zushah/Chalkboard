@@ -314,7 +314,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Returns whether or not a number is a prime number.
+         * Checks if a number is a prime number.
          * @param {number} num - Number
          * @returns {boolean}
          * @example
@@ -335,6 +335,25 @@ namespace Chalkboard {
                 }
             }
             return num > 1;
+        };
+
+        /**
+         * Checks if a number is rational.
+         * @param {number} num - The number to check.
+         * @param {number} [tolerance = 1e-8] - Tolerance for approximation (optional, defaults to 1e-8).
+         * @returns {boolean}
+         * @example
+         * const yes = Chalkboard.numb.isRational(0.75); // Returns true
+         * const no = Chalkboard.numb.isRational(Chalkboard.PI()); // Returns false
+         */
+        export const isRational = (num: number, tolerance: number = 1e-8): boolean => {
+            if (!isFinite(num)) return false;
+            try {
+                const [n, d] = Chalkboard.numb.toFraction(num, tolerance);
+                return Math.abs(num - n / d) < tolerance;
+            } catch {
+                return false;
+            }
         };
 
         /**
@@ -610,5 +629,35 @@ namespace Chalkboard {
             }
             return result;
         };
+
+        /**
+         * Converts a decimal to a fraction which is represented as an array of its numerator and denominator.
+         * @param {number} num - The decimal
+         * @param {number} [tolerance = 1e-8] - The tolerance of the approximation algorithm (optional, defaults to 1e-8)
+         * @returns {[number, number]}
+         * @example
+         * // Returns [-5, 4]
+         * const fraction = Chalkboard.numb.toFraction(-1.25);
+         */
+        export const toFraction = (num: number, tolerance: number = 1e-8): [number, number] => {
+            if (!isFinite(num)) throw new Error('The parameter "num" must be finite to be converted to a fraction.');
+            const sgn = Chalkboard.numb.sgn(num);
+            num *= sgn;
+            if (Number.isInteger(num)) return [sgn * num, 1];
+            let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+            let b = num;
+            while (true) {
+                let a = Math.floor(b);
+                let h = a * h1 + h2, k = a * k1 + k2;
+                let approx = h / k;
+                if (Math.abs(num - approx) < tolerance) {
+                    const g = Chalkboard.numb.gcd(h, k);
+                    return [sgn * (h / g), k / g];
+                }
+                h2 = h1, h1 = h;
+                k2 = k1, k1 = k;
+                b = 1 / (b - a);
+            }
+        }       
     }
 }

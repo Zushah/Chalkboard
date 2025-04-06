@@ -1162,10 +1162,10 @@ namespace Chalkboard {
          * Converts an array to a matrix.
          * @param {number[]} arr - The array
          * @param {number} rows - The number of rows of the matrix
-         * @param {number} cols - The number of columns of the matrix
+         * @param {number} [cols=rows] - The number of columns of the matrix (optional, defaults to the number of rows to make a square matrix)
          * @returns {ChalkboardMatrix}
          */
-        export const toMatrix = (arr: number[], rows: number, cols: number): ChalkboardMatrix => {
+        export const toMatrix = (arr: number[], rows: number, cols: number = rows): ChalkboardMatrix => {
             const result = Chalkboard.matr.init();
             let index = 0;
             for (let i = 0; i < rows; i++) {
@@ -1193,6 +1193,15 @@ namespace Chalkboard {
                 result["_" + i.toString()] = arr[i];
             }
             return result;
+        };
+
+        /**
+         * Converts an array to a set.
+         * @param {number[]} arr - The array
+         * @returns {ChalkboardSet<number>}
+         */
+        export const toSet = (arr: number[]): ChalkboardSet<number> => {
+            return Chalkboard.abal.set(arr);
         };
 
         /**

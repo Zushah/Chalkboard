@@ -97,7 +97,6 @@ type ChalkboardStructure<T> = {
     mulInverter?: (a: T) => T;
 };
 
-
 /**
  * The type for tensors.
  */

@@ -576,6 +576,15 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a tensor to a set.
+         * @param {ChalkboardTensor} tens - The tensor 
+         * @returns {ChalkboardSet<number>}
+         */
+        export const toSet = (tens: ChalkboardTensor): ChalkboardSet<number> => {
+            return Chalkboard.abal.set(Chalkboard.tens.toArray(tens));
+        };
+
+        /**
          * Converts a tensor to a string.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {string}

@@ -99,6 +99,49 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the Cayley table for an algebraic structure.
+         * @param {ChalkboardStructure<number>} struc - The algebraic structure
+         * @param {"add" | "mul"} [type="add"] - The type of operation to calculate the Cayley table for ("add" for additive operations, "mul" for multiplicative operations, defaults to "add")
+         */
+        export const Cayley = (struc: ChalkboardStructure<number>, type: "add" | "mul" = "add"): ChalkboardMatrix => {
+            if (!struc.set.elements) {
+                throw new Error("The structure must have a finite set of elements.");
+            }
+            const elements = struc.set.elements;
+            if ("operation" in struc && struc.operation) {
+                if (type === "add") {
+                    let result = Chalkboard.matr.fill(0, elements.length);
+                    for (let i = 0; i < elements.length; i++) {
+                        for (let j = 0; j < elements.length; j++) {
+                            result[i][j] = struc.operation(elements[i], elements[j]);
+                        }
+                    }
+                    return result;
+                }
+                throw new Error('The "type" parameter for groups should remain as the default "add" since there is no distinction between their additive and multiplicative Cayley tables.');
+            }
+            if ("add" in struc && struc.add && "mul" in struc && struc.mul) {
+                if (type === "add") {
+                    let result = Chalkboard.matr.fill(0, elements.length);
+                    for (let i = 0; i < elements.length; i++) {
+                        for (let j = 0; j < elements.length; j++) {
+                            result[i][j] = struc.add(elements[i], elements[j]);
+                        }
+                    }
+                    return result;
+                }
+                let result = Chalkboard.matr.fill(0, elements.length);
+                for (let i = 0; i < elements.length; i++) {
+                    for (let j = 0; j < elements.length; j++) {
+                        result[i][j] = struc.mul(elements[i], elements[j]);
+                    }
+                }
+                return result;
+            }
+            throw new Error("Invalid algebraic structure for Cayley table.");
+        };
+
+        /**
          * Calculates the center of a group.
          * @template T
          * @param {ChalkboardStructure<T>} group - The group
@@ -256,7 +299,6 @@ namespace Chalkboard {
                 }
                 return Chalkboard.abal.ring(set, add, mul, addIdentity, mulIdentity, addInverter);
             }
-
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && "mulInverter" in struc1 && "mulInverter" in struc2) {
                 if (type === "sum") {
                     if (!struc1.set.elements || !struc2.set.elements) {
@@ -265,7 +307,7 @@ namespace Chalkboard {
                 }
                 return Chalkboard.abal.field(set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter);
             }
-            throw new Error("Unsupported algebraic structures for direct product or sum.");
+            throw new Error("Invalid algebraic structures for direct product or sum.");
         };
 
         /**
@@ -346,6 +388,18 @@ namespace Chalkboard {
             }
             return field;
         };
+
+        /**
+         * The set of all real-valued invertible matrices of size "n" x "n", denoted as GLn.
+         * @param {number} n - The number of rows/columns
+         * @returns {ChalkboardSet<ChalkboardMatrix>}
+         */
+        export const GL = (n: number): ChalkboardSet<ChalkboardMatrix> => ({
+            contains: (element: ChalkboardMatrix) => {
+                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
+            },
+            id: `GL${n}`
+        });
 
         /**
          * Defines an algebraic structure known as a group.
@@ -732,8 +786,14 @@ namespace Chalkboard {
                 return (
                     Chalkboard.abal.isEqual(group1.set, group2.set) &&
                     group1.identity === group2.identity &&
-                    (group1.operation as (x: T, y: T) => T).toString() === (group2.operation as (x: T, y: T) => T).toString() &&
-                    (group1.inverter as (x: T, y: T) => T).toString() === (group2.inverter as (x: T, y: T) => T).toString()
+                    (
+                        group1.operation === group2.operation ||
+                        (group1.operation as (x: T, y: T) => T).toString() === (group2.operation as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        group1.inverter === group2.inverter ||
+                        (group1.inverter as (x: T, y: T) => T).toString() === (group2.inverter as (x: T, y: T) => T).toString()
+                    )
                 );
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
@@ -743,9 +803,18 @@ namespace Chalkboard {
                     Chalkboard.abal.isEqual(ring1.set, ring2.set) &&
                     ring1.addIdentity === ring2.addIdentity &&
                     ring1.mulIdentity === ring2.mulIdentity &&
-                    (ring1.add as (x: T, y: T) => T).toString() === (ring2.add as (x: T, y: T) => T).toString() &&
-                    (ring1.mul as (x: T, y: T) => T).toString() === (ring2.mul as (x: T, y: T) => T).toString() &&
-                    (ring1.addInverter as (x: T, y: T) => T).toString() === (ring2.addInverter as (x: T, y: T) => T).toString()
+                    (
+                        ring1.add === ring2.add ||
+                        (ring1.add as (x: T, y: T) => T).toString() === (ring2.add as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        ring1.mul === ring2.mul ||
+                        (ring1.mul as (x: T, y: T) => T).toString() === (ring2.mul as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        ring1.addInverter === ring2.addInverter ||
+                        (ring1.addInverter as (x: T, y: T) => T).toString() === (ring2.addInverter as (x: T, y: T) => T).toString()
+                    )
                 );
             }
             if ("mulInverter" in struc1 && "mulInverter" in struc2) {
@@ -755,10 +824,22 @@ namespace Chalkboard {
                     Chalkboard.abal.isEqual(field1.set, field2.set) &&
                     field1.addIdentity === field2.addIdentity &&
                     field1.mulIdentity === field2.mulIdentity &&
-                    (field1.add as (x: T, y: T) => T).toString() === (field2.add as (x: T, y: T) => T).toString() &&
-                    (field1.mul as (x: T, y: T) => T).toString() === (field2.mul as (x: T, y: T) => T).toString() &&
-                    (field1.addInverter as (x: T, y: T) => T).toString() === (field2.addInverter as (x: T, y: T) => T).toString() &&
-                    (field1.mulInverter as (x: T, y: T) => T).toString() === (field2.mulInverter as (x: T, y: T) => T).toString()
+                    (
+                        field1.add === field2.add ||
+                        (field1.add as (x: T, y: T) => T).toString() === (field2.add as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        field1.mul === field2.mul ||
+                        (field1.mul as (x: T, y: T) => T).toString() === (field2.mul as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        field1.addInverter === field2.addInverter ||
+                        (field1.addInverter as (x: T, y: T) => T).toString() === (field2.addInverter as (x: T, y: T) => T).toString()
+                    ) &&
+                    (
+                        field1.mulInverter === field2.mulInverter ||
+                        (field1.mulInverter as (x: T, y: T) => T).toString() === (field2.mulInverter as (x: T, y: T) => T).toString()
+                    )
                 );
             }
             if ("mapping" in struc1 && "mapping" in struc2) {
@@ -767,9 +848,15 @@ namespace Chalkboard {
                 return (
                     Chalkboard.abal.isEqual(morph1.struc1, morph2.struc1) &&
                     Chalkboard.abal.isEqual(morph1.struc2, morph2.struc2) &&
-                    Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.image(morph2)) &&
-                    Chalkboard.abal.isEqual(Chalkboard.abal.preimage(morph1), Chalkboard.abal.preimage(morph2)) &&
-                    Chalkboard.abal.isEqual(Chalkboard.abal.kernel(morph1), Chalkboard.abal.kernel(morph2))
+                    (
+                        morph1.mapping === morph2.mapping ||
+                        morph1.mapping.toString() === morph2.mapping.toString() ||
+                        (
+                            Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.image(morph2)) &&
+                            Chalkboard.abal.isEqual(Chalkboard.abal.preimage(morph1), Chalkboard.abal.preimage(morph2)) &&
+                            Chalkboard.abal.isEqual(Chalkboard.abal.kernel(morph1), Chalkboard.abal.kernel(morph2))
+                        )
+                    )
                 );
             }
             return false;
@@ -1264,11 +1351,18 @@ namespace Chalkboard {
          */
         export const M = (rows: number, cols: number = rows): ChalkboardSet<ChalkboardMatrix> => ({
             contains: (element: ChalkboardMatrix) => {
-                return Array.isArray(element) &&
-                    element.length === rows &&
-                    element.every(row => Array.isArray(row) && row.length === cols && row.every(cell => typeof cell === "number"));
+                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
             },
             id: `M(${rows}, ${cols})`
+        });
+
+        /**
+         * The set of all natural numbers, denoted as N.
+         * @returns {ChalkboardSet<number>}
+         */
+        export const N = (): ChalkboardSet<number> => ({
+            contains: (element: number) => Number.isInteger(element) && element > 0,
+            id: "N"
         });
 
         /**
@@ -1293,6 +1387,15 @@ namespace Chalkboard {
             }
             return result;
         };
+
+        /**
+         * The set of all prime numbers, denoted as P.
+         * @returns {ChalkboardSet<number>}
+         */
+        export const P = (): ChalkboardSet<number> => ({
+            contains: (element: number) => Chalkboard.numb.isPrime(element),
+            id: "P"
+        });
 
         /**
          * Calculates the power set of a set.
@@ -1375,9 +1478,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<number>}
          */
         export const Q = (): ChalkboardSet<number> => ({
-            contains: (element: number) => {
-                return Number.isFinite(element) && element % 1 !== 0;
-            },
+            contains: (element: number) => Number.isFinite(element) && Chalkboard.numb.isRational(element),
             id: "Q"
         });
 
@@ -1524,6 +1625,99 @@ namespace Chalkboard {
             const diffA = Chalkboard.abal.difference(set1, set2).elements || [];
             const diffB = Chalkboard.abal.difference(set2, set1).elements || [];
             return Chalkboard.abal.set([...diffA, ...diffB]);
+        };
+
+        /**
+         * Converts a set or algebraic structure to an array.
+         * @template T
+         * @param {ChalkboardSet<T> | ChalkboardStructure<T>} struc - The set or structure
+         * @returns {T[]}
+         */
+        export const toArray = <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>): T[] => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to array.");
+            }
+            return [...result.elements];
+        };
+
+        /**
+         * Converts a set or algebraic structure to a matrix.
+         * @param {ChalkboardSet<number> | ChalkboardStructure<number>} struc - The set or structure
+         * @param {number} rows - The number of rows of the matrix
+         * @param {number} [cols=rows] - The number of columns of the matrix (optional, defaults to the number of rows to make a square matrix)
+         * @returns {ChalkboardMatrix}
+         */
+        export const toMatrix = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, rows: number, cols: number = rows): ChalkboardMatrix => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to matrix.");
+            }
+            return Chalkboard.stat.toMatrix(result.elements, rows, cols);
+        };
+
+        /**
+         * Converts a set or algebraic structure to an object.
+         * @param struc - The set or structure
+         * @returns {object}
+         */
+        export const toObject = (struc: ChalkboardSet<number> | ChalkboardStructure<number>): object => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to object.");
+            }
+            return Chalkboard.stat.toObject(result.elements);
+        };
+
+        /**
+         * Converts a set or algebraic structure to a string.
+         * @param struc - The set or structure
+         * @returns {string}
+         */
+        export const toString = (struc: ChalkboardSet<number> | ChalkboardStructure<number>): string => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to string.");
+            }
+            return Chalkboard.stat.toString(result.elements);
+        };
+
+        /**
+         * Converts a set or algebraic structure to a tensor.
+         * @param {ChalkboardSet<number> | ChalkboardStructure<number>} struc - The set or structure
+         * @param {number[]} size - The size of the tensor
+         * @returns {ChalkboardTensor}
+         */
+        export const toTensor = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...size: number[]): ChalkboardTensor => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to tensor.");
+            }
+            if (Array.isArray(size[0])) size = size[0];
+            return Chalkboard.tens.resize(result.elements, ...size);
+        };
+
+        /**
+         * Converts a set or algebraic structure to a vector.
+         * @param {ChalkboardSet<number> | ChalkboardStructure<number>} struc - The set or structure
+         * @param {number} dimension - The dimension of the vector, which can be 2, 3, or 4
+         * @param {number} [index=0] - The index of the array to start the vector
+         * @returns {ChalkboardVector}
+         */
+        export const toVector = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, dimension: 2 | 3 | 4, index: number = 0): ChalkboardVector => {
+            const elements = "set" in struc ? struc.set.elements : struc.elements;
+            if (!elements) {
+                throw new Error("Cannot convert infinite set to vector.");
+            }
+            if (dimension === 2) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1]);
+            } else if (dimension === 3) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2]);
+            } else if (dimension === 4) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2], elements[index + 3]);
+            } else {
+                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+            }
         };
 
         /**

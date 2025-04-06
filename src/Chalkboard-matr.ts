@@ -2433,6 +2433,15 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a matrix to a set.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {ChalkboardSet<number>}
+         */
+        export const toSet = (matr: ChalkboardMatrix): ChalkboardSet<number> => {
+            return Chalkboard.abal.set(Chalkboard.matr.toArray(matr));
+        };
+
+        /**
          * Converts a matrix to a string.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {string}
