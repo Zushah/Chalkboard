@@ -15,7 +15,11 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const absolute = (arr: number[]): number[] => {
-            return arr.map(x => Math.abs(x));
+            const result: number[] = [];
+            for (let i = 0; i < arr.length; i++) {
+                result.push(Math.abs(arr[i]));
+            }
+            return result;
         };
 
         /**
@@ -28,7 +32,11 @@ namespace Chalkboard {
             if (arr1.length !== arr2.length) {
                 throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
             }
-            return arr1.map((x, i) => x + arr2[i]);
+            const result: number[] = [];
+            for (let i = 0; i < arr1.length; i++) {
+                result.push(arr1[i] + arr2[i]);
+            }
+            return result;
         };
 
         /**
@@ -281,7 +289,11 @@ namespace Chalkboard {
             if (arr1.length !== arr2.length) {
                 throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
             }
-            return arr1.reduce((sum, x, i) => sum + x * arr2[i], 0);
+            let result = 0;
+            for (let i = 0; i < arr1.length; i++) {
+                result += arr1[i] * arr2[i];
+            }
+            return result;
         };
 
         /**
@@ -332,7 +344,11 @@ namespace Chalkboard {
             if (arr.length !== probabilities.length) {
                 throw new RangeError('Parameters "values" and "probabilities" must have the same length.');
             }
-            return arr.reduce((sum, x, i) => sum + x * probabilities[i], 0);
+            let result = 0;
+            for (let i = 0; i < arr.length; i++) {
+                result += arr[i] * probabilities[i];
+            }
+            return result;
         };
 
         /**
@@ -743,7 +759,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mul = (arr: number[]): number => {
-            return arr.reduce((result, x) => result * x, 1);
+            let result = 0;
+            for (let i = 0; i < arr.length; i++) {
+                result *= arr[i];
+            }
+            return result;
         };
 
         /**
@@ -752,7 +772,11 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const negate = (arr: number[]): number[] => {
-            return arr.map(x => -x);
+            const result: number[] = [];
+            for (let i = 0; i < arr.length; i++) {
+                result.push(-arr[i]);
+            }
+            return result;
         };
 
         /**
@@ -1069,17 +1093,25 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const reverse = (arr: number[]): number[] => {
-            return arr.slice().reverse();
+            const result: number[] = [];
+            for (let i = arr.length - 1; i >= 0; i--) {
+                result.push(arr[i]);
+            }
+            return result;
         };
 
         /**
-         * Scales the elements of an array by a given factor.
+         * Calculates the scalar multiplication of an array.
          * @param {number[]} arr - The array
          * @param {number} num - The scalar
          * @returns {number[]}
          */
         export const scl = (arr: number[], num: number): number[] => {
-            return arr.map(value => value * num);
+            const result: number[] = [];
+            for (let i = 0; i < arr.length; i++) {
+                result.push(arr[i] * num);
+            }
+            return result;
         };
 
         /**
@@ -1123,7 +1155,11 @@ namespace Chalkboard {
             if (arr1.length !== arr2.length) {
                 throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
             }
-            return arr1.map((x, i) => x - arr2[i]);
+            const result: number[] = [];
+            for (let i = 0; i < arr1.length; i++) {
+                result.push(arr1[i] - arr2[i]);
+            }
+            return result;
         };
 
         /**
@@ -1155,7 +1191,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const sum = (arr: number[]): number => {
-            return arr.reduce((result, x) => result + x, 0);
+            let result = 0;
+            for (let i = 0; i < arr.length; i++) {
+                result += arr[i];
+            }
+            return result;
         };
 
         /**
@@ -1247,11 +1287,64 @@ namespace Chalkboard {
 
         /**
          * Returns the unique elements of an array.
-         * @param {number[]} arr - The array
-         * @returns {number[]}
+         * @template T
+         * @param {T[]} arr - The array
+         * @returns {T[]}
          */
-        export const unique = (arr: number[]): number[] => {
-            return Array.from(new Set(arr));
+        export const unique = <T>(arr: T[]): T[] => {
+            const stableStringify = (obj: any): string => {
+                const replacer = (key: string, value: any) => {
+                    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+                        const sortedObj: Record<string, any> = {};
+                        Object.keys(value).sort().forEach(k => {
+                            sortedObj[k] = value[k];
+                        });
+                        return sortedObj;
+                    }
+                    return value;
+                };
+                return JSON.stringify(obj, replacer);
+            };
+            const getKey = (item: any): string => {
+                let typePrefix: string;
+                let valuePart: string;
+                if (item === null) {
+                    typePrefix = "null";
+                    valuePart = stableStringify(item);
+                } else if (Array.isArray(item)) {
+                    typePrefix = "array";
+                    valuePart = stableStringify(item);
+                } else if (typeof item === "object") {
+                    typePrefix = "object";
+                    valuePart = stableStringify(item);
+                } else if (typeof item === "number") {
+                    typePrefix = "number";
+                    if (Number.isNaN(item)) {
+                        valuePart = "NaN";
+                    } else if (item === Infinity) {
+                        valuePart = "Infinity";
+                    } else if (item === -Infinity) {
+                        valuePart = "-Infinity";
+                    } else {
+                        valuePart = JSON.stringify(item);
+                    }
+                } else if (typeof item === "undefined") {
+                    typePrefix = "undefined";
+                    valuePart = "";
+                } else {
+                    typePrefix = typeof item;
+                    valuePart = stableStringify(item);
+                }
+                return `${typePrefix}:${valuePart}`;
+            };
+            const seen = new Map<string, T>();
+            for (const item of arr) {
+                const key = getKey(item);
+                if (!seen.has(key)) {
+                    seen.set(key, item);
+                }
+            }
+            return Array.from(seen.values());
         };
 
         /**
@@ -1273,9 +1366,13 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const zscored = (arr: number[]): number[] => {
+            let result: number[] = [];
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
-            return arr.map(value => (value - mean) / deviation);
+            for (let i = 0; i < arr.length; i++) {
+                result.push((arr[i] - mean) / deviation);
+            }
+            return result;
         };
     }
 }

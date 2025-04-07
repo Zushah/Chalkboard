@@ -2138,12 +2138,12 @@ namespace Chalkboard {
          */
         export const resize = (matr: ChalkboardMatrix, rows: number, cols: number = rows): ChalkboardMatrix => {
             const result = Chalkboard.matr.init();
-            const flat = Chalkboard.matr.toArray(matr);
-            let index = 0;
+            const matrrows = Chalkboard.matr.rows(matr);
+            const matrcols = Chalkboard.matr.cols(matr);
             for (let i = 0; i < rows; i++) {
                 result.push([]);
                 for (let j = 0; j < cols; j++) {
-                    result[i].push(index < flat.length ? flat[index++] : 0);
+                    result[i].push(i < matrrows && j < matrcols ? matr[i][j] : 0);
                 }
             }
             return result;

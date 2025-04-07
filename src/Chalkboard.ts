@@ -18,18 +18,16 @@
 type ChalkboardComplex = { a: number; b: number };
 
 /**
- * The type for dual numbers.
- * @property {number} a - The real part
- * @property {number} b - The dual part
- */
-type ChalkboardDual = { a: number; b: number };
-
-/**
  * The type for mathematical functions.
  * @property {string | string[]} definition - The function's definition
  * @property {"expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"} type - The function's type, which can be "expl" for explicit functions, "inve" for inverse functions, "pola" for polar functions, "curv" for parametric curves, "surf" for parametric surfaces, "mult" for explicit multivariable functions, or "comp" for explicit complex-valued functions
  */
 type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp" };
+
+/**
+ * The type for matrices.
+ */
+type ChalkboardMatrix = number[][];
 
 /**
  * The type for morphisms in abstract algebra.
@@ -43,11 +41,6 @@ type ChalkboardMorphism<T, U> = {
     struc2: ChalkboardStructure<U>;
     mapping: (a: T) => U;
 };
-
-/**
- * The type for matrices.
- */
-type ChalkboardMatrix = number[][];
 
 /**
  * The type for quaternions.
@@ -98,6 +91,28 @@ type ChalkboardStructure<T> = {
 };
 
 /**
+ * The type for algebraic structure extensions in abstract algebra.
+ * @template T, U
+ * @property {ChalkboardStructure<T>} base - The algebraic structure which is a substructure of the extension structure
+ * @property {ChalkboardStructure<U>} extension - The algebraic structure which is an extension of the base structure
+ * @property {number} degree - The dimension of the extension structure as a vector space over the base structure
+ * @property {ChalkboardVector[]} basis - The basis vectors of the extension structure
+ * @property {boolean} isFinite - Whether the extension structure is finite or not
+ * @property {boolean} isSimple - Whether the extension structure is simple or not
+ * @property {boolean} isAlgebraic - Whether the extension structure is algebraic or not
+ * 
+ */
+type ChalkboardStructureExtension<T, U extends T> = {
+    base: ChalkboardStructure<T>;
+    extension: ChalkboardStructure<U>;
+    degree: number;
+    basis: ChalkboardVector[];
+    isFinite: boolean;
+    isSimple: boolean;
+    isAlgebraic: boolean;
+};
+
+/**
  * The type for tensors.
  */
 type ChalkboardTensor = number | ChalkboardTensor[];
@@ -126,10 +141,11 @@ type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
  */
 namespace Chalkboard {
     /**
-     * Applies a callback function in an element-wise manner on a complex number, dual number, matrix, quaternion, tensor, or vector.
-     * @param {ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector} object - The complex number, dual number, matrix, quaternion, tensor, or vector
-     * @param {Function} callback - The callback function to apply
-     * @returns {ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector}
+     * Applies a callback function in an element-wise manner on a complex number, matrix, quaternion, tensor, vector, set, or structure.
+     * @template T
+     * @param {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>} object - The complex number, matrix, quaternion, tensor, vector, set, or structure
+     * @param {(x: any) => any} callback - The callback function
+     * @returns {ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>}
      * @example
      * // Returns the vector (1, 2, 6, 24)
      * let v = Chalkboard.vect.init(1, 2, 3, 4);
@@ -137,50 +153,83 @@ namespace Chalkboard {
      *     return Chalkboard.numb.factorial(x)
      * });
      */
-    export const APPLY = (
-        object: ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector,
-        callback: Function
-    ): ChalkboardComplex | ChalkboardDual | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector => {
-        const comp = object as ChalkboardComplex;
-        const dual = object as ChalkboardDual;
-        const matr = object as ChalkboardMatrix;
-        const quat = object as ChalkboardQuaternion;
-        const tens = object as ChalkboardTensor;
-        const vect = object as ChalkboardVector;
-        if (typeof comp.a !== "undefined" && typeof comp.b !== "undefined" && typeof quat.c === "undefined" && typeof quat.d === "undefined") {
+    export const APPLY = <T>(
+        object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>,
+        callback: (x: any) => any
+    ): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T> => {
+        if (object && typeof (object as any).a === "number" && typeof (object as any).b === "number" && typeof (object as any).c === "undefined") {
+            const comp = object as ChalkboardComplex;
             return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
-        } else if (typeof dual.a !== "undefined" && typeof dual.b !== "undefined") { 
-            return Chalkboard.dual.init(callback(dual.a), callback(dual.b));
-        } else if (Array.isArray(matr) && Array.isArray(matr[0]) && !Array.isArray(matr[0][0])) {
-            const result = Chalkboard.matr.init();
-            for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = callback(matr[i][j]);
+        }
+        if (object && typeof (object as any).a === "number" && typeof (object as any).b === "number" && typeof (object as any).c === "number" && typeof (object as any).d === "number") {
+            const quat = object as ChalkboardQuaternion;
+            return Chalkboard.quat.init(callback(quat.a), callback(quat.b), callback(quat.c), callback(quat.d));
+        }
+        if (object && typeof (object as any).x === "number" && typeof (object as any).y === "number") {
+            const vect = object as ChalkboardVector;
+            if (typeof vect.w === "number" && typeof vect.z === "number") {
+                return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
+            } else if (typeof vect.z === "number") {
+                return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z));
+            } else {
+                return Chalkboard.vect.init(callback(vect.x), callback(vect.y));
+            }
+        }
+        if (Array.isArray(object)) {
+            let isMatrix = true;
+            for (let i = 0; i < object.length; i++) {
+                if (!Array.isArray(object[i]) || ((object[i] as number[]).length > 0 && typeof (object as number[][])[i][0] !== "number")) {
+                    isMatrix = false;
+                    break;
                 }
             }
-            return result;
-        } else if (typeof quat.a !== "undefined" && typeof quat.b !== "undefined" && typeof quat.c !== "undefined" && typeof quat.d !== "undefined") {
-            return Chalkboard.quat.init(callback(quat.a), callback(quat.b), callback(quat.c), callback(quat.d));
-        } else if (Array.isArray(tens) && Array.isArray(tens[0])) {
-            const result = Chalkboard.tens.init() as ChalkboardTensor[];
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.APPLY(tens[i], callback) as ChalkboardTensor;
+            if (isMatrix) {
+                const matr = object as ChalkboardMatrix;
+                const rows = Chalkboard.matr.rows(matr);
+                const cols = Chalkboard.matr.cols(matr);
+                const result = Chalkboard.matr.fill(0, rows, cols);
+                for (let i = 0; i < rows; i++) {
+                    for (let j = 0; j < cols; j++) {
+                        result[i][j] = callback(matr[i][j]);
+                    }
                 }
                 return result;
             } else {
-                return callback(tens);
+                const result: ChalkboardTensor[] = [];
+                for (let i = 0; i < object.length; i++) {
+                    result.push(Chalkboard.APPLY(object[i], callback) as ChalkboardTensor);
+                }
+                return result;
             }
-        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y));
-        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w === "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z));
-        } else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w !== "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
-        } else {
-            throw new TypeError('Parameter "object" must be of type "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", or "ChalkboardVector".');
         }
+        if (typeof object === "number") {
+            return callback(object);
+        }
+        if (object && typeof (object as any).contains === "function" && typeof (object as any).set === "undefined") {
+            const set = object as ChalkboardSet<T>;
+            if (Array.isArray(set.elements)) {
+                const result = [];
+                for (let i = 0; i < set.elements.length; i++) {
+                    result.push(callback(set.elements[i]));
+                }
+                return result;
+            } else {
+                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardSet".');
+            }
+        }
+        if (object && typeof (object as any).set?.contains === "function") {
+            const struc = object as ChalkboardStructure<T>;
+            if (Array.isArray(struc.set.elements)) {
+                const result = [];
+                for (let i = 0; i < struc.set.elements.length; i++) {
+                    result.push(callback(struc.set.elements[i]));
+                }
+                return result;
+            } else {
+                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardStructure".');
+            }
+        }
+        throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
     };
 
     /**
