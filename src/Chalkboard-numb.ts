@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Number Theory Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -184,10 +184,9 @@ namespace Chalkboard {
          */
         export const factorial = (num: number): number => {
             let n = 1;
-            for (var i = 1; i <= num; i++) {
+            for (let i = 1; i <= num; i++) {
                 n *= i;
             }
-            i--;
             return n;
         };
 

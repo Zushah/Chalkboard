@@ -1,18 +1,18 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.1.0 Seki Example Program: Fluid Flow
+    Version 2.2.0 Galois Example Program: Fluid Flow
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
 // Get the JavaScript Canvas API
-var ctx = document.getElementById("canvas").getContext("2d");
+const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var cb = Chalkboard; // Initialize Chalkboard as cb
+const cb = Chalkboard; // Initialize Chalkboard as cb
 
 // Vector field defined as F(x, y) = (-y, -x/(1 + x^2)^2), adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
-var F = cb.vect.field("y", "-x / ((1 + x * x) * (1 + x * x))");
+const F = cb.vect.field("y", "-x / ((1 + x * x) * (1 + x * x))");
 
 // Basic particle system to simulate the fluid flow
 class Particle {
@@ -63,8 +63,8 @@ class Particle {
     }
 }
 // Create 500 particles in the particles array
-var particles = [];
-for (var i = 0; i < 500; i++) {
+let particles = [];
+for (let i = 0; i < 500; i++) {
     particles.push(new Particle());
 }
 
@@ -72,9 +72,9 @@ for (var i = 0; i < 500; i++) {
 ctx.fillStyle = "black";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 function main() {
-    for (var i = 0; i < particles.length; i++) {
+    for (let i = 0; i < particles.length; i++) {
         particles[i].draw();
     }
     window.requestAnimationFrame(main);
 }
-window.requestAnimationFrame(main);
+main();

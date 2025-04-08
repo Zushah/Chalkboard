@@ -1,6 +1,48 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v2.2.0 Galois](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0) - 04/07/2024
+The twelfth release of the Chalkboard library.
+Commits: [`v2.1.0...v2.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.1.0...v2.2.0)
+- Added abstract algebra functionalities with the new `abal` category containing 76 commands, so only a few notable ones are mentioned below
+- Added `abal.set` which defines a mathematical set, as well as `abal.Z` which defines the set of integers or the set of integers modulo n, `abal.Q` which defines the set of rational numbers, `abal.R` which defines the set of real numbers, and `abal.C` which defines the set of complex numbers or the set of nth roots of unity
+- Added `abal.union`, `abal.intersection`, `abal.complement`, `abal.difference`, `abal.symmetricDifference`, `abal.Cartesian`, `abal.powerSet`, `abal.isSubset`, and `abal.isSuperset` which respectively calculate the union of two sets, the intersection of two sets, the complement of a set, the difference of two sets, the symmetric difference of two sets, the Cartesian product of two sets, the power set of a set, whether or not a set is a subset of another set, and whether or not a set is a superset of another set
+- Added `abal.group`, `abal.ring`, and `abal.field` which define the algebraic structures known as groups, rings, and fields
+- Added `abal.direct` which calculates the direct sum or direct product of two algebraic structures
+- Added `abal.cosets` and `abal.quotient` which respectively calculate the cosets or quotient structure of two inputted algebraic structures
+- Added `abal.homomorphism`, `abal.endomorphism`, `abal.isomorphism`, `abal.automorphism`, `abal.idmorphism`, and `abal.invmorphism` which define various types of morphisms between one or two algebraic structures
+- Added `abal.compose` which calculates the composition morphism of two given morphisms
+- Added `abal.image`, `abal.preimage`, and `abal.kernel` which respectively calculate the image, preimage, or kernel of a given morphism
+- Added `abal.cardinality` which calculates the cardinality of a set or the set of a structure
+- Added `abal.isEqual` which checks if two sets, structures, or morphisms are equal
+- Added `abal.copy` which creates a copy of a set, structure, or morphism
+- Added `abal.toArray`, `abal.toMatrix`, `abal.toObject`, `abal.toString`, `abal.toTensor`, and `abal.toVector` which convert sets or structures to arrays, matricies, objects, strings, tensors, or vectors, and `abal.print` prints a set or structure in the console
+- Added `stat.Bayes` which calculates the posterior probability given prior probabilities
+- Added `stat.expected` which calculates the expected value of an array given the probabilities of its elements
+- Added `stat.normal` and `stat.inormal` which respectively calculate the values of the standard normal distribution and cumulative distribution function of the standard normal distribution
+- Added `stat.resampling` which resamples an array either by the bootstrap or jackknife methods
+- Added `stat.interpolate` which linearly or quadratically interpolates missing elements in an array
+- Added `stat.absolute` which takes the absolute value of the elements of an array, `stat.negate` which negates the elements of an array, `stat.add` which adds the elements of two arrays, `stat.sub` which subtracts the elements of two arrays, `stat.dot` which calculates the dot product of two arrays, `stat.scl` which scales the elements of an array by a given number, `stat.sum` which calculates the sum of the elements of an array, `stat.mul` which calculates the product of the elements of an array, and `stat.reverse` which reverses the elements of an array
+- Added `stat.cumsum`, `stat.cummul`, `stat.cummax`, and `stat.cummin` which respectively calculate the cumululative sum, product, maximum, and minimum of an array
+- Added `stat.meanMoving` and `stat.meanWeighted` which respectively calculate the moving and weighted averages of an array
+- Added `stat.covariance` which calculates the covariance of two arrays and `stat.correlationCoefficient` which calculates the correlation coefficient of two arrays
+- Added `stat.interquartileRange` which calculates the interquartile range of an array
+- Added `stat.zscored` which standardizes the elements of an array by their mean and standard deviation
+- Added `stat.pad` which pads an array by a given element to a given length
+- Added `stat.unique` which deduplicates an array of numbers, arrays, objects, etc.
+- Added `matr.toSet`, `stat.toSet` and `tens.toSet` to convert matrices, arrays, and tensors to sets
+- Added `numb.toFraction` to convert decimals to fractions and `numb.isRational` to check if a number is rational
+- Changed `APPLY` to work for sets and algebraic structures introduced in the `abal` category
+- Changed `stat.change` and `stat.chiSquared` to be written more succinctly
+- Changed `stat.confidenceInterval` to use an adjustable confidence level
+- Changed `stat.toMatrix` to be able to use only one parameter for the size of the matrix instead of requiring two
+- Changed `matr.rotator` to be faster
+- Changed `comp.toString` to output 1, i, -1, or -i when 1+0i, 0+1i, -1+0i, or 0-1i are inputted
+- Fixed `comp.div` which was broken for who knows how long because it was using the wrong formula for some reason
+- Fixed `matr.resize` which was always returning zero matrices
+- Fixed `matr.zero` which was unnecessarily using erasing operations
+- Fixed `tens.init` which had an expression assigned to itself
+
 ## [v2.1.0 Seki](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0) - 01/22/2024
 The eleventh release of the Chalkboard library.
 Commits: [`v2.0.0...v2.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.0.0...v2.1.0)
@@ -42,7 +84,7 @@ Commits: [`v1.7.0...v2.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed `real.function` to be renamed as `real.define`, `comp.function` to be renamed as `comp.define`, and `plot.function` to be renamed as `plot.definition`
 - Changed `LOGO` to draw the logo as a circle instead of a square
 - Changed `matr.mulvec` to be renamed as `matr.mulVector`
-- Fixed `matr.mulVector`` which didn't work when the rows of the matrix equaled the dimension of the vector
+- Fixed `matr.mulVector` which didn't work when the rows of the matrix equaled the dimension of the vector
 - Discontinued the Processsing.js edition of the library, meaning it will no longer be updated and it will only be available on the Khan Academy release (it will no longer be available on GitHub)
 
 ## [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) - 01/01/2024

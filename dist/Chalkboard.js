@@ -1,4 +1,15 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
         if (ar || !(i in from)) {
@@ -11,51 +22,85 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 var Chalkboard;
 (function (Chalkboard) {
     Chalkboard.APPLY = function (object, callback) {
-        var comp = object;
-        var matr = object;
-        var quat = object;
-        var tens = object;
-        var vect = object;
-        if (typeof comp.a !== "undefined" && typeof comp.b !== "undefined" && typeof quat.c === "undefined" && typeof quat.d === "undefined") {
-            return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
+        var _a;
+        if (object && typeof object.a === "number" && typeof object.b === "number" && typeof object.c === "undefined") {
+            var comp_1 = object;
+            return Chalkboard.comp.init(callback(comp_1.a), callback(comp_1.b));
         }
-        else if (Array.isArray(matr) && Array.isArray(matr[0]) && !Array.isArray(matr[0][0])) {
-            var result = Chalkboard.matr.init();
-            for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                result[i] = [];
-                for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    result[i][j] = callback(matr[i][j]);
+        if (object && typeof object.a === "number" && typeof object.b === "number" && typeof object.c === "number" && typeof object.d === "number") {
+            var quat_1 = object;
+            return Chalkboard.quat.init(callback(quat_1.a), callback(quat_1.b), callback(quat_1.c), callback(quat_1.d));
+        }
+        if (object && typeof object.x === "number" && typeof object.y === "number") {
+            var vect_1 = object;
+            if (typeof vect_1.w === "number" && typeof vect_1.z === "number") {
+                return Chalkboard.vect.init(callback(vect_1.x), callback(vect_1.y), callback(vect_1.z), callback(vect_1.w));
+            }
+            else if (typeof vect_1.z === "number") {
+                return Chalkboard.vect.init(callback(vect_1.x), callback(vect_1.y), callback(vect_1.z));
+            }
+            else {
+                return Chalkboard.vect.init(callback(vect_1.x), callback(vect_1.y));
+            }
+        }
+        if (Array.isArray(object)) {
+            var isMatrix = true;
+            for (var i = 0; i < object.length; i++) {
+                if (!Array.isArray(object[i]) || (object[i].length > 0 && typeof object[i][0] !== "number")) {
+                    isMatrix = false;
+                    break;
                 }
             }
-            return result;
-        }
-        else if (typeof quat.a !== "undefined" && typeof quat.b !== "undefined" && typeof quat.c !== "undefined" && typeof quat.d !== "undefined") {
-            return Chalkboard.quat.init(callback(quat.a), callback(quat.b), callback(quat.c), callback(quat.d));
-        }
-        else if (Array.isArray(tens) && Array.isArray(tens[0])) {
-            var result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (var i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.APPLY(tens[i], callback);
+            if (isMatrix) {
+                var matr_1 = object;
+                var rows = Chalkboard.matr.rows(matr_1);
+                var cols = Chalkboard.matr.cols(matr_1);
+                var result = Chalkboard.matr.fill(0, rows, cols);
+                for (var i = 0; i < rows; i++) {
+                    for (var j = 0; j < cols; j++) {
+                        result[i][j] = callback(matr_1[i][j]);
+                    }
                 }
                 return result;
             }
             else {
-                return callback(tens);
+                var result = [];
+                for (var i = 0; i < object.length; i++) {
+                    result.push(Chalkboard.APPLY(object[i], callback));
+                }
+                return result;
             }
         }
-        else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y));
+        if (typeof object === "number") {
+            return callback(object);
         }
-        else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w === "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z));
+        if (object && typeof object.contains === "function" && typeof object.set === "undefined") {
+            var set = object;
+            if (Array.isArray(set.elements)) {
+                var result = [];
+                for (var i = 0; i < set.elements.length; i++) {
+                    result.push(callback(set.elements[i]));
+                }
+                return result;
+            }
+            else {
+                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardSet".');
+            }
         }
-        else if (typeof vect.x !== "undefined" && typeof vect.y !== "undefined" && typeof vect.z !== "undefined" && typeof vect.w !== "undefined") {
-            return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
+        if (object && typeof ((_a = object.set) === null || _a === void 0 ? void 0 : _a.contains) === "function") {
+            var struc = object;
+            if (Array.isArray(struc.set.elements)) {
+                var result = [];
+                for (var i = 0; i < struc.set.elements.length; i++) {
+                    result.push(callback(struc.set.elements[i]));
+                }
+                return result;
+            }
+            else {
+                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardStructure".');
+            }
         }
-        else {
-            throw new TypeError('Parameter "object" must be of type "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", or "ChalkboardVector".');
-        }
+        throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
     };
     Chalkboard.CONTEXT = typeof window !== "undefined" ? "ctx" : "0";
     Chalkboard.E = function (exponent) {
@@ -105,10 +150,10 @@ var Chalkboard;
             Chalkboard.VERSION +
             " " +
             Chalkboard.VERSIONALIAS +
-            " released 01/22/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
+            " released 04/07/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
     };
-    Chalkboard.VERSION = "2.1.0";
-    Chalkboard.VERSIONALIAS = "Seki";
+    Chalkboard.VERSION = "2.2.0";
+    Chalkboard.VERSIONALIAS = "Galois";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined") {
     module.exports = Chalkboard;
@@ -116,6 +161,1528 @@ if (typeof window === "undefined") {
 else {
     window.Chalkboard = Chalkboard;
 }
+var Chalkboard;
+(function (Chalkboard) {
+    var abal;
+    (function (abal) {
+        var $ = JSON.stringify;
+        abal.A = function (n) {
+            if (!Number.isInteger(n) || n <= 0) {
+                throw new Error('The parameter "n" must be a positive integer.');
+            }
+            var Sn = Chalkboard.abal.S(n);
+            var isEvenPermutation = function (perm) {
+                var inversions = 0;
+                for (var i = 0; i < perm.length; i++) {
+                    for (var j = i + 1; j < perm.length; j++) {
+                        if (perm[i] > perm[j])
+                            inversions++;
+                    }
+                }
+                return inversions % 2 === 0;
+            };
+            var elements = (Sn.elements || []).filter(isEvenPermutation);
+            return {
+                contains: function (element) { return elements.some(function (perm) { return $(perm) === $(element); }); },
+                elements: elements,
+                id: "A".concat(n)
+            };
+        };
+        abal.automorphism = function (struc, mapping) {
+            var morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
+            if (!Chalkboard.abal.isHomomorphism(morphism)) {
+                throw new Error("The mapping is not a homomorphism, so it cannot be an automorphism.");
+            }
+            if (!Chalkboard.abal.isBijective(morphism)) {
+                throw new Error("The mapping is not bijective, so it cannot be an automorphism.");
+            }
+            return morphism;
+        };
+        abal.C = function (n) {
+            if (n === undefined) {
+                return {
+                    contains: function (element) {
+                        return typeof element.a === "number" && typeof element.b === "number";
+                    },
+                    id: "C"
+                };
+            }
+            else {
+                if (!Number.isInteger(n) || n <= 0) {
+                    throw new Error('The parameter "n" must be a positive integer.');
+                }
+                var elements_1 = [];
+                for (var k = 0; k < n; k++) {
+                    var t = (2 * Math.PI * k) / n;
+                    elements_1.push(Chalkboard.comp.init(Chalkboard.numb.roundTo(Math.cos(t), 0.0001), Chalkboard.numb.roundTo(Math.sin(t), 0.0001)));
+                }
+                return {
+                    contains: function (element) { return elements_1.some(function (e) {
+                        return e.a === element.a && e.b === element.b;
+                    }); },
+                    elements: elements_1,
+                    id: "C".concat(n)
+                };
+            }
+        };
+        abal.cardinality = function (struc) {
+            var id = "set" in struc && struc.set ? struc.set.id : ("id" in struc ? struc.id : undefined);
+            if ((id === null || id === void 0 ? void 0 : id.startsWith("M(")) || (id === null || id === void 0 ? void 0 : id.startsWith("GL")) || ["Z", "Q", "R", "C", "P"].includes(id || "")) {
+                return Infinity;
+            }
+            if ("elements" in struc && struc.elements) {
+                return struc.elements.length;
+            }
+            if ("set" in struc && struc.set.elements) {
+                return struc.set.elements.length;
+            }
+            throw new Error("The inputted structure does not have a finite cardinality or is missing elements.");
+        };
+        abal.Cartesian = function (set1, set2) {
+            var result = [];
+            for (var _i = 0, _a = set1.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                for (var _b = 0, _c = set2.elements || []; _b < _c.length; _b++) {
+                    var b = _c[_b];
+                    result.push([a, b]);
+                }
+            }
+            return Chalkboard.abal.set(result);
+        };
+        abal.Cayley = function (struc, type) {
+            if (type === void 0) { type = "add"; }
+            if (!struc.set.elements) {
+                throw new Error("The structure must have a finite set of elements.");
+            }
+            var elements = struc.set.elements;
+            if ("operation" in struc && struc.operation) {
+                if (type === "add") {
+                    var result = Chalkboard.matr.fill(0, elements.length);
+                    for (var i = 0; i < elements.length; i++) {
+                        for (var j = 0; j < elements.length; j++) {
+                            result[i][j] = struc.operation(elements[i], elements[j]);
+                        }
+                    }
+                    return result;
+                }
+                throw new Error('The "type" parameter for groups should remain as the default "add" since there is no distinction between their additive and multiplicative Cayley tables.');
+            }
+            if ("add" in struc && struc.add && "mul" in struc && struc.mul) {
+                if (type === "add") {
+                    var result_1 = Chalkboard.matr.fill(0, elements.length);
+                    for (var i = 0; i < elements.length; i++) {
+                        for (var j = 0; j < elements.length; j++) {
+                            result_1[i][j] = struc.add(elements[i], elements[j]);
+                        }
+                    }
+                    return result_1;
+                }
+                var result = Chalkboard.matr.fill(0, elements.length);
+                for (var i = 0; i < elements.length; i++) {
+                    for (var j = 0; j < elements.length; j++) {
+                        result[i][j] = struc.mul(elements[i], elements[j]);
+                    }
+                }
+                return result;
+            }
+            throw new Error("Invalid algebraic structure for Cayley table.");
+        };
+        abal.center = function (group) {
+            var set = group.set, operation = group.operation;
+            if (!set.elements || !operation) {
+                return Chalkboard.abal.set([]);
+            }
+            var result = set.elements.filter(function (z) { var _a; return ((_a = set.elements) !== null && _a !== void 0 ? _a : []).every(function (g) { return operation(z, g) === operation(g, z); }); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.complement = function (set, superset) {
+            return Chalkboard.abal.set((superset.elements || []).filter(function (element) { return !set.contains(element); }));
+        };
+        abal.compose = function (morph1, morph2) {
+            if (!Chalkboard.abal.isHomomorphism(morph1) || !Chalkboard.abal.isHomomorphism(morph2)) {
+                throw new Error("Both morphisms of the morphism composition must be homomorphisms.");
+            }
+            if (!Chalkboard.abal.isEqual(morph1.struc2, morph2.struc1)) {
+                throw new Error("The codomain of the first morphism and the domain of the second morphism must be equal to calculate the composition morphism.");
+            }
+            return Chalkboard.abal.homomorphism(morph1.struc1, morph2.struc2, function (x) { return morph2.mapping(morph1.mapping(x)); });
+        };
+        abal.copy = function (struc) {
+            var isSet = function (obj) { return obj && typeof obj.contains === "function" && (!obj.set && !obj.struc1 && !obj.base); };
+            var isStructure = function (obj) { return obj && obj.set && (obj.operation || obj.add || obj.mul); };
+            var isExtension = function (obj) { return obj && obj.base && obj.extension && typeof obj.degree === "number"; };
+            var isMorphism = function (obj) { return obj && obj.struc1 && obj.struc2 && typeof obj.mapping === "function"; };
+            if (isSet(struc)) {
+                var copiedSet = __assign(__assign({ contains: struc.contains }, (struc.id && { id: struc.id })), (struc.elements && { elements: __spreadArray([], struc.elements, true) }));
+                return copiedSet;
+            }
+            if (isStructure(struc)) {
+                var copiedSet = Chalkboard.abal.copy(struc.set);
+                var copiedStructure = __assign(__assign(__assign(__assign(__assign(__assign(__assign(__assign(__assign({ set: copiedSet }, (struc.operation && { operation: struc.operation })), (struc.identity !== undefined && { identity: struc.identity })), (struc.inverter && { inverter: struc.inverter })), (struc.add && { add: struc.add })), (struc.mul && { mul: struc.mul })), (struc.addIdentity !== undefined && { addIdentity: struc.addIdentity })), (struc.mulIdentity !== undefined && { mulIdentity: struc.mulIdentity })), (struc.addInverter && { addInverter: struc.addInverter })), (struc.mulInverter && { mulInverter: struc.mulInverter }));
+                return copiedStructure;
+            }
+            if (isExtension(struc)) {
+                var copiedBase = Chalkboard.abal.copy(struc.base);
+                var copiedExtension = Chalkboard.abal.copy(struc.extension);
+                var copiedExtensionStructure = {
+                    base: copiedBase,
+                    extension: copiedExtension,
+                    degree: struc.degree,
+                    basis: struc.basis ? __spreadArray([], struc.basis, true) : [],
+                    isFinite: struc.isFinite,
+                    isSimple: struc.isSimple,
+                    isAlgebraic: struc.isAlgebraic
+                };
+                return copiedExtensionStructure;
+            }
+            if (isMorphism(struc)) {
+                var copiedStruc1 = Chalkboard.abal.copy(struc.struc1);
+                var copiedStruc2 = Chalkboard.abal.copy(struc.struc2);
+                var copiedMorphism = {
+                    struc1: copiedStruc1,
+                    struc2: copiedStruc2,
+                    mapping: struc.mapping
+                };
+                return copiedMorphism;
+            }
+            throw new Error('The "struc" must be a set, structure, structure extension, or morphism.');
+        };
+        abal.coset = function (struc, substruc) {
+            if ("operation" in struc && !Chalkboard.abal.isSubgroup(struc, substruc.set)) {
+                throw new Error('The "substruc" must be a subgroup of the "struc".');
+            }
+            else if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
+                throw new Error('The "substruc" must be an ideal of the "struc".');
+            }
+            var elements = Chalkboard.abal.toArray(struc.set);
+            var subElements = Chalkboard.abal.toArray(substruc.set);
+            var cosets = new Map();
+            elements.forEach(function (g) {
+                var cosetElements = subElements.map(function (h) {
+                    return "operation" in struc ?
+                        struc.operation(g, h) :
+                        struc.add(g, h);
+                });
+                var sortedElements = __spreadArray([], cosetElements, true).sort(function (a, b) {
+                    if (typeof a === "number" && typeof b === "number") {
+                        return a - b;
+                    }
+                    return $(a).localeCompare($(b));
+                });
+                var key = $(sortedElements);
+                if (!cosets.has(key)) {
+                    var coset_1 = Chalkboard.abal.set(cosetElements);
+                    cosets.set(key, coset_1);
+                }
+            });
+            return Chalkboard.abal.set(Array.from(cosets.values()));
+        };
+        abal.cyclicSubgroup = function (group, element) {
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
+                throw new Error('The "group" must be finite.');
+            }
+            var result = [];
+            var current = element;
+            if (!group.operation) {
+                return Chalkboard.abal.set([]);
+            }
+            do {
+                result.push(current);
+                current = group.operation(current, element);
+            } while (!result.includes(current));
+            return Chalkboard.abal.set(result);
+        };
+        abal.D = function (n) {
+            if (!Number.isInteger(n) || n <= 0) {
+                throw new Error('The parameter "n" must be a positive integer.');
+            }
+            var elements = [];
+            for (var i = 0; i < n; i++) {
+                elements.push("r".concat(i));
+            }
+            for (var i = 0; i < n; i++) {
+                elements.push("s".concat(i));
+            }
+            return {
+                contains: function (element) { return elements.includes(element); },
+                elements: elements,
+                id: "D".concat(n)
+            };
+        };
+        abal.difference = function (set1, set2) {
+            var result = (set1.elements || []).filter(function (element) { return !set2.contains(element); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.direct = function (struc1, struc2, type) {
+            if (type === void 0) { type = "product"; }
+            var set = Chalkboard.abal.Cartesian(struc1.set, struc2.set);
+            var add = function (a, b) { return [
+                struc1.add(a[0], b[0]),
+                struc2.add(a[1], b[1])
+            ]; };
+            var mul = function (a, b) { return [
+                struc1.mul(a[0], b[0]),
+                struc2.mul(a[1], b[1])
+            ]; };
+            var addIdentity = [
+                struc1.addIdentity,
+                struc2.addIdentity
+            ];
+            var mulIdentity = [
+                struc1.mulIdentity,
+                struc2.mulIdentity
+            ];
+            var addInverter = function (a) { return [
+                struc1.addInverter(a[0]),
+                struc2.addInverter(a[1])
+            ]; };
+            var mulInverter = function (a) { return [
+                struc1.mulInverter(a[0]),
+                struc2.mulInverter(a[1])
+            ]; };
+            if ("operation" in struc1 && "operation" in struc2) {
+                var operation = function (a, b) { return [
+                    struc1.operation(a[0], b[0]),
+                    struc2.operation(a[1], b[1])
+                ]; };
+                var identity = [struc1.identity, struc2.identity];
+                var inverter = function (a) { return [
+                    struc1.inverter(a[0]),
+                    struc2.inverter(a[1])
+                ]; };
+                if (type === "sum") {
+                    if (!struc1.set.elements || !struc2.set.elements) {
+                        throw new Error("Direct sum is only defined for finite groups.");
+                    }
+                }
+                return Chalkboard.abal.group(set, operation, identity, inverter);
+            }
+            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
+                if (type === "sum") {
+                    if (!struc1.set.elements || !struc2.set.elements) {
+                        throw new Error("Direct sum is only defined for finite rings.");
+                    }
+                }
+                return Chalkboard.abal.ring(set, add, mul, addIdentity, mulIdentity, addInverter);
+            }
+            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && "mulInverter" in struc1 && "mulInverter" in struc2) {
+                if (type === "sum") {
+                    if (!struc1.set.elements || !struc2.set.elements) {
+                        throw new Error("Direct sum is only defined for finite fields.");
+                    }
+                }
+                return Chalkboard.abal.field(set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter);
+            }
+            throw new Error("Invalid algebraic structures for direct product or sum.");
+        };
+        abal.endomorphism = function (struc, mapping) {
+            var morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
+            if (!Chalkboard.abal.isHomomorphism(morphism)) {
+                throw new Error("The mapping is not a homomorphism, so it cannot be an endomorphism.");
+            }
+            return morphism;
+        };
+        abal.field = function (set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter) {
+            var _a, _b;
+            var presets = {
+                addition: {
+                    Z: function (a, b) { return a + b; },
+                    Q: function (a, b) { return a + b; },
+                    R: function (a, b) { return a + b; },
+                    C: Chalkboard.comp.add,
+                    M: Chalkboard.matr.add
+                },
+                multiplication: {
+                    Z: function (a, b) { return a * b; },
+                    Q: function (a, b) { return a * b; },
+                    R: function (a, b) { return a * b; },
+                    C: Chalkboard.comp.mul,
+                    M: Chalkboard.matr.mul
+                }
+            };
+            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
+            var _add = typeof add === "string" ? presets[add]["addition"] || presets[add][(_a = _set.id) !== null && _a !== void 0 ? _a : ""] : add;
+            var _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][(_b = _set.id) !== null && _b !== void 0 ? _b : ""] : mul;
+            if (!_add || !_mul) {
+                throw new Error("Preset operations \"".concat(add, "\" or \"").concat(mul, "\" are not defined for set \"").concat(_set.id, "\"."));
+            }
+            var autoconfig = function () {
+                if (!_set.id) {
+                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.');
+                }
+                if (_set.id === "Q" || _set.id === "R") {
+                    return {
+                        addIdentity: 0,
+                        mulIdentity: 1,
+                        addInverter: function (a) { return -a; },
+                        mulInverter: function (a) { return (1 / a); }
+                    };
+                }
+                else if (_set.id === "C") {
+                    return {
+                        addIdentity: Chalkboard.comp.init(0, 0),
+                        mulIdentity: Chalkboard.comp.init(1, 0),
+                        addInverter: function (a) { return Chalkboard.comp.negate(a); },
+                        mulInverter: function (a) { return Chalkboard.comp.invert(a); }
+                    };
+                }
+                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
+            };
+            var configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined" ? autoconfig() : { addIdentity: addIdentity, mulIdentity: mulIdentity, addInverter: addInverter, mulInverter: mulInverter };
+            var field = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
+            if (!Chalkboard.abal.isField(field)) {
+                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.');
+            }
+            return field;
+        };
+        abal.fieldExtension = function (base, extension, degree, basis, isFinite, isSimple, isAlgebraic) {
+            if (!Chalkboard.abal.isSubfield(base, extension.set)) {
+                throw new Error('The "base" must be a subfield of the "extension".');
+            }
+            var autoconfig = function () {
+                if (!base.set.id) {
+                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
+                }
+                if (base.set.id === "Q" && extension.set.id === "R") {
+                    return {
+                        degree: Infinity,
+                        basis: [],
+                        isFinite: false,
+                        isSimple: false,
+                        isAlgebraic: false
+                    };
+                }
+                else if (base.set.id === "R" && extension.set.id === "C") {
+                    return {
+                        degree: 2,
+                        basis: [Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0, 1)],
+                        isFinite: true,
+                        isSimple: true,
+                        isAlgebraic: true
+                    };
+                }
+                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+            };
+            var configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree: degree, basis: basis, isFinite: isFinite, isSimple: isSimple, isAlgebraic: isAlgebraic };
+            return { base: base, extension: extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
+        };
+        abal.GL = function (n) { return ({
+            contains: function (element) {
+                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
+            },
+            id: "GL".concat(n)
+        }); };
+        abal.group = function (set, operation, identity, inverter) {
+            var presets = {
+                addition: {
+                    Z: function (a, b) { return a + b; },
+                    Q: function (a, b) { return a + b; },
+                    R: function (a, b) { return a + b; },
+                    C: Chalkboard.comp.add,
+                    M: Chalkboard.matr.add
+                },
+                multiplication: {
+                    Z: function (a, b) { return a * b; },
+                    Q: function (a, b) { return a * b; },
+                    R: function (a, b) { return a * b; },
+                    C: Chalkboard.comp.mul,
+                    M: Chalkboard.matr.mul
+                }
+            };
+            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
+            var _operation = typeof operation === "string" && _set.id ? presets[operation][_set.id] : operation;
+            if (!_operation) {
+                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
+            }
+            if (!_operation) {
+                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
+            }
+            var autoconfig = function () {
+                if (!_set.id) {
+                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.');
+                }
+                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                    return {
+                        identity: 0,
+                        inverter: function (a) { return -a; }
+                    };
+                }
+                else if (_set.id === "C") {
+                    return {
+                        identity: Chalkboard.comp.init(0, 0),
+                        inverter: function (a) { return Chalkboard.comp.negate(a); }
+                    };
+                }
+                else if (_set.id.startsWith("Z") && _set.id.length > 1) {
+                    var n_1 = parseInt(_set.id.slice(1), 10);
+                    return {
+                        identity: 0,
+                        inverter: function (a) { return ((n_1 - a % n_1) % n_1); }
+                    };
+                }
+                else if (_set.id.startsWith("C") && _set.id.length > 1) {
+                    return {
+                        identity: Chalkboard.comp.init(1, 0),
+                        inverter: function (a) { return Chalkboard.comp.conjugate(a); }
+                    };
+                }
+                else if (_set.id.startsWith("M(")) {
+                    var rows = _set.rows;
+                    var cols = _set.cols;
+                    return {
+                        identity: Chalkboard.matr.fill(0, rows, cols),
+                        inverter: function (a) { return Chalkboard.matr.negate(a); }
+                    };
+                }
+                else if (_set.id.startsWith("GL")) {
+                    var n = parseInt(_set.id.slice(2), 10);
+                    return {
+                        identity: Chalkboard.matr.identity(n),
+                        inverter: function (a) { return Chalkboard.matr.invert(a); }
+                    };
+                }
+                else if (_set.id.match(/^[SA]\d+$/)) {
+                    var n = parseInt(_set.id.slice(1), 10);
+                    return {
+                        identity: Array.from({ length: n }, function (_, i) { return i; }),
+                        inverter: function (a) {
+                            var perm = a;
+                            var inverse = new Array(perm.length);
+                            for (var i = 0; i < perm.length; i++)
+                                inverse[perm[i]] = i;
+                            return inverse;
+                        }
+                    };
+                }
+                throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
+            };
+            var configured = typeof identity === "undefined" || typeof inverter === "undefined" ? autoconfig() : { identity: identity, inverter: inverter };
+            var group = { set: _set, operation: _operation, identity: configured.identity, inverter: configured.inverter };
+            if (!Chalkboard.abal.isGroup(group)) {
+                throw new Error('The inputted "set", "operation", "identity", and "inverter" do not form a group.');
+            }
+            return group;
+        };
+        abal.homomorphism = function (struc1, struc2, mapping) {
+            var morphism = { struc1: struc1, struc2: struc2, mapping: mapping };
+            if (!Chalkboard.abal.isHomomorphism(morphism)) {
+                throw new Error('The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.');
+            }
+            return morphism;
+        };
+        abal.idmorphism = function (struc) {
+            return Chalkboard.abal.automorphism(struc, function (x) { return x; });
+        };
+        abal.image = function (morph, subset) {
+            var struc1 = morph.struc1, mapping = morph.mapping;
+            if (!struc1.set.elements) {
+                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the image.');
+            }
+            var _subset = subset || struc1.set;
+            if (!_subset.elements) {
+                throw new Error('The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.');
+            }
+            var mapped = _subset.elements.map(mapping);
+            var result = Array.from(new Set(mapped.map(function (e) { return $(e); }))).map(function (e) { return JSON.parse(e); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.intersection = function (set1, set2) {
+            var result = (set1.elements || []).filter(function (element) { return set2.contains(element); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.invmorphism = function (morph) {
+            if (morph.struc1.set.id && ["Z", "Q", "R", "C"].includes(morph.struc1.set.id)) {
+                throw new Error('Inverse morphisms cannot be defined for morphisms with infinite domains.');
+            }
+            if (!Chalkboard.abal.isIsomorphism(morph)) {
+                throw new Error("The morphism is not an isomorphism, so it does not have an inverse.");
+            }
+            return Chalkboard.abal.homomorphism(morph.struc2, morph.struc1, function (y) {
+                var domain = morph.struc1.set.elements || [];
+                for (var _i = 0, domain_1 = domain; _i < domain_1.length; _i++) {
+                    var x = domain_1[_i];
+                    if ($(morph.mapping(x)) === $(y)) {
+                        return x;
+                    }
+                }
+                throw new Error("The inverse morphism failed to be defined because no element in the domain maps to the element \"".concat($(y), "\" in the codomain."));
+            });
+        };
+        abal.isAutomorphism = function (morph) {
+            return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEndomorphism(morph) && Chalkboard.abal.isIsomorphism(morph);
+        };
+        abal.isBijective = function (morph) {
+            if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
+                return morph.struc1.set.id === morph.struc2.set.id;
+            }
+            return Chalkboard.abal.isInjective(morph) && Chalkboard.abal.isSurjective(morph);
+        };
+        abal.isClosed = function (set, operation) {
+            var _a;
+            if (typeof set !== "string" && set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
+                if (operation === "addition" || operation === "multiplication")
+                    return true;
+                return false;
+            }
+            var presets = {
+                addition: {
+                    Z: function (a, b) { return a + b; },
+                    Q: function (a, b) { return a + b; },
+                    R: function (a, b) { return a + b; },
+                    C: Chalkboard.comp.add,
+                    M: Chalkboard.matr.add,
+                },
+                multiplication: {
+                    Z: function (a, b) { return a * b; },
+                    Q: function (a, b) { return a * b; },
+                    R: function (a, b) { return a * b; },
+                    C: Chalkboard.comp.mul,
+                    M: Chalkboard.matr.mul,
+                }
+            };
+            var _set = typeof set === "string" && (set in Chalkboard.abal) && typeof Chalkboard.abal[set] === "function"
+                ? (Object.prototype.hasOwnProperty.call(Chalkboard.abal, set) && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : undefined)
+                : set;
+            if (!_set || typeof _set !== "object") {
+                throw new Error('The "set" must have a valid "id" property or be resolvable from a string.');
+            }
+            var _operation = typeof operation === "string" && typeof _set !== "string" && _set.id && operation in presets && _set.id in presets[operation]
+                ? presets[operation][_set.id]
+                : operation;
+            if (!_operation) {
+                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
+            }
+            if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                if (_operation === presets.addition[_set.id] ||
+                    _operation === presets.multiplication[_set.id]) {
+                    return true;
+                }
+                return false;
+            }
+            if (_set.id === "C") {
+                if (_operation === Chalkboard.comp.add ||
+                    _operation === Chalkboard.comp.mul) {
+                    return true;
+                }
+                return false;
+            }
+            if ((_a = _set.id) === null || _a === void 0 ? void 0 : _a.startsWith("M(")) {
+                var rows = _set.rows;
+                var cols = _set.cols;
+                if (_operation === Chalkboard.matr.add) {
+                    return true;
+                }
+                if (_operation === Chalkboard.matr.mul) {
+                    return rows === cols;
+                }
+                return false;
+            }
+            if (typeof _set === "object" && "elements" in _set && _set.elements) {
+                for (var _i = 0, _b = _set.elements; _i < _b.length; _i++) {
+                    var a = _b[_i];
+                    for (var _c = 0, _d = _set.elements; _c < _d.length; _c++) {
+                        var b = _d[_c];
+                        if (typeof _operation === "function") {
+                            var result = _operation(a, b);
+                            if (_set.contains(result)) {
+                                continue;
+                            }
+                            return false;
+                        }
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isCommutative = function (struc) {
+            var set = struc.set;
+            if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
+                return true;
+            }
+            if (!set.elements) {
+                return false;
+            }
+            if ("operation" in struc && struc.operation) {
+                var operation = struc.operation;
+                for (var _i = 0, _a = set.elements; _i < _a.length; _i++) {
+                    var a = _a[_i];
+                    for (var _b = 0, _c = set.elements; _b < _c.length; _b++) {
+                        var b = _c[_b];
+                        if ($(operation(a, b)) !== $(operation(b, a))) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            if ("add" in struc && "mul" in struc && struc.add && struc.mul) {
+                var add = struc.add, mul = struc.mul;
+                for (var _d = 0, _e = set.elements; _d < _e.length; _d++) {
+                    var a = _e[_d];
+                    for (var _f = 0, _g = set.elements; _f < _g.length; _f++) {
+                        var b = _g[_f];
+                        if ($(add(a, b)) !== $(add(b, a))) {
+                            return false;
+                        }
+                    }
+                }
+                if ("mulIdentity" in struc) {
+                    for (var _h = 0, _j = set.elements; _h < _j.length; _h++) {
+                        var a = _j[_h];
+                        for (var _k = 0, _l = set.elements; _k < _l.length; _k++) {
+                            var b = _l[_k];
+                            if ($(mul(a, b)) !== $(mul(b, a))) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            return false;
+        };
+        abal.isCyclicSubgroup = function (group, subgroup) {
+            if (!Chalkboard.abal.isSubgroup(group, subgroup) || !group.operation) {
+                return false;
+            }
+            var operation = group.operation;
+            for (var _i = 0, _a = subgroup.elements || []; _i < _a.length; _i++) {
+                var generator = _a[_i];
+                var generatedElements = [];
+                var current = generator;
+                do {
+                    generatedElements.push(current);
+                    current = operation(current, generator);
+                } while (!generatedElements.includes(current));
+                var generatedSet = Chalkboard.abal.set(generatedElements);
+                if (Chalkboard.abal.isSubset(subgroup, generatedSet)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        abal.isEmpty = function (struc) {
+            var id = "set" in struc && struc.set ? struc.set.id : ("id" in struc ? struc.id : undefined);
+            if (id === "Z" || id === "Q" || id === "R" || id === "C" || (id === null || id === void 0 ? void 0 : id.startsWith("M("))) {
+                return false;
+            }
+            if ("elements" in struc && struc.elements) {
+                return struc.elements.length === 0;
+            }
+            if ("set" in struc && struc.set.elements) {
+                return struc.set.elements.length === 0;
+            }
+            return true;
+        };
+        abal.isEndomorphism = function (morph) {
+            return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEqual(morph.struc1, morph.struc2);
+        };
+        abal.isEqual = function (struc1, struc2) {
+            if (struc1.constructor !== struc2.constructor) {
+                return false;
+            }
+            if ("elements" in struc1 && "elements" in struc2) {
+                if ("id" in struc1 && "id" in struc2 && struc1.id === struc2.id) {
+                    return true;
+                }
+                var set1 = struc1.elements || [];
+                var set2 = struc2.elements || [];
+                if (set1.length !== set2.length) {
+                    return false;
+                }
+                return set1.every(function (x) { return struc2.contains(x); }) && set2.every(function (x) { return struc1.contains(x); });
+            }
+            if ("operation" in struc1 && "operation" in struc2) {
+                var group1 = struc1;
+                var group2 = struc2;
+                return (Chalkboard.abal.isEqual(group1.set, group2.set) &&
+                    group1.identity === group2.identity &&
+                    (group1.operation === group2.operation ||
+                        group1.operation.toString() === group2.operation.toString()) &&
+                    (group1.inverter === group2.inverter ||
+                        group1.inverter.toString() === group2.inverter.toString()));
+            }
+            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
+                var ring1 = struc1;
+                var ring2 = struc2;
+                return (Chalkboard.abal.isEqual(ring1.set, ring2.set) &&
+                    ring1.addIdentity === ring2.addIdentity &&
+                    ring1.mulIdentity === ring2.mulIdentity &&
+                    (ring1.add === ring2.add ||
+                        ring1.add.toString() === ring2.add.toString()) &&
+                    (ring1.mul === ring2.mul ||
+                        ring1.mul.toString() === ring2.mul.toString()) &&
+                    (ring1.addInverter === ring2.addInverter ||
+                        ring1.addInverter.toString() === ring2.addInverter.toString()));
+            }
+            if ("mulInverter" in struc1 && "mulInverter" in struc2) {
+                var field1 = struc1;
+                var field2 = struc2;
+                return (Chalkboard.abal.isEqual(field1.set, field2.set) &&
+                    field1.addIdentity === field2.addIdentity &&
+                    field1.mulIdentity === field2.mulIdentity &&
+                    (field1.add === field2.add ||
+                        field1.add.toString() === field2.add.toString()) &&
+                    (field1.mul === field2.mul ||
+                        field1.mul.toString() === field2.mul.toString()) &&
+                    (field1.addInverter === field2.addInverter ||
+                        field1.addInverter.toString() === field2.addInverter.toString()) &&
+                    (field1.mulInverter === field2.mulInverter ||
+                        field1.mulInverter.toString() === field2.mulInverter.toString()));
+            }
+            if ("mapping" in struc1 && "mapping" in struc2) {
+                var morph1 = struc1;
+                var morph2 = struc2;
+                return (Chalkboard.abal.isEqual(morph1.struc1, morph2.struc1) &&
+                    Chalkboard.abal.isEqual(morph1.struc2, morph2.struc2) &&
+                    (morph1.mapping === morph2.mapping ||
+                        morph1.mapping.toString() === morph2.mapping.toString() ||
+                        (Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.image(morph2)) &&
+                            Chalkboard.abal.isEqual(Chalkboard.abal.preimage(morph1), Chalkboard.abal.preimage(morph2)) &&
+                            Chalkboard.abal.isEqual(Chalkboard.abal.kernel(morph1), Chalkboard.abal.kernel(morph2)))));
+            }
+            return false;
+        };
+        abal.isExact = function (morph1, morph2) {
+            return Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.kernel(morph2));
+        };
+        abal.isField = function (field) {
+            var set = field.set, add = field.add, mul = field.mul, addIdentity = field.addIdentity, mulIdentity = field.mulIdentity, addInverter = field.addInverter, mulInverter = field.mulInverter;
+            if (set.id === "Q" || set.id === "R" || set.id === "C") {
+                return true;
+            }
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined") {
+                return false;
+            }
+            var additiveGroup = { set: set, operation: add, identity: addIdentity, inverter: addInverter };
+            if (!Chalkboard.abal.isGroup(additiveGroup) || !Chalkboard.abal.isCommutative(additiveGroup)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(set, mul)) {
+                return false;
+            }
+            for (var _i = 0, _a = set.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                for (var _b = 0, _c = set.elements || []; _b < _c.length; _b++) {
+                    var b = _c[_b];
+                    for (var _d = 0, _e = set.elements || []; _d < _e.length; _d++) {
+                        var c = _e[_d];
+                        if ($(mul(mul(a, b), c)) !== $(mul(a, mul(b, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            for (var _f = 0, _g = set.elements || []; _f < _g.length; _f++) {
+                var a = _g[_f];
+                if (a !== addIdentity && (!set.contains(mulInverter(a)) || $(mul(a, mulInverter(a))) !== $(mulIdentity))) {
+                    return false;
+                }
+            }
+            if (!Chalkboard.abal.isCommutative(field)) {
+                return false;
+            }
+            for (var _h = 0, _j = field.set.elements || []; _h < _j.length; _h++) {
+                var a = _j[_h];
+                for (var _k = 0, _l = field.set.elements || []; _k < _l.length; _k++) {
+                    var b = _l[_k];
+                    for (var _m = 0, _o = field.set.elements || []; _m < _o.length; _m++) {
+                        var c = _o[_m];
+                        if ($(field.mul(a, field.add(b, c))) !== $(field.add(field.mul(a, b), field.mul(a, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isGroup = function (group) {
+            var set = group.set, operation = group.operation, identity = group.identity, inverter = group.inverter;
+            if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
+                return true;
+            }
+            if (typeof set.elements === "undefined") {
+                return false;
+            }
+            if (typeof operation === "undefined" || typeof identity === "undefined" || typeof inverter === "undefined") {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(set, operation)) {
+                return false;
+            }
+            for (var _i = 0, _a = set.elements; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if ($(operation(a, identity)) !== $(a) || $(operation(identity, a)) !== $(a)) {
+                    return false;
+                }
+            }
+            for (var _b = 0, _c = set.elements; _b < _c.length; _b++) {
+                var a = _c[_b];
+                if (!set.contains(inverter(a)) || $(operation(a, inverter(a))) !== $(identity)) {
+                    return false;
+                }
+            }
+            for (var _d = 0, _e = set.elements; _d < _e.length; _d++) {
+                var a = _e[_d];
+                for (var _f = 0, _g = set.elements; _f < _g.length; _f++) {
+                    var b = _g[_f];
+                    for (var _h = 0, _j = set.elements; _h < _j.length; _h++) {
+                        var c = _j[_h];
+                        if ($(operation(operation(a, b), c)) !== $(operation(a, operation(b, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isHomomorphism = function (morph) {
+            var struc1 = morph.struc1, struc2 = morph.struc2, mapping = morph.mapping;
+            if ("operation" in struc1 && "operation" in struc2 && struc1.operation && struc2.operation) {
+                var op1 = struc1.operation;
+                var op2 = struc2.operation;
+                for (var _i = 0, _a = struc1.set.elements || []; _i < _a.length; _i++) {
+                    var a = _a[_i];
+                    for (var _b = 0, _c = struc1.set.elements || []; _b < _c.length; _b++) {
+                        var b = _c[_b];
+                        if ($(op2(mapping(a), mapping(b))) !== $(mapping(op1(a, b)))) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && struc1.add && struc2.add && struc1.mul && struc2.mul) {
+                var add1 = struc1.add, mul1 = struc1.mul;
+                var add2 = struc2.add, mul2 = struc2.mul;
+                for (var _d = 0, _e = struc1.set.elements || []; _d < _e.length; _d++) {
+                    var a = _e[_d];
+                    for (var _f = 0, _g = struc1.set.elements || []; _f < _g.length; _f++) {
+                        var b = _g[_f];
+                        if ($(add2(mapping(a), mapping(b))) !== $(mapping(add1(a, b)))) {
+                            return false;
+                        }
+                        if ($(mul2(mapping(a), mapping(b))) !== $(mapping(mul1(a, b)))) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            }
+            throw new Error("The algebraic structures of the homomorphism may have missing operations or incompatible types.");
+        };
+        abal.isIdeal = function (ring, subset) {
+            var add = ring.add, mul = ring.mul, addIdentity = ring.addIdentity, addInverter = ring.addInverter;
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, add)) {
+                return false;
+            }
+            if (!subset.contains(addIdentity)) {
+                return false;
+            }
+            for (var _i = 0, _a = subset.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if (!subset.contains(addInverter(a))) {
+                    return false;
+                }
+            }
+            for (var _b = 0, _c = ring.set.elements || []; _b < _c.length; _b++) {
+                var r = _c[_b];
+                for (var _d = 0, _e = subset.elements || []; _d < _e.length; _d++) {
+                    var a = _e[_d];
+                    if (!subset.contains(mul(r, a)) || !subset.contains(mul(a, r))) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isIdentity = function (struc, element, type) {
+            var _a, _b;
+            if (type === void 0) { type = "add"; }
+            if (type === "add" && struc.add && struc.addIdentity) {
+                return ("add" in struc &&
+                    struc.add(element, struc.addIdentity) === element &&
+                    struc.add(struc.addIdentity, element) === element);
+            }
+            else if (type === "mul" && struc.mul && struc.mulIdentity) {
+                return ("mul" in struc && "mulIdentity" in struc &&
+                    ((_a = struc.mul) === null || _a === void 0 ? void 0 : _a.call(struc, element, struc.mulIdentity)) === element &&
+                    ((_b = struc.mul) === null || _b === void 0 ? void 0 : _b.call(struc, struc.mulIdentity, element)) === element);
+            }
+            return false;
+        };
+        abal.isInjective = function (morph) {
+            if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
+                return morph.struc1.set.id === morph.struc2.set.id;
+            }
+            var struc1 = morph.struc1, mapping = morph.mapping;
+            var domain = struc1.set.elements || [];
+            var mapped = domain.map(mapping);
+            return new Set(mapped.map(function (e) { return $(e); })).size === domain.length;
+        };
+        abal.isInverse = function (struc, element1, element2, type) {
+            var _a, _b, _c, _d;
+            if (type === void 0) { type = "add"; }
+            if (type === "add") {
+                return ("add" in struc &&
+                    ((_a = struc.add) === null || _a === void 0 ? void 0 : _a.call(struc, element1, element2)) === struc.addIdentity &&
+                    ((_b = struc.add) === null || _b === void 0 ? void 0 : _b.call(struc, element2, element1)) === struc.addIdentity);
+            }
+            else if (type === "mul" && "mul" in struc && "mulIdentity" in struc) {
+                return (((_c = struc.mul) === null || _c === void 0 ? void 0 : _c.call(struc, element1, element2)) === struc.mulIdentity &&
+                    ((_d = struc.mul) === null || _d === void 0 ? void 0 : _d.call(struc, element2, element1)) === struc.mulIdentity);
+            }
+            return false;
+        };
+        abal.isIsomorphism = function (morph) {
+            return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isBijective(morph);
+        };
+        abal.isNormalSubgroup = function (group, subgroup) {
+            var set = group.set, operation = group.operation, inverter = group.inverter;
+            if (!operation || !inverter) {
+                return false;
+            }
+            if (!Chalkboard.abal.isSubgroup(group, subgroup)) {
+                return false;
+            }
+            for (var _i = 0, _a = set.elements || []; _i < _a.length; _i++) {
+                var g = _a[_i];
+                for (var _b = 0, _c = subgroup.elements || []; _b < _c.length; _b++) {
+                    var h = _c[_b];
+                    var conjugate = operation(operation(g, h), inverter(g));
+                    if (!subgroup.contains(conjugate)) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isomorphism = function (struc1, struc2, mapping) {
+            var morphism = Chalkboard.abal.homomorphism(struc1, struc2, mapping);
+            if (!Chalkboard.abal.isHomomorphism(morphism)) {
+                throw new Error("The mapping is not a homomorphism, so it cannot be an isomorphism.");
+            }
+            if (!Chalkboard.abal.isBijective(morphism)) {
+                throw new Error("The mapping is not bijective, so it cannot be an isomorphism.");
+            }
+            return morphism;
+        };
+        abal.isPrincipalIdeal = function (ring, ideal) {
+            for (var _i = 0, _a = ideal.elements || []; _i < _a.length; _i++) {
+                var generator = _a[_i];
+                var principalIdeal_1 = Chalkboard.abal.principalIdeal(ring, generator);
+                if (Chalkboard.abal.isSubset(ideal, principalIdeal_1) && Chalkboard.abal.isSubset(principalIdeal_1, ideal)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        abal.isRing = function (ring) {
+            var set = ring.set, add = ring.add, mul = ring.mul, addIdentity = ring.addIdentity, addInverter = ring.addInverter;
+            if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C") {
+                return true;
+            }
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
+                return false;
+            }
+            var additiveGroup = { set: set, operation: add, identity: addIdentity, inverter: addInverter };
+            if (!Chalkboard.abal.isGroup(additiveGroup) || !Chalkboard.abal.isCommutative(additiveGroup)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(set, mul)) {
+                return false;
+            }
+            for (var _i = 0, _a = set.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                for (var _b = 0, _c = set.elements || []; _b < _c.length; _b++) {
+                    var b = _c[_b];
+                    for (var _d = 0, _e = set.elements || []; _d < _e.length; _d++) {
+                        var c = _e[_d];
+                        if ($(mul(mul(a, b), c)) !== $(mul(a, mul(b, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+        abal.isSubfield = function (field, subset) {
+            var add = field.add, mul = field.mul, addIdentity = field.addIdentity, mulIdentity = field.mulIdentity, addInverter = field.addInverter, mulInverter = field.mulInverter;
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined") {
+                return false;
+            }
+            if (!subset.contains(addIdentity) || !subset.contains(mulIdentity)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, add) || !Chalkboard.abal.isClosed(subset, mul)) {
+                return false;
+            }
+            for (var _i = 0, _a = subset.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if (!subset.contains(addInverter(a))) {
+                    return false;
+                }
+            }
+            for (var _b = 0, _c = subset.elements || []; _b < _c.length; _b++) {
+                var a = _c[_b];
+                if ($(a) !== $(addIdentity) && !subset.contains(mulInverter(a))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        abal.isSubgroup = function (group, subset) {
+            var operation = group.operation, identity = group.identity, inverter = group.inverter;
+            if (typeof operation === "undefined" || typeof identity === "undefined" || typeof inverter === "undefined") {
+                return false;
+            }
+            if (!subset.contains(identity)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, operation)) {
+                return false;
+            }
+            for (var _i = 0, _a = subset.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if (!subset.contains(inverter(a))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        abal.isSubring = function (ring, subset) {
+            var add = ring.add, mul = ring.mul, addIdentity = ring.addIdentity, addInverter = ring.addInverter;
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
+                return false;
+            }
+            if (!subset.contains(addIdentity)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, add) || !Chalkboard.abal.isClosed(subset, mul)) {
+                return false;
+            }
+            for (var _i = 0, _a = subset.elements || []; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if (!subset.contains(addInverter(a))) {
+                    return false;
+                }
+            }
+            return true;
+        };
+        abal.isSubset = function (set, superset) {
+            return (set.elements || []).every(function (element) { return superset.contains(element); });
+        };
+        abal.isSuperset = function (set, subset) {
+            return Chalkboard.abal.isSubset(subset, set);
+        };
+        abal.isSurjective = function (morph) {
+            var struc1 = morph.struc1, struc2 = morph.struc2, mapping = morph.mapping;
+            if (["Z", "Q", "R", "C", "P"].includes(struc2.set.id || "")) {
+                if (struc2.set.id === "C" && ["R", "C"].includes(struc1.set.id || ""))
+                    return true;
+                if (struc2.set.id === "R" && struc1.set.id === "Q")
+                    return false;
+                if (struc1.set.id === struc2.set.id)
+                    return true;
+                return false;
+            }
+            var domain = struc1.set.elements || [];
+            var codomain = struc2.set.elements || [];
+            var mapped = domain.map(mapping);
+            return codomain.every(function (e) { return mapped.some(function (m) { return $(m) === $(e); }); });
+        };
+        abal.kernel = function (morph, subset) {
+            var struc1 = morph.struc1, struc2 = morph.struc2, mapping = morph.mapping;
+            if (!struc1.set.elements) {
+                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the kernel.');
+            }
+            var _subset = (subset === null || subset === void 0 ? void 0 : subset.elements) || struc1.set.elements;
+            var identity;
+            if ("identity" in struc2) {
+                identity = struc2.identity;
+            }
+            else if ("addIdentity" in struc2) {
+                identity = struc2.addIdentity;
+            }
+            else {
+                throw new Error('The codomain of the "morph" must have an identity element to calculate the kernel.');
+            }
+            var result = _subset.filter(function (element) { return $(mapping(element)) === $(identity); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.Lagrange = function (group, subgroup) {
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
+                throw new Error("Lagrange's Theorem only applies to finite groups");
+            }
+            return Chalkboard.abal.cardinality(group) % Chalkboard.abal.cardinality(subgroup) === 0;
+        };
+        abal.M = function (rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            return ({
+                contains: function (element) {
+                    return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
+                },
+                id: "M(".concat(rows, ", ").concat(cols, ")")
+            });
+        };
+        abal.N = function () { return ({
+            contains: function (element) { return Number.isInteger(element) && element > 0; },
+            id: "N"
+        }); };
+        abal.order = function (group, element) {
+            var _a;
+            if (!group.operation) {
+                throw new Error('The "group" must have an "operation" property to calculate the order of an element.');
+            }
+            var result = 1;
+            var current = element;
+            while ($(current) !== $(group.identity)) {
+                current = group.operation(current, element);
+                result++;
+                if (result > (((_a = group.set.elements) === null || _a === void 0 ? void 0 : _a.length) || Infinity)) {
+                    throw new Error('The "group" might not be finite because an infinite loop was detected.');
+                }
+            }
+            return result;
+        };
+        abal.P = function () { return ({
+            contains: function (element) { return Chalkboard.numb.isPrime(element); },
+            id: "P"
+        }); };
+        abal.powerSet = function (set) {
+            var result = [];
+            var elements = set.elements || [];
+            var totalSubsets = 1 << elements.length;
+            for (var i = 0; i < totalSubsets; i++) {
+                var subset = [];
+                for (var j = 0; j < elements.length; j++) {
+                    if (i & (1 << j)) {
+                        subset.push(elements[j]);
+                    }
+                }
+                result.push(Chalkboard.abal.set(subset));
+            }
+            return Chalkboard.abal.set(result);
+        };
+        abal.preimage = function (morph, subset) {
+            var struc1 = morph.struc1, struc2 = morph.struc2, mapping = morph.mapping;
+            if (!struc1.set.elements) {
+                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the preimage.');
+            }
+            var _subset = subset || struc2.set;
+            if (!_subset.elements) {
+                throw new Error('The codomain of the "morph" or the subset of it must have a finite set of elements to calculate the preimage.');
+            }
+            var result = struc1.set.elements.filter(function (element) { return _subset.contains(mapping(element)); });
+            return Chalkboard.abal.set(result);
+        };
+        abal.principalIdeal = function (ring, element) {
+            if (ring.set.id && ["Z", "Q", "R", "C"].includes(ring.set.id)) {
+                throw new Error('The "ring" must be finite.');
+            }
+            var result = [];
+            var mul = ring.mul, add = ring.add;
+            if (!add || !mul) {
+                throw new Error('The "ring" must have "mul" and "add" properties to generate a principal ideal.');
+            }
+            for (var _i = 0, _a = ring.set.elements || []; _i < _a.length; _i++) {
+                var r = _a[_i];
+                var leftProduct = mul(element, r);
+                var rightProduct = mul(r, element);
+                if (!result.includes(leftProduct)) {
+                    result.push(leftProduct);
+                }
+                if (!result.includes(rightProduct)) {
+                    result.push(rightProduct);
+                }
+            }
+            for (var i = 0; i < result.length; i++) {
+                for (var j = 0; j < result.length; j++) {
+                    var sum = add(result[i], result[j]);
+                    if (!result.includes(sum)) {
+                        result.push(sum);
+                    }
+                }
+            }
+            return Chalkboard.abal.set(result);
+        };
+        abal.print = function (struc) {
+            console.log(Chalkboard.abal.toString(struc));
+        };
+        abal.Q = function () { return ({
+            contains: function (element) { return Number.isFinite(element) && Chalkboard.numb.isRational(element); },
+            id: "Q"
+        }); };
+        abal.quotient = function (struc, substruc) {
+            if ("operation" in struc && !Chalkboard.abal.isNormalSubgroup(struc, substruc.set)) {
+                throw new Error('The "substruc" must be a normal subgroup of the "struc".');
+            }
+            if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
+                throw new Error('The "substruc" must be an ideal of the "struc".');
+            }
+            var cosets = Chalkboard.abal.coset(struc, substruc);
+            var operationConfig = function (a, b, operation) {
+                var repA = a.elements[0];
+                var repB = b.elements[0];
+                var result = operation(repA, repB);
+                return cosets.elements.find(function (c) { return c.contains(result); });
+            };
+            return __assign({ set: cosets }, ("operation" in struc ? {
+                operation: function (a, b) { return operationConfig(a, b, struc.operation); },
+                identity: cosets.elements.find(function (c) { return c.contains(struc.identity); }),
+                inverter: function (a) { return operationConfig(a, a, function (x) { return struc.inverter(x); }); }
+            } : {
+                add: function (a, b) { return operationConfig(a, b, struc.add); },
+                mul: function (a, b) { return operationConfig(a, b, struc.mul); },
+                addIdentity: cosets.elements.find(function (c) { return c.contains(struc.addIdentity); }),
+                addInverter: function (a) { return operationConfig(a, a, function (x) { return struc.addInverter(x); }); }
+            }));
+        };
+        abal.R = function () { return ({
+            contains: function (element) { return Number.isFinite(element); },
+            id: "R"
+        }); };
+        abal.ring = function (set, add, mul, addIdentity, mulIdentity, addInverter) {
+            var _a, _b;
+            var presets = {
+                addition: {
+                    Z: function (a, b) { return a + b; },
+                    Q: function (a, b) { return a + b; },
+                    R: function (a, b) { return a + b; },
+                    C: Chalkboard.comp.add,
+                    M: Chalkboard.matr.add
+                },
+                multiplication: {
+                    Z: function (a, b) { return a * b; },
+                    Q: function (a, b) { return a * b; },
+                    R: function (a, b) { return a * b; },
+                    C: Chalkboard.comp.mul,
+                    M: Chalkboard.matr.mul
+                },
+            };
+            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
+            var _add = typeof add === "string" ? presets[add]["addition"] || presets[add][(_a = _set.id) !== null && _a !== void 0 ? _a : ""] : add;
+            var _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][(_b = _set.id) !== null && _b !== void 0 ? _b : ""] : mul;
+            if (!_add || !_mul) {
+                throw new Error("Preset operations \"".concat(add, "\" or \"").concat(mul, "\" are not defined for set \"").concat(_set.id, "\"."));
+            }
+            var autoconfig = function () {
+                if (!_set.id) {
+                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.');
+                }
+                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                    return {
+                        addIdentity: 0,
+                        mulIdentity: 1,
+                        addInverter: function (a) { return -a; }
+                    };
+                }
+                else if (_set.id === "C") {
+                    return {
+                        addIdentity: Chalkboard.comp.init(0, 0),
+                        mulIdentity: Chalkboard.comp.init(1, 0),
+                        addInverter: function (a) { return Chalkboard.comp.negate(a); }
+                    };
+                }
+                else if (_set.id.startsWith("Z") && _set.id.length > 1) {
+                    var n_2 = parseInt(_set.id.slice(1), 10);
+                    if (isNaN(n_2) || n_2 <= 0) {
+                        throw new Error("Invalid modulus in set \"".concat(_set.id, "\"."));
+                    }
+                    return {
+                        addIdentity: 0,
+                        mulIdentity: 1,
+                        addInverter: function (a) { return ((n_2 - a % n_2) % n_2); }
+                    };
+                }
+                else if (_set.id.startsWith("M(")) {
+                    var rows = _set.rows;
+                    var cols = _set.cols;
+                    if (rows !== cols) {
+                        throw new Error("Only square matrices can form a ring.");
+                    }
+                    return {
+                        addIdentity: Chalkboard.matr.fill(0, rows, cols),
+                        mulIdentity: Chalkboard.matr.identity(rows),
+                        addInverter: function (a) { return Chalkboard.matr.negate(a); }
+                    };
+                }
+                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
+            };
+            var configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" ? autoconfig() : { addIdentity: addIdentity, mulIdentity: mulIdentity, addInverter: addInverter };
+            var ring = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter };
+            if (!Chalkboard.abal.isRing(ring)) {
+                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.');
+            }
+            return ring;
+        };
+        abal.ringExtension = function (base, extension, degree, basis, isFinite, isSimple, isAlgebraic) {
+            if (!Chalkboard.abal.isSubring(base, extension.set)) {
+                throw new Error('The "base" must be a subring of the "extension".');
+            }
+            var autoconfig = function () {
+                if (!base.set.id) {
+                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
+                }
+                if (base.set.id === "Z" && extension.set.id === "Q") {
+                    return {
+                        degree: Infinity,
+                        basis: [],
+                        isFinite: false,
+                        isSimple: false,
+                        isAlgebraic: false
+                    };
+                }
+                else if (base.set.id === "Q" && extension.set.id === "R") {
+                    return {
+                        degree: Infinity,
+                        basis: [],
+                        isFinite: false,
+                        isSimple: false,
+                        isAlgebraic: false
+                    };
+                }
+                else if (base.set.id === "R" && extension.set.id === "C") {
+                    return {
+                        degree: 2,
+                        basis: [Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0, 1)],
+                        isFinite: true,
+                        isSimple: true,
+                        isAlgebraic: true
+                    };
+                }
+                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+            };
+            var configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree: degree, basis: basis, isFinite: isFinite, isSimple: isSimple, isAlgebraic: isAlgebraic };
+            return { base: base, extension: extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
+        };
+        abal.S = function (n) {
+            if (!Number.isInteger(n) || n <= 0) {
+                throw new Error('The parameter "n" must be a positive integer.');
+            }
+            var generatePermutations = function (arr) {
+                if (arr.length === 0)
+                    return [[]];
+                var result = [];
+                for (var i = 0; i < arr.length; i++) {
+                    var rest = __spreadArray(__spreadArray([], arr.slice(0, i), true), arr.slice(i + 1), true);
+                    var perms = generatePermutations(rest);
+                    for (var _i = 0, perms_1 = perms; _i < perms_1.length; _i++) {
+                        var perm = perms_1[_i];
+                        result.push(__spreadArray([arr[i]], perm, true));
+                    }
+                }
+                return result;
+            };
+            var elements = generatePermutations(Array.from({ length: n }, function (_, i) { return i; }));
+            return {
+                contains: function (element) { return elements.some(function (perm) { return $(perm) === $(element); }); },
+                elements: elements,
+                id: "S".concat(n)
+            };
+        };
+        abal.set = function (set) {
+            var elements = Chalkboard.stat.unique(set);
+            return {
+                contains: function (element) { return elements.some(function (x) { return $(x) === $(element); }); },
+                elements: elements
+            };
+        };
+        abal.symmetricDifference = function (set1, set2) {
+            var diffA = Chalkboard.abal.difference(set1, set2).elements || [];
+            var diffB = Chalkboard.abal.difference(set2, set1).elements || [];
+            return Chalkboard.abal.set(__spreadArray(__spreadArray([], diffA, true), diffB, true));
+        };
+        abal.toArray = function (struc) {
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to array.");
+            }
+            return __spreadArray([], result.elements, true);
+        };
+        abal.toMatrix = function (struc, rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to matrix.");
+            }
+            return Chalkboard.stat.toMatrix(result.elements, rows, cols);
+        };
+        abal.toObject = function (struc) {
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to object.");
+            }
+            return Chalkboard.stat.toObject(result.elements);
+        };
+        abal.toString = function (struc) {
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to string.");
+            }
+            return Chalkboard.stat.toString(result.elements);
+        };
+        abal.toTensor = function (struc) {
+            var _a;
+            var size = [];
+            for (var _i = 1; _i < arguments.length; _i++) {
+                size[_i - 1] = arguments[_i];
+            }
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to tensor.");
+            }
+            if (Array.isArray(size[0]))
+                size = size[0];
+            return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([result.elements], size, false));
+        };
+        abal.toVector = function (struc, dimension, index) {
+            if (index === void 0) { index = 0; }
+            var elements = "set" in struc ? struc.set.elements : struc.elements;
+            if (!elements) {
+                throw new Error("Cannot convert infinite set to vector.");
+            }
+            if (dimension === 2) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1]);
+            }
+            else if (dimension === 3) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2]);
+            }
+            else if (dimension === 4) {
+                return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2], elements[index + 3]);
+            }
+            else {
+                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+            }
+        };
+        abal.union = function (set1, set2) {
+            var result = Array.from(new Set(__spreadArray(__spreadArray([], (set1.elements || []), true), (set2.elements || []), true)));
+            return Chalkboard.abal.set(result);
+        };
+        abal.Z = function (n) {
+            if (n === undefined) {
+                return {
+                    contains: function (element) { return Number.isInteger(element); },
+                    id: "Z"
+                };
+            }
+            else {
+                if (!Number.isInteger(n) || n <= 0) {
+                    throw new Error('The modulus "n" must be a positive integer.');
+                }
+                return {
+                    contains: function (element) { return Number.isInteger(element) && element >= 0 && element < n; },
+                    elements: Array.from({ length: n }, function (_, i) { return i; }),
+                    id: "Z".concat(n)
+                };
+            }
+        };
+    })(abal = Chalkboard.abal || (Chalkboard.abal = {}));
+})(Chalkboard || (Chalkboard = {}));
 var Chalkboard;
 (function (Chalkboard) {
     var calc;
@@ -656,61 +2223,61 @@ var Chalkboard;
 var Chalkboard;
 (function (Chalkboard) {
     var comp;
-    (function (comp_1) {
-        comp_1.absolute = function (comp) {
+    (function (comp_2) {
+        comp_2.absolute = function (comp) {
             return Chalkboard.comp.init(Math.abs(comp.a), Math.abs(comp.b));
         };
-        comp_1.add = function (comp1, comp2) {
+        comp_2.add = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.comp.init(comp1.a + comp2.a, comp1.b + comp2.b);
         };
-        comp_1.arg = function (comp) {
+        comp_2.arg = function (comp) {
             return Chalkboard.trig.arctan2(comp.b, comp.a);
         };
-        comp_1.argBetween = function (comp1, comp2) {
+        comp_2.argBetween = function (comp1, comp2) {
             return Chalkboard.vect.angBetween(Chalkboard.comp.toVector(comp1), Chalkboard.comp.toVector(comp2));
         };
-        comp_1.conjugate = function (comp) {
+        comp_2.conjugate = function (comp) {
             return Chalkboard.comp.init(comp.a, -comp.b);
         };
-        comp_1.constrain = function (comp, range) {
+        comp_2.constrain = function (comp, range) {
             if (range === void 0) { range = [0, 1]; }
             return Chalkboard.comp.init(Chalkboard.numb.constrain(comp.a, range), Chalkboard.numb.constrain(comp.b, range));
         };
-        comp_1.copy = function (comp) {
+        comp_2.copy = function (comp) {
             return Object.create(Object.getPrototypeOf(comp), Object.getOwnPropertyDescriptors(comp));
         };
-        comp_1.define = function (realDefinition, imagDefinition) {
+        comp_2.define = function (realDefinition, imagDefinition) {
             return { definition: [realDefinition, imagDefinition], type: "comp" };
         };
-        comp_1.dist = function (comp1, comp2) {
+        comp_2.dist = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.real.sqrt((comp2.a - comp1.a) * (comp2.a - comp1.a) + (comp2.b - comp1.b) * (comp2.b - comp1.b));
         };
-        comp_1.distsq = function (comp1, comp2) {
+        comp_2.distsq = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
             return (comp2.a - comp1.a) * (comp2.a - comp1.a) + (comp2.b - comp1.b) * (comp2.b - comp1.b);
         };
-        comp_1.div = function (comp1, comp2) {
+        comp_2.div = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init((comp1.a * comp2.a - comp1.b * comp2.b) / Chalkboard.comp.magsq(comp2), (comp1.a * comp2.b + comp1.b * comp2.a) / Chalkboard.comp.magsq(comp2));
+            return Chalkboard.comp.init((comp1.a * comp2.a - comp1.b * comp2.b) / Chalkboard.comp.magsq(comp2), (comp1.b * comp2.a - comp1.a * comp2.b) / Chalkboard.comp.magsq(comp2));
         };
-        comp_1.Euler = function (rad) {
+        comp_2.Euler = function (rad) {
             return Chalkboard.comp.init(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
         };
-        comp_1.Im = function (funcORcomp) {
+        comp_2.Im = function (funcORcomp) {
             if (funcORcomp.hasOwnProperty("definition")) {
                 return funcORcomp.definition[1];
             }
@@ -718,53 +2285,53 @@ var Chalkboard;
                 return funcORcomp.b;
             }
         };
-        comp_1.init = function (a, b) {
+        comp_2.init = function (a, b) {
             if (b === void 0) { b = 0; }
             return { a: a, b: b };
         };
-        comp_1.invert = function (comp) {
+        comp_2.invert = function (comp) {
             return Chalkboard.comp.init(comp.a / Chalkboard.comp.magsq(comp), -comp.b / Chalkboard.comp.magsq(comp));
         };
-        comp_1.ln = function (comp) {
+        comp_2.ln = function (comp) {
             return Chalkboard.comp.init(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Chalkboard.trig.arctan2(comp.b, comp.a));
         };
-        comp_1.mag = function (comp) {
+        comp_2.mag = function (comp) {
             return Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b);
         };
-        comp_1.magset = function (comp, num) {
+        comp_2.magset = function (comp, num) {
             return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num);
         };
-        comp_1.magsq = function (comp) {
+        comp_2.magsq = function (comp) {
             return comp.a * comp.a + comp.b * comp.b;
         };
-        comp_1.mul = function (comp1, comp2) {
+        comp_2.mul = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.comp.init(comp1.a * comp2.a - comp1.b * comp2.b, comp1.a * comp2.b + comp1.b * comp2.a);
         };
-        comp_1.negate = function (comp) {
+        comp_2.negate = function (comp) {
             return Chalkboard.comp.init(-comp.a, -comp.b);
         };
-        comp_1.normalize = function (comp) {
+        comp_2.normalize = function (comp) {
             return Chalkboard.comp.init(comp.a / Chalkboard.comp.mag(comp), comp.b / Chalkboard.comp.mag(comp));
         };
-        comp_1.parse = function (str) {
+        comp_2.parse = function (str) {
             return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + " return (" + str + ")")();
         };
-        comp_1.pow = function (comp, num) {
+        comp_2.pow = function (comp, num) {
             return Chalkboard.comp.init(Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.cos(num * Chalkboard.comp.arg(comp)), Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.sin(num * Chalkboard.comp.arg(comp)));
         };
-        comp_1.print = function (comp) {
+        comp_2.print = function (comp) {
             console.log(Chalkboard.comp.toString(comp));
         };
-        comp_1.random = function (inf, sup) {
+        comp_2.random = function (inf, sup) {
             if (inf === void 0) { inf = 0; }
             if (sup === void 0) { sup = 1; }
             return Chalkboard.comp.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         };
-        comp_1.Re = function (funcORcomp) {
+        comp_2.Re = function (funcORcomp) {
             if (funcORcomp.hasOwnProperty("definition")) {
                 return funcORcomp.definition[0];
             }
@@ -772,10 +2339,10 @@ var Chalkboard;
                 return funcORcomp.a;
             }
         };
-        comp_1.reciprocate = function (comp) {
+        comp_2.reciprocate = function (comp) {
             return Chalkboard.comp.init(1 / comp.a, 1 / comp.b);
         };
-        comp_1.root = function (comp, index) {
+        comp_2.root = function (comp, index) {
             if (index === void 0) { index = 3; }
             var result = [];
             var r = Chalkboard.comp.mag(comp);
@@ -785,49 +2352,61 @@ var Chalkboard;
             }
             return result;
         };
-        comp_1.rotate = function (comp, rad) {
+        comp_2.rotate = function (comp, rad) {
             return Chalkboard.comp.init(Chalkboard.comp.mag(comp) * Chalkboard.trig.cos(Chalkboard.comp.arg(comp) + rad), Chalkboard.comp.mag(comp) * Chalkboard.trig.sin(Chalkboard.comp.arg(comp) + rad));
         };
-        comp_1.round = function (comp) {
+        comp_2.round = function (comp) {
             return Chalkboard.comp.init(Math.round(comp.a), Math.round(comp.b));
         };
-        comp_1.scl = function (comp, num) {
+        comp_2.scl = function (comp, num) {
             return Chalkboard.comp.init(comp.a * num, comp.b * num);
         };
-        comp_1.slope = function (comp) {
+        comp_2.slope = function (comp) {
             return comp.b / comp.a;
         };
-        comp_1.sq = function (comp) {
+        comp_2.sq = function (comp) {
             return Chalkboard.comp.init(comp.a * comp.a - comp.b * comp.b, 2 * comp.a * comp.b);
         };
-        comp_1.sqrt = function (comp) {
+        comp_2.sqrt = function (comp) {
             return Chalkboard.comp.init(Chalkboard.real.sqrt((comp.a + Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b)) / 2), Chalkboard.numb.sgn(comp.b) * Chalkboard.real.sqrt((-comp.a + Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b)) / 2));
         };
-        comp_1.sub = function (comp1, comp2) {
+        comp_2.sub = function (comp1, comp2) {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
             return Chalkboard.comp.init(comp1.a - comp2.a, comp1.b - comp2.b);
         };
-        comp_1.toArray = function (comp) {
+        comp_2.toArray = function (comp) {
             return [comp.a, comp.b];
         };
-        comp_1.toMatrix = function (comp) {
+        comp_2.toMatrix = function (comp) {
             return Chalkboard.matr.init([comp.a, -comp.b], [comp.b, comp.a]);
         };
-        comp_1.toString = function (comp) {
-            if (comp.b >= 0) {
+        comp_2.toString = function (comp) {
+            if (comp.a === 1 && comp.b === 0) {
+                return "1";
+            }
+            else if (comp.a === 0 && comp.b === 1) {
+                return "i";
+            }
+            else if (comp.a === -1 && comp.b === 0) {
+                return "-1";
+            }
+            else if (comp.a === 0 && comp.b === -1) {
+                return "-i";
+            }
+            else if (comp.b >= 0) {
                 return comp.a.toString() + " + " + comp.b.toString() + "i";
             }
             else {
                 return comp.a.toString() + " - " + Math.abs(comp.b).toString() + "i";
             }
         };
-        comp_1.toVector = function (comp) {
+        comp_2.toVector = function (comp) {
             return Chalkboard.vect.init(comp.a, comp.b);
         };
-        comp_1.val = function (func, comp) {
+        comp_2.val = function (func, comp) {
             if (func.type === "comp") {
                 var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]), v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
                 return Chalkboard.comp.init(u(comp.a, comp.b), v(comp.a, comp.b));
@@ -836,7 +2415,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a type property of "comp".');
             }
         };
-        comp_1.zero = function (comp) {
+        comp_2.zero = function (comp) {
             return Chalkboard.comp.init(comp.a * 0, comp.b * 0);
         };
     })(comp = Chalkboard.comp || (Chalkboard.comp = {}));
@@ -948,7 +2527,7 @@ var Chalkboard;
             return [a, b, c];
         };
         geom.rectangularprismA = function (l, w, h) {
-            return 2 * (l * h + l * h + w * h);
+            return 2 * (l * h + l * w + w * h);
         };
         geom.rectangularprismV = function (l, w, h) {
             return l * w * h;
@@ -999,8 +2578,8 @@ var Chalkboard;
 var Chalkboard;
 (function (Chalkboard) {
     var matr;
-    (function (matr_1) {
-        matr_1.absolute = function (matr) {
+    (function (matr_2) {
+        matr_2.absolute = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
             }
@@ -1021,7 +2600,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.add = function (matr1, matr2) {
+        matr_2.add = function (matr1, matr2) {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return Chalkboard.matr.init([matr1[0][0] + matr2[0][0], matr1[0][1] + matr2[0][1]], [matr1[1][0] + matr2[1][0], matr1[1][1] + matr2[1][1]]);
@@ -1047,7 +2626,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
         };
-        matr_1.addKronecker = function (matr1, matr2) {
+        matr_2.addKronecker = function (matr1, matr2) {
             if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
                 return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2));
             }
@@ -1055,10 +2634,10 @@ var Chalkboard;
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" that are square.');
             }
         };
-        matr_1.adjugate = function (matr, row, col) {
+        matr_2.adjugate = function (matr, row, col) {
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         };
-        matr_1.cofactor = function (matr, row, col) {
+        matr_2.cofactor = function (matr, row, col) {
             return matr
                 .slice(0, row)
                 .concat(matr.slice(row + 1))
@@ -1066,13 +2645,13 @@ var Chalkboard;
                 return row.slice(0, col).concat(row.slice(col + 1));
             });
         };
-        matr_1.cols = function (matr) {
+        matr_2.cols = function (matr) {
             return matr[0].length;
         };
-        matr_1.colspace = function (matr) {
+        matr_2.colspace = function (matr) {
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         };
-        matr_1.concat = function (matr1, matr2, axis) {
+        matr_2.concat = function (matr1, matr2, axis) {
             if (axis === void 0) { axis = 0; }
             if (axis === 0) {
                 if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2)) {
@@ -1120,7 +2699,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
-        matr_1.constrain = function (matr, range) {
+        matr_2.constrain = function (matr, range) {
             if (range === void 0) { range = [0, 1]; }
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)], [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
@@ -1162,7 +2741,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.copy = function (matr) {
+        matr_2.copy = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1]], [matr[1][0], matr[1][1]]);
             }
@@ -1183,7 +2762,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.det = function (matr) {
+        matr_2.det = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
@@ -1227,7 +2806,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.diagonal = function (size) {
+        matr_2.diagonal = function (size) {
             var elements = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 elements[_i - 1] = arguments[_i];
@@ -1251,7 +2830,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.eigenvalue = function (matr, maxIterations) {
+        matr_2.eigenvalue = function (matr, maxIterations) {
             if (maxIterations === void 0) { maxIterations = 100; }
             var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             var _loop_1 = function (i) {
@@ -1274,7 +2853,7 @@ var Chalkboard;
             return (dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(Chalkboard.matr.mul(matr, v))) /
                 dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v)));
         };
-        matr_1.eigenvector = function (matr, maxIterations) {
+        matr_2.eigenvector = function (matr, maxIterations) {
             if (maxIterations === void 0) { maxIterations = 100; }
             var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             var _loop_2 = function (i) {
@@ -1290,7 +2869,7 @@ var Chalkboard;
             var result = Chalkboard.matr.toArray(v);
             return result;
         };
-        matr_1.empty = function (rows, cols) {
+        matr_2.empty = function (rows, cols) {
             if (cols === void 0) { cols = rows; }
             var _null = null;
             if (rows === 2 && cols === 2) {
@@ -1313,7 +2892,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.exchange = function (size) {
+        matr_2.exchange = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [1, 0]);
             }
@@ -1335,7 +2914,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.fill = function (element, rows, cols) {
+        matr_2.fill = function (element, rows, cols) {
             if (cols === void 0) { cols = rows; }
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([element, element], [element, element]);
@@ -1357,7 +2936,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.Gaussian = function (matr) {
+        matr_2.Gaussian = function (matr) {
             var lead = 0;
             for (var row = 0; row < Chalkboard.matr.rows(matr); row++) {
                 if (lead >= Chalkboard.matr.cols(matr)) {
@@ -1393,7 +2972,7 @@ var Chalkboard;
             }
             return matr;
         };
-        matr_1.Hilbert = function (size) {
+        matr_2.Hilbert = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 3]);
             }
@@ -1414,7 +2993,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.identity = function (size) {
+        matr_2.identity = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [0, 1]);
             }
@@ -1433,7 +3012,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.init = function () {
+        matr_2.init = function () {
             var matrix = [];
             for (var _i = 0; _i < arguments.length; _i++) {
                 matrix[_i] = arguments[_i];
@@ -1448,7 +3027,7 @@ var Chalkboard;
                 return matrix;
             }
         };
-        matr_1.invert = function (matr) {
+        matr_2.invert = function (matr) {
             if (Chalkboard.matr.isInvertible(matr)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     var det_1 = Chalkboard.matr.det(matr);
@@ -1538,7 +3117,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square and has a non-zero determinant.');
             }
         };
-        matr_1.isDiagonal = function (matr) {
+        matr_2.isDiagonal = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return matr[0][1] !== 0 && matr[1][0] !== 0;
@@ -1575,7 +3154,7 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isEqual = function (matr1, matr2) {
+        matr_2.isEqual = function (matr1, matr2) {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
@@ -1624,7 +3203,7 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isIdentity = function (matr) {
+        matr_2.isIdentity = function (matr) {
             if (Chalkboard.matr.isDiagonal(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return matr[0][0] === 1 && matr[1][1] === 1;
@@ -1648,10 +3227,10 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isInvertible = function (matr) {
+        matr_2.isInvertible = function (matr) {
             return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
         };
-        matr_1.isLowerTriangular = function (matr) {
+        matr_2.isLowerTriangular = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return matr[0][1] === 0;
@@ -1677,7 +3256,7 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isOrthogonal = function (matr) {
+        matr_2.isOrthogonal = function (matr) {
             if (Chalkboard.matr.isInvertible(matr)) {
                 return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
             }
@@ -1685,23 +3264,23 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isSizeEqual = function (matr1, matr2) {
+        matr_2.isSizeEqual = function (matr1, matr2) {
             return Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2);
         };
-        matr_1.isSizeOf = function (matr, rows, cols) {
+        matr_2.isSizeOf = function (matr, rows, cols) {
             if (cols === void 0) { cols = rows; }
             return Chalkboard.matr.rows(matr) === rows && Chalkboard.matr.cols(matr) === cols;
         };
-        matr_1.isSkewSymmetric = function (matr) {
+        matr_2.isSkewSymmetric = function (matr) {
             return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.negate(matr));
         };
-        matr_1.isSquare = function (matr) {
+        matr_2.isSquare = function (matr) {
             return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr);
         };
-        matr_1.isSymmetric = function (matr) {
+        matr_2.isSymmetric = function (matr) {
             return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
         };
-        matr_1.isUpperTriangular = function (matr) {
+        matr_2.isUpperTriangular = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return matr[1][0] === 0;
@@ -1727,10 +3306,10 @@ var Chalkboard;
                 return false;
             }
         };
-        matr_1.isZero = function (matr) {
+        matr_2.isZero = function (matr) {
             return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(matr));
         };
-        matr_1.Lehmer = function (size) {
+        matr_2.Lehmer = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 1]);
             }
@@ -1751,7 +3330,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.lowerBinomial = function (size) {
+        matr_2.lowerBinomial = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [1, 1]);
             }
@@ -1772,7 +3351,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.lowerShift = function (size) {
+        matr_2.lowerShift = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([0, 0], [1, 0]);
             }
@@ -1793,7 +3372,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.lowerTriangular = function (size) {
+        matr_2.lowerTriangular = function (size) {
             var elements = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 elements[_i - 1] = arguments[_i];
@@ -1820,7 +3399,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.LUdecomp = function (matr) {
+        matr_2.LUdecomp = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 var L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
                 for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
@@ -1845,7 +3424,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.mul = function (matr1, matr2) {
+        matr_2.mul = function (matr1, matr2) {
             if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2, 1)) {
                     return Chalkboard.matr.init([matr1[0][0] * matr2[0][0] + matr1[0][1] * matr2[1][0]], [matr1[1][0] * matr2[0][0] + matr1[1][1] * matr2[1][0]]);
@@ -1915,7 +3494,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
             }
         };
-        matr_1.mulKronecker = function (matr1, matr2) {
+        matr_2.mulKronecker = function (matr1, matr2) {
             if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
                 return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]], [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]], [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]], [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
             }
@@ -2304,7 +3883,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.mulVector = function (matr, vect) {
+        matr_2.mulVector = function (matr, vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -2333,7 +3912,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        matr_1.negate = function (matr) {
+        matr_2.negate = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1]], [-matr[1][0], -matr[1][1]]);
             }
@@ -2354,7 +3933,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.norm = function (matr, p, q) {
+        matr_2.norm = function (matr, p, q) {
             if (p === void 0) { p = 2; }
             if (q === void 0) { q = 2; }
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
@@ -2401,7 +3980,7 @@ var Chalkboard;
                 return Chalkboard.real.pow(result, 1 / q);
             }
         };
-        matr_1.normalize = function (matr, p, q) {
+        matr_2.normalize = function (matr, p, q) {
             if (p === void 0) { p = 2; }
             if (q === void 0) { q = 2; }
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
@@ -2444,7 +4023,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.normsq = function (matr, p, q) {
+        matr_2.normsq = function (matr, p, q) {
             if (p === void 0) { p = 2; }
             if (q === void 0) { q = 2; }
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
@@ -2491,7 +4070,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.nullspace = function (matr) {
+        matr_2.nullspace = function (matr) {
             var augmented = matr.map(function (row) {
                 return row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0));
             });
@@ -2506,7 +4085,7 @@ var Chalkboard;
                 return row.slice(Chalkboard.matr.rows(matr));
             });
         };
-        matr_1.perm = function (matr) {
+        matr_2.perm = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 1) {
                     return matr[0][0];
@@ -2550,7 +4129,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.pow = function (matr, num) {
+        matr_2.pow = function (matr, num) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (num === 0) {
                     return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
@@ -2567,10 +4146,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.print = function (matr) {
+        matr_2.print = function (matr) {
             console.log(Chalkboard.matr.toString(matr));
         };
-        matr_1.pull = function (matr, index, axis) {
+        matr_2.pull = function (matr, index, axis) {
             if (axis === 0) {
                 matr.splice(index, 1);
                 return matr;
@@ -2585,7 +4164,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
-        matr_1.push = function (matr, index, axis, elements) {
+        matr_2.push = function (matr, index, axis, elements) {
             if (axis === 0) {
                 matr.splice(index, 0, elements);
                 return matr;
@@ -2600,7 +4179,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "axis" must be 0 or 1.');
             }
         };
-        matr_1.QRdecomp = function (matr) {
+        matr_2.QRdecomp = function (matr) {
             var Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
             for (var j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
                 var norm_1 = 0;
@@ -2646,7 +4225,7 @@ var Chalkboard;
             }
             return { Q: Q, R: R };
         };
-        matr_1.random = function (inf, sup, rows, cols) {
+        matr_2.random = function (inf, sup, rows, cols) {
             if (cols === void 0) { cols = rows; }
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
@@ -2668,14 +4247,14 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.rank = function (matr) {
+        matr_2.rank = function (matr) {
             return Chalkboard.matr.Gaussian(matr).filter(function (row) {
                 return row.some(function (element) {
                     return element !== 0;
                 });
             }).length;
         };
-        matr_1.reciprocate = function (matr) {
+        matr_2.reciprocate = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]], [1 / matr[1][0], 1 / matr[1][1]]);
             }
@@ -2696,29 +4275,29 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.resize = function (matr, rows, cols) {
+        matr_2.resize = function (matr, rows, cols) {
             if (cols === void 0) { cols = rows; }
             var result = Chalkboard.matr.init();
-            var flat = Chalkboard.matr.toArray(matr);
-            var index = 0;
+            var matrrows = Chalkboard.matr.rows(matr);
+            var matrcols = Chalkboard.matr.cols(matr);
             for (var i = 0; i < rows; i++) {
                 result.push([]);
                 for (var j = 0; j < cols; j++) {
-                    result[i].push(index < flat.length ? flat[index++] : 0);
+                    result[i].push(i < matrrows && j < matrcols ? matr[i][j] : 0);
                 }
             }
             return result;
         };
-        matr_1.rotator = function (radx, rady, radz) {
+        matr_2.rotator = function (radx, rady, radz) {
             if (rady === undefined && radz === undefined) {
-                return Chalkboard.matr.init([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
+                return Chalkboard.matr.init([Math.cos(radx), -Math.sin(radx)], [Math.sin(radx), Math.cos(radx)]);
             }
             else {
-                var matrx = Chalkboard.matr.init([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]), matry = Chalkboard.matr.init([Chalkboard.trig.cos(rady), 0, Chalkboard.trig.sin(rady)], [0, 1, 0], [-Chalkboard.trig.sin(rady), 0, Chalkboard.trig.cos(rady)]), matrz = Chalkboard.matr.init([Chalkboard.trig.cos(radz), -Chalkboard.trig.sin(radz), 0], [Chalkboard.trig.sin(radz), Chalkboard.trig.cos(radz), 0], [0, 0, 1]);
+                var matrx = Chalkboard.matr.init([1, 0, 0], [0, Math.cos(radx), -Math.sin(radx)], [0, Math.sin(radx), Math.cos(radx)]), matry = Chalkboard.matr.init([Math.cos(rady), 0, Math.sin(rady)], [0, 1, 0], [-Math.sin(rady), 0, Math.cos(rady)]), matrz = Chalkboard.matr.init([Math.cos(radz), -Math.sin(radz), 0], [Math.sin(radz), Math.cos(radz), 0], [0, 0, 1]);
                 return Chalkboard.matr.mul(Chalkboard.matr.mul(matrz, matry), matrx);
             }
         };
-        matr_1.round = function (matr) {
+        matr_2.round = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])], [Math.round(matr[1][0]), Math.round(matr[1][1])]);
             }
@@ -2739,17 +4318,17 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.rows = function (matr) {
+        matr_2.rows = function (matr) {
             return matr.length;
         };
-        matr_1.rowspace = function (matr) {
+        matr_2.rowspace = function (matr) {
             return Chalkboard.matr.Gaussian(matr).filter(function (row) {
                 return row.some(function (element) {
                     return element !== 0;
                 });
             });
         };
-        matr_1.scaler = function (vect) {
+        matr_2.scaler = function (vect) {
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             }
@@ -2763,7 +4342,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        matr_1.scl = function (matr, num) {
+        matr_2.scl = function (matr, num) {
             if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num]);
             }
@@ -2793,7 +4372,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.solve = function (matrA, matrB) {
+        matr_2.solve = function (matrA, matrB) {
             if (Chalkboard.matr.isSquare(matrA)) {
                 if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
                     if (Chalkboard.matr.det(matrA) !== 0) {
@@ -2811,7 +4390,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.sub = function (matr1, matr2) {
+        matr_2.sub = function (matr1, matr2) {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return Chalkboard.matr.init([matr1[0][0] - matr2[0][0], matr1[0][1] - matr2[0][1]], [matr1[1][0] - matr2[1][0], matr1[1][1] - matr2[1][1]]);
@@ -2837,7 +4416,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
             }
         };
-        matr_1.symmetricBinomial = function (size) {
+        matr_2.symmetricBinomial = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [1, 2]);
             }
@@ -2851,7 +4430,7 @@ var Chalkboard;
                 return Chalkboard.matr.mul(Chalkboard.matr.lowerBinomial(size), Chalkboard.matr.upperBinomial(size));
             }
         };
-        matr_1.toArray = function (matr) {
+        matr_2.toArray = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
             }
@@ -2888,7 +4467,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.toObject = function (matr) {
+        matr_2.toObject = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1] },
@@ -2921,7 +4500,10 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.toString = function (matr) {
+        matr_2.toSet = function (matr) {
+            return Chalkboard.abal.set(Chalkboard.matr.toArray(matr));
+        };
+        matr_2.toString = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return "[ " + matr[0][0].toString() + " " + matr[0][1].toString() + " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]";
             }
@@ -2993,7 +4575,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.toTensor = function (matr) {
+        matr_2.toTensor = function (matr) {
             var _a;
             var size = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -3002,7 +4584,7 @@ var Chalkboard;
             size = Array.isArray(size[0]) ? size[0] : size;
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([matr], size, false));
         };
-        matr_1.toVector = function (matr, dimension, index, axis) {
+        matr_2.toVector = function (matr, dimension, index, axis) {
             if (index === void 0) { index = 0; }
             if (axis === void 0) { axis = 0; }
             if (dimension === 2) {
@@ -3042,7 +4624,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
-        matr_1.trace = function (matr) {
+        matr_2.trace = function (matr) {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return matr[0][0] + matr[1][1];
@@ -3065,7 +4647,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
             }
         };
-        matr_1.transpose = function (matr) {
+        matr_2.transpose = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
             }
@@ -3086,7 +4668,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.translator = function (vect) {
+        matr_2.translator = function (vect) {
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             }
@@ -3100,7 +4682,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        matr_1.upperBinomial = function (size) {
+        matr_2.upperBinomial = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [0, 1]);
             }
@@ -3121,7 +4703,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.upperShift = function (size) {
+        matr_2.upperShift = function (size) {
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [0, 0]);
             }
@@ -3142,7 +4724,7 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.upperTriangular = function (size) {
+        matr_2.upperTriangular = function (size) {
             var elements = [];
             for (var _i = 1; _i < arguments.length; _i++) {
                 elements[_i - 1] = arguments[_i];
@@ -3169,22 +4751,22 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.zero = function (matr) {
+        matr_2.zero = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0], [matr[1][0] * 0, matr[1][1] * 0]);
+                return Chalkboard.matr.init([0, 0], [0, 0]);
             }
             else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
+                return Chalkboard.matr.init([0, 0, 0], [0, 0, 0], [0, 0, 0]);
             }
             else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0], [matr[3][0] * 0, matr[3][1] * 0, matr[3][2] * 0, matr[3][3] * 0]);
+                return Chalkboard.matr.init([0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
             }
             else {
                 var result = Chalkboard.matr.init();
                 for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     result[i] = [];
                     for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        result[i][j] = matr[i][j] * 0;
+                        result[i][j] = 0;
                     }
                 }
                 return result;
@@ -3271,7 +4853,6 @@ var Chalkboard;
             for (var i = 1; i <= num; i++) {
                 n *= i;
             }
-            i--;
             return n;
         };
         numb.factors = function (num) {
@@ -3345,6 +4926,18 @@ var Chalkboard;
                 }
             }
             return num > 1;
+        };
+        numb.isRational = function (num, tolerance) {
+            if (tolerance === void 0) { tolerance = 1e-8; }
+            if (!isFinite(num))
+                return false;
+            try {
+                var _a = Chalkboard.numb.toFraction(num, tolerance), n = _a[0], d = _a[1];
+                return Math.abs(num - n / d) < tolerance;
+            }
+            catch (_b) {
+                return false;
+            }
         };
         numb.Kronecker = function (a, b) {
             if (a === b) {
@@ -3465,6 +5058,29 @@ var Chalkboard;
                 result += f(i);
             }
             return result;
+        };
+        numb.toFraction = function (num, tolerance) {
+            if (tolerance === void 0) { tolerance = 1e-8; }
+            if (!isFinite(num))
+                throw new Error('The parameter "num" must be finite to be converted to a fraction.');
+            var sgn = Chalkboard.numb.sgn(num);
+            num *= sgn;
+            if (Number.isInteger(num))
+                return [sgn * num, 1];
+            var h1 = 1, h2 = 0, k1 = 0, k2 = 1;
+            var b = num;
+            while (true) {
+                var a = Math.floor(b);
+                var h = a * h1 + h2, k = a * k1 + k2;
+                var approx = h / k;
+                if (Math.abs(num - approx) < tolerance) {
+                    var g = Chalkboard.numb.gcd(h, k);
+                    return [sgn * (h / g), k / g];
+                }
+                h2 = h1, h1 = h;
+                k2 = k1, k1 = k;
+                b = 1 / (b - a);
+            }
         };
     })(numb = Chalkboard.numb || (Chalkboard.numb = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -3677,14 +5293,14 @@ var Chalkboard;
                 }
             }
             else if (func.type === "surf") {
-                var vect_1 = val;
+                var vect_2 = val;
                 var x = Chalkboard.real.parse("(s, t) => " + func.definition[0]), y = Chalkboard.real.parse("(s, t) => " + func.definition[1]), z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
-                return Chalkboard.vect.init(x(vect_1.x, vect_1.y), y(vect_1.x, vect_1.y), z(vect_1.x, vect_1.y));
+                return Chalkboard.vect.init(x(vect_2.x, vect_2.y), y(vect_2.x, vect_2.y), z(vect_2.x, vect_2.y));
             }
             else if (func.type === "mult" && typeof val !== "number") {
-                var vect_2 = val;
+                var vect_3 = val;
                 var f = Chalkboard.real.parse("(x, y) => " + func.definition);
-                return f(vect_2.x, vect_2.y);
+                return f(vect_3.x, vect_3.y);
             }
             else {
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a "type" property of "expl", "pola", "curv", "surf", or "mult".');
@@ -4321,49 +5937,49 @@ var Chalkboard;
 var Chalkboard;
 (function (Chalkboard) {
     var quat;
-    (function (quat_1) {
-        quat_1.absolute = function (quat) {
+    (function (quat_2) {
+        quat_2.absolute = function (quat) {
             return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
         };
-        quat_1.add = function (quat1, quat2) {
+        quat_2.add = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
         };
-        quat_1.conjugate = function (quat) {
+        quat_2.conjugate = function (quat) {
             return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
         };
-        quat_1.constrain = function (quat, range) {
+        quat_2.constrain = function (quat, range) {
             if (range === void 0) { range = [0, 1]; }
             return Chalkboard.quat.init(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
         };
-        quat_1.copy = function (quat) {
+        quat_2.copy = function (quat) {
             return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
         };
-        quat_1.dist = function (quat1, quat2) {
+        quat_2.dist = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.real.sqrt((quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d));
         };
-        quat_1.distsq = function (quat1, quat2) {
+        quat_2.distsq = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return (quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d);
         };
-        quat_1.div = function (quat1, quat2) {
+        quat_2.div = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init((quat1.a * quat2.a + quat1.b * quat2.b + quat1.c * quat2.c + quat1.d * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.b * quat2.a - quat1.a * quat2.b - quat1.d * quat2.c + quat1.c * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.c * quat2.a + quat1.d * quat2.b - quat1.a * quat2.c - quat1.b * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.d * quat2.a - quat1.c * quat2.b + quat1.b * quat2.c - quat1.a * quat2.d) / Chalkboard.quat.magsq(quat2));
         };
-        quat_1.fromAxis = function (vect, rad) {
+        quat_2.fromAxis = function (vect, rad) {
             if (typeof vect.z !== "undefined") {
                 return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
             }
@@ -4371,74 +5987,74 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" that has properties "x", "y", and "z".');
             }
         };
-        quat_1.init = function (a, b, c, d) {
+        quat_2.init = function (a, b, c, d) {
             if (b === void 0) { b = 0; }
             if (c === void 0) { c = 0; }
             if (d === void 0) { d = 0; }
             return { a: a, b: b, c: c, d: d };
         };
-        quat_1.invert = function (quat) {
+        quat_2.invert = function (quat) {
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
         };
-        quat_1.mag = function (quat) {
+        quat_2.mag = function (quat) {
             return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
         };
-        quat_1.magset = function (quat, num) {
+        quat_2.magset = function (quat, num) {
             return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
         };
-        quat_1.magsq = function (quat) {
+        quat_2.magsq = function (quat) {
             return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
         };
-        quat_1.mul = function (quat1, quat2) {
+        quat_2.mul = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(quat1.a * quat2.a - quat1.b * quat2.b - quat1.c * quat2.c - quat1.d * quat2.d, quat1.a * quat2.b + quat1.b * quat2.a + quat1.c * quat2.d - quat1.d * quat2.c, quat1.a * quat2.c - quat1.b * quat2.d + quat1.c * quat2.a + quat1.d * quat2.b, quat1.a * quat2.d + quat1.b * quat2.c - quat1.c * quat2.b + quat1.d * quat2.a);
         };
-        quat_1.negate = function (quat) {
+        quat_2.negate = function (quat) {
             return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
         };
-        quat_1.normalize = function (quat) {
+        quat_2.normalize = function (quat) {
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
         };
-        quat_1.print = function (quat) {
+        quat_2.print = function (quat) {
             console.log(Chalkboard.quat.toString(quat));
         };
-        quat_1.random = function (inf, sup) {
+        quat_2.random = function (inf, sup) {
             if (inf === void 0) { inf = 0; }
             if (sup === void 0) { sup = 1; }
             return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         };
-        quat_1.reciprocate = function (quat) {
+        quat_2.reciprocate = function (quat) {
             return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
         };
-        quat_1.round = function (quat) {
+        quat_2.round = function (quat) {
             return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
         };
-        quat_1.scl = function (quat, num) {
+        quat_2.scl = function (quat, num) {
             return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
         };
-        quat_1.sub = function (quat1, quat2) {
+        quat_2.sub = function (quat1, quat2) {
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
                 quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
         };
-        quat_1.toArray = function (quat) {
+        quat_2.toArray = function (quat) {
             return [quat.a, quat.b, quat.c, quat.d];
         };
-        quat_1.toMatrix = function (quat) {
+        quat_2.toMatrix = function (quat) {
             return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
         };
-        quat_1.toRotation = function (quat, vect) {
+        quat_2.toRotation = function (quat, vect) {
             var vector = Chalkboard.vect.toQuaternion(vect);
             var inverse = Chalkboard.quat.invert(quat);
             var quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
             return Chalkboard.vect.init(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
         };
-        quat_1.toString = function (quat) {
+        quat_2.toString = function (quat) {
             var quat_b = "";
             var quat_c = "";
             var quat_d = "";
@@ -4462,10 +6078,10 @@ var Chalkboard;
             }
             return quat.a.toString() + quat_b + quat_c + quat_d;
         };
-        quat_1.toVector = function (quat) {
+        quat_2.toVector = function (quat) {
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
         };
-        quat_1.zero = function (quat) {
+        quat_2.zero = function (quat) {
             return Chalkboard.quat.init(quat.a * 0, quat.b * 0, quat.c * 0, quat.d * 0);
         };
     })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
@@ -4474,6 +6090,23 @@ var Chalkboard;
 (function (Chalkboard) {
     var stat;
     (function (stat) {
+        stat.absolute = function (arr) {
+            var result = [];
+            for (var i = 0; i < arr.length; i++) {
+                result.push(Math.abs(arr[i]));
+            }
+            return result;
+        };
+        stat.add = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            var result = [];
+            for (var i = 0; i < arr1.length; i++) {
+                result.push(arr1[i] + arr2[i]);
+            }
+            return result;
+        };
         stat.array = function (inf, sup, length) {
             if (length === void 0) { length = sup - inf + 1; }
             var result = [];
@@ -4486,35 +6119,41 @@ var Chalkboard;
         stat.autocorrelation = function (arr) {
             return Chalkboard.stat.correlation(arr, arr);
         };
+        stat.Bayes = function (pA, pGivenA, pGivenNotA) {
+            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1) {
+                throw new RangeError('All probabilities must be between 0 and 1.');
+            }
+            return (pGivenA * pA) / (pGivenA * pA + pGivenNotA * (1 - pA));
+        };
         stat.change = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
             var result = [];
-            if (arr1.length === arr2.length) {
-                for (var i = 0; i < arr1.length; i++) {
-                    result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
-                }
-                return result;
+            for (var i = 0; i < arr1.length; i++) {
+                result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
             }
-            else {
-                throw new RangeError('Parameters "arr1" and "arr2" must be of type "number[]" with the same "length" property.');
-            }
+            return result;
         };
         stat.chiSquared = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
             var result = [];
-            if (arr1.length === arr2.length) {
-                for (var i = 0; i < arr1.length; i++) {
-                    result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
-                }
-                return result;
+            for (var i = 0; i < arr1.length; i++) {
+                result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
             }
-            else {
-                throw new RangeError('Parameters "arr1" and "arr2" must be of type "number[]" with the same "length" property.');
-            }
+            return result;
         };
-        stat.confidenceInterval = function (arr) {
-            return [
-                Chalkboard.stat.mean(arr) - 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length)),
-                Chalkboard.stat.mean(arr) + 1.96 * (Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length))
-            ];
+        stat.confidenceInterval = function (arr, confidence) {
+            if (confidence === void 0) { confidence = 0.95; }
+            if (confidence <= 0 || confidence >= 1) {
+                throw new RangeError('Parameter "confidence" must be between 0 and 1 (exclusive).');
+            }
+            var z = Chalkboard.stat.inormal(1 - (1 - confidence) / 2);
+            var mean = Chalkboard.stat.mean(arr);
+            var standardError = Chalkboard.stat.error(arr);
+            return [mean - z * standardError, mean + z * standardError];
         };
         stat.constrain = function (arr, range) {
             if (range === void 0) { range = [0, 1]; }
@@ -4527,21 +6166,74 @@ var Chalkboard;
         stat.convolution = function (arr1, arr2) {
             var result = [];
             for (var i = 0; i < arr1.length + arr2.length - 1; i++) {
-                var sum = 0;
+                var sum_1 = 0;
                 for (var j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
-                    sum += arr1[j] * arr2[i - j];
+                    sum_1 += arr1[j] * arr2[i - j];
                 }
-                result.push(sum);
+                result.push(sum_1);
             }
             return result;
         };
         stat.correlation = function (arr1, arr2) {
             var result = [];
             for (var i = 0; i < arr1.length + arr2.length - 1; i++) {
-                var sum = 0;
+                var sum_2 = 0;
                 for (var j = Math.max(0, i - arr2.length + 1); j < Math.min(arr1.length, i + 1); j++) {
-                    sum += arr1[j] * arr2[arr2.length - 1 - i + j];
+                    sum_2 += arr1[j] * arr2[arr2.length - 1 - i + j];
                 }
+                result.push(sum_2);
+            }
+            return result;
+        };
+        stat.correlationCoefficient = function (arr1, arr2) {
+            return Chalkboard.stat.covariance(arr1, arr2) / (Chalkboard.stat.deviation(arr1) * Chalkboard.stat.deviation(arr2));
+        };
+        stat.covariance = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            var mean1 = Chalkboard.stat.mean(arr1);
+            var mean2 = Chalkboard.stat.mean(arr2);
+            var sum = 0;
+            for (var i = 0; i < arr1.length; i++) {
+                sum += (arr1[i] - mean1) * (arr2[i] - mean2);
+            }
+            return sum / arr1.length;
+        };
+        stat.cummax = function (arr) {
+            var result = [];
+            var max = -Infinity;
+            for (var _i = 0, arr_1 = arr; _i < arr_1.length; _i++) {
+                var value = arr_1[_i];
+                max = Math.max(max, value);
+                result.push(max);
+            }
+            return result;
+        };
+        stat.cummin = function (arr) {
+            var result = [];
+            var min = Infinity;
+            for (var _i = 0, arr_2 = arr; _i < arr_2.length; _i++) {
+                var value = arr_2[_i];
+                min = Math.min(min, value);
+                result.push(min);
+            }
+            return result;
+        };
+        stat.cummul = function (arr) {
+            var result = [];
+            var mul = 0;
+            for (var i = 0; i < arr.length; i++) {
+                mul *= arr[i];
+                result.push(mul);
+            }
+            return result;
+        };
+        stat.cumsum = function (arr) {
+            var result = [];
+            var sum = 0;
+            for (var i = 0; i < arr.length; i++) {
+                sum += arr[i];
                 result.push(sum);
             }
             return result;
@@ -4552,6 +6244,16 @@ var Chalkboard;
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
             }
             return Chalkboard.real.sqrt(result / arr.length);
+        };
+        stat.dot = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            var result = 0;
+            for (var i = 0; i < arr1.length; i++) {
+                result += arr1[i] * arr2[i];
+            }
+            return result;
         };
         stat.error = function (arr) {
             return Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length);
@@ -4573,6 +6275,19 @@ var Chalkboard;
                         result.push(arr[i]);
                     }
                 }
+            }
+            return result;
+        };
+        stat.expected = function (arr, probabilities) {
+            if (!probabilities) {
+                probabilities = Array(arr.length).fill(1 / arr.length);
+            }
+            if (arr.length !== probabilities.length) {
+                throw new RangeError('Parameters "values" and "probabilities" must have the same length.');
+            }
+            var result = 0;
+            for (var i = 0; i < arr.length; i++) {
+                result += arr[i] * probabilities[i];
             }
             return result;
         };
@@ -4678,6 +6393,65 @@ var Chalkboard;
             }
             return result;
         };
+        stat.inormal = function (p) {
+            if (p <= 0 || p >= 1) {
+                throw new RangeError('Parameter "p" must be between 0 and 1 (exclusive).');
+            }
+            var a = [2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637];
+            var b = [-8.4735109309, 23.08336743743, -21.06224101826, 3.13082909833];
+            var c = [0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
+                0.0276438810333863, 0.0038405729373609, 0.0003951896511919,
+                0.0000321767881768, 0.0000002888167364, 0.0000003960315187];
+            var x = p - 0.5;
+            if (Math.abs(x) < 0.42) {
+                var r = x * x;
+                return x * (((a[3] * r + a[2]) * r + a[1]) * r + a[0]) /
+                    ((((b[3] * r + b[2]) * r + b[1]) * r + b[0]) * r + 1);
+            }
+            else {
+                var r = p < 0.5 ? p : 1 - p;
+                var s = Math.log(-Math.log(r));
+                var t = c[0];
+                for (var i = 1; i < c.length; i++) {
+                    t += c[i] * Math.pow(s, i);
+                }
+                return p < 0.5 ? -t : t;
+            }
+        };
+        stat.interpolate = function (arr, type) {
+            if (type === void 0) { type = "linear"; }
+            var result = arr.slice();
+            for (var i = 0; i < result.length; i++) {
+                if (result[i] == null) {
+                    var prevIndex = i - 1;
+                    var nextIndex = i + 1;
+                    while (prevIndex >= 0 && result[prevIndex] == null)
+                        prevIndex--;
+                    while (nextIndex < result.length && result[nextIndex] == null)
+                        nextIndex++;
+                    var prevValue = prevIndex >= 0 ? result[prevIndex] : 0;
+                    var nextValue = nextIndex < result.length ? result[nextIndex] : 0;
+                    if (type === "linear") {
+                        var t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.lerp([prevValue, nextValue], t);
+                    }
+                    else if (type === "quadratic" && prevIndex > 0 && nextIndex < result.length) {
+                        var prevPrevIndex = prevIndex - 1;
+                        var prevPrevValue = prevPrevIndex >= 0 ? result[prevPrevIndex] : prevValue;
+                        var t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.qerp([prevPrevIndex, prevPrevValue], [prevIndex, prevValue], [nextIndex, nextValue], prevIndex + t * (nextIndex - prevIndex));
+                    }
+                    else {
+                        var t = (i - prevIndex) / (nextIndex - prevIndex);
+                        result[i] = Chalkboard.real.lerp([prevValue, nextValue], t);
+                    }
+                }
+            }
+            return result;
+        };
+        stat.interquartileRange = function (arr) {
+            return Chalkboard.stat.quartile(arr, "Q3") - Chalkboard.stat.quartile(arr, "Q1");
+        };
         stat.kurtosis = function (arr) {
             var result = 0;
             var mean = Chalkboard.stat.mean(arr);
@@ -4763,6 +6537,28 @@ var Chalkboard;
                 throw new TypeError('Parameter "type" must be "arithmetic", "geometric", or "harmonic".');
             }
         };
+        stat.meanMoving = function (arr, windowSize) {
+            if (windowSize <= 0 || windowSize > arr.length) {
+                throw new RangeError('Parameter "windowSize" must be greater than 0 and less than or equal to the array length.');
+            }
+            var result = [];
+            for (var i = 0; i <= arr.length - windowSize; i++) {
+                var windowArr = arr.slice(i, i + windowSize);
+                result.push(Chalkboard.stat.sum(windowArr) / windowSize);
+            }
+            return result;
+        };
+        stat.meanWeighted = function (arr, weights) {
+            if (arr.length !== weights.length) {
+                throw new RangeError('Parameters "values" and "weights" must have the same length.');
+            }
+            var sum = 0, weightSum = 0;
+            for (var i = 0; i < arr.length; i++) {
+                sum += arr[i] * weights[i];
+                weightSum += weights[i];
+            }
+            return sum / weightSum;
+        };
         stat.median = function (arr) {
             var temp = arr.slice().sort(function (a, b) {
                 return a - b;
@@ -4809,6 +6605,20 @@ var Chalkboard;
                 return bestElm;
             }
         };
+        stat.mul = function (arr) {
+            var result = 0;
+            for (var i = 0; i < arr.length; i++) {
+                result *= arr[i];
+            }
+            return result;
+        };
+        stat.negate = function (arr) {
+            var result = [];
+            for (var i = 0; i < arr.length; i++) {
+                result.push(-arr[i]);
+            }
+            return result;
+        };
         stat.norm = function (arr, type) {
             if (type === void 0) { type = "L2"; }
             var result = 0;
@@ -4838,6 +6648,10 @@ var Chalkboard;
             else {
                 throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
             }
+        };
+        stat.normal = function (x) {
+            var standardNormal = Chalkboard.real.define("1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x)");
+            return Chalkboard.real.val(standardNormal, x);
         };
         stat.normalize = function (arr, type) {
             if (type === void 0) { type = "L2"; }
@@ -4877,6 +6691,14 @@ var Chalkboard;
             else {
                 throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
             }
+        };
+        stat.pad = function (arr, length, num) {
+            if (num === void 0) { num = 0; }
+            var result = arr.slice();
+            while (result.length < length) {
+                result.push(num);
+            }
+            return result;
         };
         stat.percentile = function (arr, num) {
             var result = 0;
@@ -4999,6 +6821,58 @@ var Chalkboard;
                 throw new TypeError('Parameter "type" must be "linear", "polynomial", "power", "exponential", or "logarithmic".');
             }
         };
+        stat.resampling = function (arr, samples, type) {
+            if (type === void 0) { type = "bootstrap"; }
+            if (type === "bootstrap") {
+                var numSamples = samples !== null && samples !== void 0 ? samples : 100;
+                var result = [];
+                for (var i = 0; i < numSamples; i++) {
+                    var sample = [];
+                    for (var j = 0; j < arr.length; j++) {
+                        sample.push(arr[Math.floor(Math.random() * arr.length)]);
+                    }
+                    result.push(sample);
+                }
+                return result;
+            }
+            else if (type === "jackknife") {
+                var numSamples = samples !== null && samples !== void 0 ? samples : arr.length;
+                var allJackknifeSamples = [];
+                for (var i = 0; i < arr.length; i++) {
+                    allJackknifeSamples.push(arr.slice(0, i).concat(arr.slice(i + 1)));
+                }
+                if (numSamples < allJackknifeSamples.length) {
+                    var selectedSamples = [];
+                    var usedIndices = new Set();
+                    while (selectedSamples.length < numSamples) {
+                        var randomIndex = Math.floor(Math.random() * allJackknifeSamples.length);
+                        if (!usedIndices.has(randomIndex)) {
+                            usedIndices.add(randomIndex);
+                            selectedSamples.push(allJackknifeSamples[randomIndex]);
+                        }
+                    }
+                    return selectedSamples;
+                }
+                return allJackknifeSamples;
+            }
+            else {
+                throw new TypeError('Parameter "type" must be "bootstrap" or "jackknife".');
+            }
+        };
+        stat.reverse = function (arr) {
+            var result = [];
+            for (var i = arr.length - 1; i >= 0; i--) {
+                result.push(arr[i]);
+            }
+            return result;
+        };
+        stat.scl = function (arr, num) {
+            var result = [];
+            for (var i = 0; i < arr.length; i++) {
+                result.push(arr[i] * num);
+            }
+            return result;
+        };
         stat.shuffle = function (arr) {
             var index, temp, rindex;
             for (index = arr.length - 1; index > 0; index--) {
@@ -5018,6 +6892,16 @@ var Chalkboard;
             }
             return result / ((arr.length - 1) * (deviation * deviation * deviation));
         };
+        stat.sub = function (arr1, arr2) {
+            if (arr1.length !== arr2.length) {
+                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
+            }
+            var result = [];
+            for (var i = 0; i < arr1.length; i++) {
+                result.push(arr1[i] - arr2[i]);
+            }
+            return result;
+        };
         stat.subsets = function (arr) {
             var result = [[]];
             arr.sort();
@@ -5035,7 +6919,15 @@ var Chalkboard;
             }
             return result;
         };
+        stat.sum = function (arr) {
+            var result = 0;
+            for (var i = 0; i < arr.length; i++) {
+                result += arr[i];
+            }
+            return result;
+        };
         stat.toMatrix = function (arr, rows, cols) {
+            if (cols === void 0) { cols = rows; }
             var result = Chalkboard.matr.init();
             var index = 0;
             for (var i = 0; i < rows; i++) {
@@ -5058,6 +6950,9 @@ var Chalkboard;
                 result["_" + i.toString()] = arr[i];
             }
             return result;
+        };
+        stat.toSet = function (arr) {
+            return Chalkboard.abal.set(arr);
         };
         stat.toString = function (arr) {
             return "[" + arr.join(", ") + "]";
@@ -5088,12 +6983,85 @@ var Chalkboard;
                 throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
+        stat.unique = function (arr) {
+            var stableStringify = function (obj) {
+                var replacer = function (key, value) {
+                    if (value !== null && typeof value === "object" && !Array.isArray(value)) {
+                        var sortedObj_1 = {};
+                        Object.keys(value).sort().forEach(function (k) {
+                            sortedObj_1[k] = value[k];
+                        });
+                        return sortedObj_1;
+                    }
+                    return value;
+                };
+                return JSON.stringify(obj, replacer);
+            };
+            var getKey = function (item) {
+                var typePrefix;
+                var valuePart;
+                if (item === null) {
+                    typePrefix = "null";
+                    valuePart = stableStringify(item);
+                }
+                else if (Array.isArray(item)) {
+                    typePrefix = "array";
+                    valuePart = stableStringify(item);
+                }
+                else if (typeof item === "object") {
+                    typePrefix = "object";
+                    valuePart = stableStringify(item);
+                }
+                else if (typeof item === "number") {
+                    typePrefix = "number";
+                    if (Number.isNaN(item)) {
+                        valuePart = "NaN";
+                    }
+                    else if (item === Infinity) {
+                        valuePart = "Infinity";
+                    }
+                    else if (item === -Infinity) {
+                        valuePart = "-Infinity";
+                    }
+                    else {
+                        valuePart = JSON.stringify(item);
+                    }
+                }
+                else if (typeof item === "undefined") {
+                    typePrefix = "undefined";
+                    valuePart = "";
+                }
+                else {
+                    typePrefix = typeof item;
+                    valuePart = stableStringify(item);
+                }
+                return "".concat(typePrefix, ":").concat(valuePart);
+            };
+            var seen = new Map();
+            for (var _i = 0, arr_3 = arr; _i < arr_3.length; _i++) {
+                var item = arr_3[_i];
+                var key = getKey(item);
+                if (!seen.has(key)) {
+                    seen.set(key, item);
+                }
+            }
+            return Array.from(seen.values());
+        };
         stat.variance = function (arr) {
             var result = 0;
             for (var i = 0; i < arr.length; i++) {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
             }
             return result / arr.length;
+        };
+        stat.zscored = function (arr) {
+            var result = [];
+            var mean = Chalkboard.stat.mean(arr);
+            var deviation = Chalkboard.stat.deviation(arr);
+            for (var i = 0; i < arr.length; i++) {
+                result.push((arr[i] - mean) / deviation);
+            }
+            return result;
         };
     })(stat = Chalkboard.stat || (Chalkboard.stat = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -5228,9 +7196,6 @@ var Chalkboard;
             }
             else if (tensor.length === 1 && Array.isArray(tensor[0])) {
                 tensor = tensor[0];
-            }
-            else {
-                tensor = tensor;
             }
             var newNDArray = function (arr) {
                 return arr.map(function (subarr) {
@@ -5507,6 +7472,9 @@ var Chalkboard;
                 return tens;
             }
         };
+        tens_1.toSet = function (tens) {
+            return Chalkboard.abal.set(Chalkboard.tens.toArray(tens));
+        };
         tens_1.toString = function (tens, indentation) {
             if (indentation === void 0) { indentation = 0; }
             if (Array.isArray(tens[0])) {
@@ -5779,8 +7747,8 @@ var Chalkboard;
 var Chalkboard;
 (function (Chalkboard) {
     var vect;
-    (function (vect_3) {
-        vect_3.absolute = function (vect) {
+    (function (vect_4) {
+        vect_4.absolute = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             }
@@ -5794,7 +7762,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.add = function (vect1, vect2) {
+        vect_4.add = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y);
             }
@@ -5808,7 +7776,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.ang = function (vect) {
+        vect_4.ang = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.trig.arctan2(vect.y, vect.x);
             }
@@ -5827,10 +7795,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.angBetween = function (vect1, vect2) {
+        vect_4.angBetween = function (vect1, vect2) {
             return Math.acos(Chalkboard.vect.dot(vect1, vect2) / (Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2)));
         };
-        vect_3.constrain = function (vect, range) {
+        vect_4.constrain = function (vect, range) {
             if (range === void 0) { range = [0, 1]; }
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
@@ -5845,10 +7813,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.copy = function (vect) {
+        vect_4.copy = function (vect) {
             return Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
         };
-        vect_3.cross = function (vect1, vect2) {
+        vect_4.cross = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(0, 0, vect1.x * vect2.y - vect1.y * vect2.x);
             }
@@ -5859,7 +7827,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2 or 3 dimensions.');
             }
         };
-        vect_3.dimension = function (vectORvectfield) {
+        vect_4.dimension = function (vectORvectfield) {
             var vect = vectORvectfield;
             var vectfield = vectORvectfield;
             if ((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") ||
@@ -5878,7 +7846,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vectORvectfield" must be of type "ChalkboardVector" or "ChalkboardVectorField" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.dist = function (vect1, vect2) {
+        vect_4.dist = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y));
             }
@@ -5895,7 +7863,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.distsq = function (vect1, vect2) {
+        vect_4.distsq = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y);
             }
@@ -5912,7 +7880,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.dot = function (vect1, vect2) {
+        vect_4.dot = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y;
             }
@@ -5926,7 +7894,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.empty = function (dimension) {
+        vect_4.empty = function (dimension) {
             var _null = null;
             if (dimension === 2) {
                 return Chalkboard.vect.init(_null, _null);
@@ -5941,7 +7909,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
-        vect_3.field = function (p, q, r, s) {
+        vect_4.field = function (p, q, r, s) {
             if (r === undefined && s === undefined) {
                 return { p: p, q: q };
             }
@@ -5952,7 +7920,7 @@ var Chalkboard;
                 return { p: p, q: q, r: r, s: s };
             }
         };
-        vect_3.fill = function (num, dimension) {
+        vect_4.fill = function (num, dimension) {
             if (dimension === 2) {
                 return Chalkboard.vect.init(num, num);
             }
@@ -5966,7 +7934,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
-        vect_3.fromAlternateToCartesian = function (vect, type) {
+        vect_4.fromAlternateToCartesian = function (vect, type) {
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             }
@@ -5983,7 +7951,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
             }
         };
-        vect_3.fromAngle = function (rad1, rad2) {
+        vect_4.fromAngle = function (rad1, rad2) {
             if (typeof rad2 === "undefined") {
                 return Chalkboard.vect.init(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
             }
@@ -5991,7 +7959,7 @@ var Chalkboard;
                 return Chalkboard.vect.init(Chalkboard.trig.cos(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad1) * Chalkboard.trig.cos(rad2), Chalkboard.trig.sin(rad2));
             }
         };
-        vect_3.fromCartesianToAlternate = function (vect, type) {
+        vect_4.fromCartesianToAlternate = function (vect, type) {
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect));
             }
@@ -6008,7 +7976,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
             }
         };
-        vect_3.fromField = function (vectfield, vect) {
+        vect_4.fromField = function (vectfield, vect) {
             if (Chalkboard.vect.dimension(vectfield) === 2 && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 var p = Chalkboard.real.parse("(x, y) => " + vectfield.p), q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
                 return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
@@ -6025,7 +7993,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vectfield" and "vect" must respectively be of type "ChalkboardVector" and "ChalkboardVectorField" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.fromVector = function (vect) {
+        vect_4.fromVector = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x, vect.y, 0);
             }
@@ -6039,7 +8007,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.init = function (x, y, z, w) {
+        vect_4.init = function (x, y, z, w) {
             if (z === undefined && w === undefined) {
                 return { x: x, y: y };
             }
@@ -6050,7 +8018,7 @@ var Chalkboard;
                 return { x: x, y: y, z: z, w: w };
             }
         };
-        vect_3.interp = function (vect, a, b, c, d) {
+        vect_4.interp = function (vect, a, b, c, d) {
             if (Chalkboard.vect.isDimensionOf(vect, 2) && typeof c === "undefined" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y) / (a + b), (a * vect.x + b * vect.y) / (a + b));
             }
@@ -6064,10 +8032,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.isDimensionEqual = function (vect1, vect2) {
+        vect_4.isDimensionEqual = function (vect1, vect2) {
             return Chalkboard.vect.dimension(vect1) === Chalkboard.vect.dimension(vect2);
         };
-        vect_3.isDimensionOf = function (vectORvectfield, dimension) {
+        vect_4.isDimensionOf = function (vectORvectfield, dimension) {
             if (dimension === 2) {
                 return Chalkboard.vect.dimension(vectORvectfield) === 2;
             }
@@ -6081,7 +8049,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
-        vect_3.isEqual = function (vect1, vect2) {
+        vect_4.isEqual = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return vect1.x === vect2.x && vect1.y === vect2.y;
@@ -6100,19 +8068,19 @@ var Chalkboard;
                 return false;
             }
         };
-        vect_3.isNormalized = function (vect) {
+        vect_4.isNormalized = function (vect) {
             return Chalkboard.vect.magsq(vect) === 1;
         };
-        vect_3.isOrthogonal = function (vect1, vect2) {
+        vect_4.isOrthogonal = function (vect1, vect2) {
             return Chalkboard.vect.dot(vect1, vect2) === 0;
         };
-        vect_3.isParallel = function (vect1, vect2) {
+        vect_4.isParallel = function (vect1, vect2) {
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2));
         };
-        vect_3.isZero = function (vect) {
+        vect_4.isZero = function (vect) {
             return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(vect));
         };
-        vect_3.mag = function (vect) {
+        vect_4.mag = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             }
@@ -6126,10 +8094,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.magset = function (vect, num) {
+        vect_4.magset = function (vect, num) {
             return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
         };
-        vect_3.magsq = function (vect) {
+        vect_4.magsq = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             }
@@ -6143,7 +8111,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.negate = function (vect) {
+        vect_4.negate = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y);
             }
@@ -6157,7 +8125,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.normalize = function (vect) {
+        vect_4.normalize = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect));
             }
@@ -6171,16 +8139,16 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.oproj = function (vect1, vect2) {
+        vect_4.oproj = function (vect1, vect2) {
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.proj(vect1, vect2));
         };
-        vect_3.print = function (vect) {
+        vect_4.print = function (vect) {
             console.log(Chalkboard.vect.toString(vect));
         };
-        vect_3.proj = function (vect1, vect2) {
+        vect_4.proj = function (vect1, vect2) {
             return Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2) / Chalkboard.vect.dot(vect2, vect2));
         };
-        vect_3.random = function (inf, sup, dimension) {
+        vect_4.random = function (inf, sup, dimension) {
             if (dimension === 2) {
                 return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             }
@@ -6194,7 +8162,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
             }
         };
-        vect_3.reciprocate = function (vect) {
+        vect_4.reciprocate = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             }
@@ -6208,10 +8176,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.reflect = function (vect1, vect2) {
+        vect_4.reflect = function (vect1, vect2) {
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, 2 * Chalkboard.vect.dot(vect1, vect2)));
         };
-        vect_3.refract = function (vect1, vect2, refractiveIndex) {
+        vect_4.refract = function (vect1, vect2, refractiveIndex) {
             if (refractiveIndex > 0) {
                 var perp = Chalkboard.vect.scl(Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2))), refractiveIndex);
                 var parr = Chalkboard.vect.scl(vect2, -Chalkboard.real.sqrt(1 - refractiveIndex * refractiveIndex * (1 - Chalkboard.vect.dot(vect1, vect2) * Chalkboard.vect.dot(vect1, vect2))));
@@ -6221,7 +8189,7 @@ var Chalkboard;
                 throw new RangeError('Parameter "refractiveIndex" must be of type "number" greater than 0.');
             }
         };
-        vect_3.round = function (vect) {
+        vect_4.round = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             }
@@ -6235,13 +8203,13 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.scalarQuadruple = function (vect1, vect2, vect3, vect4) {
+        vect_4.scalarQuadruple = function (vect1, vect2, vect3, vect4) {
             return Chalkboard.vect.dot(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
-        vect_3.scalarTriple = function (vect1, vect2, vect3) {
+        vect_4.scalarTriple = function (vect1, vect2, vect3) {
             return Chalkboard.vect.dot(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
-        vect_3.scl = function (vect, num) {
+        vect_4.scl = function (vect, num) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num);
             }
@@ -6255,7 +8223,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.slope = function (vect) {
+        vect_4.slope = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.y / vect.x;
             }
@@ -6269,7 +8237,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.sub = function (vect1, vect2) {
+        vect_4.sub = function (vect1, vect2) {
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y);
             }
@@ -6283,7 +8251,7 @@ var Chalkboard;
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.toArray = function (vect) {
+        vect_4.toArray = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return [vect.x, vect.y];
             }
@@ -6297,10 +8265,10 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.toComplex = function (vect) {
+        vect_4.toComplex = function (vect) {
             return Chalkboard.comp.init(vect.x, vect.y);
         };
-        vect_3.toMatrix = function (vect, axis) {
+        vect_4.toMatrix = function (vect, axis) {
             if (axis === void 0) { axis = 0; }
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (axis === 0) {
@@ -6339,7 +8307,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.toQuaternion = function (vect) {
+        vect_4.toQuaternion = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             }
@@ -6353,7 +8321,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.toString = function (vect) {
+        vect_4.toString = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             }
@@ -6367,7 +8335,7 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
-        vect_3.toTensor = function (vect) {
+        vect_4.toTensor = function (vect) {
             var _a;
             var size = [];
             for (var _i = 1; _i < arguments.length; _i++) {
@@ -6378,13 +8346,13 @@ var Chalkboard;
             }
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([Chalkboard.vect.toMatrix(vect)], size, false));
         };
-        vect_3.vectorQuadruple = function (vect1, vect2, vect3, vect4) {
+        vect_4.vectorQuadruple = function (vect1, vect2, vect3, vect4) {
             return Chalkboard.vect.cross(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
-        vect_3.vectorTriple = function (vect1, vect2, vect3) {
+        vect_4.vectorTriple = function (vect1, vect2, vect3) {
             return Chalkboard.vect.cross(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
-        vect_3.zero = function (vect) {
+        vect_4.zero = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * 0, vect.y * 0);
             }

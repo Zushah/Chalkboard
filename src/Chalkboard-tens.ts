@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Tensor Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -183,8 +183,6 @@ namespace Chalkboard {
                 return [];
             } else if (tensor.length === 1 && Array.isArray(tensor[0])) {
                 tensor = tensor[0];
-            } else {
-                tensor = tensor;
             }
             const newNDArray = function (arr: ChalkboardTensor[]): ChalkboardTensor[] {
                 return arr.map(function (subarr) {

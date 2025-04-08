@@ -1,11 +1,11 @@
 /*
-    The Chalkboard Library - Real-Valued Namespace
-    Version 2.1.0 Seki
+    The Chalkboard Library - Real Numbers Namespace
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     /**
-     * The real-valued namespace.
+     * The real numbers namespace.
      * @namespace
      */
     export namespace real {

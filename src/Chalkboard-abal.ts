@@ -1,10 +1,17 @@
 /*
     The Chalkboard Library - Abstract Algebra Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
+    /**
+     * The abstract algebra namespace.
+     * @namespace
+     */
     export namespace abal {
+        /** @ignore */
+        const $ = JSON.stringify;
+
         /**
          * The set of all even permutations of n elements, denoted as An.
          * @param {number} n - The number of elements
@@ -26,7 +33,7 @@ namespace Chalkboard {
             };
             const elements = (Sn.elements || []).filter(isEvenPermutation);
             return {
-                contains: (element: number[]) => elements.some((perm) => JSON.stringify(perm) === JSON.stringify(element)),
+                contains: (element: number[]) => elements.some((perm) => $(perm) === $(element)),
                 elements: elements,
                 id: `A${n}`
             };
@@ -51,15 +58,36 @@ namespace Chalkboard {
         };
 
         /**
-         * The set of all complex numbers, denoted as C.
+         * The set of all complex numbers, denoted as C, or the set of nth roots of unity when n is provided.
+         * @param {number} [n] - The degree of the roots of unity (optional, returns the set of all complex numbers if omitted)
          * @returns {ChalkboardSet<ChalkboardComplex>}
          */
-        export const C = (): ChalkboardSet<ChalkboardComplex> => ({
-            contains: (element: ChalkboardComplex) => {
-                return typeof element.a === "number" && typeof element.b === "number";
-            },
-            id: "C"
-        });
+        export const C = (n?: number): ChalkboardSet<ChalkboardComplex> => {
+            if (n === undefined) {
+                return {
+                    contains: (element: ChalkboardComplex) => {
+                        return typeof element.a === "number" && typeof element.b === "number";
+                    },
+                    id: "C"
+                };
+            } else {
+                if (!Number.isInteger(n) || n <= 0) {
+                    throw new Error('The parameter "n" must be a positive integer.');
+                }
+                const elements: ChalkboardComplex[] = [];
+                for (let k = 0; k < n; k++) {
+                    const t = (2 * Math.PI * k) / n;
+                    elements.push(Chalkboard.comp.init(Chalkboard.numb.roundTo(Math.cos(t), 0.0001), Chalkboard.numb.roundTo(Math.sin(t), 0.0001)));
+                }
+                return {
+                    contains: (element: ChalkboardComplex) => elements.some((e) => {
+                        return e.a === element.a && e.b === element.b;
+                    }),
+                    elements: elements,
+                    id: `C${n}`
+                };
+            }
+        };
 
         /**
          * Calculates the cardinality of a set or algebraic structure.
@@ -273,9 +301,9 @@ namespace Chalkboard {
                     if (typeof a === "number" && typeof b === "number") {
                         return a - b;
                     }
-                    return JSON.stringify(a).localeCompare(JSON.stringify(b));
+                    return $(a).localeCompare($(b));
                 });
-                const key = JSON.stringify(sortedElements);
+                const key = $(sortedElements);
                 if (!cosets.has(key)) {
                     const coset = Chalkboard.abal.set(cosetElements);
                     cosets.set(key, coset);
@@ -530,7 +558,7 @@ namespace Chalkboard {
                 }
                 throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
             };
-            const configured = !degree || !basis || !isFinite || !isSimple || !isAlgebraic ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
+            const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
         };
 
@@ -573,31 +601,9 @@ namespace Chalkboard {
                 }
             };
             const _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? (Chalkboard.abal[set] as () => ChalkboardSet<any>)() : set;
-            let _operation: ((a: T, b: T) => T) | undefined;
-            if (typeof operation === "string" && _set.id) {
-                const opType = operation;
-                const setId = _set.id;
-                if (setId.match(/^[SA]\d+$/)) {
-                    _operation = ((a: T, b: T) => {
-                        const perm1 = a as unknown as number[];
-                        const perm2 = b as unknown as number[];
-                        return perm1.map((_, i) => perm1[perm2[i]]) as unknown as T;
-                    });
-                } else if (setId.startsWith("Z") && setId.length > 1) {
-                    const n = parseInt(setId.slice(1), 10);
-                    if (opType === "addition") {
-                        _operation = ((a: T, b: T) => 
-                            ((a as unknown as number) + (b as unknown as number)) % n as T);
-                    } else if (opType === "multiplication") {
-                        throw new Error(`Preset operation "multiplcation" is not defined for set "${_set.id}".`);
-                    }
-                } else if (setId.startsWith("GL")) {
-                    _operation = Chalkboard.matr.mul as unknown as (a: T, b: T) => T;
-                } else {
-                    _operation = presets[opType][setId];
-                }
-            } else {
-                _operation = operation;
+            const _operation = typeof operation === "string" && _set.id ? presets[operation][_set.id] : operation;
+            if (!_operation) {
+                throw new Error(`Preset operation "${operation}" is not defined for set "${_set.id}".`);
             }
             if (!_operation) {
                 throw new Error(`Preset operation "${operation}" is not defined for set "${_set.id}".`);
@@ -618,12 +624,14 @@ namespace Chalkboard {
                     };
                 } else if (_set.id.startsWith("Z") && _set.id.length > 1) {
                     const n = parseInt(_set.id.slice(1), 10);
-                    if (isNaN(n) || n <= 0) {
-                        throw new Error(`Invalid modulus in set "${_set.id}".`);
-                    }
                     return {
                         identity: 0 as T,
                         inverter: (a: T) => ((n - (a as unknown as number) % n) % n) as T
+                    };
+                } else if (_set.id.startsWith("C") && _set.id.length > 1) {
+                    return {
+                        identity: Chalkboard.comp.init(1, 0) as T,
+                        inverter: (a: T) => Chalkboard.comp.conjugate(a as unknown as ChalkboardComplex) as T
                     };
                 } else if (_set.id.startsWith("M(")) {
                     const rows = (_set as any).rows;
@@ -703,7 +711,7 @@ namespace Chalkboard {
                 throw new Error('The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.');
             }
             const mapped = _subset.elements.map(mapping);
-            const result = Array.from(new Set(mapped.map((e) => JSON.stringify(e)))).map((e) => JSON.parse(e));
+            const result = Array.from(new Set(mapped.map((e) => $(e)))).map((e) => JSON.parse(e));
             return Chalkboard.abal.set(result);
         };
 
@@ -735,11 +743,11 @@ namespace Chalkboard {
             return Chalkboard.abal.homomorphism(morph.struc2, morph.struc1, (y: U) => {
                 const domain = morph.struc1.set.elements || [];
                 for (const x of domain) {
-                    if (morph.mapping(x) === y) {
+                    if ($(morph.mapping(x)) === $(y)) {
                         return x;
                     }
                 }
-                throw new Error(`The inverse morphism failed to be defined because no element in the domain maps to the element "${JSON.stringify(y)}" in the codomain.`);
+                throw new Error(`The inverse morphism failed to be defined because no element in the domain maps to the element "${$(y)}" in the codomain.`);
             });
         };
 
@@ -849,7 +857,7 @@ namespace Chalkboard {
                         return false;
                     }
                 }
-             }
+            }
             return true;
         }
 
@@ -861,6 +869,9 @@ namespace Chalkboard {
          */
         export const isCommutative = <T>(struc: ChalkboardStructure<T>): boolean => {
             const { set } = struc;
+            if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
+                return true;
+            }
             if (!set.elements) {
                 return false;
             }
@@ -868,7 +879,7 @@ namespace Chalkboard {
                 const { operation } = struc;
                 for (const a of set.elements) {
                     for (const b of set.elements) {
-                        if (operation(a, b) !== operation(b, a)) {
+                        if ($(operation(a, b)) !== $(operation(b, a))) {
                             return false;
                         }
                     }
@@ -879,7 +890,7 @@ namespace Chalkboard {
                 const { add, mul } = struc;
                 for (const a of set.elements) {
                     for (const b of set.elements) {
-                        if (add(a, b) !== add(b, a)) {
+                        if ($(add(a, b)) !== $(add(b, a))) {
                             return false;
                         }
                     }
@@ -887,7 +898,7 @@ namespace Chalkboard {
                 if ("mulIdentity" in struc) {
                     for (const a of set.elements) {
                         for (const b of set.elements) {
-                            if (mul(a, b) !== mul(b, a)) {
+                            if ($(mul(a, b)) !== $(mul(b, a))) {
                                 return false;
                             }
                         }
@@ -1094,14 +1105,14 @@ namespace Chalkboard {
             for (const a of set.elements || []) {
                 for (const b of set.elements || []) {
                     for (const c of set.elements || []) {
-                        if (mul(mul(a, b), c) !== mul(a, mul(b, c))) {
+                        if ($(mul(mul(a, b), c)) !== $(mul(a, mul(b, c)))) {
                             return false;
                         }
                     }
                 }
             }
             for (const a of set.elements || []) {
-                if (a !== addIdentity && (!set.contains(mulInverter(a)) || mul(a, mulInverter(a)) !== mulIdentity)) {
+                if (a !== addIdentity && (!set.contains(mulInverter(a)) || $(mul(a, mulInverter(a))) !== $(mulIdentity))) {
                     return false;
                 }
             }
@@ -1111,7 +1122,7 @@ namespace Chalkboard {
             for (const a of field.set.elements || []) {
                 for (const b of field.set.elements || []) {
                     for (const c of field.set.elements || []) {
-                        if (field.mul!(a, field.add!(b, c)) !== field.add!(field.mul!(a, b), field.mul!(a, c))) {
+                        if ($(field.mul!(a, field.add!(b, c))) !== $(field.add!(field.mul!(a, b), field.mul!(a, c)))) {
                             return false;
                         }
                     }
@@ -1141,19 +1152,19 @@ namespace Chalkboard {
                 return false;
             }
             for (const a of set.elements) {
-                if (operation(a, identity) !== a || operation(identity, a) !== a) {
+                if ($(operation(a, identity)) !== $(a) || $(operation(identity, a)) !== $(a)) {
                     return false;
                 }
             }
             for (const a of set.elements) {
-                if (!set.contains(inverter(a)) || operation(a, inverter!(a)) !== identity) {
+                if (!set.contains(inverter(a)) || $(operation(a, inverter!(a))) !== $(identity)) {
                     return false;
                 }
             }
             for (const a of set.elements) {
                 for (const b of set.elements) {
                     for (const c of set.elements) {
-                        if (operation(operation(a, b), c) !== operation(a, operation(b, c))) {
+                        if ($(operation(operation(a, b), c)) !== $(operation(a, operation(b, c)))) {
                             return false;
                         }
                     }
@@ -1175,7 +1186,7 @@ namespace Chalkboard {
                 const { operation: op2 } = struc2;
                 for (const a of struc1.set.elements || []) {
                     for (const b of struc1.set.elements || []) {
-                        if (op2(mapping(a), mapping(b)) !== mapping(op1(a, b))) {
+                        if ($(op2(mapping(a), mapping(b))) !== $(mapping(op1(a, b)))) {
                             return false;
                         }
                     }
@@ -1187,10 +1198,10 @@ namespace Chalkboard {
                 const { add: add2, mul: mul2 } = struc2;
                 for (const a of struc1.set.elements || []) {
                     for (const b of struc1.set.elements || []) {
-                        if (add2(mapping(a), mapping(b)) !== mapping(add1(a, b))) {
+                        if ($(add2(mapping(a), mapping(b))) !== $(mapping(add1(a, b)))) {
                             return false;
                         }
-                        if (mul2(mapping(a), mapping(b)) !== mapping(mul1(a, b))) {
+                        if ($(mul2(mapping(a), mapping(b))) !== $(mapping(mul1(a, b)))) {
                             return false;
                         }
                     }
@@ -1209,7 +1220,7 @@ namespace Chalkboard {
          */
         export const isIdeal = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, addInverter } = ring;
-            if (!add || !mul || !addIdentity || !addInverter) {
+            if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
                 return false;
             }
             if (!Chalkboard.abal.isClosed(subset, add)) {
@@ -1271,7 +1282,7 @@ namespace Chalkboard {
             const { struc1, mapping } = morph;
             const domain = struc1.set.elements || [];
             const mapped = domain.map(mapping);
-            return new Set(mapped.map((e) => JSON.stringify(e))).size === domain.length;
+            return new Set(mapped.map((e) => $(e))).size === domain.length;
         };
 
         /**
@@ -1340,7 +1351,7 @@ namespace Chalkboard {
          * @template T, U
          * @param {ChalkboardStructure<T>} struc1 - The first algebraic structure which is the domain of the morphism
          * @param {ChalkboardStructure<U>} struc2 - The second algebraic structure which is the codomain of the morphism
-         * @param {(element: T) => U} map - The bijective function that takes an element from the first structure and maps it to the second structure
+         * @param {(element: T) => U} mapping - The bijective function that takes an element from the first structure and maps it to the second structure
          * @returns {ChalkboardMorphism<T, U>}
          */
         export const isomorphism = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
@@ -1395,7 +1406,7 @@ namespace Chalkboard {
             for (const a of set.elements || []) {
                 for (const b of set.elements || []) {
                     for (const c of set.elements || []) {
-                        if (mul(mul(a, b), c) !== mul(a, mul(b, c))) {
+                        if ($(mul(mul(a, b), c)) !== $(mul(a, mul(b, c)))) {
                             return false;
                         }
                     }
@@ -1428,7 +1439,7 @@ namespace Chalkboard {
                 }
             }
             for (const a of subset.elements || []) {
-                if (a !== addIdentity && !subset.contains(mulInverter(a))) {
+                if ($(a) !== $(addIdentity) && !subset.contains(mulInverter(a))) {
                     return false;
                 }
             }
@@ -1526,7 +1537,7 @@ namespace Chalkboard {
             const domain = struc1.set.elements || [];
             const codomain = struc2.set.elements || [];
             const mapped = domain.map(mapping);
-            return codomain.every((e) => mapped.some((m) => JSON.stringify(m) === JSON.stringify(e)));
+            return codomain.every((e) => mapped.some((m) => $(m) === $(e)));
         };
 
         /**
@@ -1550,7 +1561,7 @@ namespace Chalkboard {
             } else {
                 throw new Error('The codomain of the "morph" must have an identity element to calculate the kernel.');
             }
-            const result = _subset.filter((element) => mapping(element) === identity);
+            const result = _subset.filter((element) => $(mapping(element)) === $(identity));
             return Chalkboard.abal.set(result);
         };
 
@@ -1603,7 +1614,7 @@ namespace Chalkboard {
             }
             let result = 1;
             let current = element;
-            while (current !== group.identity) {
+            while ($(current) !== $(group.identity)) {
                 current = group.operation(current, element);
                 result++;
                 if (result > (group.set.elements?.length || Infinity)) {
@@ -1796,9 +1807,7 @@ namespace Chalkboard {
             const _add = typeof add === "string" ? presets[add]["addition"] || presets[add][_set.id ?? ""] : add;
             const _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][_set.id ?? ""] : mul;
             if (!_add || !_mul) {
-                throw new Error(
-                    `Preset operations "${add}" or "${mul}" are not defined for set "${_set.id}".`
-                );
+                throw new Error(`Preset operations "${add}" or "${mul}" are not defined for set "${_set.id}".`);
             }
             const autoconfig = (): { addIdentity: T; mulIdentity: T; addInverter: (a: T) => T } => {
                 if (!_set.id) {
@@ -1895,7 +1904,7 @@ namespace Chalkboard {
                 }
                 throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
             };
-            const configured = !degree || !basis || !isFinite || !isSimple || !isAlgebraic ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
+            const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
         };
 
@@ -1922,7 +1931,7 @@ namespace Chalkboard {
             };
             const elements = generatePermutations(Array.from({ length: n }, (_, i) => i));
             return {
-                contains: (element: number[]) => elements.some((perm) => JSON.stringify(perm) === JSON.stringify(element)),
+                contains: (element: number[]) => elements.some((perm) => $(perm) === $(element)),
                 elements: elements,
                 id: `S${n}`
             };
@@ -1936,7 +1945,7 @@ namespace Chalkboard {
         export const set = <T>(set: T[]): ChalkboardSet<T> => {
             const elements = Chalkboard.stat.unique(set);
             return {
-                contains: (element: T) => elements.some((x) => JSON.stringify(x) === JSON.stringify(element)),
+                contains: (element: T) => elements.some((x) => $(x) === $(element)),
                 elements: elements
             };
         };

@@ -1,30 +1,30 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.1.0 Seki Example Program: Hyperbolic Functions
+    Version 2.2.0 Galois Example Program: Hyperbolic Functions
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
 // Get the JavaScript Canvas API
-var ctx = document.getElementById("canvas").getContext("2d");
+const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var cb = Chalkboard; // Initialize Chalkboard as cb
+const cb = Chalkboard; // Initialize Chalkboard as cb
 
-var theta = 0;
+let theta = 0;
 function main() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     cb.plot.xyplane({lineWidth: 2});
 
-    // Plot the unit hyperbola with a parametric function (see: https://en.wikipedia.org/wiki/Hyperbola)
-    var f = cb.real.define(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "curv");
+    // Plot the unit hyperbola with a parametric function
+    const f = cb.real.define(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "curv");
     cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", domain: [0, 10], lineWidth: 4});
     cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", domain: [-10, 0], lineWidth: 4});
 
     // The two main hyperbolic trigonometric functions, hyperbolic sine (sinh) and hyperbolic cosine (cosh)
-    var x = cb.trig.cosh(theta);
-    var y = cb.trig.sinh(theta);
+    let x = cb.trig.cosh(theta);
+    let y = cb.trig.sinh(theta);
 
     // Show the values of all of the hyperbolic trigonometric functions as theta varies
     ctx.strokeStyle = "rgb(255, 100, 100)";
@@ -87,4 +87,4 @@ function main() {
     }
     window.requestAnimationFrame(main);
 }
-window.requestAnimationFrame(main);
+main();

@@ -7,11 +7,42 @@ type ChalkboardFunction = {
     type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp";
 };
 type ChalkboardMatrix = number[][];
+type ChalkboardMorphism<T, U> = {
+    struc1: ChalkboardStructure<T>;
+    struc2: ChalkboardStructure<U>;
+    mapping: (a: T) => U;
+};
 type ChalkboardQuaternion = {
     a: number;
     b: number;
     c: number;
     d: number;
+};
+type ChalkboardSet<T> = {
+    contains: (element: T) => boolean;
+    elements?: T[];
+    id?: string;
+};
+type ChalkboardStructure<T> = {
+    set: ChalkboardSet<T>;
+    operation?: (a: T, b: T) => T;
+    identity?: T;
+    inverter?: (a: T) => T;
+    add?: (a: T, b: T) => T;
+    mul?: (a: T, b: T) => T;
+    addIdentity?: T;
+    mulIdentity?: T;
+    addInverter?: (a: T) => T;
+    mulInverter?: (a: T) => T;
+};
+type ChalkboardStructureExtension<T, U extends T> = {
+    base: ChalkboardStructure<T>;
+    extension: ChalkboardStructure<U>;
+    degree: number;
+    basis: ChalkboardVector[];
+    isFinite: boolean;
+    isSimple: boolean;
+    isAlgebraic: boolean;
 };
 type ChalkboardTensor = number | ChalkboardTensor[];
 type ChalkboardVector = {
@@ -27,15 +58,97 @@ type ChalkboardVectorField = {
     s?: string;
 };
 declare namespace Chalkboard {
-    const APPLY: (object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector, callback: Function) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector;
+    const APPLY: <T>(object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>, callback: (x: any) => any) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>;
     let CONTEXT: string;
     const E: (exponent?: number) => number;
     const LOGO: (x?: number, y?: number, size?: number, context?: CanvasRenderingContext2D) => void;
     let PARSEPREFIX: string;
     const PI: (coefficient?: number) => number;
     const README: () => void;
-    const VERSION: "2.1.0";
-    const VERSIONALIAS: "Seki";
+    const VERSION: "2.2.0";
+    const VERSIONALIAS: "Galois";
+}
+declare namespace Chalkboard {
+    namespace abal {
+        const A: (n: number) => ChalkboardSet<number[]>;
+        const automorphism: <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T) => ChalkboardMorphism<T, T>;
+        const C: (n?: number) => ChalkboardSet<ChalkboardComplex>;
+        const cardinality: <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>) => number;
+        const Cartesian: <T, U>(set1: ChalkboardSet<T>, set2: ChalkboardSet<U>) => ChalkboardSet<[T, U]>;
+        const Cayley: (struc: ChalkboardStructure<number>, type?: "add" | "mul") => ChalkboardMatrix;
+        const center: <T>(group: ChalkboardStructure<T>) => ChalkboardSet<T>;
+        const complement: <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const compose: <T, U, V>(morph1: ChalkboardMorphism<T, U>, morph2: ChalkboardMorphism<U, V>) => ChalkboardMorphism<T, V>;
+        const copy: <T, U extends T>(struc: ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardStructureExtension<T, U> | ChalkboardMorphism<T, U>) => ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardStructureExtension<T, U> | ChalkboardMorphism<T, U>;
+        const coset: <T>(struc: ChalkboardStructure<T>, substruc: ChalkboardStructure<T>) => ChalkboardSet<ChalkboardSet<T>>;
+        const cyclicSubgroup: <T>(group: ChalkboardStructure<T>, element: T) => ChalkboardSet<T>;
+        const D: (n: number) => ChalkboardSet<string>;
+        const difference: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const direct: <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, type?: "product" | "sum") => ChalkboardStructure<[T, U]>;
+        const endomorphism: <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T) => ChalkboardMorphism<T, T>;
+        const field: <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T) => ChalkboardStructure<T>;
+        const fieldExtension: <T, U extends T>(base: ChalkboardStructure<T>, extension: ChalkboardStructure<U>, degree: number, basis: ChalkboardVector[], isFinite: boolean, isSimple: boolean, isAlgebraic: boolean) => ChalkboardStructureExtension<T, U>;
+        const GL: (n: number) => ChalkboardSet<ChalkboardMatrix>;
+        const group: <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T) => ChalkboardStructure<T>;
+        const homomorphism: <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U) => ChalkboardMorphism<T, U>;
+        const idmorphism: <T>(struc: ChalkboardStructure<T>) => ChalkboardMorphism<T, T>;
+        const image: <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<T>) => ChalkboardSet<U>;
+        const intersection: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const invmorphism: <T, U>(morph: ChalkboardMorphism<T, U>) => ChalkboardMorphism<U, T>;
+        const isAutomorphism: <T>(morph: ChalkboardMorphism<T, T>) => boolean;
+        const isBijective: <T, U>(morph: ChalkboardMorphism<T, U>) => boolean;
+        const isClosed: <T>(set: ChalkboardSet<T> | string, operation: ((a: T, b: T) => T) | "addition" | "multiplication") => boolean;
+        const isCommutative: <T>(struc: ChalkboardStructure<T>) => boolean;
+        const isCyclicSubgroup: <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>) => boolean;
+        const isEmpty: <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>) => boolean;
+        const isEndomorphism: <T>(morph: ChalkboardMorphism<T, T>) => boolean;
+        const isEqual: <T, U>(struc1: ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>, struc2: ChalkboardSet<T> | ChalkboardStructure<T> | ChalkboardMorphism<T, U>) => boolean;
+        const isExact: <T, U, V>(morph1: ChalkboardMorphism<T, U>, morph2: ChalkboardMorphism<U, V>) => boolean;
+        const isField: <T>(field: ChalkboardStructure<T>) => boolean;
+        const isGroup: <T>(group: ChalkboardStructure<T>) => boolean;
+        const isHomomorphism: <T, U>(morph: ChalkboardMorphism<T, U>) => boolean;
+        const isIdeal: <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>) => boolean;
+        const isIdentity: <T>(struc: ChalkboardStructure<T>, element: T, type?: "add" | "mul") => boolean;
+        const isInjective: <T, U>(morph: ChalkboardMorphism<T, U>) => boolean;
+        const isInverse: <T>(struc: ChalkboardStructure<T>, element1: T, element2: T, type?: "add" | "mul") => boolean;
+        const isIsomorphism: <T, U>(morph: ChalkboardMorphism<T, U>) => boolean;
+        const isNormalSubgroup: <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>) => boolean;
+        const isomorphism: <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U) => ChalkboardMorphism<T, U>;
+        const isPrincipalIdeal: <T>(ring: ChalkboardStructure<T>, ideal: ChalkboardSet<T>) => boolean;
+        const isRing: <T>(ring: ChalkboardStructure<T>) => boolean;
+        const isSubfield: <T>(field: ChalkboardStructure<T>, subset: ChalkboardSet<T>) => boolean;
+        const isSubgroup: <T>(group: ChalkboardStructure<T>, subset: ChalkboardSet<T>) => boolean;
+        const isSubring: <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>) => boolean;
+        const isSubset: <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>) => boolean;
+        const isSuperset: <T>(set: ChalkboardSet<T>, subset: ChalkboardSet<T>) => boolean;
+        const isSurjective: <T, U>(morph: ChalkboardMorphism<T, U>) => boolean;
+        const kernel: <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const Lagrange: <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>) => boolean;
+        const M: (rows: number, cols?: number) => ChalkboardSet<ChalkboardMatrix>;
+        const N: () => ChalkboardSet<number>;
+        const order: <T>(group: ChalkboardStructure<T>, element: T) => number;
+        const P: () => ChalkboardSet<number>;
+        const powerSet: <T>(set: ChalkboardSet<T>) => ChalkboardSet<ChalkboardSet<T>>;
+        const preimage: <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<U>) => ChalkboardSet<T>;
+        const principalIdeal: <T>(ring: ChalkboardStructure<T>, element: T) => ChalkboardSet<T>;
+        const print: (struc: ChalkboardSet<number> | ChalkboardStructure<number>) => void;
+        const Q: () => ChalkboardSet<number>;
+        const quotient: <T>(struc: ChalkboardStructure<T>, substruc: ChalkboardStructure<T>) => ChalkboardStructure<ChalkboardSet<T>>;
+        const R: () => ChalkboardSet<number>;
+        const ring: <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T) => ChalkboardStructure<T>;
+        const ringExtension: <T, U extends T>(base: ChalkboardStructure<T>, extension: ChalkboardStructure<U>, degree: number, basis: ChalkboardVector[], isFinite: boolean, isSimple: boolean, isAlgebraic: boolean) => ChalkboardStructureExtension<T, U>;
+        const S: (n: number) => ChalkboardSet<number[]>;
+        const set: <T>(set: T[]) => ChalkboardSet<T>;
+        const symmetricDifference: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const toArray: <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>) => T[];
+        const toMatrix: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, rows: number, cols?: number) => ChalkboardMatrix;
+        const toObject: (struc: ChalkboardSet<number> | ChalkboardStructure<number>) => object;
+        const toString: (struc: ChalkboardSet<number> | ChalkboardStructure<number>) => string;
+        const toTensor: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...size: number[]) => ChalkboardTensor;
+        const toVector: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, dimension: 2 | 3 | 4, index?: number) => ChalkboardVector;
+        const union: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
+        const Z: (n?: number) => ChalkboardSet<number>;
+    }
 }
 declare namespace Chalkboard {
     namespace calc {
@@ -234,6 +347,7 @@ declare namespace Chalkboard {
         const symmetricBinomial: (size: number) => ChalkboardMatrix;
         const toArray: (matr: ChalkboardMatrix) => number[];
         const toObject: (matr: ChalkboardMatrix) => object;
+        const toSet: (matr: ChalkboardMatrix) => ChalkboardSet<number>;
         const toString: (matr: ChalkboardMatrix) => string;
         const toTensor: (matr: ChalkboardMatrix, ...size: number[]) => ChalkboardTensor;
         const toVector: (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index?: number, axis?: 0 | 1) => ChalkboardVector;
@@ -266,6 +380,7 @@ declare namespace Chalkboard {
         const Goldbach: (num: number) => [number, number] | undefined;
         const isApproxEqual: (a: number, b: number, precision?: number) => boolean;
         const isPrime: (num: number) => boolean;
+        const isRational: (num: number, tolerance?: number) => boolean;
         const Kronecker: (a: number, b: number) => 1 | 0;
         const lcm: (a: number, b: number) => number;
         const map: (num: number, range1: number[], range2: number[]) => number;
@@ -282,6 +397,7 @@ declare namespace Chalkboard {
         const roundTo: (num: number, positionalIndex: number) => number;
         const sgn: (num: number) => -1 | 0 | 1;
         const sum: (formula: string, inf: number, sup: number) => number;
+        const toFraction: (num: number, tolerance?: number) => [number, number];
     }
 }
 declare namespace Chalkboard {
@@ -525,46 +641,74 @@ declare namespace Chalkboard {
 }
 declare namespace Chalkboard {
     namespace stat {
+        const absolute: (arr: number[]) => number[];
+        const add: (arr1: number[], arr2: number[]) => number[];
         const array: (inf: number, sup: number, length?: number) => number[];
         const autocorrelation: (arr: number[]) => number[];
+        const Bayes: (pA: number, pGivenA: number, pGivenNotA: number) => number;
         const change: (arr1: number[], arr2: number[]) => number[];
         const chiSquared: (arr1: number[], arr2: number[]) => number[];
-        const confidenceInterval: (arr: number[]) => [number, number];
+        const confidenceInterval: (arr: number[], confidence?: number) => [number, number];
         const constrain: (arr: number[], range?: [number, number]) => number[];
         const convolution: (arr1: number[], arr2: number[]) => number[];
         const correlation: (arr1: number[], arr2: number[]) => number[];
+        const correlationCoefficient: (arr1: number[], arr2: number[]) => number;
+        const covariance: (arr1: number[], arr2: number[]) => number;
+        const cummax: (arr: number[]) => number[];
+        const cummin: (arr: number[]) => number[];
+        const cummul: (arr: number[]) => number[];
+        const cumsum: (arr: number[]) => number[];
         const deviation: (arr: number[]) => number;
+        const dot: (arr1: number[], arr2: number[]) => number;
         const error: (arr: number[]) => number;
         const eq: (arr: number[], arrORnum: number | number[]) => number[];
+        const expected: (arr: number[], probabilities?: number[]) => number;
         const Gaussian: (height: number, mean: number, deviation: number) => ChalkboardFunction;
         const gt: (arr: number[], arrORnum: number | number[], includeEnd?: boolean) => number[];
         const ineq: (arr: number[], inf: number, sup: number, includeInf?: boolean, includeSup?: boolean) => number[];
+        const inormal: (p: number) => number;
+        const interpolate: (arr: (number | null | undefined)[], type?: "linear" | "quadratic") => number[];
+        const interquartileRange: (arr: number[]) => number;
         const kurtosis: (arr: number[]) => number;
         const lt: (arr: number[], arrORnum: number | number[], includeEnd?: boolean) => number[];
         const mad: (arr: number[]) => number;
         const max: (arr: number[]) => number;
         const mean: (arr: number[], type?: "arithmetic" | "geometric" | "harmonic") => number;
+        const meanMoving: (arr: number[], windowSize: number) => number[];
+        const meanWeighted: (arr: number[], weights: number[]) => number;
         const median: (arr: number[]) => number;
         const min: (arr: number[]) => number;
         const mode: (arr: number[]) => number;
+        const mul: (arr: number[]) => number;
+        const negate: (arr: number[]) => number[];
         const norm: (arr: number[], type?: "L0" | "L1" | "L2" | "LInfinity") => number;
+        const normal: (x: number) => number;
         const normalize: (arr: number[], type?: "L0" | "L1" | "L2" | "LInfinity") => number[];
         const normsq: (arr: number[], type?: "L0" | "L1" | "L2" | "LInfinity") => number;
+        const pad: (arr: number[], length: number, num?: number) => number[];
         const percentile: (arr: number[], num: number) => number;
         const print: (arr: number[]) => void;
         const quartile: (arr: number[], type: "Q1" | "Q2" | "Q3") => number;
         const random: (inf: number, sup: number, length: number) => number[];
         const range: (arr: number[]) => number;
         const regression: (data: number[][], type?: "linear" | "polynomial" | "power" | "exponential" | "logarithmic", degree?: number) => ChalkboardFunction;
+        const resampling: (arr: number[], samples?: number, type?: "bootstrap" | "jackknife") => number[][];
+        const reverse: (arr: number[]) => number[];
+        const scl: (arr: number[], num: number) => number[];
         const shuffle: (arr: number[]) => number[];
         const skewness: (arr: number[]) => number;
+        const sub: (arr1: number[], arr2: number[]) => number[];
         const subsets: (arr: number[]) => number[][];
-        const toMatrix: (arr: number[], rows: number, cols: number) => ChalkboardMatrix;
+        const sum: (arr: number[]) => number;
+        const toMatrix: (arr: number[], rows: number, cols?: number) => ChalkboardMatrix;
         const toObject: (arr: number[]) => object;
+        const toSet: (arr: number[]) => ChalkboardSet<number>;
         const toString: (arr: number[]) => string;
         const toTensor: (arr: number[], ...size: number[]) => ChalkboardTensor;
         const toVector: (arr: number[], dimension: 2 | 3 | 4, index?: number) => ChalkboardVector;
+        const unique: <T>(arr: T[]) => T[];
         const variance: (arr: number[]) => number;
+        const zscored: (arr: number[]) => number[];
     }
 }
 declare namespace Chalkboard {
@@ -600,6 +744,7 @@ declare namespace Chalkboard {
         const toArray: (tens: ChalkboardTensor) => number[];
         const toMatrix: (tens: ChalkboardTensor) => ChalkboardMatrix;
         const toObject: (tens: ChalkboardTensor) => object | number;
+        const toSet: (tens: ChalkboardTensor) => ChalkboardSet<number>;
         const toString: (tens: ChalkboardTensor, indentation?: number) => string;
         const toVector: (tens: ChalkboardTensor, dimension: number, index?: number) => ChalkboardVector;
         const transpose: (tens: ChalkboardTensor) => ChalkboardTensor;

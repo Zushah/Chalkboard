@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library
-    Version 2.1.0 Seki released 01/22/2024
+    Version 2.2.0 Galois released 04/07/2025
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
@@ -55,7 +55,7 @@ type ChalkboardQuaternion = { a: number; b: number; c: number; d: number };
  * The type for sets.
  * @property {Function} contains - Function to check if an element belongs to the set
  * @property {T[]} [elements] - Optional array for the elements of a finite set
- * @property {string} [id] - Unique identifier for known sets (e.g., "Z", "Q", "R")
+ * @property {string} [id] - Unique identifier for known sets (e.g., "Z", "Q", "R", "C")
  */
 type ChalkboardSet<T> = {
     contains: (element: T) => boolean;
@@ -136,7 +136,7 @@ type ChalkboardVector = { x: number; y: number; z?: number; w?: number };
 type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
 
 /**
- * The Chalkboard namespace.
+ * The Chalkboard library namespace.
  * @namespace
  */
 namespace Chalkboard {
@@ -332,7 +332,7 @@ namespace Chalkboard {
      * Chalkboard.README();
      * // Returns in the console:
      * //   The Chalkboard Library
-     * //   Version 2.1.0 Seki released 01/22/2024
+     * //   Version 2.2.0 Galois released 04/07/2025
      * //   Authored by Zushah ===> https://www.github.com/Zushah
      * //   Available under the MIT License ===> https://www.opensource.org/license/mit/
      * //
@@ -347,27 +347,27 @@ namespace Chalkboard {
                 Chalkboard.VERSION +
                 " " +
                 Chalkboard.VERSIONALIAS +
-                " released 01/22/2024\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
+                " released 04/07/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
         );
     };
 
     /**
      * The version of Chalkboard.
-     * @type {string}
+     * @type {"2.2.0"}
      * @example
-     * // Returns "2.1.0"
+     * // Returns "2.2.0"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "2.1.0" = "2.1.0";
+    export const VERSION: "2.2.0" = "2.2.0";
 
     /**
      * The alias of the version of Chalkboard.
-     * @type {string}
+     * @type {"Galois"}
      * @example
-     * // Returns "Seki"
+     * // Returns "Galois"
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "Seki" = "Seki";
+    export const VERSIONALIAS: "Galois" = "Galois";
 }
 
 if (typeof window === "undefined") {

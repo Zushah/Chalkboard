@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Trigonometry Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {

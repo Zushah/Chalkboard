@@ -1,11 +1,11 @@
 /*
     The Chalkboard Library - Complex Numbers Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     /**
-     * The complex number namespace.
+     * The complex numbers namespace.
      * @namespace
      */
     export namespace comp {
@@ -120,13 +120,13 @@ namespace Chalkboard {
         export const div = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
             if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init((comp1.a * comp2.a - comp1.b * comp2.b) / Chalkboard.comp.magsq(comp2), (comp1.a * comp2.b + comp1.b * comp2.a) / Chalkboard.comp.magsq(comp2));
+            return Chalkboard.comp.init((comp1.a * comp2.a - comp1.b * comp2.b) / Chalkboard.comp.magsq(comp2), (comp1.b * comp2.a - comp1.a * comp2.b) / Chalkboard.comp.magsq(comp2));
         };
 
         /**
          * Calculates Euler's formula (the complex exponential) for the inputted radian.
          * @param {number} rad
-         * @returns
+         * @returns {ChalkboardComplex}
          */
         export const Euler = (rad: number): ChalkboardComplex => {
             return Chalkboard.comp.init(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
@@ -134,7 +134,7 @@ namespace Chalkboard {
 
         /**
          * Returns the imaginary part of a complex number or complex function.
-         * @param funcORcomp
+         * @param {ChalkboardFunction | ChalkboardComplex} funcORcomp
          * @returns {ChalkboardComplex}
          */
         export const Im = (funcORcomp: ChalkboardFunction | ChalkboardComplex): string | number => {
@@ -413,7 +413,15 @@ namespace Chalkboard {
          * @returns {string}
          */
         export const toString = (comp: ChalkboardComplex): string => {
-            if (comp.b >= 0) {
+            if (comp.a === 1 && comp.b === 0) {
+                return "1";
+            } else if (comp.a === 0 && comp.b === 1) {
+                return "i";
+            } else if (comp.a === -1 && comp.b === 0) {
+                return "-1";
+            } else if (comp.a === 0 && comp.b === -1) {
+                return "-i";
+            } else if (comp.b >= 0) {
                 return comp.a.toString() + " + " + comp.b.toString() + "i";
             } else {
                 return comp.a.toString() + " - " + Math.abs(comp.b).toString() + "i";

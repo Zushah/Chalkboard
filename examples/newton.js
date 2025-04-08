@@ -1,23 +1,23 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.1.0 Seki Example Program: Newton's Method
+    Version 2.2.0 Galois Example Program: Newton's Method
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
 // Get the JavaScript Canvas API
-var ctx = document.getElementById("canvas").getContext("2d");
+const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-var cb = Chalkboard; // Initialize Chalkboard as cb
+const cb = Chalkboard; // Initialize Chalkboard as cb
 
-// Random fourth-degree polynomial function
-var c = cb.stat.random(-3, 3, 5);
-var f = cb.real.define(c[0] + " * x * x * x * x + " + c[1] + " * x * x * x + " + c[2] + " * x * x + " + c[3] + " * x + " + c[4]);
+// Random fourth-degree polynomial
+const c = cb.stat.random(-3, 3, 5);
+const f = cb.real.define(c[0] + " * x * x * x * x + " + c[1] + " * x * x * x + " + c[2] + " * x * x + " + c[3] + " * x + " + c[4]);
 
-// Newton's method's solution and tangent line (see: https://en.wikipedia.org/wiki/Newton's_method)
-var root = cb.calc.Newton(f, [-5, 5]);
-var y = cb.real.define(cb.calc.dfdx(f, root) + " * (x - " + root + ") + " + cb.real.val(f, root));
+// Newton's method's solution and tangent line
+const root = cb.calc.Newton(f, [-5, 5]);
+const y = cb.real.define(cb.calc.dfdx(f, root) + " * (x - " + root + ") + " + cb.real.val(f, root));
 
 function main() {
     ctx.fillStyle = "rgb(255, 255, 255)";

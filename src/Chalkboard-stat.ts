@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Statistics Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -207,21 +207,6 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the cumulative sum of an array.
-         * @param {number[]} arr - The array
-         * @returns {number[]}
-         */
-        export const cumsum = (arr: number[]): number[] => {
-            const result = [];
-            let sum = 0;
-            for (let i = 0; i < arr.length; i++) {
-                sum += arr[i];
-                result.push(sum);
-            }
-            return result;
-        };
-
-        /**
          * Calculates the cumulative maximum of an array.
          * @param {number[]} arr - The array
          * @returns {number[]}
@@ -262,6 +247,21 @@ namespace Chalkboard {
             for (let i = 0; i < arr.length; i++) {
                 mul *= arr[i];
                 result.push(mul);
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the cumulative sum of an array.
+         * @param {number[]} arr - The array
+         * @returns {number[]}
+         */
+        export const cumsum = (arr: number[]): number[] => {
+            const result = [];
+            let sum = 0;
+            for (let i = 0; i < arr.length; i++) {
+                sum += arr[i];
+                result.push(sum);
             }
             return result;
         };

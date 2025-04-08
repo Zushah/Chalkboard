@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Matrix Namespace
-    Version 2.1.0 Seki
+    Version 2.2.0 Galois
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -2158,11 +2158,11 @@ namespace Chalkboard {
          */
         export const rotator = (radx: number, rady?: number, radz?: number): ChalkboardMatrix => {
             if (rady === undefined && radz === undefined) {
-                return Chalkboard.matr.init([Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]);
+                return Chalkboard.matr.init([Math.cos(radx), -Math.sin(radx)], [Math.sin(radx), Math.cos(radx)]);
             } else {
-                const matrx = Chalkboard.matr.init([1, 0, 0], [0, Chalkboard.trig.cos(radx), -Chalkboard.trig.sin(radx)], [0, Chalkboard.trig.sin(radx), Chalkboard.trig.cos(radx)]),
-                    matry = Chalkboard.matr.init([Chalkboard.trig.cos(rady!), 0, Chalkboard.trig.sin(rady!)], [0, 1, 0], [-Chalkboard.trig.sin(rady!), 0, Chalkboard.trig.cos(rady!)]),
-                    matrz = Chalkboard.matr.init([Chalkboard.trig.cos(radz!), -Chalkboard.trig.sin(radz!), 0], [Chalkboard.trig.sin(radz!), Chalkboard.trig.cos(radz!), 0], [0, 0, 1]);
+                const matrx = Chalkboard.matr.init([1, 0, 0], [0, Math.cos(radx), -Math.sin(radx)], [0, Math.sin(radx), Math.cos(radx)]),
+                    matry = Chalkboard.matr.init([Math.cos(rady!), 0, Math.sin(rady!)], [0, 1, 0], [-Math.sin(rady!), 0, Math.cos(rady!)]),
+                    matrz = Chalkboard.matr.init([Math.cos(radz!), -Math.sin(radz!), 0], [Math.sin(radz!), Math.cos(radz!), 0], [0, 0, 1]);
                 return Chalkboard.matr.mul(Chalkboard.matr.mul(matrz, matry), matrx);
             }
         };
@@ -2727,22 +2727,17 @@ namespace Chalkboard {
          */
         export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0], [matr[1][0] * 0, matr[1][1] * 0]);
+                return Chalkboard.matr.init([0, 0], [0, 0]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init([matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0], [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0], [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0]);
+                return Chalkboard.matr.init([0, 0, 0], [0, 0, 0], [0, 0, 0]);
             } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init(
-                    [matr[0][0] * 0, matr[0][1] * 0, matr[0][2] * 0, matr[0][3] * 0],
-                    [matr[1][0] * 0, matr[1][1] * 0, matr[1][2] * 0, matr[1][3] * 0],
-                    [matr[2][0] * 0, matr[2][1] * 0, matr[2][2] * 0, matr[2][3] * 0],
-                    [matr[3][0] * 0, matr[3][1] * 0, matr[3][2] * 0, matr[3][3] * 0]
-                );
+                return Chalkboard.matr.init([0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     result[i] = [];
                     for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        result[i][j] = matr[i][j] * 0;
+                        result[i][j] = 0;
                     }
                 }
                 return result;
