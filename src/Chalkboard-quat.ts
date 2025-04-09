@@ -336,7 +336,7 @@ namespace Chalkboard {
          * @returns {ChalkboardQuaternion}
          */
         export const zero = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
-            return Chalkboard.quat.init(quat.a * 0, quat.b * 0, quat.c * 0, quat.d * 0);
+            return Chalkboard.quat.init(0, 0, 0, 0);
         };
     }
 }

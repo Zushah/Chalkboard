@@ -935,12 +935,12 @@ namespace Chalkboard {
 
         /**
          * Returns an array with random elements.
-         * @param {number} inf - The lower bound
-         * @param {number} sup - The upper bound
          * @param {number} length - The length of the array
+         * @param {number} [inf=0] - The lower bound (optional, defaults to 0)
+         * @param {number} [sup=1] - The upper bound (optional, defaults to 1)
          * @returns {number[]}
          */
-        export const random = (inf: number, sup: number, length: number): number[] => {
+        export const random = (length: number, inf: number = 0, sup: number = 1): number[] => {
             const result = [];
             for (let i = 0; i < length; i++) {
                 result.push(Chalkboard.numb.random(inf, sup));
@@ -984,7 +984,7 @@ namespace Chalkboard {
                 for (let i = 0; i < data.length; i++) {
                     A.push([]);
                     for (let j = 0; j <= degree; j++) {
-                        A[i].push(Chalkboard.real.pow(data[i][0], j));
+                        A[i].push(Chalkboard.real.pow(data[i][0], j) as number);
                     }
                 }
                 const AT = Chalkboard.matr.transpose(A);

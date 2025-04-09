@@ -1734,11 +1734,11 @@ namespace Chalkboard {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     let rowResult = 0;
                     for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                        rowResult += Chalkboard.real.pow(matr[i][j], p) as number;
                     }
-                    result += Chalkboard.real.pow(rowResult, q / p);
+                    result += Chalkboard.real.pow(rowResult, q / p) as number;
                 }
-                return Chalkboard.real.pow(result, 1 / q);
+                return Chalkboard.real.pow(result, 1 / q) as number;
             }
         };
 
@@ -1846,9 +1846,9 @@ namespace Chalkboard {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     let rowResult = 0;
                     for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        rowResult += Chalkboard.real.pow(matr[i][j], p);
+                        rowResult += Chalkboard.real.pow(matr[i][j], p) as number;
                     }
-                    result += Chalkboard.real.pow(rowResult, q / p);
+                    result += Chalkboard.real.pow(rowResult, q / p) as number;
                 }
                 return result;
             }

@@ -322,7 +322,7 @@ namespace Chalkboard {
                             config.context.fillStyle = "rgb(255, 255, 255)";
                         } else {
                             config.context.fillStyle =
-                                "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
+                                "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / (Chalkboard.real.pow(10, 20) as number)) + 0.5) * 100 + "%)";
                         }
                         config.context.fillRect(i, j, 5, 5);
                         data.push([u(i, j), v(i, j)]);

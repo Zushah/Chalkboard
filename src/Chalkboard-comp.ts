@@ -248,8 +248,8 @@ namespace Chalkboard {
          */
         export const pow = (comp: ChalkboardComplex, num: number): ChalkboardComplex => {
             return Chalkboard.comp.init(
-                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.cos(num * Chalkboard.comp.arg(comp)),
-                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) * Chalkboard.trig.sin(num * Chalkboard.comp.arg(comp))
+                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) as number * Chalkboard.trig.cos(num * Chalkboard.comp.arg(comp)),
+                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) as number * Chalkboard.trig.sin(num * Chalkboard.comp.arg(comp))
             );
         };
 
@@ -459,7 +459,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex}
          */
         export const zero = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(comp.a * 0, comp.b * 0);
+            return Chalkboard.comp.init(0, 0);
         };
     }
 }

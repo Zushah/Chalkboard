@@ -10,6 +10,70 @@ namespace Chalkboard {
      */
     export namespace real {
         /**
+         * Calculates the absolute value of a function.
+         * @param {ChalkboardFunction} func - The function
+         * @returns {ChalkboardFunction}
+         */
+        export const absolute = (func: ChalkboardFunction): ChalkboardFunction => {
+            if (func.type === "expl") {
+                return Chalkboard.real.define(`Math.abs(${func.definition})`, "expl");
+            } else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `Math.abs(${func.definition[0]})`,
+                        `Math.abs(${func.definition[1]})`
+                    ], "curv");
+                } else if (func.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `Math.abs(${func.definition[0]})`,
+                        `Math.abs(${func.definition[1]})`,
+                        `Math.abs(${func.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl" or "curv".');
+        };
+
+        /**
+         * Calculates the addition of two functions.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @returns {ChalkboardFunction}
+         */
+        export const add = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define(`(${func1.definition}) + (${func2.definition})`, "expl");
+            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2 && func2.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) + (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) + (${func2.definition[1]})`
+                    ], "curv");
+                } else if (func1.definition.length === 3 && func2.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) + (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) + (${func2.definition[1]})`,
+                        `(${func1.definition[2]}) + (${func2.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl" or "curv".');
+        };
+
+        /**
+         * Calculates the composition of two functions.
+         * @param {ChalkboardFunction} func1 - The outer function
+         * @param {ChalkboardFunction} func2 - The inner function
+         * @returns {ChalkboardFunction}
+         */
+        export const compose = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define(`(${func1.definition.toString().replace(/x/g, `(${func2.definition})`)})`, "expl");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl".');
+        };
+
+        /**
          * Defines an explicit, inverse, polar, parametric curve, parametric surface, or multivariable function.
          * @param {string | string[]} definition - The definition, which can use the variable "x" for explicit, "y" for inverse, "O" for polar, "t" for parametric curve, "s" and "t" for parametric surface, and "x" and "y" for multivariable
          * @param {"expl" | "inve" | "pola" | "curv" | "surf" | "mult"} [type="expl"] - The type, which can be "expl" for explicit, "inve" for inverse, "pola" for polar, "curv" for parametric curve, "surf" for parametric surface, or "mult" for multivariable
@@ -64,6 +128,32 @@ namespace Chalkboard {
             } else {
                 throw new TypeError('Parameter "form" must be "stan" or "vert".');
             }
+        };
+
+        /**
+         * Calculates the division of two functions
+         * @param {ChalkboardFunction} func1 - The numerator function
+         * @param {ChalkboardFunction} func2 - The denominator function
+         * @returns {ChalkboardFunction}
+         */
+        export const div = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define(`(${func1.definition}) / (${func2.definition})`, "expl");
+            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) / (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) / (${func2.definition[1]})`
+                    ], "curv");
+                } else if (func1.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) / (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) / (${func2.definition[1]})`,
+                        `(${func1.definition[2]}) / (${func2.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl" or "curv".');
         };
 
         /**
@@ -150,6 +240,41 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the multiplication of two functions.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @returns {ChalkboardFunction}
+         */
+        export const mul = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define(`(${func1.definition}) * (${func2.definition})`, "expl");
+            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) * (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) * (${func2.definition[1]})`
+                    ], "curv");
+                } else if (func1.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) * (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) * (${func2.definition[1]})`,
+                        `(${func1.definition[2]}) * (${func2.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl" or "curv".');
+        };
+
+        /**
+         * Calculates the negation of a function.
+         * @param {ChalkboardFunction} func - The function
+         * @returns {ChalkboardFunction}
+         */
+        export const negate = (func: ChalkboardFunction): ChalkboardFunction => {
+            return Chalkboard.real.scl(func, -1);
+        };
+
+        /**
          * Parses a string of JavaScript code.
          * @param {string} str - The string
          * @returns {Function}
@@ -174,16 +299,74 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the exponentiation of a number to the power of another.
-         * @param {number} base - The numeber
-         * @param {number} num - The other number
-         * @returns {number}
+         * Defines a polynomial function by its coefficients.
+         * @param {...number[]} coeffs - The coefficients of the polynomial, starting with the leading coefficient and ending with the constant term, which can be written either in an array or as separate arguments
+         * @returns {ChalkboardFunction}
          */
-        export const pow = (base: number, num: number): number => {
-            if (base === 0 && num === 0) {
-                return 1;
+        export const polynomial = (...coeffs: number[]): ChalkboardFunction => {
+            let arr: number[];
+            if (coeffs.length === 1 && Array.isArray(coeffs[0])) {
+                arr = coeffs[0];
             } else {
-                return Math.exp(num * Math.log(base));
+                arr = coeffs as number[];
+            }
+            let result = "";
+            for (let i = 0; i < arr.length; i++) {
+                const coeff = arr[i];
+                const exponent = arr.length - i - 1;
+                if (coeff === 0 && exponent !== 0) continue;
+                if (result !== "") {
+                    result += coeff >= 0 ? " + " : " - ";
+                } else if (coeff < 0) {
+                    result += "-";
+                }
+                const abscoeff = Math.abs(coeff);
+                let term = "";
+                if (exponent === 0) {
+                    term = abscoeff.toString();
+                } else if (exponent === 1) {
+                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x";
+                } else {
+                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x ** " + exponent;
+                }
+                result += "(" + term + ")";
+            }
+            if (result === "") result = "0";
+            return Chalkboard.real.define(result, "expl");
+        };
+
+        /**
+         * Calculates the exponentiation of a number or a function to the power of a number.
+         * @param {number | ChalkboardFunction} base - The number or function
+         * @param {number} num - The power
+         * @returns {number | ChalkboardFunction}
+         */
+        export const pow = (base: number | ChalkboardFunction, num: number): number | ChalkboardFunction => {
+            if (typeof base === "number") {
+                if (base === 0 && num === 0) {
+                    return 1;
+                } else {
+                    return Math.exp(num * Math.log(base));
+                }
+            } else {
+                const func = base;
+                if (func.type === "expl") {
+                    return Chalkboard.real.define(`(${func.definition}) ** ${num}`, "expl");
+                } else if (func.type === "curv" && Array.isArray(func.definition)) {
+                    if (func.definition.length === 2) {
+                        return Chalkboard.real.define([
+                            `(${func.definition[0]}) ** ${num}`,
+                            `(${func.definition[1]}) ** ${num}`
+                        ], "curv");
+                    } else if (func.definition.length === 3) {
+                        return Chalkboard.real.define([
+                            `(${func.definition[0]}) ** ${num}`,
+                            `(${func.definition[1]}) ** ${num}`,
+                            `(${func.definition[2]}) ** ${num}`
+                        ], "curv");
+                    }
+                }
+                throw new TypeError('Property "type" of "base" must be either "expl" or "curv".');
             }
         };
 
@@ -260,6 +443,42 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines a polynomial with random coefficients.
+         * @param {number} degree - The degree of the polynomial
+         * @param {number} [inf=0] - The lower bound of the coefficients (optional, defaults to 0)
+         * @param {number} [sup=1] - The upper bound of the coefficients (optional, defaults to 1)
+         * @returns {ChalkboardFunction}
+         */
+        export const randomPolynomial = (degree: number, inf: number = 0, sup: number = 1): ChalkboardFunction => {
+            return Chalkboard.real.polynomial(...Chalkboard.stat.random(degree + 1, inf, sup));
+        };
+
+        /**
+         * Calculates the reciprocation of a function.
+         * @param {ChalkboardFunction} func - The function
+         * @returns {ChalkboardFunction}
+         */
+        export const reciprocate = (func: ChalkboardFunction): ChalkboardFunction => {
+            if (func.type === "expl") {
+                return Chalkboard.real.define(`1 / (${func.definition})`, "expl");
+            } else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `1 / (${func.definition[0]})`,
+                        `1 / (${func.definition[1]})`
+                    ], "curv");
+                } else if (func.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `1 / (${func.definition[0]})`,
+                        `1 / (${func.definition[1]})`,
+                        `1 / (${func.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl" or "curv".');
+        };
+
+        /**
          * Evaluates the rect function at a number.
          * @param {number} num the number
          * @param {number} center - The position of the function
@@ -283,6 +502,38 @@ namespace Chalkboard {
          */
         export const root = (num: number, index: number = 3): number => {
             return Math.exp(Math.log(num) / index);
+        };
+
+        /**
+         * Calculates the scalar multiplication of a function.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} num - The scalar
+         * @returns {ChalkboardFunction}
+         */
+        export const scl = (func: ChalkboardFunction, num: number): ChalkboardFunction => {
+            if (func.type === "expl") {
+                return Chalkboard.real.define(`${num} * (${func.definition})`, "expl");
+            } else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `${num} * (${func.definition[0]})`,
+                        `${num} * (${func.definition[1]})`
+                    ], "curv");
+                } else if (func.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `${num} * (${func.definition[0]})`,
+                        `${num} * (${func.definition[1]})`,
+                        `${num} * (${func.definition[2]})`
+                    ], "curv");
+                }
+            } else if (func.type === "surf" && Array.isArray(func.definition) && func.definition.length === 3) {
+                return Chalkboard.real.define([
+                    `${num} * (${func.definition[0]})`,
+                    `${num} * (${func.definition[1]})`,
+                    `${num} * (${func.definition[2]})`
+                ], "surf");
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl", "curv", or "surf".');
         };
 
         /**
@@ -311,6 +562,32 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the subtraction of two functions.
+         * @param {ChalkboardFunction} func1 - The first function
+         * @param {ChalkboardFunction} func2 - The second function
+         * @returns {ChalkboardFunction}
+         */
+        export const sub = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define(`(${func1.definition}) - (${func2.definition})`, "expl");
+            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2 && func2.definition.length === 2) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) - (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) - (${func2.definition[1]})`
+                    ], "curv");
+                } else if (func1.definition.length === 3 && func2.definition.length === 3) {
+                    return Chalkboard.real.define([
+                        `(${func1.definition[0]}) - (${func2.definition[0]})`,
+                        `(${func1.definition[1]}) - (${func2.definition[1]})`,
+                        `(${func1.definition[2]}) - (${func2.definition[2]})`
+                    ], "curv");
+                }
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl" or "curv".');
+        };
+
+        /**
          * Calculates the tetration of a number.
          * @param {number} base - The number
          * @param {number} num - The tetratant
@@ -322,6 +599,28 @@ namespace Chalkboard {
             } else if (num > 0) {
                 return Math.pow(base, Chalkboard.real.tetration(base, num - 1) as number);
             }
+        };
+
+        /**
+         * Calculates the translation of a function, which can be horizontally, vertically, or both.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} h - Horizontal translation (positive moves right)
+         * @param {number} v - Vertical translation (positive moves up)
+         * @returns {ChalkboardFunction}
+         */
+        export const translate = (func: ChalkboardFunction, h: number = 0, v: number = 0): ChalkboardFunction => {
+            if (func.type === "expl") {
+                if (h !== 0 && v !== 0) {
+                    return Chalkboard.real.define(`(${func.definition.toString().replace(/x/g, `(x - ${h})`)}) + ${v}`, "expl");
+                } else if (h !== 0) {
+                    return Chalkboard.real.define(`${func.definition.toString().replace(/x/g, `(x - ${h})`)}`, "expl");
+                } else if (v !== 0) {
+                    return Chalkboard.real.define(`(${func.definition}) + ${v}`, "expl");
+                } else {
+                    return func;
+                }
+            }
+            throw new TypeError('Property "type" of "func" must be "expl".');
         };
 
         /**

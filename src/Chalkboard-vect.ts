@@ -913,11 +913,11 @@ namespace Chalkboard {
          */
         export const zero = (vect: ChalkboardVector): ChalkboardVector => {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0);
+                return Chalkboard.vect.init(0, 0);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z! * 0);
+                return Chalkboard.vect.init(0, 0, 0);
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z! * 0, vect.w! * 0);
+                return Chalkboard.vect.init(0, 0, 0, 0);
             } else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
