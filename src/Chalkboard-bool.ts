@@ -13,63 +13,78 @@ namespace Chalkboard {
         const $ = (x: boolean): boolean | 0 | 1 => mode === "boolean" ? x : (x ? 1 : 0);
 
         /**
-         * Performs the logical AND operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the logical AND operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
          * Chalkboard.bool.AND(true, true); // Returns true
-         * Chalkboard.bool.AND(true, false); // Returns false
+         * Chalkboard.bool.AND(true, true, false); // Returns false
          */
-        export const AND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(xp && xq);
+        export const AND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                const current = vals[i] === true || vals[i] === 1;
+                if (!current) {
+                    result = false;
+                    break;
+                }
+            }
+            return $(result);
         };
 
         /**
-         * Performs the biconditional (if and only if) operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the biconditional (if and only if) operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values.
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.BICOND(true, true); // Returns true
-         * Chalkboard.bool.BICOND(true, false); // Returns false
+         * Chalkboard.bool.BICOND(true, true, true); // Returns true
+         * Chalkboard.bool.BICOND(true, false, true); // Returns false
+         * Chalkboard.bool.BICOND(false, false, false); // Returns true
          */
-        export const BICOND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $((xp && xq) || (!xp && !xq));
+        export const BICOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length === 0) return $(true);
+            const first = (vals[0] === true || vals[0] === 1);
+            for (let i = 1; i < vals.length; i++) {
+                const current = (vals[i] === true || vals[i] === 1);
+                if (first !== current) return $(false);
+            }
+            return $(true);
         };
 
         /**
-         * Performs the conditional (implication) operation on two values.
-         * @param {boolean | 0 | 1} p - Antecedent
-         * @param {boolean | 0 | 1} q - Consequent
+         * Calculates the conditional (implication) operation on two or more values. It works as a chain, i.e. it returns true if every adjacent pair (p, q) satisfies p ∧ ¬q.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.COND(false, false); // Returns true
-         * Chalkboard.bool.COND(true, false); // Returns false
+         * Chalkboard.bool.COND(false, false, true); // Returns true
+         * Chalkboard.bool.COND(true, false, true); // Returns false
          */
-        export const COND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $((!xp) || xq);
+        export const COND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length < 2) return $(true);
+            for (let i = 0; i < vals.length - 1; i++) {
+                const xp = (vals[i] === true || vals[i] === 1);
+                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (xp && !xq) return $(false);
+            }
+            return $(true);
         };
 
         /**
-         * Performs the converse of the conditional operation on two values.
-         * @param {boolean | 0 | 1} p - Consequent
-         * @param {boolean | 0 | 1} q - Antecedent
+         * Calculates the converse of the conditional operation on two or more values. It works as a chain, i.e. it returns true if every adjacent pair (p, q) satisfies q ∧ ¬p.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.CONV(true, false); // Returns true
-         * Chalkboard.bool.CONV(false, true); // Returns false
+         * Chalkboard.bool.CONV(false, false, true); // Returns true
+         * Chalkboard.bool.CONV(true, false, true); // Returns false
          */
-        export const CONV = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $((!xq) || xp);
+        export const CONV = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length < 2) return $(true);
+            for (let i = 0; i < vals.length - 1; i++) {
+                const xp = (vals[i] === true || vals[i] === 1);
+                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (xq && !xp) return $(false);
+            }
+            return $(true);
         };
 
         /** @ignore */
@@ -93,106 +108,118 @@ namespace Chalkboard {
         };
 
         /**
-         * Performs the logical NAND (NOT AND) operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the logical NAND (NOT AND) operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.NAND(true, false); // Returns true
-         * Chalkboard.bool.NAND(true, true); // Returns false
+         * Chalkboard.bool.NAND(true, true, true); // Returns false
+         * Chalkboard.bool.NAND(true, true, false); // Returns true
          */
-        export const NAND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(!(xp && xq));
+        export const NAND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            const andResult = AND(...vals);
+            return $(!(andResult === true || andResult === 1));
         };
 
         /**
-         * Performs the opposite of the biconditional operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the opposite of the biconditional operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.NBICOND(true, false); // Returns true
-         * Chalkboard.bool.NBICOND(true, true); // Returns false
+         * Chalkboard.bool.BICOND(true, true, true); // Returns false
+         * Chalkboard.bool.BICOND(true, false, true); // Returns true
+         * Chalkboard.bool.BICOND(false, false, false); // Returns false
          */
-        export const NBICOND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(!((xp && xq) || (!xp && !xq)));
+        export const NBICOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            const bicondResult = BICOND(...vals);
+            return $(!(bicondResult === true || bicondResult === 1));
         };
 
         /**
-         * Performs the opposite of the conditional (non-implication) on two values.
-         * @param {boolean | 0 | 1} p - Antecedent
-         * @param {boolean | 0 | 1} q - Consequent
+         * Calculates the opposite of the conditional (non-implication) on two or more values. It works as a chain, i.e. it returns true only if every adjacent pair satisfies ¬p ∨ q.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.NCOND(true, false); // Returns true
-         * Chalkboard.bool.NCOND(false, true); // Returns false
+         * Chalkboard.bool.COND(false, false, true); // Returns false
+         * Chalkboard.bool.COND(true, false, true); // Returns true
          */
-        export const NCOND = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(xp && !xq);
+        export const NCOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length < 2) return $(false);
+            for (let i = 0; i < vals.length - 1; i++) {
+                const xp = (vals[i] === true || vals[i] === 1);
+                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (!(xp && !xq)) return $(false);
+            }
+            return $(true);
         };
 
         /**
-         * Performs the opposite of the converse on two values.
-         * @param {boolean | 0 | 1} p - Consequent
-         * @param {boolean | 0 | 1} q - Antecedent
+         * Calculates the opposite of the converse on two or more values. It works as a chain, i.e. it returns true only if every adjacent pair satisfies ¬q ∨ p.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.NCONV(false, true); // Returns true
-         * Chalkboard.bool.NCONV(true, true); // Returns false
+         * Chalkboard.bool.CONV(false, false, true); // Returns false
+         * Chalkboard.bool.CONV(true, false, true); // Returns true
          */
-        export const NCONV = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(xq && !xp);
+        export const NCONV = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length < 2) return $(false);
+            for (let i = 0; i < vals.length - 1; i++) {
+                const xp = (vals[i] === true || vals[i] === 1);
+                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (!(xq && !xp)) return $(false);
+            }
+            return $(true);
         };
 
         /**
-         * Performs the logical NOR (NOT OR) operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the logical NOR (NOT OR) operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.NOR(false, false); // Returns true
-         * Chalkboard.bool.NOR(true, false); // Returns false
+         * Chalkboard.bool.NOR(false, false, false); // Returns true
+         * Chalkboard.bool.NOR(true, false, false); // Returns false
          */
-        export const NOR = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(!(xp || xq));
+        export const NOR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            for (let i = 0; i < vals.length; i++) {
+                const x = (vals[i] === true || vals[i] === 1);
+                if (x) return $(false);
+            }
+            return $(true);
         };
 
         /**
-         * Performs the logical NOT operation on a value.
-         * @param {boolean | 0 | 1} p - Operand
+         * Calculates the logical NOT operation on one or more values. When more than one value is inputted, it applies NOT to each and then returns true only if all values are false.
+         * @param {...(boolean | 0 | 1)[]} vals - One or more values.
          * @returns {boolean | 0 | 1}
          * @example
          * Chalkboard.bool.NOT(false); // Returns true
-         * Chalkboard.bool.NOT(true); // Returns false
+         * Chalkboard.bool.NOT(true, false, false); // Returns false
+         * Chalkboard.bool.NOT(false, false, false); // Returns true
          */
-        export const NOT = (p: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            return $(!xp);
+        export const NOT = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            if (vals.length === 0) return $(true);
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                const x = (vals[i] === true || vals[i] === 1);
+                result = result && !x;
+            }
+            return $(result);
         };
 
         /**
-         * Performs the logical OR operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the logical OR operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.OR(false, true); // Returns true
-         * Chalkboard.bool.OR(false, false); // Returns false
+         * Chalkboard.bool.OR(false, false, true); // Returns true
+         * Chalkboard.bool.OR(false, false, false); // Returns false
          */
-        export const OR = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $(xp || xq);
+        export const OR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            let result = false;
+            for (let i = 0; i < vals.length; i++) {
+                const x = (vals[i] === true || vals[i] === 1);
+                if (x) { result = true; break; }
+            }
+            return $(result);
         };
 
         /**
@@ -508,18 +535,20 @@ namespace Chalkboard {
         };
 
         /**
-         * Performs the logical XOR (exclusive OR) operation on two values.
-         * @param {boolean | 0 | 1} p - First value
-         * @param {boolean | 0 | 1} q - Second value
+         * Calculates the logical XOR (exclusive OR) operation on two or more values.
+         * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
-         * Chalkboard.bool.XOR(true, false); // Returns true
-         * Chalkboard.bool.XOR(true, true); // Returns false
+         * Chalkboard.bool.XOR(true, false, false); // Returns true
+         * Chalkboard.bool.XOR(true, true, false); // Returns false
          */
-        export const XOR = (p: boolean | 0 | 1, q: boolean | 0 | 1): boolean | 0 | 1 => {
-            const xp = (p === 1 || p === true);
-            const xq = (q === 1 || q === true);
-            return $((xp && !xq) || (!xp && xq));
+        export const XOR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            let count = 0;
+            for (let i = 0; i < vals.length; i++) {
+                const x = (vals[i] === true || vals[i] === 1);
+                if (x) count++;
+            }
+            return $(count % 2 === 1);
         };
     }
 }
