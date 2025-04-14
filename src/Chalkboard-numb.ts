@@ -630,8 +630,50 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a decimal number to binary representation (base 2).
+         * @param {number} num - The decimal number
+         * @param {boolean} [prefix=false] - Whether to include "0b" prefix (optional, defaults to false)
+         * @returns {string}
+         * @example
+         * const bin1 = Chalkboard.numb.toBinary(10); // Returns "1010"
+         * const bin2 = Chalkboard.numb.toBinary(10, true); // Returns "0b1010"
+         */
+        export const toBinary = (num: number, prefix: boolean = false): string => {
+            if (!Number.isInteger(num)) throw new Error('Parameter "num" must be an integer.');
+            const result = Math.abs(num).toString(2);
+            return (prefix ? "0b" : "") + (num < 0 ? "-" : "") + result;
+        };
+
+        /**
+         * Converts a number from a specified base to decimal (base 10).
+         * @param {string} num - The string representation of the number in the specified base
+         * @param {number} base - The base (2-36) of the number
+         * @returns {number}
+         * @example
+         * const dec1 = Chalkboard.numb.toDecimal("1010", 2); // Returns 10
+         * const dec2 = Chalkboard.numb.toDecimal("1a", 16); // Returns 26
+         * const dec3 = Chalkboard.numb.toDecimal("0x2a", 16); // Returns 42
+         */
+        export const toDecimal = (num: string, base: number): number => {
+            if (base < 2 || base > 36) throw new Error('Parameter "base" must be between 2 and 36.');
+            num = num.toLowerCase();
+            if (base === 2 && num.startsWith("0b")) num = num.substring(2);
+            if (base === 8 && num.startsWith("0o")) num = num.substring(2);
+            if (base === 16 && num.startsWith("0x")) num = num.substring(2);
+            if (num.startsWith("-")) num = num.substring(1);
+            const chars = "0123456789abcdefghijklmnopqrstuvwxyz".substring(0, base);
+            for (const char of num) {
+                if (!chars.includes(char)) {
+                    throw new Error(`Invalid character "${char}" for base ${base}.`);
+                }
+            }
+            const result = parseInt(num, base);
+            return num.startsWith("-") ? -result : result;
+        };
+
+        /**
          * Converts a decimal to a fraction which is represented as an array of its numerator and denominator.
-         * @param {number} num - The decimal
+         * @param {number} num - The decimal number
          * @param {number} [tolerance = 1e-8] - The tolerance of the approximation algorithm (optional, defaults to 1e-8)
          * @returns {[number, number]}
          * @example
@@ -657,6 +699,38 @@ namespace Chalkboard {
                 k2 = k1, k1 = k;
                 b = 1 / (b - a);
             }
-        }       
+        };
+
+        /**
+         * Converts a decimal number to hexadecimal representation (base 16).
+         * @param {number} num - The decimal number
+         * @param {boolean} [prefix=false] - Whether to include "0x" prefix (optional, defaults to false)
+         * @param {boolean} [uppercase=false] - Whether to use uppercase letters (optional, defaults to false)
+         * @returns {string}
+         * @example
+         * const hex1 = Chalkboard.numb.toHexadecimal(26); // Returns "1a"
+         * const hex2 = Chalkboard.numb.toHexadecimal(26, true, true); // Returns "0x1A"
+         */
+        export const toHexadecimal = (num: number, prefix: boolean = false, uppercase: boolean = false): string => {
+            if (!Number.isInteger(num)) throw new Error('The parameter "num" must be an integer.');
+            let result = Math.abs(num).toString(16);
+            if (uppercase) result = result.toUpperCase();
+            return (prefix ? "0x" : "") + (num < 0 ? "-" : "") + result;
+        };
+
+        /**
+         * Converts a decimal number to octal representation (base 8).
+         * @param {number} num - The decimal number
+         * @param {boolean} [prefix=false] - Whether to include "0o" prefix (optional, defaults to false)
+         * @returns {string}
+         * @example
+         * const oct1 = Chalkboard.numb.toOctal(10); // Returns "12"
+         * const oct2 = Chalkboard.numb.toOctal(10, true); // Returns "0o12"
+         */
+        export const toOctal = (num: number, prefix: boolean = false): string => {
+            if (!Number.isInteger(num)) throw new Error('The parameter "num" must be an integer.');
+            const result = Math.abs(num).toString(8);
+            return (prefix ? "0o" : "") + (num < 0 ? "-" : "") + result;
+        };
     }
 }

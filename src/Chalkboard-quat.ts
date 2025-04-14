@@ -13,6 +13,9 @@ namespace Chalkboard {
          * Calculates the absolute value of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 2 + 3i + 4j + 5k
+         * const q = Chalkboard.quat.absolute(Chalkboard.quat.init(-2, 3, -4, 5));
          */
         export const absolute = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
@@ -23,6 +26,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 3 + 5i + 7j + 9k
+         * const sum = Chalkboard.quat.add(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const add = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -34,6 +40,9 @@ namespace Chalkboard {
          * Calculates the conjugate of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 2 - 3i - 4j - 5k
+         * const conj = Chalkboard.quat.conjugate(Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const conjugate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
@@ -44,6 +53,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @param {number[]} [range=[0, 1]] - The range
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 1 + 0.6i + 0.7j + 0.8k
+         * const constrained = Chalkboard.quat.constrain(Chalkboard.quat.init(1.2, 0.6, 0.7, 0.8), [0, 1]);
          */
         export const constrain = (quat: ChalkboardQuaternion, range: [number, number] = [0, 1]): ChalkboardQuaternion => {
             return Chalkboard.quat.init(
@@ -58,6 +70,9 @@ namespace Chalkboard {
          * Copies a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 2 + 3i + 4j + 5k
+         * const copied = Chalkboard.quat.copy(Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const copy = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
@@ -68,6 +83,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 2
+         * const distance = Chalkboard.quat.dist(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(3, 0, 0, 0));
          */
         export const dist = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): number => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -82,6 +100,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 4
+         * const distanceSquared = Chalkboard.quat.distsq(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(3, 0, 0, 0));
          */
         export const distsq = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): number => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -94,6 +115,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0.5 + 0i + 0j + 0k
+         * const quotient = Chalkboard.quat.div(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(2, 0, 0, 0));
          */
         export const div = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -111,6 +135,9 @@ namespace Chalkboard {
          * @param {ChalkboardVector} vect - The vector
          * @param {number} rad - The angle in radians
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0.7071 + 0i + 0.7071j + 0k
+         * const q = Chalkboard.quat.fromAxis(Chalkboard.vect.init(0, 1, 0), Chalkboard.PI(0.5));
          */
         export const fromAxis = (vect: ChalkboardVector, rad: number): ChalkboardQuaternion => {
             if (typeof vect.z !== "undefined") {
@@ -127,6 +154,9 @@ namespace Chalkboard {
          * @param {number} [c=0] - The second imaginary part
          * @param {number} [d=0] - The third imaginary part
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 1 + 2i + 3j + 4k
+         * const q = Chalkboard.quat.init(1, 2, 3, 4);
          */
         export const init = (a: number, b: number = 0, c: number = 0, d: number = 0): ChalkboardQuaternion => {
             return { a: a, b: b, c: c, d: d };
@@ -136,6 +166,9 @@ namespace Chalkboard {
          * Calculates the inverse of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0.0333 - 0.0667i - 0.1j - 0.1333k
+         * const inverse = Chalkboard.quat.invert(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const invert = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
@@ -145,6 +178,9 @@ namespace Chalkboard {
          * Calculates the magnitude of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {number}
+         * @example
+         * // Returns 5.4772
+         * const r = Chalkboard.quat.mag(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const mag = (quat: ChalkboardQuaternion): number => {
             return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
@@ -155,6 +191,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @param {number} num - The magnitude to set to
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0.3651 + 0.7303i + 1.0954j + 1.4606k
+         * const normscl = Chalkboard.quat.magset(Chalkboard.quat.init(1, 2, 3, 4), 2);
          */
         export const magset = (quat: ChalkboardQuaternion, num: number): ChalkboardQuaternion => {
             return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
@@ -164,6 +203,9 @@ namespace Chalkboard {
          * Calculates the magnitude squared of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {number}
+         * @example
+         * // Returns 30
+         * const r2 = Chalkboard.quat.magsq(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const magsq = (quat: ChalkboardQuaternion): number => {
             return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
@@ -174,6 +216,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns -4 + 8i + 8j + 2k
+         * const product = Chalkboard.quat.mul(Chalkboard.quat.init(1, 2, 3, 0), Chalkboard.quat.init(2, 2, 0, 1));
          */
         export const mul = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -187,9 +232,12 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the negation of two quaternions.
+         * Calculates the negation of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns -1 - 2i - 3j - 4k
+         * const negated = Chalkboard.quat.negate(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const negate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
@@ -199,6 +247,9 @@ namespace Chalkboard {
          * Calculates the normalization of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0.1826 + 0.3651i + 0.5477j + 0.7303k
+         * const normalized = Chalkboard.quat.normalize(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const normalize = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
@@ -208,6 +259,9 @@ namespace Chalkboard {
          * Prints a quaternion in the console.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {void}
+         * @example
+         * // Prints "1 + 2i + 3j + 4k" in the console
+         * Chalkboard.quat.print(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const print = (quat: ChalkboardQuaternion): void => {
             console.log(Chalkboard.quat.toString(quat));
@@ -218,6 +272,9 @@ namespace Chalkboard {
          * @param {number} [inf=0] - The lower bound
          * @param {number} [sup=1] - The upper bound
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns a random quaternion with components between 0 and 1
+         * const q = Chalkboard.quat.random();
          */
         export const random = (inf: number = 0, sup: number = 1): ChalkboardQuaternion => {
             return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
@@ -227,6 +284,9 @@ namespace Chalkboard {
          * Calculates the reciprocal of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 1 + 0.5i + 0.3333j + 0.25k
+         * const reciprocated = Chalkboard.quat.reciprocate(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const reciprocate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
@@ -236,6 +296,9 @@ namespace Chalkboard {
          * Calculates the rounding of a quaternion.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 1 + 2i + 3j + 4k
+         * const rounded = Chalkboard.quat.round(Chalkboard.quat.init(0.6, 2.3, 2.7, 4.1));
          */
         export const round = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
@@ -246,6 +309,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @param {number} num - The scalar
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 2 + 4i + 6j + 8k
+         * const scaled = Chalkboard.quat.scl(Chalkboard.quat.init(1, 2, 3, 4), 2);
          */
         export const scl = (quat: ChalkboardQuaternion, num: number): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
@@ -256,6 +322,9 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
          * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns -1 - 1i - 1j - 1k
+         * const difference = Chalkboard.quat.sub(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const sub = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
@@ -267,6 +336,9 @@ namespace Chalkboard {
          * Converts a quaternion to an array.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {number[]}
+         * @example
+         * // Returns [1, 2, 3, 4]
+         * const arr = Chalkboard.quat.toArray(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toArray = (quat: ChalkboardQuaternion): [number, number, number, number] => {
             return [quat.a, quat.b, quat.c, quat.d];
@@ -276,6 +348,9 @@ namespace Chalkboard {
          * Converts a quaternion to a matrix.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardMatrix}
+         * @example
+         * // Returns a 4×4 matrix representing the quaternion
+         * const matr = Chalkboard.quat.toMatrix(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toMatrix = (quat: ChalkboardQuaternion): ChalkboardMatrix => {
             return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
@@ -286,6 +361,12 @@ namespace Chalkboard {
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @param {ChalkboardVector} vect - The vector to rotate around
          * @returns {ChalkboardVector}
+         * @example
+         * // Returns the vector (1, 1, 1)
+         * const rotated = Chalkboard.quat.toRotation(
+         *   Chalkboard.quat.fromAxis(Chalkboard.vect.init(0, 0, 1), Chalkboard.PI(0.5)),
+         *   Chalkboard.vect.init(1, 0, 1)
+         * );
          */
         export const toRotation = (quat: ChalkboardQuaternion, vect: ChalkboardVector): ChalkboardVector => {
             const vector = Chalkboard.vect.toQuaternion(vect);
@@ -298,6 +379,9 @@ namespace Chalkboard {
          * Converts a quaternion to a string
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {string}
+         * @example
+         * // Returns "1 + 2i + 3j + 4k"
+         * const str = Chalkboard.quat.toString(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toString = (quat: ChalkboardQuaternion): string => {
             let quat_b = "";
@@ -325,6 +409,9 @@ namespace Chalkboard {
          * Converts a quaternion to a vector.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboadVector}
+         * @example
+         * // Returns the vector (1, 2, 3, 4)
+         * const v = Chalkboard.quat.toVector(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toVector = (quat: ChalkboardQuaternion): ChalkboardVector => {
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
@@ -334,6 +421,9 @@ namespace Chalkboard {
          * Calculates a quaternion multiplied by zero.
          * @param {ChalkboardQuaternion} quat - The quaternion
          * @returns {ChalkboardQuaternion}
+         * @example
+         * // Returns 0 + 0i + 0j + 0k
+         * const zeroed = Chalkboard.quat.zero(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const zero = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(0, 0, 0, 0);

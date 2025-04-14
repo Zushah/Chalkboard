@@ -88,6 +88,52 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two boolean expressions are logically equivalent.
+         * @param {string} expr1 - First boolean expression
+         * @param {string} expr2 - Second boolean expression
+         * @returns {boolean | 0 | 1}
+         * @example
+         * const x = Chalkboard.bool.isEqual("x & y", "y & x"); // Returns true
+         * const y = Chalkboard.bool.isEqual("x & y | z", "(x | z) & (y | z)"); // Returns false
+         * const z = Chalkboard.bool.isEqual("x & (y | z)", "(x & y) | (x & z)"); // Returns true
+         */
+        export const isEqual = (expr1: string, expr2: string): boolean | 0 | 1 => {
+            const variables: string[] = [];
+            const varextract = (expr: string): void => {
+                const ast = Chalkboard.bool.parse(expr, {}, true) as { type: string, [key: string]: any };
+                const traverse = (node: { type: string, [key: string]: any }): void => {
+                    if (node.type === "var" && !variables.includes(node.name)) {
+                        variables.push(node.name);
+                    } else if (node.type === "not") {
+                        traverse(node.expr);
+                    } else if (node.type === "and" || node.type === "or") {
+                        traverse(node.left);
+                        traverse(node.right);
+                    }
+                };
+                traverse(ast);
+            };
+            varextract(expr1);
+            varextract(expr2);
+            const generateAssignments = (vars: string[], index: number = 0, current: Record<string, boolean> = {}): Record<string, boolean>[] => {
+                if (index >= vars.length) return [current];
+                const withTrue = { ...current, [vars[index]]: true };
+                const withFalse = { ...current, [vars[index]]: false };
+                return [
+                    ...generateAssignments(vars, index + 1, withTrue),
+                    ...generateAssignments(vars, index + 1, withFalse)
+                ];
+            };
+            const assignments = generateAssignments(variables);
+            for (const assignment of assignments) {
+                const result1 = Chalkboard.bool.parse(expr1, assignment);
+                const result2 = Chalkboard.bool.parse(expr2, assignment);
+                if (result1 !== result2) return $(false);
+            }
+            return $(true);
+        };
+
+        /**
          * Calculates a Karnaugh map (K-map) for a boolean expression. It supports 2, 3, or 4 variables and returns a 2D array representing the K-map with cells as 0 or 1.
          * @param {string} input - The boolean expression to map
          * @param {string[]} variables - An array of variable names (order matters)
@@ -151,6 +197,88 @@ namespace Chalkboard {
                 result.push(row);
             }
             return result;
+        };
+        
+        /**
+         * Creates a function that maps inputs to outputs based on provided truth tables.
+         * @param {(boolean | 0 | 1)[][]} inputs - Array of input rows, each row containing values for all inputs
+         * @param {(boolean | 0 | 1)[][]} outputs - Array of output rows corresponding to each input row
+         * @returns {((...args: (boolean | 0 | 1)[]) => (boolean | 0 | 1)[])}
+         * @example
+         * // f(0, 0, 0) returns [0, 0]
+         * // f(1, 0, 0) returns [0, 1]
+         * const f = Chalkboard.bool.mapping([
+         *     [0, 0, 0], [1, 0, 0], [0, 1, 0], [0, 0, 1]
+         * ], [
+         *     [0, 0], [0, 1], [1, 0], [1, 1]
+         * ]);
+         */
+        export const mapping = (inputs: (boolean | 0 | 1)[][], outputs: (boolean | 0 | 1)[][]): ((...args: (boolean | 0 | 1)[]) => (boolean | 0 | 1)[]) => {
+            if (inputs.length !== outputs.length) {
+                throw new Error('Parameter "inputs" and "outputs" must have the same length.');
+            }
+            if (inputs.length === 0) {
+                throw new Error('Parameter "inputs" and "outputs" cannot be empty.');
+            }
+            const m = inputs[0].length;
+            const n = outputs[0].length;
+            for (const row of inputs) {
+                if (row.length !== m) {
+                    throw new Error('Parameter "inputs" must have the same length for each row.');
+                }
+            }
+            for (const row of outputs) {
+                if (row.length !== n) {
+                    throw new Error('Parameter "outputs" must have the same length for each row.');
+                }
+            }
+            const variables = Array.from({length: m}, (_, i) => String.fromCharCode(97 + i));
+            const expressions: string[] = [];
+            for (let outCol = 0; outCol < n; outCol++) {
+                const trueRows: number[] = [];
+                for (let row = 0; row < inputs.length; row++) {
+                    if (outputs[row][outCol] === true || outputs[row][outCol] === 1) {
+                        trueRows.push(row);
+                    }
+                }
+                if (trueRows.length === 0) {
+                    expressions.push("false");
+                    continue;
+                }
+                if (trueRows.length === inputs.length) {
+                    expressions.push("true");
+                    continue;
+                }
+                const terms: string[] = [];
+                for (const row of trueRows) {
+                    const literals: string[] = [];
+                    for (let i = 0; i < m; i++) {
+                        const value = inputs[row][i] === true || inputs[row][i] === 1;
+                        literals.push(value ? variables[i] : `!${variables[i]}`);
+                    }
+                    terms.push(`(${literals.join(" & ")})`);
+                }
+                const expr = terms.join(" | ");
+                if (m <= 4) {
+                    expressions.push(Chalkboard.bool.minimize(expr, variables));
+                } else {
+                    expressions.push(expr);
+                }
+            }
+            return (...args: (boolean | 0 | 1)[]): (boolean | 0 | 1)[] => {
+                if (args.length !== m) {
+                    throw new Error(`Expected ${m} arguments, but got ${args.length}.`);
+                }
+                const values: Record<string, boolean | 0 | 1> = {};
+                for (let i = 0; i < m; i++) {
+                    values[variables[i]] = args[i];
+                }
+                return expressions.map((expr) => {
+                    const parsed = Chalkboard.bool.parse(expr, values);
+                    const booled = parsed === true || parsed === 1;
+                    return $(booled);
+                });
+            };
         };
 
         /**
