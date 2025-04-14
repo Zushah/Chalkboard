@@ -61,12 +61,13 @@ declare namespace Chalkboard {
     const APPLY: <T>(object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>, callback: (x: any) => any) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>;
     let CONTEXT: string;
     const E: (exponent?: number) => number;
+    const I: (exponent?: number) => ChalkboardComplex;
     const LOGO: (x?: number, y?: number, size?: number, context?: CanvasRenderingContext2D) => void;
     let PARSEPREFIX: string;
     const PI: (coefficient?: number) => number;
     const README: () => void;
-    const VERSION: "2.2.0";
-    const VERSIONALIAS: "Galois";
+    const VERSION: "2.3.0";
+    const VERSIONALIAS: "Boole";
 }
 declare namespace Chalkboard {
     namespace abal {
@@ -148,6 +149,35 @@ declare namespace Chalkboard {
         const toVector: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, dimension: 2 | 3 | 4, index?: number) => ChalkboardVector;
         const union: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
         const Z: (n?: number) => ChalkboardSet<number>;
+    }
+}
+declare namespace Chalkboard {
+    namespace bool {
+        const AND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const BICOND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const COND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const CONV: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const isEqual: (expr1: string, expr2: string) => boolean | 0 | 1;
+        const Karnaugh: (input: string, variables: string[]) => (boolean | 0 | 1)[][];
+        const mapping: (inputs: (boolean | 0 | 1)[][], outputs: (boolean | 0 | 1)[][]) => ((...args: (boolean | 0 | 1)[]) => (boolean | 0 | 1)[]);
+        const minimize: (input: string, variables: string[]) => string;
+        const modeConfig: (config: "boolean" | "binary") => void;
+        const NAND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const NBICOND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const NCOND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const NCONV: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const NOR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const NOT: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const OR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
+        const parse: (input: string, values?: Record<string, boolean | 0 | 1>, returnAST?: boolean) => string | boolean | 0 | 1 | {
+            type: string;
+            [key: string]: any;
+        };
+        const primeImplicants: (input: string, variables: string[]) => string[];
+        const toCNF: (input: string) => string;
+        const toDNF: (input: string) => string;
+        const truthTable: (...operations: ((p: boolean | 0 | 1, q: boolean | 0 | 1) => boolean | 0 | 1)[]) => (boolean | 0 | 1)[][];
+        const XOR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
     }
 }
 declare namespace Chalkboard {
@@ -397,14 +427,22 @@ declare namespace Chalkboard {
         const roundTo: (num: number, positionalIndex: number) => number;
         const sgn: (num: number) => -1 | 0 | 1;
         const sum: (formula: string, inf: number, sup: number) => number;
+        const toBinary: (num: number, prefix?: boolean) => string;
+        const toDecimal: (num: string, base: number) => number;
         const toFraction: (num: number, tolerance?: number) => [number, number];
+        const toHexadecimal: (num: number, prefix?: boolean, uppercase?: boolean) => string;
+        const toOctal: (num: number, prefix?: boolean) => string;
     }
 }
 declare namespace Chalkboard {
     namespace real {
+        const absolute: (func: ChalkboardFunction) => ChalkboardFunction;
+        const add: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
+        const compose: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const define: (definition: string | string[], type?: "expl" | "inve" | "pola" | "curv" | "surf" | "mult") => ChalkboardFunction;
         const Dirac: (num: number, edge?: number, scl?: number) => number;
         const discriminant: (a: number, b: number, c: number, form?: "stan" | "vert") => number;
+        const div: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const Heaviside: (num: number, edge?: number, scl?: number) => number;
         const lerp: (p: [number, number], t: number) => number;
         const linear: (x1: number, y1: number, x2: number, y2: number) => ChalkboardFunction;
@@ -412,18 +450,26 @@ declare namespace Chalkboard {
         const ln: (num: number) => number;
         const log: (base: number, num: number) => number;
         const log10: (num: number) => number;
+        const mul: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
+        const negate: (func: ChalkboardFunction) => ChalkboardFunction;
         const parse: (str: string) => Function;
         const pingpong: (num: number, edge?: number, scl?: number) => number;
-        const pow: (base: number, num: number) => number;
+        const polynomial: (...coeffs: number[]) => ChalkboardFunction;
+        const pow: (base: number | ChalkboardFunction, num: number) => number | ChalkboardFunction;
         const qerp: (p1: [number, number], p2: [number, number], p3: [number, number], t: number) => number;
         const quadratic: (a: number, b: number, c: number, form?: "stan" | "vert") => ChalkboardFunction;
         const quadraticFormula: (a: number, b: number, c: number, form?: "stan" | "vert") => [number, number];
         const ramp: (num: number, edge?: number, scl?: number) => number;
+        const randomPolynomial: (degree: number, inf?: number, sup?: number) => ChalkboardFunction;
+        const reciprocate: (func: ChalkboardFunction) => ChalkboardFunction;
         const rect: (num: number, center?: number, width?: number, scl?: number) => number;
         const root: (num: number, index?: number) => number;
+        const scl: (func: ChalkboardFunction, num: number) => ChalkboardFunction;
         const slope: (x1: number, y1: number, x2: number, y2: number) => number;
         const sqrt: (num: number) => number;
+        const sub: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const tetration: (base: number, num: number) => number | undefined;
+        const translate: (func: ChalkboardFunction, h?: number, v?: number) => ChalkboardFunction;
         const val: (func: ChalkboardFunction, val: number | ChalkboardVector) => number | ChalkboardVector;
     }
 }
@@ -689,7 +735,7 @@ declare namespace Chalkboard {
         const percentile: (arr: number[], num: number) => number;
         const print: (arr: number[]) => void;
         const quartile: (arr: number[], type: "Q1" | "Q2" | "Q3") => number;
-        const random: (inf: number, sup: number, length: number) => number[];
+        const random: (length: number, inf?: number, sup?: number) => number[];
         const range: (arr: number[]) => number;
         const regression: (data: number[][], type?: "linear" | "polynomial" | "power" | "exponential" | "logarithmic", degree?: number) => ChalkboardFunction;
         const resampling: (arr: number[], samples?: number, type?: "bootstrap" | "jackknife") => number[][];

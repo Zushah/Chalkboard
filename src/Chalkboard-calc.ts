@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Calculus Namespace
-    Version 2.2.0 Galois
+    Version 2.3.0 Boole
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {

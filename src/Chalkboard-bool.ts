@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Boolean Algebra Namespace
-    Version 2.2.0 Galois
+    Version 2.3.0 Boole
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -200,7 +200,7 @@ namespace Chalkboard {
         };
         
         /**
-         * Creates a function that maps inputs to outputs based on provided truth tables.
+         * Calculates a function that maps inputs to outputs based on provided truth tables.
          * @param {(boolean | 0 | 1)[][]} inputs - Array of input rows, each row containing values for all inputs
          * @param {(boolean | 0 | 1)[][]} outputs - Array of output rows corresponding to each input row
          * @returns {((...args: (boolean | 0 | 1)[]) => (boolean | 0 | 1)[])}
@@ -305,7 +305,7 @@ namespace Chalkboard {
                 if (primes.some((term) => term === "true")) {
                     return "true";
                 }
-                return primes.join(" | ");
+                return Chalkboard.bool.parse(primes.join(" | ")) as string;
             } catch (e) {
                 if (e instanceof Error) {
                     throw new Error(`Error minimizing expression: ${e.message}`);
@@ -898,93 +898,169 @@ namespace Chalkboard {
         };
 
         /**
-         * Converts a boolean expression into conjunctive normal form (CNF).
+         * Converts a boolean expression to conjunctive normal form (CNF).
          * @param {string} input - The boolean expression
          * @returns {string}
          * @example
          * const cnf = Chalkboard.bool.toCNF("x & (y | z)"); // Returns "(x) & (y | z)"
          */
         export const toCNF = (input: string): string => {
-            const variables: string[] = [];
+            const simplified = Chalkboard.bool.parse(input) as string;
+            if (simplified.includes(" & ") && !simplified.includes(" | ")) {
+                return simplified;
+            }
             const ast = Chalkboard.bool.parse(input, {}, true) as { type: string, [key: string]: any };
-            const varextract = (node: { type: string, [key: string]: any }): void => {
+            const convertToCNF = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
                 switch (node.type) {
+                    case "bool":
                     case "var":
-                        if (!variables.includes(node.name)) {
-                            variables.push(node.name);
-                        }
-                        break;
+                        return node;
                     case "not":
-                        varextract(node.expr);
-                        break;
+                        if (node.expr.type === "not") {
+                            return convertToCNF(node.expr.expr);
+                        } else if (node.expr.type === "and") {
+                            return convertToCNF({
+                                type: "or",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        } else if (node.expr.type === "or") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        return { type: "not", expr: convertToCNF(node.expr) };
                     case "and":
+                        const leftCNF = convertToCNF(node.left);
+                        const rightCNF = convertToCNF(node.right);
+                        return { type: "and", left: leftCNF, right: rightCNF };
                     case "or":
-                        varextract(node.left);
-                        varextract(node.right);
-                        break;
+                        const left = convertToCNF(node.left);
+                        const right = convertToCNF(node.right);
+                        if (right.type === "and") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "or", left, right: right.left },
+                                right: { type: "or", left, right: right.right }
+                            });
+                        }
+                        if (left.type === "and") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "or", left: left.left, right },
+                                right: { type: "or", left: left.right, right }
+                            });
+                        }
+                        return { type: "or", left, right };
                 }
+                return node;
             };
-            varextract(ast);
-            const generateCombinations = (vars: string[]): Record<string, boolean>[] => {
-                if (vars.length === 0) return [{}];
-                const [first, ...rest] = vars;
-                const restcombos = generateCombinations(rest);
-                return [...restcombos.map((combo) => ({ ...combo, [first]: true })), ...restcombos.map((combo) => ({ ...combo, [first]: false }))];
+            const cnfAST = convertToCNF(ast);
+            const nodeToString = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "bool":
+                        return node.value ? "true" : "false";
+                    case "var":
+                        return node.name;
+                    case "not":
+                        const innerExpr = node.expr.type === "var" ? 
+                            nodeToString(node.expr) : 
+                            `(${nodeToString(node.expr)})`;
+                        return `!${innerExpr}`;
+                    case "and":
+                        return `${nodeToString(node.left)} & ${nodeToString(node.right)}`;
+                    case "or":
+                        return `(${nodeToString(node.left)} | ${nodeToString(node.right)})`;
+                }
+                return "";
             };
-            const combinations = generateCombinations(variables);
-            const falserows = combinations.filter((values) => !Chalkboard.bool.parse(input, values));
-            const result: string[] = falserows.map((values) => {
-                const literals = variables.map((variable) => values[variable] ? `!${variable}` : variable);
-                return literals.length > 1 ? `(${literals.join(" | ")})` : literals[0];
-            });
-            if (result.length === 0) return "true";
-            if (result.length === Chalkboard.real.pow(2, variables.length)) return "false";
-            return result.join(" & ");
+            return nodeToString(cnfAST);
         };
 
         /**
-         * Converts a boolean expression into disjunctive normal form (DNF).
+         * Converts a boolean expression to disjunctive normal form (DNF).
          * @param {string} input - The boolean expression
          * @returns {string}
          * @example
          * const dnf = Chalkboard.bool.toDNF("x & (y | z)"); // Returns "(x & y) | (x & z)"
          */
         export const toDNF = (input: string): string => {
-            const variables: string[] = [];
+            const simplified = Chalkboard.bool.parse(input) as string;
+            if (simplified.includes(" | ") && !simplified.includes(" & ")) {
+                return simplified;
+            }
             const ast = Chalkboard.bool.parse(input, {}, true) as { type: string, [key: string]: any };
-            const varextract = (node: { type: string, [key: string]: any }): void => {
+            const convertToDNF = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
                 switch (node.type) {
+                    case "bool":
                     case "var":
-                        if (!variables.includes(node.name)) {
-                            variables.push(node.name);
-                        }
-                        break;
+                        return node;
                     case "not":
-                        varextract(node.expr);
-                        break;
-                    case "and":
+                        if (node.expr.type === "not") {
+                            return convertToDNF(node.expr.expr);
+                        } else if (node.expr.type === "and") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        } else if (node.expr.type === "or") {
+                            return convertToDNF({
+                                type: "and",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        return { type: "not", expr: convertToDNF(node.expr) };
                     case "or":
-                        varextract(node.left);
-                        varextract(node.right);
-                        break;
+                        const leftDNF = convertToDNF(node.left);
+                        const rightDNF = convertToDNF(node.right);
+                        return { type: "or", left: leftDNF, right: rightDNF };
+                    case "and":
+                        const left = convertToDNF(node.left);
+                        const right = convertToDNF(node.right);
+                        if (right.type === "or") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "and", left, right: right.left },
+                                right: { type: "and", left, right: right.right }
+                            });
+                        }
+                        if (left.type === "or") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "and", left: left.left, right },
+                                right: { type: "and", left: left.right, right }
+                            });
+                        }
+                        return { type: "and", left, right };
                 }
+                return node;
             };
-            varextract(ast);
-            const generateCombinations = (vars: string[]): Record<string, boolean>[] => {
-                if (vars.length === 0) return [{}];
-                const [first, ...rest] = vars;
-                const restcombos = generateCombinations(rest);
-                return [...restcombos.map((combo) => ({ ...combo, [first]: true })), ...restcombos.map((combo) => ({ ...combo, [first]: false }))];
+            const dnfAST = convertToDNF(ast);
+            const nodeToString = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "bool":
+                        return node.value ? "true" : "false";
+                    case "var":
+                        return node.name;
+                    case "not":
+                        const innerExpr = node.expr.type === "var" ? 
+                            nodeToString(node.expr) : 
+                            `(${nodeToString(node.expr)})`;
+                        return `!${innerExpr}`;
+                    case "and":
+                        const leftAnd = nodeToString(node.left);
+                        const rightAnd = nodeToString(node.right);
+                        return `(${leftAnd} & ${rightAnd})`;
+                    case "or":
+                        return `${nodeToString(node.left)} | ${nodeToString(node.right)}`;
+                }
+                return "";
             };
-            const combinations = generateCombinations(variables);
-            const truerows = combinations.filter((values) => Chalkboard.bool.parse(input, values));
-            const result: string[] = truerows.map((values) => {
-                const literals = variables.map((variable) => values[variable] ? variable : `!${variable}`);
-                return literals.length > 1 ? `(${literals.join(" & ")})` : literals[0];
-            });
-            if (result.length === 0) return "false";
-            if (result.length === Chalkboard.real.pow(2, variables.length)) return "true";
-            return result.join(" | ");
+            return nodeToString(dnfAST);
         };
 
         /**

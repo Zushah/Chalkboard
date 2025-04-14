@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library
-    Version 2.2.0 Galois released 04/07/2025
+    Version 2.3.0 Boole released 04/14/2025
     Authored by Zushah ===> https://www.github.com/Zushah
     Available under the MIT License ===> https://www.opensource.org/license/mit/
 
@@ -350,7 +350,7 @@ namespace Chalkboard {
      * Chalkboard.README();
      * // Returns in the console:
      * //   The Chalkboard Library
-     * //   Version 2.2.0 Galois released 04/07/2025
+     * //   Version 2.3.0 Boole released 04/14/2025
      * //   Authored by Zushah ===> https://www.github.com/Zushah
      * //   Available under the MIT License ===> https://www.opensource.org/license/mit/
      * //
@@ -365,27 +365,27 @@ namespace Chalkboard {
                 Chalkboard.VERSION +
                 " " +
                 Chalkboard.VERSIONALIAS +
-                " released 04/07/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
+                " released 04/14/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
         );
     };
 
     /**
      * The version of Chalkboard.
-     * @type {"2.2.0"}
+     * @type {"2.3.0"}
      * @example
-     * // Returns "2.2.0"
+     * // Returns "2.3.0"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "2.2.0" = "2.2.0";
+    export const VERSION: "2.3.0" = "2.3.0";
 
     /**
      * The alias of the version of Chalkboard.
-     * @type {"Galois"}
+     * @type {"Boole"}
      * @example
-     * // Returns "Galois"
+     * // Returns "Boole"
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "Galois" = "Galois";
+    export const VERSIONALIAS: "Boole" = "Boole";
 }
 
 if (typeof window === "undefined") {

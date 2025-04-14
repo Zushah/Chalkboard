@@ -1,7 +1,28 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
-## [v2.2.0 Galois](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0) - 04/07/2024
+## [v2.3.0 Boole](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0) - 04/14/2025
+The thirteenth release of the Chalkboard library.
+Commits: [`v2.2.0...v2.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.2.0...v2.3.0)
+- Added `I` which calculates the number i
+- Added boolean algebra functionalities with the new `bool` category containing 23 commands, which are mentioned below
+- Added `bool.AND`, `bool.OR`, `bool.XOR`, `bool.COND`, `bool.CONV`, `bool.BICOND`, `bool.NOT`, `bool.NAND`, `bool.NOR`, `bool.NCOND`, `bool.NCONV`, and `bool.NBICOND` which are boolean operations that act on two or more values
+- Added `bool.parse` which evaluates or simplifies a boolean expression, `bool.minimize` which minimizes a boolean expression, and `bool.isEqual` which checks if two boolean expressions are logically equivalent
+- Added `bool.truthTable` which calculates the truth table for one or more boolean operators
+- Added `bool.Karnaugh` which defines the Karnaugh map (or K-map) for a boolean expression and `bool.mapping` which defines a function that maps inputs to outputs based on truth tables
+- Added `bool.primeImplicants` which calculates the prime implicants of a boolean expression using its Karnaugh map
+- Added `bool.toCNF` which converts a boolean expression to conjunctive normal form and `bool.toDNF` which converts a boolean expression to disjunctive normal form
+- Added `bool.modeConfig` which can change the mode of the `bool` commands to output either `1`/`0` (which is `"binary"` mode) or `true`/`false` (which is `"boolean"` mode)
+- Added `numb.toBinary`, `numb.toHexadecimal`, and `numb.toOctal` which convert numbers from decimal representation to binary, hexadecimal, or octal representations
+- Added `numb.toDecimal` which converts a number from another representation back to decimal representation
+- Added `real.absolute`, `real.add`, `real.compose`, `real.div`, `real.mul`, `real.negate`, `real.pow` `real.reciprocate`, `real.scl`, `real.sub`, and `real.translate` which calculate the absolute value of a function, the addition of two functions, the composition of two functions, the division of two functions, the multiplication of two functions, the negation of a function, the exponentation of a function, the reciprocation of a function, the scalar multiplication of a function, the subtraction of two functions, and the translation of a function, respectively
+- Added `real.polynomial` which defines a polynomial function based on inputted coefficients, and added `real.randomPolynomial` which defines a polynomial of a specified degree with random coefficients
+- Changed `real.define` to be written more efficiently
+- Changed `stat.random` to have its first parameter be the length of the array instead of the last
+- Fixed `comp.pow`, `matr.norm`, `matr.normsq`, `plot.definition`, and `stat.regression` which were throwing type errors because of the updated `real.pow` function which can now handle not only numbers but also functions
+- Fixed `comp.zero`, `quat.zero`, and `vect.zero` which were unnecessarily using erasing operations
+
+## [v2.2.0 Galois](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0) - 04/07/2025
 The twelfth release of the Chalkboard library.
 Commits: [`v2.1.0...v2.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.1.0...v2.2.0)
 - Added abstract algebra functionalities with the new `abal` category containing 76 commands, so only a few notable ones are mentioned below
@@ -42,6 +63,7 @@ Commits: [`v2.1.0...v2.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Fixed `matr.resize` which was always returning zero matrices
 - Fixed `matr.zero` which was unnecessarily using erasing operations
 - Fixed `tens.init` which had an expression assigned to itself
+- Fixed `geom.rectangularprismA` thanks to @gyang0's contribution [here](https://github.com/Zushah/Chalkboard/pull/5)
 
 ## [v2.1.0 Seki](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0) - 01/22/2024
 The eleventh release of the Chalkboard library.

@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Complex Numbers Namespace
-    Version 2.2.0 Galois
+    Version 2.3.0 Boole
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -556,7 +556,7 @@ namespace Chalkboard {
          * @returns {ChalkboadVector}
          * @example
          * // Returns the 2D vector (3, 4)
-         * const vector = Chalkboard.comp.toVector(Chalkboard.comp.init(3, 4));
+         * const v = Chalkboard.comp.toVector(Chalkboard.comp.init(3, 4));
          */
         export const toVector = (comp: ChalkboardComplex): ChalkboardVector => {
             return Chalkboard.vect.init(comp.a, comp.b);

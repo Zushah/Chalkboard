@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.2.0 Galois Example Program: Newton's Method
+    Version 2.3.0 Boole Example Program: Newton's Method
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -12,8 +12,7 @@ canvas.height = window.innerHeight;
 const cb = Chalkboard; // Initialize Chalkboard as cb
 
 // Random fourth-degree polynomial
-const c = cb.stat.random(-3, 3, 5);
-const f = cb.real.define(c[0] + " * x * x * x * x + " + c[1] + " * x * x * x + " + c[2] + " * x * x + " + c[3] + " * x + " + c[4]);
+const f = cb.real.randomPolynomial(4, -3, 3);
 
 // Newton's method's solution and tangent line
 const root = cb.calc.Newton(f, [-5, 5]);
@@ -26,14 +25,12 @@ function main() {
 
     // Draw the polynomial
     cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", lineWidth: 4});
-    ctx.fillStyle = "rgb(0, 0, 0)";
-    ctx.font = "50px Times New Roman";
-    ctx.fillText("f(x) = " + c[0].toFixed(2) + "x⁴ + " + c[1].toFixed(2) + "x³ + " + c[2].toFixed(2) + "x² + " + c[3].toFixed(2) + "x + " + c[4].toFixed(2), 20, 70);
     
     // Draw the solution and the tangent line if the solution is correct
+    ctx.fillStyle = "rgb(0, 0, 0)";
+    ctx.font = "50px Times New Roman";
     if (cb.real.val(f, root).toFixed(1) == 0) {
-        ctx.fillText("y = " + cb.calc.dfdx(f, root).toFixed(2) + "x - " + (cb.calc.dfdx(f, root) * root).toFixed(2), 20, 120);
-        ctx.fillText("A possible root is at x = " + root.toFixed(2), 20, 170);
+        ctx.fillText("A possible root is at x = " + root.toFixed(2), 20, 70);
         cb.plot.definition(y, {strokeStyle: "rgb(255, 100, 100)", lineWidth: 4});
         ctx.save();
         ctx.translate(canvas.width / 2, canvas.height / 2);
@@ -43,8 +40,7 @@ function main() {
         ctx.fill();
         ctx.restore();
     } else {
-        ctx.fillText("y = " + cb.calc.dfdx(f, root).toFixed(2) + "x - " + (cb.calc.dfdx(f, root) * root + cb.real.val(f, root)).toFixed(2), 20, 120);
-        ctx.fillText("A possible root was not found", 20, 170);
+        ctx.fillText("A possible root was not found", 20, 70);
     }
 }
 main();

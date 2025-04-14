@@ -107,6 +107,18 @@ var Chalkboard;
         if (exponent === void 0) { exponent = 1; }
         return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
     };
+    Chalkboard.I = function (exponent) {
+        if (exponent === void 0) { exponent = 1; }
+        if (exponent % 4 === 0)
+            return Chalkboard.comp.init(1, 0);
+        if (exponent % 4 === 1)
+            return Chalkboard.comp.init(0, 1);
+        if (exponent % 4 === 2)
+            return Chalkboard.comp.init(-1, 0);
+        if (exponent % 4 === 3)
+            return Chalkboard.comp.init(0, -1);
+        return Chalkboard.comp.init(0, 0);
+    };
     Chalkboard.LOGO = function (x, y, size, context) {
         if (x === void 0) { x = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.width / 2; }
         if (y === void 0) { y = Chalkboard.real.parse(Chalkboard.CONTEXT).canvas.height / 2; }
@@ -150,10 +162,10 @@ var Chalkboard;
             Chalkboard.VERSION +
             " " +
             Chalkboard.VERSIONALIAS +
-            " released 04/07/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
+            " released 04/14/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
     };
-    Chalkboard.VERSION = "2.2.0";
-    Chalkboard.VERSIONALIAS = "Galois";
+    Chalkboard.VERSION = "2.3.0";
+    Chalkboard.VERSIONALIAS = "Boole";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined") {
     module.exports = Chalkboard;
@@ -1685,6 +1697,1017 @@ var Chalkboard;
 })(Chalkboard || (Chalkboard = {}));
 var Chalkboard;
 (function (Chalkboard) {
+    var bool;
+    (function (bool) {
+        var $ = function (x) { return mode === "boolean" ? x : (x ? 1 : 0); };
+        bool.AND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            var result = true;
+            for (var i = 0; i < vals.length; i++) {
+                var current = vals[i] === true || vals[i] === 1;
+                if (!current) {
+                    result = false;
+                    break;
+                }
+            }
+            return $(result);
+        };
+        bool.BICOND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length === 0)
+                return $(true);
+            var first = (vals[0] === true || vals[0] === 1);
+            for (var i = 1; i < vals.length; i++) {
+                var current = (vals[i] === true || vals[i] === 1);
+                if (first !== current)
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.COND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length < 2)
+                return $(true);
+            for (var i = 0; i < vals.length - 1; i++) {
+                var xp = (vals[i] === true || vals[i] === 1);
+                var xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (xp && !xq)
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.CONV = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length < 2)
+                return $(true);
+            for (var i = 0; i < vals.length - 1; i++) {
+                var xp = (vals[i] === true || vals[i] === 1);
+                var xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (xq && !xp)
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.isEqual = function (expr1, expr2) {
+            var variables = [];
+            var varextract = function (expr) {
+                var ast = Chalkboard.bool.parse(expr, {}, true);
+                var traverse = function (node) {
+                    if (node.type === "var" && !variables.includes(node.name)) {
+                        variables.push(node.name);
+                    }
+                    else if (node.type === "not") {
+                        traverse(node.expr);
+                    }
+                    else if (node.type === "and" || node.type === "or") {
+                        traverse(node.left);
+                        traverse(node.right);
+                    }
+                };
+                traverse(ast);
+            };
+            varextract(expr1);
+            varextract(expr2);
+            var generateAssignments = function (vars, index, current) {
+                var _a, _b;
+                if (index === void 0) { index = 0; }
+                if (current === void 0) { current = {}; }
+                if (index >= vars.length)
+                    return [current];
+                var withTrue = __assign(__assign({}, current), (_a = {}, _a[vars[index]] = true, _a));
+                var withFalse = __assign(__assign({}, current), (_b = {}, _b[vars[index]] = false, _b));
+                return __spreadArray(__spreadArray([], generateAssignments(vars, index + 1, withTrue), true), generateAssignments(vars, index + 1, withFalse), true);
+            };
+            var assignments = generateAssignments(variables);
+            for (var _i = 0, assignments_1 = assignments; _i < assignments_1.length; _i++) {
+                var assignment = assignments_1[_i];
+                var result1 = Chalkboard.bool.parse(expr1, assignment);
+                var result2 = Chalkboard.bool.parse(expr2, assignment);
+                if (result1 !== result2)
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.Karnaugh = function (input, variables) {
+            var n = variables.length;
+            if (n !== 2 && n !== 3 && n !== 4) {
+                throw new Error("Chalkboard.bool.Karnaugh only supports 2, 3, or 4 variables.");
+            }
+            var rowvars;
+            var colvars;
+            var rows;
+            var cols;
+            var grayCodes = function (bits) {
+                if (bits === 0)
+                    return [""];
+                var prev = grayCodes(bits - 1);
+                var result = [];
+                for (var _i = 0, prev_1 = prev; _i < prev_1.length; _i++) {
+                    var code = prev_1[_i];
+                    result.push("0" + code);
+                }
+                for (var _a = 0, _b = prev.slice().reverse(); _a < _b.length; _a++) {
+                    var code = _b[_a];
+                    result.push("1" + code);
+                }
+                return result;
+            };
+            if (n === 2) {
+                rowvars = [variables[0]];
+                colvars = [variables[1]];
+                rows = grayCodes(1);
+                cols = grayCodes(1);
+            }
+            else if (n === 3) {
+                rowvars = [variables[0]];
+                colvars = variables.slice(1);
+                rows = grayCodes(1);
+                cols = grayCodes(2);
+            }
+            else {
+                rowvars = variables.slice(0, 2);
+                colvars = variables.slice(2);
+                rows = grayCodes(2);
+                cols = grayCodes(2);
+            }
+            var result = [];
+            for (var _i = 0, rows_1 = rows; _i < rows_1.length; _i++) {
+                var r = rows_1[_i];
+                var row = [];
+                for (var _a = 0, cols_1 = cols; _a < cols_1.length; _a++) {
+                    var c = cols_1[_a];
+                    var values = {};
+                    for (var i = 0; i < rowvars.length; i++) {
+                        values[rowvars[i]] = r[i] === "1";
+                    }
+                    for (var j = 0; j < colvars.length; j++) {
+                        values[colvars[j]] = c[j] === "1";
+                    }
+                    var parsed = Chalkboard.bool.parse(input, values);
+                    var booled = parsed === true || parsed === 1;
+                    row.push($(booled));
+                }
+                result.push(row);
+            }
+            return result;
+        };
+        bool.mapping = function (inputs, outputs) {
+            if (inputs.length !== outputs.length) {
+                throw new Error('Parameter "inputs" and "outputs" must have the same length.');
+            }
+            if (inputs.length === 0) {
+                throw new Error('Parameter "inputs" and "outputs" cannot be empty.');
+            }
+            var m = inputs[0].length;
+            var n = outputs[0].length;
+            for (var _i = 0, inputs_1 = inputs; _i < inputs_1.length; _i++) {
+                var row = inputs_1[_i];
+                if (row.length !== m) {
+                    throw new Error('Parameter "inputs" must have the same length for each row.');
+                }
+            }
+            for (var _a = 0, outputs_1 = outputs; _a < outputs_1.length; _a++) {
+                var row = outputs_1[_a];
+                if (row.length !== n) {
+                    throw new Error('Parameter "outputs" must have the same length for each row.');
+                }
+            }
+            var variables = Array.from({ length: m }, function (_, i) { return String.fromCharCode(97 + i); });
+            var expressions = [];
+            for (var outCol = 0; outCol < n; outCol++) {
+                var trueRows = [];
+                for (var row = 0; row < inputs.length; row++) {
+                    if (outputs[row][outCol] === true || outputs[row][outCol] === 1) {
+                        trueRows.push(row);
+                    }
+                }
+                if (trueRows.length === 0) {
+                    expressions.push("false");
+                    continue;
+                }
+                if (trueRows.length === inputs.length) {
+                    expressions.push("true");
+                    continue;
+                }
+                var terms = [];
+                for (var _b = 0, trueRows_1 = trueRows; _b < trueRows_1.length; _b++) {
+                    var row = trueRows_1[_b];
+                    var literals = [];
+                    for (var i = 0; i < m; i++) {
+                        var value = inputs[row][i] === true || inputs[row][i] === 1;
+                        literals.push(value ? variables[i] : "!".concat(variables[i]));
+                    }
+                    terms.push("(".concat(literals.join(" & "), ")"));
+                }
+                var expr = terms.join(" | ");
+                if (m <= 4) {
+                    expressions.push(Chalkboard.bool.minimize(expr, variables));
+                }
+                else {
+                    expressions.push(expr);
+                }
+            }
+            return function () {
+                var args = [];
+                for (var _i = 0; _i < arguments.length; _i++) {
+                    args[_i] = arguments[_i];
+                }
+                if (args.length !== m) {
+                    throw new Error("Expected ".concat(m, " arguments, but got ").concat(args.length, "."));
+                }
+                var values = {};
+                for (var i = 0; i < m; i++) {
+                    values[variables[i]] = args[i];
+                }
+                return expressions.map(function (expr) {
+                    var parsed = Chalkboard.bool.parse(expr, values);
+                    var booled = parsed === true || parsed === 1;
+                    return $(booled);
+                });
+            };
+        };
+        bool.minimize = function (input, variables) {
+            if (variables.length === 0) {
+                var result = Chalkboard.bool.parse(input, {});
+                return result ? "true" : "false";
+            }
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
+                throw new Error("Chalkboard.bool.minimize only supports 2, 3, or 4 variables.");
+            }
+            try {
+                var primes = Chalkboard.bool.primeImplicants(input, variables);
+                if (primes.length === 0) {
+                    return "false";
+                }
+                if (primes.some(function (term) { return term === "true"; })) {
+                    return "true";
+                }
+                return Chalkboard.bool.parse(primes.join(" | "));
+            }
+            catch (e) {
+                if (e instanceof Error) {
+                    throw new Error("Error minimizing expression: ".concat(e.message));
+                }
+                else {
+                    throw new Error("Error minimizing expression: ".concat(String(e)));
+                }
+            }
+        };
+        var mode = "boolean";
+        bool.modeConfig = function (config) {
+            if (config !== "boolean" && config !== "binary") {
+                throw new Error('The mode must be either "boolean" or "binary".');
+            }
+            mode = config;
+        };
+        bool.NAND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            var andResult = bool.AND.apply(void 0, vals);
+            return $(!(andResult === true || andResult === 1));
+        };
+        bool.NBICOND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            var bicondResult = bool.BICOND.apply(void 0, vals);
+            return $(!(bicondResult === true || bicondResult === 1));
+        };
+        bool.NCOND = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length < 2)
+                return $(false);
+            for (var i = 0; i < vals.length - 1; i++) {
+                var xp = (vals[i] === true || vals[i] === 1);
+                var xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (!(xp && !xq))
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.NCONV = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length < 2)
+                return $(false);
+            for (var i = 0; i < vals.length - 1; i++) {
+                var xp = (vals[i] === true || vals[i] === 1);
+                var xq = (vals[i + 1] === true || vals[i + 1] === 1);
+                if (!(xq && !xp))
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.NOR = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            for (var i = 0; i < vals.length; i++) {
+                var x = (vals[i] === true || vals[i] === 1);
+                if (x)
+                    return $(false);
+            }
+            return $(true);
+        };
+        bool.NOT = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            if (vals.length === 0)
+                return $(true);
+            var result = true;
+            for (var i = 0; i < vals.length; i++) {
+                var x = (vals[i] === true || vals[i] === 1);
+                result = result && !x;
+            }
+            return $(result);
+        };
+        bool.OR = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            var result = false;
+            for (var i = 0; i < vals.length; i++) {
+                var x = (vals[i] === true || vals[i] === 1);
+                if (x) {
+                    result = true;
+                    break;
+                }
+            }
+            return $(result);
+        };
+        bool.parse = function (input, values, returnAST) {
+            if (returnAST === void 0) { returnAST = false; }
+            var tokenize = function (input) {
+                var tokens = [];
+                var i = 0;
+                while (i < input.length) {
+                    var ch = input[i];
+                    if (/\s/.test(ch)) {
+                        i++;
+                        continue;
+                    }
+                    if ("!&|()".indexOf(ch) !== -1) {
+                        tokens.push(ch);
+                        i++;
+                    }
+                    else {
+                        var name_1 = "";
+                        while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
+                            name_1 += input[i++];
+                        }
+                        tokens.push(name_1);
+                    }
+                }
+                return tokens;
+            };
+            var parseTokens = function (tokens) {
+                var pos = 0;
+                var peek = function () { return tokens[pos]; };
+                var consume = function (token) {
+                    if (token && tokens[pos] !== token) {
+                        throw new Error("Expected token ".concat(token, " but found ").concat(tokens[pos]));
+                    }
+                    return tokens[pos++];
+                };
+                var parseExpression = function () { return parseOr(); };
+                var parseOr = function () {
+                    var node = parseAnd();
+                    while (peek() === "|") {
+                        consume("|");
+                        node = { type: "or", left: node, right: parseAnd() };
+                    }
+                    return node;
+                };
+                var parseAnd = function () {
+                    var node = parseNot();
+                    while (peek() === "&") {
+                        consume("&");
+                        node = { type: "and", left: node, right: parseNot() };
+                    }
+                    return node;
+                };
+                var parseNot = function () {
+                    if (peek() === "!") {
+                        consume("!");
+                        return { type: "not", expr: parseNot() };
+                    }
+                    return parsePrimary();
+                };
+                var parsePrimary = function () {
+                    var token = peek();
+                    if (token === "(") {
+                        consume("(");
+                        var node = parseExpression();
+                        consume(")");
+                        return node;
+                    }
+                    if (token === "true") {
+                        consume();
+                        return { type: "bool", value: true };
+                    }
+                    if (token === "false") {
+                        consume();
+                        return { type: "bool", value: false };
+                    }
+                    consume();
+                    return { type: "var", name: token };
+                };
+                var ast = parseExpression();
+                if (pos < tokens.length)
+                    throw new Error("Unexpected tokens at end");
+                return ast;
+            };
+            var nodeEqual = function (a, b) {
+                if (a.type !== b.type)
+                    return false;
+                switch (a.type) {
+                    case "bool":
+                        return a.value === b.value;
+                    case "var":
+                        return a.name === b.name;
+                    case "not":
+                        return nodeEqual(a.expr, b.expr);
+                    case "and":
+                    case "or":
+                        return nodeEqual(a.left, b.left) && nodeEqual(a.right, b.right);
+                }
+                return false;
+            };
+            var nodeToString = function (node) {
+                switch (node.type) {
+                    case "bool":
+                        return node.value ? "true" : "false";
+                    case "var":
+                        return node.name;
+                    case "not":
+                        var inner = node.expr.type === "var" ?
+                            nodeToString(node.expr) :
+                            "(".concat(nodeToString(node.expr), ")");
+                        return "!".concat(inner);
+                    case "and":
+                        var leftAnd = node.left.type === "or" ?
+                            "(".concat(nodeToString(node.left), ")") :
+                            nodeToString(node.left);
+                        var rightAnd = node.right.type === "or" ?
+                            "(".concat(nodeToString(node.right), ")") :
+                            nodeToString(node.right);
+                        return "".concat(leftAnd, " & ").concat(rightAnd);
+                    case "or":
+                        return "".concat(nodeToString(node.left), " | ").concat(nodeToString(node.right));
+                }
+                return "";
+            };
+            var getAndFactors = function (node) {
+                if (node.type === "and") {
+                    return __spreadArray(__spreadArray([], getAndFactors(node.left), true), getAndFactors(node.right), true);
+                }
+                return [node];
+            };
+            var detectTautology = function (left, right) {
+                if (left.type === "not" && right.type === "var" &&
+                    nodeEqual(left.expr, right)) {
+                    return true;
+                }
+                if (right.type === "not" && left.type === "var" &&
+                    nodeEqual(right.expr, left)) {
+                    return true;
+                }
+                return false;
+            };
+            var simplifyOrNode = function (node) {
+                if (node.type !== "or")
+                    return node;
+                var left = simplifyNode(node.left);
+                var right = simplifyNode(node.right);
+                if (detectTautology(left, right)) {
+                    return { type: "bool", value: true };
+                }
+                if (left.type === "bool" && left.value === true)
+                    return { type: "bool", value: true };
+                if (right.type === "bool" && right.value === true)
+                    return { type: "bool", value: true };
+                if (left.type === "bool" && left.value === false)
+                    return right;
+                if (right.type === "bool" && right.value === false)
+                    return left;
+                var leftFactors = left.type === "and" ? getAndFactors(left) : [left];
+                var rightFactors = right.type === "and" ? getAndFactors(right) : [right];
+                var commons = [];
+                leftFactors.forEach(function (fa) {
+                    if (rightFactors.some(function (fb) { return nodeEqual(fa, fb); }) &&
+                        !commons.some(function (c) { return nodeEqual(c, fa); })) {
+                        commons.push(fa);
+                    }
+                });
+                for (var i = 0; i < leftFactors.length; i++) {
+                    for (var j = 0; j < rightFactors.length; j++) {
+                        if (detectTautology(leftFactors[i], rightFactors[j])) {
+                            return commons.length === 0 ?
+                                { type: "bool", value: true } :
+                                commons.reduce(function (acc, cur) { return ({ type: "and", left: acc, right: cur }); });
+                        }
+                    }
+                }
+                if (commons.length > 0) {
+                    var removeCommon = function (factors) {
+                        var remaining = factors.filter(function (f) {
+                            return !commons.some(function (c) { return nodeEqual(c, f); });
+                        });
+                        if (remaining.length === 0)
+                            return { type: "bool", value: true };
+                        if (remaining.length === 1)
+                            return remaining[0];
+                        return remaining.reduce(function (acc, cur) {
+                            return ({ type: "and", left: acc, right: cur });
+                        });
+                    };
+                    var newLeft = removeCommon(leftFactors);
+                    var newRight = removeCommon(rightFactors);
+                    var combined = void 0;
+                    if ((newLeft.type === "bool" && newLeft.value === true) ||
+                        (newRight.type === "bool" && newRight.value === true)) {
+                        combined = { type: "bool", value: true };
+                    }
+                    else {
+                        combined = { type: "or", left: newLeft, right: newRight };
+                    }
+                    return commons.reduce(function (acc, cur) {
+                        return ({ type: "and", left: acc, right: cur });
+                    }, combined);
+                }
+                return { type: "or", left: left, right: right };
+            };
+            var simplifyNode = function (node) {
+                switch (node.type) {
+                    case "bool":
+                    case "var":
+                        return node;
+                    case "not":
+                        var expr = simplifyNode(node.expr);
+                        if (expr.type === "not")
+                            return simplifyNode(expr.expr);
+                        if (expr.type === "bool")
+                            return { type: "bool", value: !expr.value };
+                        return { type: "not", expr: expr };
+                    case "and":
+                        var left = simplifyNode(node.left);
+                        var right = simplifyNode(node.right);
+                        if ((left.type === "bool" && left.value === false) ||
+                            (right.type === "bool" && right.value === false)) {
+                            return { type: "bool", value: false };
+                        }
+                        if (left.type === "bool" && left.value === true)
+                            return right;
+                        if (right.type === "bool" && right.value === true)
+                            return left;
+                        if (nodeEqual(left, right))
+                            return left;
+                        if ((left.type === "not" && nodeEqual(left.expr, right)) ||
+                            (right.type === "not" && nodeEqual(right.expr, left))) {
+                            return { type: "bool", value: false };
+                        }
+                        return { type: "and", left: left, right: right };
+                    case "or":
+                        return simplifyOrNode(node);
+                }
+                return node;
+            };
+            var evaluateNode = function (node, values) {
+                switch (node.type) {
+                    case "bool":
+                        return node.value;
+                    case "var":
+                        var varname = node.name;
+                        if (!(varname in values)) {
+                            throw new Error("Variable \"".concat(varname, "\" not defined in values"));
+                        }
+                        var value = values[varname];
+                        return value === true || value === 1;
+                    case "not":
+                        return !evaluateNode(node.expr, values);
+                    case "and":
+                        return evaluateNode(node.left, values) && evaluateNode(node.right, values);
+                    case "or":
+                        return evaluateNode(node.left, values) || evaluateNode(node.right, values);
+                }
+                throw new Error("Unknown node type: ".concat(node.type));
+            };
+            try {
+                var tokens = tokenize(input);
+                var ast = parseTokens(tokens);
+                if (values && Object.keys(values).length > 0) {
+                    return $(evaluateNode(ast, values));
+                }
+                var simplified = simplifyNode(ast);
+                if (returnAST) {
+                    return simplified;
+                }
+                return nodeToString(simplified);
+            }
+            catch (err) {
+                if (err instanceof Error) {
+                    throw new Error("Error parsing expression: ".concat(err.message));
+                }
+                else {
+                    throw new Error("Error parsing expression: ".concat(String(err)));
+                }
+            }
+        };
+        bool.primeImplicants = function (input, variables) {
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
+                throw new Error("Chalkboard.bool.primeImplicants only supports 2, 3, or 4 variables.");
+            }
+            var kmap = Chalkboard.bool.Karnaugh(input, variables);
+            var grayCodes = function (bits) {
+                if (bits === 0)
+                    return [""];
+                var prev = grayCodes(bits - 1);
+                var result = [];
+                for (var _i = 0, prev_2 = prev; _i < prev_2.length; _i++) {
+                    var code = prev_2[_i];
+                    result.push("0" + code);
+                }
+                for (var _a = 0, _b = prev.slice().reverse(); _a < _b.length; _a++) {
+                    var code = _b[_a];
+                    result.push("1" + code);
+                }
+                return result;
+            };
+            var rowbits, colbits;
+            var rowvars, colvars;
+            if (variables.length === 2) {
+                rowbits = 1;
+                colbits = 1;
+                rowvars = [variables[0]];
+                colvars = [variables[1]];
+            }
+            else if (variables.length === 3) {
+                rowbits = 1;
+                colbits = 2;
+                rowvars = [variables[0]];
+                colvars = variables.slice(1);
+            }
+            else {
+                rowbits = 2;
+                colbits = 2;
+                rowvars = variables.slice(0, 2);
+                colvars = variables.slice(2);
+            }
+            var rows = grayCodes(rowbits);
+            var cols = grayCodes(colbits);
+            var cells = [];
+            for (var i = 0; i < rows.length; i++) {
+                for (var j = 0; j < cols.length; j++) {
+                    if (kmap[i][j] === true || kmap[i][j] === 1) {
+                        cells.push({ row: i, col: j, rowcode: rows[i], colcode: cols[j] });
+                    }
+                }
+            }
+            var isAdjacent = function (c1, c2) {
+                var rowdiff = c1.row === rows.length - 1 && c2.row === 0 || c2.row === rows.length - 1 && c1.row === 0 ? 1 : Math.abs(c1.row - c2.row);
+                var coldiff = c1.col === cols.length - 1 && c2.col === 0 || c2.col === cols.length - 1 && c1.col === 0 ? 1 : Math.abs(c1.col - c2.col);
+                return (rowdiff === 1 && coldiff === 0) || (rowdiff === 0 && coldiff === 1);
+            };
+            var isGroup = function (groupcells) {
+                var size = groupcells.length;
+                if ((size & (size - 1)) !== 0)
+                    return false;
+                if (size === 1)
+                    return true;
+                var uniquerows = new Set(groupcells.map(function (c) { return c.row; })).size;
+                var uniquecols = new Set(groupcells.map(function (c) { return c.col; })).size;
+                var rowswrap = groupcells.some(function (c) { return c.row === 0; }) && groupcells.some(function (c) { return c.row === rows.length - 1; });
+                var colswrap = groupcells.some(function (c) { return c.col === 0; }) && groupcells.some(function (c) { return c.col === cols.length - 1; });
+                var effectiverows = rowswrap ? 1 : uniquerows;
+                var effectivecols = colswrap ? 1 : uniquecols;
+                var isRectangle = (size === effectiverows * effectivecols) && (size === 1 || size === 2 || size === 4 || size === 8 || size === 16);
+                if (!isRectangle)
+                    return false;
+                var visited = new Set();
+                var queue = [groupcells[0]];
+                visited.add("".concat(groupcells[0].row, ",").concat(groupcells[0].col));
+                while (queue.length > 0) {
+                    var current = queue.shift();
+                    for (var _i = 0, groupcells_1 = groupcells; _i < groupcells_1.length; _i++) {
+                        var neighbor = groupcells_1[_i];
+                        var key = "".concat(neighbor.row, ",").concat(neighbor.col);
+                        if (!visited.has(key) && isAdjacent(current, neighbor)) {
+                            visited.add(key);
+                            queue.push(neighbor);
+                        }
+                    }
+                }
+                return visited.size === size;
+            };
+            var generateGroups = function () {
+                var groups = [];
+                var maxsize = Chalkboard.stat.min([16, Chalkboard.real.pow(2, variables.length)]);
+                for (var _i = 0, cells_1 = cells; _i < cells_1.length; _i++) {
+                    var cell = cells_1[_i];
+                    groups.push({
+                        cells: [cell],
+                        size: 1,
+                        term: ""
+                    });
+                }
+                var _loop_1 = function (size) {
+                    var prevgroups = groups.filter(function (g) { return g.size === size / 2; });
+                    for (var i = 0; i < prevgroups.length; i++) {
+                        for (var j = i + 1; j < prevgroups.length; j++) {
+                            var group1 = prevgroups[i];
+                            var group2 = prevgroups[j];
+                            var merged = __spreadArray(__spreadArray([], group1.cells, true), group2.cells, true);
+                            var unique = new Set(merged.map(function (c) { return "".concat(c.row, ",").concat(c.col); }));
+                            if (unique.size === size && isGroup(merged)) {
+                                groups.push({
+                                    cells: merged,
+                                    size: size,
+                                    term: ""
+                                });
+                            }
+                        }
+                    }
+                };
+                for (var size = 2; size <= maxsize; size *= 2) {
+                    _loop_1(size);
+                }
+                return groups;
+            };
+            var groups = generateGroups();
+            var primes = [];
+            groups.sort(function (a, b) { return b.size - a.size; });
+            var covered = new Set();
+            for (var _i = 0, groups_1 = groups; _i < groups_1.length; _i++) {
+                var group = groups_1[_i];
+                var uncovered = group.cells.some(function (cell) { return !covered.has("".concat(cell.row, ",").concat(cell.col)); });
+                if (uncovered) {
+                    primes.push(group);
+                    group.cells.forEach(function (cell) { return covered.add("".concat(cell.row, ",").concat(cell.col)); });
+                }
+            }
+            primes.forEach(function (group) {
+                var constants = {};
+                variables.forEach(function (variable) {
+                    constants[variable] = true;
+                });
+                var _loop_2 = function (i) {
+                    var varname = rowvars[i];
+                    var values = new Set(group.cells.map(function (c) { return c.rowcode[i]; }));
+                    if (values.size > 1) {
+                        constants[varname] = false;
+                    }
+                };
+                for (var i = 0; i < rowvars.length; i++) {
+                    _loop_2(i);
+                }
+                var _loop_3 = function (i) {
+                    var varname = colvars[i];
+                    var values = new Set(group.cells.map(function (c) { return c.colcode[i]; }));
+                    if (values.size > 1) {
+                        constants[varname] = false;
+                    }
+                };
+                for (var i = 0; i < colvars.length; i++) {
+                    _loop_3(i);
+                }
+                var terms = [];
+                for (var _i = 0, _a = Object.entries(constants); _i < _a.length; _i++) {
+                    var _b = _a[_i], varname = _b[0], isConstant = _b[1];
+                    if (isConstant) {
+                        var sampleCell = group.cells[0];
+                        var value = void 0;
+                        var rowindex = rowvars.indexOf(varname);
+                        if (rowindex >= 0) {
+                            value = sampleCell.rowcode[rowindex] === '1';
+                        }
+                        else {
+                            var colindex = colvars.indexOf(varname);
+                            value = sampleCell.colcode[colindex] === '1';
+                        }
+                        terms.push(value ? varname : "!".concat(varname));
+                    }
+                }
+                group.term = terms.length > 0 ? terms.join(" & ") : "true";
+            });
+            return primes.map(function (group) { return group.term; });
+        };
+        bool.toCNF = function (input) {
+            var simplified = Chalkboard.bool.parse(input);
+            if (simplified.includes(" & ") && !simplified.includes(" | ")) {
+                return simplified;
+            }
+            var ast = Chalkboard.bool.parse(input, {}, true);
+            var convertToCNF = function (node) {
+                switch (node.type) {
+                    case "bool":
+                    case "var":
+                        return node;
+                    case "not":
+                        if (node.expr.type === "not") {
+                            return convertToCNF(node.expr.expr);
+                        }
+                        else if (node.expr.type === "and") {
+                            return convertToCNF({
+                                type: "or",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        else if (node.expr.type === "or") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        return { type: "not", expr: convertToCNF(node.expr) };
+                    case "and":
+                        var leftCNF = convertToCNF(node.left);
+                        var rightCNF = convertToCNF(node.right);
+                        return { type: "and", left: leftCNF, right: rightCNF };
+                    case "or":
+                        var left = convertToCNF(node.left);
+                        var right = convertToCNF(node.right);
+                        if (right.type === "and") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "or", left: left, right: right.left },
+                                right: { type: "or", left: left, right: right.right }
+                            });
+                        }
+                        if (left.type === "and") {
+                            return convertToCNF({
+                                type: "and",
+                                left: { type: "or", left: left.left, right: right },
+                                right: { type: "or", left: left.right, right: right }
+                            });
+                        }
+                        return { type: "or", left: left, right: right };
+                }
+                return node;
+            };
+            var cnfAST = convertToCNF(ast);
+            var nodeToString = function (node) {
+                switch (node.type) {
+                    case "bool":
+                        return node.value ? "true" : "false";
+                    case "var":
+                        return node.name;
+                    case "not":
+                        var innerExpr = node.expr.type === "var" ?
+                            nodeToString(node.expr) :
+                            "(".concat(nodeToString(node.expr), ")");
+                        return "!".concat(innerExpr);
+                    case "and":
+                        return "".concat(nodeToString(node.left), " & ").concat(nodeToString(node.right));
+                    case "or":
+                        return "(".concat(nodeToString(node.left), " | ").concat(nodeToString(node.right), ")");
+                }
+                return "";
+            };
+            return nodeToString(cnfAST);
+        };
+        bool.toDNF = function (input) {
+            var simplified = Chalkboard.bool.parse(input);
+            if (simplified.includes(" | ") && !simplified.includes(" & ")) {
+                return simplified;
+            }
+            var ast = Chalkboard.bool.parse(input, {}, true);
+            var convertToDNF = function (node) {
+                switch (node.type) {
+                    case "bool":
+                    case "var":
+                        return node;
+                    case "not":
+                        if (node.expr.type === "not") {
+                            return convertToDNF(node.expr.expr);
+                        }
+                        else if (node.expr.type === "and") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        else if (node.expr.type === "or") {
+                            return convertToDNF({
+                                type: "and",
+                                left: { type: "not", expr: node.expr.left },
+                                right: { type: "not", expr: node.expr.right }
+                            });
+                        }
+                        return { type: "not", expr: convertToDNF(node.expr) };
+                    case "or":
+                        var leftDNF = convertToDNF(node.left);
+                        var rightDNF = convertToDNF(node.right);
+                        return { type: "or", left: leftDNF, right: rightDNF };
+                    case "and":
+                        var left = convertToDNF(node.left);
+                        var right = convertToDNF(node.right);
+                        if (right.type === "or") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "and", left: left, right: right.left },
+                                right: { type: "and", left: left, right: right.right }
+                            });
+                        }
+                        if (left.type === "or") {
+                            return convertToDNF({
+                                type: "or",
+                                left: { type: "and", left: left.left, right: right },
+                                right: { type: "and", left: left.right, right: right }
+                            });
+                        }
+                        return { type: "and", left: left, right: right };
+                }
+                return node;
+            };
+            var dnfAST = convertToDNF(ast);
+            var nodeToString = function (node) {
+                switch (node.type) {
+                    case "bool":
+                        return node.value ? "true" : "false";
+                    case "var":
+                        return node.name;
+                    case "not":
+                        var innerExpr = node.expr.type === "var" ?
+                            nodeToString(node.expr) :
+                            "(".concat(nodeToString(node.expr), ")");
+                        return "!".concat(innerExpr);
+                    case "and":
+                        var leftAnd = nodeToString(node.left);
+                        var rightAnd = nodeToString(node.right);
+                        return "(".concat(leftAnd, " & ").concat(rightAnd, ")");
+                    case "or":
+                        return "".concat(nodeToString(node.left), " | ").concat(nodeToString(node.right));
+                }
+                return "";
+            };
+            return nodeToString(dnfAST);
+        };
+        bool.truthTable = function () {
+            var operations = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                operations[_i] = arguments[_i];
+            }
+            var result = [];
+            var inputs = [false, true];
+            for (var _a = 0, inputs_2 = inputs; _a < inputs_2.length; _a++) {
+                var p = inputs_2[_a];
+                for (var _b = 0, inputs_3 = inputs; _b < inputs_3.length; _b++) {
+                    var q = inputs_3[_b];
+                    var row = [$(p === true), $(q === true)];
+                    for (var _c = 0, operations_1 = operations; _c < operations_1.length; _c++) {
+                        var op = operations_1[_c];
+                        var result_2 = op(p, q);
+                        row.push((result_2 === true || result_2 === 1 ? $(true) : $(false)));
+                    }
+                    result.push(row);
+                }
+            }
+            return result;
+        };
+        bool.XOR = function () {
+            var vals = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                vals[_i] = arguments[_i];
+            }
+            var count = 0;
+            for (var i = 0; i < vals.length; i++) {
+                var x = (vals[i] === true || vals[i] === 1);
+                if (x)
+                    count++;
+            }
+            return $(count % 2 === 1);
+        };
+    })(bool = Chalkboard.bool || (Chalkboard.bool = {}));
+})(Chalkboard || (Chalkboard = {}));
+var Chalkboard;
+(function (Chalkboard) {
     var calc;
     (function (calc) {
         calc.autocorrelation = function (func, val) {
@@ -2416,7 +3439,7 @@ var Chalkboard;
             }
         };
         comp_2.zero = function (comp) {
-            return Chalkboard.comp.init(comp.a * 0, comp.b * 0);
+            return Chalkboard.comp.init(0, 0);
         };
     })(comp = Chalkboard.comp || (Chalkboard.comp = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -2833,7 +3856,7 @@ var Chalkboard;
         matr_2.eigenvalue = function (matr, maxIterations) {
             if (maxIterations === void 0) { maxIterations = 100; }
             var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
-            var _loop_1 = function (i) {
+            var _loop_4 = function (i) {
                 var matrv = Chalkboard.matr.mul(matr, v);
                 var max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
                 v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
@@ -2841,7 +3864,7 @@ var Chalkboard;
                 }), Chalkboard.matr.rows(matr), 1);
             };
             for (var i = 0; i < maxIterations; i++) {
-                _loop_1(i);
+                _loop_4(i);
             }
             var dot = function (v1, v2) {
                 var result = 0;
@@ -2856,7 +3879,7 @@ var Chalkboard;
         matr_2.eigenvector = function (matr, maxIterations) {
             if (maxIterations === void 0) { maxIterations = 100; }
             var v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
-            var _loop_2 = function (i) {
+            var _loop_5 = function (i) {
                 var matrv = Chalkboard.matr.mul(matr, v);
                 var max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
                 v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map(function (i) {
@@ -2864,7 +3887,7 @@ var Chalkboard;
                 }), Chalkboard.matr.rows(matr), 1);
             };
             for (var i = 0; i < maxIterations; i++) {
-                _loop_2(i);
+                _loop_5(i);
             }
             var result = Chalkboard.matr.toArray(v);
             return result;
@@ -5059,6 +6082,35 @@ var Chalkboard;
             }
             return result;
         };
+        numb.toBinary = function (num, prefix) {
+            if (prefix === void 0) { prefix = false; }
+            if (!Number.isInteger(num))
+                throw new Error('Parameter "num" must be an integer.');
+            var result = Math.abs(num).toString(2);
+            return (prefix ? "0b" : "") + (num < 0 ? "-" : "") + result;
+        };
+        numb.toDecimal = function (num, base) {
+            if (base < 2 || base > 36)
+                throw new Error('Parameter "base" must be between 2 and 36.');
+            num = num.toLowerCase();
+            if (base === 2 && num.startsWith("0b"))
+                num = num.substring(2);
+            if (base === 8 && num.startsWith("0o"))
+                num = num.substring(2);
+            if (base === 16 && num.startsWith("0x"))
+                num = num.substring(2);
+            if (num.startsWith("-"))
+                num = num.substring(1);
+            var chars = "0123456789abcdefghijklmnopqrstuvwxyz".substring(0, base);
+            for (var _i = 0, num_1 = num; _i < num_1.length; _i++) {
+                var char = num_1[_i];
+                if (!chars.includes(char)) {
+                    throw new Error("Invalid character \"".concat(char, "\" for base ").concat(base, "."));
+                }
+            }
+            var result = parseInt(num, base);
+            return num.startsWith("-") ? -result : result;
+        };
         numb.toFraction = function (num, tolerance) {
             if (tolerance === void 0) { tolerance = 1e-8; }
             if (!isFinite(num))
@@ -5082,35 +6134,99 @@ var Chalkboard;
                 b = 1 / (b - a);
             }
         };
+        numb.toHexadecimal = function (num, prefix, uppercase) {
+            if (prefix === void 0) { prefix = false; }
+            if (uppercase === void 0) { uppercase = false; }
+            if (!Number.isInteger(num))
+                throw new Error('The parameter "num" must be an integer.');
+            var result = Math.abs(num).toString(16);
+            if (uppercase)
+                result = result.toUpperCase();
+            return (prefix ? "0x" : "") + (num < 0 ? "-" : "") + result;
+        };
+        numb.toOctal = function (num, prefix) {
+            if (prefix === void 0) { prefix = false; }
+            if (!Number.isInteger(num))
+                throw new Error('The parameter "num" must be an integer.');
+            var result = Math.abs(num).toString(8);
+            return (prefix ? "0o" : "") + (num < 0 ? "-" : "") + result;
+        };
     })(numb = Chalkboard.numb || (Chalkboard.numb = {}));
 })(Chalkboard || (Chalkboard = {}));
 var Chalkboard;
 (function (Chalkboard) {
     var real;
     (function (real) {
+        real.absolute = function (func) {
+            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
+                return Chalkboard.real.define("Math.abs(".concat(func.definition, ")"), func.type);
+            }
+            else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define(["Math.abs(".concat(func.definition[0], ")"), "Math.abs(".concat(func.definition[1], ")")], "curv");
+                }
+                else if (func.definition.length === 3) {
+                    return Chalkboard.real.define(["Math.abs(".concat(func.definition[0], ")"), "Math.abs(".concat(func.definition[1], ")"), "Math.abs(".concat(func.definition[2], ")")], "curv");
+                }
+            }
+            else if (func.type === "surf" && Array.isArray(func.definition)) {
+                return Chalkboard.real.define(["Math.abs(".concat(func.definition[0], ")"), "Math.abs(".concat(func.definition[1], ")"), "Math.abs(".concat(func.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
+        real.add = function (func1, func2) {
+            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
+                return Chalkboard.real.define("(".concat(func1.definition, ") + (").concat(func2.definition, ")"), func1.type);
+            }
+            else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2 && func2.definition.length === 2) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") + (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") + (").concat(func2.definition[1], ")")], "curv");
+                }
+                else if (func1.definition.length === 3 && func2.definition.length === 3) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") + (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") + (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") + (").concat(func2.definition[2], ")")], "curv");
+                }
+            }
+            else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                return Chalkboard.real.define(["(".concat(func1.definition[0], ") + (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") + (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") + (").concat(func2.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
+        real.compose = function (func1, func2) {
+            if (func1.type === "expl" && func2.type === "expl") {
+                return Chalkboard.real.define("(".concat(func1.definition.toString().replace(/x/g, "(".concat(func2.definition, ")")), ")"), "expl");
+            }
+            else if (func1.type === "inve" && func2.type === "inve") {
+                return Chalkboard.real.define("(".concat(func1.definition.toString().replace(/y/g, "(".concat(func2.definition, ")")), ")"), "inve");
+            }
+            else if (func1.type === "pola" && func2.type === "pola") {
+                return Chalkboard.real.define("(".concat(func1.definition.toString().replace(/O/g, "(".concat(func2.definition, ")")), ")"), "pola");
+            }
+            else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2 && func2.definition.length === 2) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0].toString().replace(/x/g, "(".concat(func2.definition[0], ")")), ")"), "(".concat(func1.definition[1].toString().replace(/y/g, "(".concat(func2.definition[1], ")")), ")")], "curv");
+                }
+                else if (func1.definition.length === 3 && func2.definition.length === 3) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0].toString().replace(/x/g, "(".concat(func2.definition[0], ")")), ")"), "(".concat(func1.definition[1].toString().replace(/y/g, "(".concat(func2.definition[1], ")")), ")"), "(".concat(func1.definition[2].toString().replace(/z/g, "(".concat(func2.definition[2], ")")), ")")], "curv");
+                }
+            }
+            else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                return Chalkboard.real.define(["(".concat(func1.definition[0].toString().replace(/x/g, "(".concat(func2.definition[0], ")")), ")"), "(".concat(func1.definition[1].toString().replace(/y/g, "(".concat(func2.definition[1], ")")), ")"), "(".concat(func1.definition[2].toString().replace(/z/g, "(".concat(func2.definition[2], ")")), ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", or "surf".');
+        };
         real.define = function (definition, type) {
             if (type === void 0) { type = "expl"; }
-            if (type === "expl") {
+            if (type === "expl" || type === "inve" || type === "pola" || type === "mult") {
                 return { definition: definition, type: type };
             }
-            else if (type === "inve") {
-                return { definition: definition, type: type };
+            else if (type === "curv" && Array.isArray(definition)) {
+                var _definition = definition.length === 2 ? [definition[0], definition[1]] : [definition[0], definition[1], definition[2]];
+                return { definition: _definition, type: type };
             }
-            else if (type === "pola") {
-                return { definition: definition, type: type };
-            }
-            else if (type === "curv") {
-                return definition.length === 2 ? { definition: [definition[0], definition[1]], type: type } : { definition: [definition[0], definition[1], definition[2]], type: type };
-            }
-            else if (type === "surf") {
+            else if (type === "surf" && Array.isArray(definition)) {
                 return { definition: [definition[0], definition[1], definition[2]], type: type };
             }
-            else if (type === "mult") {
-                return { definition: definition, type: type };
-            }
-            else {
-                throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
-            }
+            throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
         };
         real.Dirac = function (num, edge, scl) {
             if (edge === void 0) { edge = 0; }
@@ -5133,6 +6249,23 @@ var Chalkboard;
             else {
                 throw new TypeError('Parameter "form" must be "stan" or "vert".');
             }
+        };
+        real.div = function (func1, func2) {
+            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
+                return Chalkboard.real.define("(".concat(func1.definition, ") / (").concat(func2.definition, ")"), func1.type);
+            }
+            else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") / (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") / (").concat(func2.definition[1], ")")], "curv");
+                }
+                else if (func1.definition.length === 3) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") / (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") / (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") / (").concat(func2.definition[2], ")")], "curv");
+                }
+            }
+            else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                return Chalkboard.real.define(["(".concat(func1.definition[0], ") / (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") / (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") / (").concat(func2.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
         };
         real.Heaviside = function (num, edge, scl) {
             if (edge === void 0) { edge = 0; }
@@ -5170,6 +6303,26 @@ var Chalkboard;
         real.log10 = function (num) {
             return Chalkboard.real.log(10, num);
         };
+        real.mul = function (func1, func2) {
+            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
+                return Chalkboard.real.define("(".concat(func1.definition, ") * (").concat(func2.definition, ")"), func1.type);
+            }
+            else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") * (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") * (").concat(func2.definition[1], ")")], "curv");
+                }
+                else if (func1.definition.length === 3) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") * (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") * (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") * (").concat(func2.definition[2], ")")], "curv");
+                }
+            }
+            else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                return Chalkboard.real.define(["(".concat(func1.definition[0], ") * (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") * (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") * (").concat(func2.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
+        real.negate = function (func) {
+            return Chalkboard.real.scl(func, -1);
+        };
         real.parse = function (str) {
             return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + " return (" + str + ")")();
         };
@@ -5183,12 +6336,73 @@ var Chalkboard;
                 return scl - ((num + edge) % scl);
             }
         };
-        real.pow = function (base, num) {
-            if (base === 0 && num === 0) {
-                return 1;
+        real.polynomial = function () {
+            var coeffs = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                coeffs[_i] = arguments[_i];
+            }
+            var arr;
+            if (coeffs.length === 1 && Array.isArray(coeffs[0])) {
+                arr = coeffs[0];
             }
             else {
-                return Math.exp(num * Math.log(base));
+                arr = coeffs;
+            }
+            var result = "";
+            for (var i = 0; i < arr.length; i++) {
+                var coeff = arr[i];
+                var exponent = arr.length - i - 1;
+                if (coeff === 0 && exponent !== 0)
+                    continue;
+                if (result !== "") {
+                    result += coeff >= 0 ? " + " : " - ";
+                }
+                else if (coeff < 0) {
+                    result += "-";
+                }
+                var abscoeff = Math.abs(coeff);
+                var term = "";
+                if (exponent === 0) {
+                    term = abscoeff.toString();
+                }
+                else if (exponent === 1) {
+                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x";
+                }
+                else {
+                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x ** " + exponent;
+                }
+                result += "(" + term + ")";
+            }
+            if (result === "")
+                result = "0";
+            return Chalkboard.real.define(result, "expl");
+        };
+        real.pow = function (base, num) {
+            if (typeof base === "number") {
+                if (base === 0 && num === 0) {
+                    return 1;
+                }
+                else {
+                    return Math.exp(num * Math.log(base));
+                }
+            }
+            else {
+                var func = base;
+                if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
+                    return Chalkboard.real.define("(".concat(func.definition, ") ** ").concat(num), func.type);
+                }
+                else if (func.type === "curv" && Array.isArray(func.definition)) {
+                    if (func.definition.length === 2) {
+                        return Chalkboard.real.define(["(".concat(func.definition[0], ") ** ").concat(num), "(".concat(func.definition[1], ") ** ").concat(num)], "curv");
+                    }
+                    else if (func.definition.length === 3) {
+                        return Chalkboard.real.define(["(".concat(func.definition[0], ") ** ").concat(num), "(".concat(func.definition[1], ") ** ").concat(num), "(".concat(func.definition[2], ") ** ").concat(num)], "curv");
+                    }
+                }
+                else if (func.type === "surf" && Array.isArray(func.definition)) {
+                    return Chalkboard.real.define(["(".concat(func.definition[0], ") ** ").concat(num), "(".concat(func.definition[1], ") ** ").concat(num), "(".concat(func.definition[2], ") ** ").concat(num)], "surf");
+                }
+                throw new TypeError('Property "type" of "base" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
             }
         };
         real.qerp = function (p1, p2, p3, t) {
@@ -5235,6 +6449,29 @@ var Chalkboard;
                 return 0;
             }
         };
+        real.randomPolynomial = function (degree, inf, sup) {
+            var _a;
+            if (inf === void 0) { inf = 0; }
+            if (sup === void 0) { sup = 1; }
+            return (_a = Chalkboard.real).polynomial.apply(_a, Chalkboard.stat.random(degree + 1, inf, sup));
+        };
+        real.reciprocate = function (func) {
+            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
+                return Chalkboard.real.define("1 / (".concat(func.definition, ")"), func.type);
+            }
+            else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define(["1 / (".concat(func.definition[0], ")"), "1 / (".concat(func.definition[1], ")")], "curv");
+                }
+                else if (func.definition.length === 3) {
+                    return Chalkboard.real.define(["1 / (".concat(func.definition[0], ")"), "1 / (".concat(func.definition[1], ")"), "1 / (".concat(func.definition[2], ")")], "curv");
+                }
+            }
+            else if (func.type === "surf" && Array.isArray(func.definition)) {
+                return Chalkboard.real.define(["1 / (".concat(func.definition[0], ")"), "1 / (".concat(func.definition[1], ")"), "1 / (".concat(func.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
         real.rect = function (num, center, width, scl) {
             if (center === void 0) { center = 0; }
             if (width === void 0) { width = 2; }
@@ -5250,6 +6487,23 @@ var Chalkboard;
             if (index === void 0) { index = 3; }
             return Math.exp(Math.log(num) / index);
         };
+        real.scl = function (func, num) {
+            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
+                return Chalkboard.real.define("".concat(num, " * (").concat(func.definition, ")"), func.type);
+            }
+            else if (func.type === "curv" && Array.isArray(func.definition)) {
+                if (func.definition.length === 2) {
+                    return Chalkboard.real.define(["".concat(num, " * (").concat(func.definition[0], ")"), "".concat(num, " * (").concat(func.definition[1], ")")], "curv");
+                }
+                else if (func.definition.length === 3) {
+                    return Chalkboard.real.define(["".concat(num, " * (").concat(func.definition[0], ")"), "".concat(num, " * (").concat(func.definition[1], ")"), "".concat(num, " * (").concat(func.definition[2], ")")], "curv");
+                }
+            }
+            else if (func.type === "surf" && Array.isArray(func.definition)) {
+                return Chalkboard.real.define(["".concat(num, " * (").concat(func.definition[0], ")"), "".concat(num, " * (").concat(func.definition[1], ")"), "".concat(num, " * (").concat(func.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
         real.slope = function (x1, y1, x2, y2) {
             return (y2 - y1) / (x2 - x1);
         };
@@ -5261,6 +6515,23 @@ var Chalkboard;
                 return NaN;
             }
         };
+        real.sub = function (func1, func2) {
+            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
+                return Chalkboard.real.define("(".concat(func1.definition, ") - (").concat(func2.definition, ")"), func1.type);
+            }
+            else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                if (func1.definition.length === 2 && func2.definition.length === 2) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") - (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") - (").concat(func2.definition[1], ")")], "curv");
+                }
+                else if (func1.definition.length === 3 && func2.definition.length === 3) {
+                    return Chalkboard.real.define(["(".concat(func1.definition[0], ") - (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") - (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") - (").concat(func2.definition[2], ")")], "curv");
+                }
+            }
+            else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
+                return Chalkboard.real.define(["(".concat(func1.definition[0], ") - (").concat(func2.definition[0], ")"), "(".concat(func1.definition[1], ") - (").concat(func2.definition[1], ")"), "(".concat(func1.definition[2], ") - (").concat(func2.definition[2], ")")], "surf");
+            }
+            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
         real.tetration = function (base, num) {
             if (num === 0) {
                 return 1;
@@ -5268,6 +6539,25 @@ var Chalkboard;
             else if (num > 0) {
                 return Math.pow(base, Chalkboard.real.tetration(base, num - 1));
             }
+        };
+        real.translate = function (func, h, v) {
+            if (h === void 0) { h = 0; }
+            if (v === void 0) { v = 0; }
+            if (func.type === "expl") {
+                if (h !== 0 && v !== 0) {
+                    return Chalkboard.real.define("(".concat(func.definition.toString().replace(/x/g, "(x - ".concat(h, ")")), ") + ").concat(v), "expl");
+                }
+                else if (h !== 0) {
+                    return Chalkboard.real.define("".concat(func.definition.toString().replace(/x/g, "(x - ".concat(h, ")"))), "expl");
+                }
+                else if (v !== 0) {
+                    return Chalkboard.real.define("(".concat(func.definition, ") + ").concat(v), "expl");
+                }
+                else {
+                    return func;
+                }
+            }
+            throw new TypeError('Property "type" of "func" must be "expl".');
         };
         real.val = function (func, val) {
             if (func.type === "expl") {
@@ -6082,7 +7372,7 @@ var Chalkboard;
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
         };
         quat_2.zero = function (quat) {
-            return Chalkboard.quat.init(quat.a * 0, quat.b * 0, quat.c * 0, quat.d * 0);
+            return Chalkboard.quat.init(0, 0, 0, 0);
         };
     })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -6731,7 +8021,9 @@ var Chalkboard;
                 throw new TypeError('Parameter "type" must be "Q1", "Q2", or "Q3".');
             }
         };
-        stat.random = function (inf, sup, length) {
+        stat.random = function (length, inf, sup) {
+            if (inf === void 0) { inf = 0; }
+            if (sup === void 0) { sup = 1; }
             var result = [];
             for (var i = 0; i < length; i++) {
                 result.push(Chalkboard.numb.random(inf, sup));
@@ -8354,13 +9646,13 @@ var Chalkboard;
         };
         vect_4.zero = function (vect) {
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0);
+                return Chalkboard.vect.init(0, 0);
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0);
+                return Chalkboard.vect.init(0, 0, 0);
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
-                return Chalkboard.vect.init(vect.x * 0, vect.y * 0, vect.z * 0, vect.w * 0);
+                return Chalkboard.vect.init(0, 0, 0, 0);
             }
             else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');

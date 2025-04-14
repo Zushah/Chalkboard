@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.2.0 Galois Example Program: Matrix Donut
+    Version 2.3.0 Boole Example Program: Matrix Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

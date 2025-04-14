@@ -1,11 +1,11 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/Chalkboard-logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0"><img src="https://img.shields.io/badge/release-v2.2.0_Galois-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
-    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://img.shields.io/codefactor/grade/github/Zushah/Chalkboard?color=blue&logo=codefactor&logoColor=white" alt="CodeFactor grade"></a>
-    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.2.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=darkgreen&logo=files&logoColor=white" alt="Minified size"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0"><img src="https://img.shields.io/badge/release-v2.3.0_Boole-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
+    <a href="https://www.github.com/microsoft/TypeScript"><img src="https://img.shields.io/github/languages/top/Zushah/Chalkboard?color=blue&logo=typescript&logoColor=white" alt="Written in TypeScript"></a>
+    <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://img.shields.io/codefactor/grade/github/Zushah/Chalkboard?color=darkgreen&logo=codefactor&logoColor=white" alt="CodeFactor grade"></a>
     <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?logo=npm&logoColor=white" alt="npm downloads"></a>
     <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/Zushah/Chalkboard?color=yellow&logo=opensourceinitiative&logoColor=white" alt="MIT License"></a>
-    <a href="https://www.github.com/microsoft/TypeScript"><img src="https://img.shields.io/github/languages/top/Zushah/Chalkboard?color=blue&logo=typescript&logoColor=white" alt="Written in TypeScript"></a>
+    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.3.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=orange&logo=files&logoColor=white" alt="Minified size"></a>
     <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://img.shields.io/jsdelivr/gh/hm/Zushah/Chalkboard?color=crimson&logo=jsdelivr&logoColor=white" alt="jsDelivr requests"></a> 
     <br>
     <a href="https://zushah.github.io/Chalkboard">https://zushah.github.io/Chalkboard</a>
@@ -23,29 +23,30 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.2.0 Galois](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0), Chalkboard has 564 unique commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.3.0 Boole](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0), Chalkboard has 605 unique commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
 
 # Installation
 If your JavaScript project is being run on the client-side within a webpage, you can install Chalkboard with this HTML tag:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.2.0/dist/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.3.0/dist/Chalkboard.min.js"></script>
 ```
 If your JavaScript project is being run on the server-side within the [Node.js](https://nodejs.org/en) environment, you can install Chalkboard with this console command:
 ```bash
 npm install @zushah/chalkboard
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0) and put the relevant files in your project's directory.
 
 Chalkboard can also be downloaded on [Khan Academy](https://www.khanacademy.org) from the code in the corresponding [release](https://www.khanacademy.org/cs/chalkboard/6708642430369792).
 
 # Documentation
-Chalkboard has thirteen categories of commands:
+Chalkboard has fourteen categories of commands:
 - `abal` - Abstract algebra definitions, sets, operations, structures, and morphisms
+- `bool` - Boolean algebra operations
 - `calc` - Single/multi-variable real/complex-valued calculus operations
 - `comp` - Complex number and complex function operations
 - `geom` - Geometric operations
 - `matr` - Multidimensional matrix operations
-- `numb` - Number-theory-related operations
+- `numb` - Number-theoretic operations
 - `plot` - Plotting real and complex functions, complex numbers, vectors, matrices, and statistical graphs
 - `quat` - Quaternion operations
 - `real` - Real number and real function operations
@@ -54,10 +55,11 @@ Chalkboard has thirteen categories of commands:
 - `trig` - Trigonometric function operations
 - `vect` - Two-, three-, and four-dimensional vector and vector field operations
 
-There are also eight "global" commands and constants, which are:
+There are also nine "global" commands and constants, which are:
 - `APPLY` - Applies a callback function in an element-wise manner on a Chalkboard object
 - `CONTEXT` - The JavaScript canvas rendering context to use for plotting
 - `E()` - Computes the number e
+- `I()` - Computes the number i
 - `LOGO()` - Draws the Chalkboard logo
 - `PARSEPREFIX` - Used for adding custom functions to the Chalkboard parser
 - `PI()` - Computes the number π
@@ -147,9 +149,9 @@ const factorialt = cb.APPLY(t, (x) => cb.numb.factorial(x)); // Calculates the f
 
 const Z4 = cb.abal.Z(4); // The set of integers modulo 4 is the set {0, 1, 2, 3}
 const C4 = cb.abal.C(4); // The set of fourth roots of unity is the set {1, i, -1, -i}
-const G = cb.abal.group(Z4, (a, b) => (a + b) % 4); // The group G is the set Z4 with mod 4 addition
-const H = cb.abal.group(C4, (z, w) => cb.comp.mul(z, w)); // The group H is the set C4 with complex multiplication
-const F = cb.abal.isomorphism(G, H, (n) => cb.comp.round(cb.comp.pow(cb.comp.init(0, 1), n))); // The isomorphism F: G → H is defined by F(n) = i^n for all n in Z4
+const G = cb.abal.group(Z4, (a, b) => (a + b) % 4); // The group G is the set Z₄ with mod 4 addition
+const H = cb.abal.group(C4, (z, w) => cb.comp.mul(z, w)); // The group H is the set C₄ with complex multiplication
+const F = cb.abal.isomorphism(G, H, (n) => cb.comp.round(cb.comp.pow(cb.comp.init(0, 1), n))); // The isomorphism F: G → H is defined by F(n) = iⁿ for all n in Z₄
 ```
 Several examples that are rather interesting can be seen [here](https://zushah.github.io/Chalkboard/examples/index.html), and their source code is [here](https://www.github.com/Zushah/Chalkboard/tree/main/examples).
 
