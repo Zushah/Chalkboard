@@ -3,7 +3,6 @@
     Version 2.3.0 Boole
 */
 /// <reference path="Chalkboard.ts"/>
-/// <reference path="Chalkboard-real.ts"/>
 namespace Chalkboard {
     /**
      * The plotting namespace
@@ -11,7 +10,13 @@ namespace Chalkboard {
      */
     export namespace plot {
         /** @ignore */
-        const PARSED_CONTEXT = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D;
+        const getContext = (): CanvasRenderingContext2D => {
+            try {
+                return Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D;
+            } catch (e) {
+                throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
+            }
+        };
 
         /**
          * Plots the autocorrelation of an explicit function.
@@ -33,14 +38,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -78,13 +83,13 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 fillStyle: config.fillStyle || "white",
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             config.context.save();
             config.context.translate(config.x, config.y);
@@ -134,12 +139,12 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 fillStyle: config.fillStyle || "black",
                 lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             config.context.fillStyle = config.fillStyle;
             config.context.save();
@@ -173,14 +178,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -219,14 +224,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -262,8 +267,8 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
@@ -275,7 +280,7 @@ namespace Chalkboard {
                               [-10, 10]
                           ]
                         : [-10, 10]),
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const xdomain = config.domain as [number, number];
             const xydomain = config.domain as [[number, number], [number, number]];
@@ -356,14 +361,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -405,14 +410,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -454,8 +459,8 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
@@ -464,7 +469,7 @@ namespace Chalkboard {
                     [-10, 10]
                 ],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.strokeStyle = config.strokeStyle;
@@ -505,14 +510,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -549,14 +554,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -598,14 +603,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -649,12 +654,12 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             config.context.save();
             config.context.translate(config.x, config.y);
@@ -702,13 +707,13 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             for (let i = config.domain[0]; i <= config.domain[1]; i++) {
                 Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
@@ -765,14 +770,14 @@ namespace Chalkboard {
             context: CanvasRenderingContext2D; //
         }): void => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
-            const cw = PARSED_CONTEXT.canvas.width;
+            const cw = getContext().canvas.width;
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;
@@ -814,12 +819,12 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 fillStyle: config.fillStyle || "black",
                 lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -869,14 +874,14 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             const data = [];
             config.context.save();
@@ -911,12 +916,12 @@ namespace Chalkboard {
             }
         ): number[][] => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
@@ -944,14 +949,14 @@ namespace Chalkboard {
             context: CanvasRenderingContext2D; //
         }): void => {
             (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
+                context: config.context || getContext()
             }).size /= 100;
-            const cw = PARSED_CONTEXT.canvas.width;
+            const cw = getContext().canvas.width;
             config.context.save();
             config.context.translate(config.x, config.y);
             config.context.strokeStyle = config.strokeStyle;
