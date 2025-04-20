@@ -468,40 +468,18 @@ namespace Chalkboard {
          * @returns {ChalkboardStructure<T>}
          */
         export const field = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T): ChalkboardStructure<T> => {
-            const presets = {
-                addition: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                }
-            };
-            const _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? (Chalkboard.abal[set] as () => ChalkboardSet<any>)() : set;
-            const _add = typeof add === "string" ? presets[add]["addition"] || presets[add][_set.id ?? ""] : add;
-            const _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][_set.id ?? ""] : mul;
-            if (!_add || !_mul) {
-                throw new Error(`Preset operations "${add}" or "${mul}" are not defined for set "${_set.id}".`);
-            }
             const autoconfig = (): { addIdentity: T; mulIdentity: T; addInverter: (a: T) => T; mulInverter: (a: T) => T } => {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.');
                 }
-                if (_set.id === "Q" || _set.id === "R") {
+                if (set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0 as T,
                         mulIdentity: 1 as T,
                         addInverter: (a: T) => (-a as unknown) as T,
                         mulInverter: (a: T) => (1 / (a as unknown as number)) as T
                     };
-                } else if (_set.id === "C") {
+                } else if (set.id === "C") {
                     return {
                         addIdentity: Chalkboard.comp.init(0, 0) as T,
                         mulIdentity: Chalkboard.comp.init(1, 0) as T,
@@ -511,8 +489,9 @@ namespace Chalkboard {
                 }
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
             };
+            
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter, mulInverter };
-            const field: ChalkboardStructure<T> = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
+            const field: ChalkboardStructure<T> = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
             if (!Chalkboard.abal.isField(field)) {
                 throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.');
             }
@@ -584,70 +563,46 @@ namespace Chalkboard {
          * @returns {ChalkboardStructure<T>}
          */
         export const group = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T): ChalkboardStructure<T> => {
-            const presets = {
-                addition: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                }
-            };
-            const _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? (Chalkboard.abal[set] as () => ChalkboardSet<any>)() : set;
-            const _operation = typeof operation === "string" && _set.id ? presets[operation][_set.id] : operation;
-            if (!_operation) {
-                throw new Error(`Preset operation "${operation}" is not defined for set "${_set.id}".`);
-            }
-            if (!_operation) {
-                throw new Error(`Preset operation "${operation}" is not defined for set "${_set.id}".`);
-            }
             const autoconfig = (): { identity: T; inverter: (a: T) => T } => {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.');
                 }
-                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         identity: 0 as T,
                         inverter: (a: T) => (-a as unknown) as T
                     };
-                } else if (_set.id === "C") {
+                } else if (set.id === "C") {
                     return {
                         identity: Chalkboard.comp.init(0, 0) as T,
                         inverter: (a: T) => Chalkboard.comp.negate(a as unknown as ChalkboardComplex) as T
                     };
-                } else if (_set.id.startsWith("Z") && _set.id.length > 1) {
-                    const n = parseInt(_set.id.slice(1), 10);
+                } else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    const n = parseInt(set.id.slice(1), 10);
                     return {
                         identity: 0 as T,
                         inverter: (a: T) => ((n - (a as unknown as number) % n) % n) as T
                     };
-                } else if (_set.id.startsWith("C") && _set.id.length > 1) {
+                } else if (set.id.startsWith("C") && set.id.length > 1) {
                     return {
                         identity: Chalkboard.comp.init(1, 0) as T,
                         inverter: (a: T) => Chalkboard.comp.conjugate(a as unknown as ChalkboardComplex) as T
                     };
-                } else if (_set.id.startsWith("M(")) {
-                    const rows = (_set as any).rows;
-                    const cols = (_set as any).cols;
+                } else if (set.id.startsWith("M(")) {
+                    const rows = (set as any).rows;
+                    const cols = (set as any).cols;
                     return {
                         identity: Chalkboard.matr.fill(0, rows, cols) as T,
                         inverter: (a: T) => Chalkboard.matr.negate(a as unknown as ChalkboardMatrix) as T
                     };
-                } else if (_set.id.startsWith("GL")) {
-                    const n = parseInt(_set.id.slice(2), 10);
+                } else if (set.id.startsWith("GL")) {
+                    const n = parseInt(set.id.slice(2), 10);
                     return {
                         identity: Chalkboard.matr.identity(n) as T,
                         inverter: (a: T) => Chalkboard.matr.invert(a as unknown as ChalkboardMatrix) as T
                     };
-                } else if (_set.id.match(/^[SA]\d+$/)) {
-                    const n = parseInt(_set.id.slice(1), 10);
+                } else if (set.id.match(/^[SA]\d+$/)) {
+                    const n = parseInt(set.id.slice(1), 10);
                     return {
                         identity: Array.from({length: n}, (_, i) => i) as T,
                         inverter: (a: T) => {
@@ -661,7 +616,7 @@ namespace Chalkboard {
                 throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
             };
             const configured = typeof identity === "undefined" || typeof inverter === "undefined" ? autoconfig() : { identity, inverter: inverter };
-            const group: ChalkboardStructure<T> = { set: _set, operation: _operation, identity: configured.identity, inverter: configured.inverter };
+            const group: ChalkboardStructure<T> = { set, operation, identity: configured.identity, inverter: configured.inverter };
             if (!Chalkboard.abal.isGroup(group)) {
                 throw new Error('The inputted "set", "operation", "identity", and "inverter" do not form a group.');
             }
@@ -1424,6 +1379,20 @@ namespace Chalkboard {
          */
         export const isSubfield = <T>(field: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
+            if (field.set.id && subset.id) {
+                if (subset.id === field.set.id && ["Q", "R", "C"].includes(subset.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["R", "C"].includes(field.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && field.set.id === "C") {
+                    return true;
+                }
+                if (subset.id === "Z") {
+                    return false;
+                }
+            }
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined") {
                 return false;
             }
@@ -1455,6 +1424,30 @@ namespace Chalkboard {
          */
         export const isSubgroup = <T>(group: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { operation, identity, inverter } = group;
+            if (group.set.id && subset.id) {
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "C" && group.set.id === "C") {
+                    return true;
+                }
+                if (subset.id.startsWith("Z") && group.set.id.startsWith("Z")) {
+                    const nSubset = parseInt(subset.id.slice(1), 10);
+                    const nGroup = parseInt(group.set.id.slice(1), 10);
+                    if (!isNaN(nSubset) && !isNaN(nGroup)) {
+                        return nGroup % nSubset === 0;
+                    }
+                }
+                if (subset.id?.startsWith("GL") && subset.id === group.set.id) {
+                    return true;
+                }
+            }
             if (typeof operation === "undefined" || typeof identity === "undefined" || typeof inverter === "undefined") {
                 return false;
             }
@@ -1481,6 +1474,27 @@ namespace Chalkboard {
          */
         export const isSubring = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
             const { add, mul, addIdentity, addInverter } = ring;
+            if (ring.set.id && subset.id) {
+                if (subset.id === ring.set.id) {
+                    return true;
+                }
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id.startsWith("Z") && ring.set.id.startsWith("Z")) {
+                    const nSubset = parseInt(subset.id.slice(1), 10);
+                    const nRing = parseInt(ring.set.id.slice(1), 10);
+                    if (!isNaN(nSubset) && !isNaN(nRing)) {
+                        return nRing % nSubset === 0;
+                    }
+                }
+            }
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
                 return false;
             }
@@ -1506,6 +1520,30 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubset = <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>): boolean => {
+            if (set.id && superset.id) {
+                if (set.id === superset.id) {
+                    return true;
+                }
+                if (set.id === "Z") {
+                    return ["Z", "Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id === "Q") {
+                    return ["Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id === "R") {
+                    return ["R", "C"].includes(superset.id);
+                }
+                if (set.id === "N") {
+                    return ["N", "Z", "Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id.startsWith("Z") && superset.id.startsWith("Z")) {
+                    const nSet = parseInt(set.id.slice(1), 10);
+                    const nSuper = parseInt(superset.id.slice(1), 10);
+                    if (!isNaN(nSet) && !isNaN(nSuper)) {
+                        return nSuper % nSet === 0;
+                    }
+                }
+            }
             return (set.elements || []).every((element) => superset.contains(element));
         };
 
@@ -1787,57 +1825,35 @@ namespace Chalkboard {
          * @returns {ChalkboardStructure<T>}
          */
         export const ring = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T): ChalkboardStructure<T> => {
-            const presets = {
-                addition: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                },
-            };
-            const _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? (Chalkboard.abal[set] as () => ChalkboardSet<any>)() : set;
-            const _add = typeof add === "string" ? presets[add]["addition"] || presets[add][_set.id ?? ""] : add;
-            const _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][_set.id ?? ""] : mul;
-            if (!_add || !_mul) {
-                throw new Error(`Preset operations "${add}" or "${mul}" are not defined for set "${_set.id}".`);
-            }
             const autoconfig = (): { addIdentity: T; mulIdentity: T; addInverter: (a: T) => T } => {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.');
                 }
-                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0 as T,
                         mulIdentity: 1 as T,
                         addInverter: (a: T) => (-a as unknown) as T
                     };
-                } else if (_set.id === "C") {
+                } else if (set.id === "C") {
                     return {
                         addIdentity: Chalkboard.comp.init(0, 0) as T,
                         mulIdentity: Chalkboard.comp.init(1, 0) as T,
                         addInverter: (a: T) => Chalkboard.comp.negate(a as unknown as ChalkboardComplex) as T
                     };
-                } else if (_set.id.startsWith("Z") && _set.id.length > 1) {
-                    const n = parseInt(_set.id.slice(1), 10);
+                } else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    const n = parseInt(set.id.slice(1), 10);
                     if (isNaN(n) || n <= 0) {
-                        throw new Error(`Invalid modulus in set "${_set.id}".`);
+                        throw new Error(`Invalid modulus in set "${set.id}".`);
                     }
                     return {
                         addIdentity: 0 as T,
                         mulIdentity: 1 as T,
                         addInverter: (a: T) => ((n - (a as unknown as number) % n) % n) as T
                     };
-                } else if (_set.id.startsWith("M(")) {
-                    const rows = (_set as any).rows;
-                    const cols = (_set as any).cols;
+                } else if (set.id.startsWith("M(")) {
+                    const rows = (set as any).rows;
+                    const cols = (set as any).cols;
                     if (rows !== cols) {
                         throw new Error("Only square matrices can form a ring.");
                     }
@@ -1850,7 +1866,7 @@ namespace Chalkboard {
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
             };
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter };
-            const ring: ChalkboardStructure<T> = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter};
+            const ring: ChalkboardStructure<T> = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter};
             if (!Chalkboard.abal.isRing(ring)) {
                 throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.');
             }
