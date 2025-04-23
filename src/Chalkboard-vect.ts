@@ -508,7 +508,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (vect: ChalkboardVector): boolean => {
-            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(vect));
+            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
         };
 
         /**
@@ -907,19 +907,19 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates a vector multiplied by zero.
-         * @param {ChalkboardVector} vect - The vector
+         * Initializes the zero vector of a particular dimension.
+         * @param {2 | 3 | 4} dimension - The dimension of the vector, which can be 2, 3, or 4
          * @returns {ChalkboardVector}
          */
-        export const zero = (vect: ChalkboardVector): ChalkboardVector => {
-            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
+        export const zero = (dimension: 2 | 3 | 4): ChalkboardVector => {
+            if (dimension === 2) {
                 return Chalkboard.vect.init(0, 0);
-            } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
+            } else if (dimension === 3) {
                 return Chalkboard.vect.init(0, 0, 0);
-            } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
+            } else if (dimension === 4) {
                 return Chalkboard.vect.init(0, 0, 0, 0);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new TypeError('Parameter "dimension" must be either 2, 3, or 4.');
             }
         };
     }

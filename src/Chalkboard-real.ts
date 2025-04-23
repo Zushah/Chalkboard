@@ -624,5 +624,21 @@ namespace Chalkboard {
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a "type" property of "expl", "pola", "curv", "surf", or "mult".');
             }
         };
+
+        /**
+         * Defines a zero function of a particular type.
+         * @param {"expl" | "inve" | "pola" | "curv" | "surf" | "mult"} [type="expl"] - The type of the function
+         * @returns {ChalkboardFunction}
+         */
+        export const zero = (type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" = "expl"): ChalkboardFunction => {
+            if (type === "expl" || type === "inve" || type === "pola" || type === "mult") {
+                return Chalkboard.real.define("0", type);
+            } else if (type === "curv") {
+                return Chalkboard.real.define(["0", "0"], type);
+            } else if (type === "surf") {
+                return Chalkboard.real.define(["0", "0", "0"], type);
+            }
+            throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
     }
 }

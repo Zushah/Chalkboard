@@ -581,17 +581,5 @@ namespace Chalkboard {
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a type property of "comp".');
             }
         };
-
-        /**
-         * Calculates a complex number multiplied by zero.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
-         * @example
-         * // Returns 0 + 0i
-         * const zero = Chalkboard.comp.zero(Chalkboard.comp.init(2, 3));
-         */
-        export const zero = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(0, 0);
-        };
     }
 }

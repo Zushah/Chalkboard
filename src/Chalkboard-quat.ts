@@ -416,17 +416,5 @@ namespace Chalkboard {
         export const toVector = (quat: ChalkboardQuaternion): ChalkboardVector => {
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
         };
-
-        /**
-         * Calculates a quaternion multiplied by zero.
-         * @param {ChalkboardQuaternion} quat - The quaternion
-         * @returns {ChalkboardQuaternion}
-         * @example
-         * // Returns 0 + 0i + 0j + 0k
-         * const zeroed = Chalkboard.quat.zero(Chalkboard.quat.init(1, 2, 3, 4));
-         */
-        export const zero = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
-            return Chalkboard.quat.init(0, 0, 0, 0);
-        };
     }
 }

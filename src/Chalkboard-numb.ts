@@ -347,9 +347,42 @@ namespace Chalkboard {
          */
         export const isRational = (num: number, tolerance: number = 1e-8): boolean => {
             if (!isFinite(num)) return false;
+            const mult = num / Chalkboard.PI();
+            if (mult !== 0 && Math.abs(Math.round(mult) - mult) < tolerance) {
+                return false;
+            }
+            if (num > 0) {
+                const ln = Math.log(num);
+                if (ln !== 0 && Math.abs(Math.round(ln) - ln) < tolerance) {
+                    const pow = Chalkboard.E(Math.round(ln));
+                    if (Math.abs(num - pow) < tolerance) {
+                        return false;
+                    }
+                }
+            }
+            for (let d = 2; d <= 6; d++) {
+                const fract = Chalkboard.PI() / d;
+                for (let n = 1; n <= d * 4; n++) {
+                    if (n % d !== 0) {
+                        if (Math.abs(num - n * fract) < tolerance) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            const knownIrrationals = [Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.real.sqrt(Chalkboard.PI()), Chalkboard.E(), Chalkboard.PI(), Chalkboard.E(2)];
+            for (let i = 2; i <= 100; i++) {
+                if (Number.isInteger(Math.sqrt(i))) continue;
+                knownIrrationals.push(Chalkboard.real.sqrt(i));
+            }
+            for (const irr of knownIrrationals) {
+                if (Math.abs(num - irr) < tolerance) {
+                    return false;
+                }
+            }
             try {
                 const [n, d] = Chalkboard.numb.toFraction(num, tolerance);
-                return Math.abs(num - n / d) < tolerance;
+                return (Math.abs(num - n / d) < tolerance) && (Math.abs(d) <= 100000);
             } catch {
                 return false;
             }

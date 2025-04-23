@@ -329,10 +329,11 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.AND(true, false); // Returns false in boolean mode
          */
         export const modeConfig = (config: "boolean" | "binary"): void => {
-            if (config !== "boolean" && config !== "binary") {
+            const _config = config.toLowerCase();
+            if (_config !== "boolean" && _config !== "binary") {
                 throw new Error('The mode must be either "boolean" or "binary".');
             }
-            mode = config;
+            mode = _config;
         };
 
         /**

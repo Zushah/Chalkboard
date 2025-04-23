@@ -975,7 +975,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (matr: ChalkboardMatrix): boolean => {
-            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(matr));
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
 
         /**
@@ -2721,22 +2721,23 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates a matrix multiplied by zero.
-         * @param {ChalkboardMatrix} matr - The matrix
+         * Initializes a zero matrix.
+         * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
+         * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
          */
-        export const zero = (matr: ChalkboardMatrix): ChalkboardMatrix => {
-            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+        export const zero = (rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([0, 0], [0, 0]);
-            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+            } else if (rows === 3 && cols === 3) {
                 return Chalkboard.matr.init([0, 0, 0], [0, 0, 0], [0, 0, 0]);
-            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+            } else if (rows === 4 && cols === 4) {
                 return Chalkboard.matr.init([0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
             } else {
                 const result = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                for (let i = 0; i < rows; i++) {
                     result[i] = [];
-                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    for (let j = 0; j < cols; j++) {
                         result[i][j] = 0;
                     }
                 }

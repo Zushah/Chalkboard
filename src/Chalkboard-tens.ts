@@ -635,20 +635,25 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates a tensor multiplied by zero.
-         * @param {ChalkboardTensor} tens - The tensor
+         * Initializes a zero tensor.
+         * @param {number[]} size - The size
          * @returns {ChalkboardTensor}
          */
-        export const zero = (tens: ChalkboardTensor): ChalkboardTensor => {
-            const result = Chalkboard.tens.init() as ChalkboardTensor[];
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.zero(tens[i]);
+        export const zero = (...size: number[]): ChalkboardTensor => {
+            size = Array.isArray(size[0]) ? size[0] : size;
+            const newNDArray = function (size: number[]): ChalkboardTensor {
+                if (size.length === 0) {
+                    return 0;
+                }
+                const curr = size[0];
+                const rest = size.slice(1);
+                const result = [];
+                for (let i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
                 }
                 return result;
-            } else {
-                return 0;
-            }
+            };
+            return newNDArray(size);
         };
     }
 }
