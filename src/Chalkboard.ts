@@ -124,7 +124,7 @@ type ChalkboardTensor = number | ChalkboardTensor[];
  * @property {number} [z] - The z-component (defined for 3D and 4D vectors)
  * @property {number} [w] - The w-component (defined for 4D vectors)
  */
-type ChalkboardVector = { x: number; y: number; z?: number; w?: number };
+type ChalkboardVector = { x: number; y: number; z?: number; w?: number } | number[] | Float32Array | Float64Array | ChalkboardMatrix | string;
 
 /**
  * The type for vector fields.
@@ -166,7 +166,7 @@ namespace Chalkboard {
             return Chalkboard.quat.init(callback(quat.a), callback(quat.b), callback(quat.c), callback(quat.d));
         }
         if (object && typeof (object as any).x === "number" && typeof (object as any).y === "number") {
-            const vect = object as ChalkboardVector;
+            const vect = object as ChalkboardVector as {x: number; y: number; z?: number; w?: number };
             if (typeof vect.w === "number" && typeof vect.z === "number") {
                 return Chalkboard.vect.init(callback(vect.x), callback(vect.y), callback(vect.z), callback(vect.w));
             } else if (typeof vect.z === "number") {
