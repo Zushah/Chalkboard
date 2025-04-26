@@ -611,13 +611,13 @@ namespace Chalkboard {
                     return Chalkboard.vect.init(x(val), y(val), z(val));
                 }
             } else if (func.type === "surf") {
-                const vect = val as ChalkboardVector;
+                const vect = val as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                 const x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
                     y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
                     z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
                 return Chalkboard.vect.init(x(vect.x, vect.y), y(vect.x, vect.y), z(vect.x, vect.y));
             } else if (func.type === "mult" && typeof val !== "number") {
-                const vect = val as ChalkboardVector;
+                const vect = val as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                 const f = Chalkboard.real.parse("(x, y) => " + func.definition);
                 return f(vect.x, vect.y);
             } else {

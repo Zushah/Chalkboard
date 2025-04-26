@@ -140,7 +140,7 @@ namespace Chalkboard {
          * const q = Chalkboard.quat.fromAxis(Chalkboard.vect.init(0, 1, 0), Chalkboard.PI(0.5));
          */
         export const fromAxis = (vect: ChalkboardVector, rad: number): ChalkboardQuaternion => {
-            vect = vect as {x: number, y: number, z?: number, w?: number};
+            vect = vect as { x: number, y: number, z?: number, w?: number };
             if (typeof vect.z !== "undefined") {
                 return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
             } else {

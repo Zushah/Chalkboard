@@ -11,7 +11,7 @@ namespace Chalkboard {
     export namespace matr {
         /** @ignore */
         const $ = (input: ChalkboardVector): ChalkboardVector => {
-            const v = input as {x: number, y: number, z?: number, w?: number};
+            const v = input as { x: number, y: number, z?: number, w?: number };
             if (v && typeof v.x === "number" && typeof v.y === "number") {
                 return input as ChalkboardVector;
             }
@@ -1691,7 +1691,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix | ChalkboardVector}
          */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
-            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
+            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -2284,7 +2284,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
-            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
+            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
@@ -2710,7 +2710,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
-            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
+            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {

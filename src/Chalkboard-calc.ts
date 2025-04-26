@@ -66,7 +66,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const curl = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
-            vect = vect as {x: number, y: number, z?: number, w?: number};
+            vect = vect as { x: number, y: number, z?: number, w?: number };
             const h = 0.000000001;
             if (Chalkboard.vect.dimension(vectfield) === 2 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 const p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
@@ -99,8 +99,8 @@ namespace Chalkboard {
         export const curvature = (func: ChalkboardFunction, val: number): number => {
             if (func.type === "curv") {
                 if (func.definition.length === 2) {
-                    const d = Chalkboard.calc.dfdx(func, val) as ChalkboardVector as {x: number, y: number, z?: number, w?: number},
-                        d2 = Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector as {x: number, y: number, z?: number, w?: number};
+                    const d = Chalkboard.calc.dfdx(func, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number },
+                        d2 = Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                     const dxdt = d.x,
                         dydt = d.y,
                         d2xdt2 = d2.x,
@@ -248,16 +248,16 @@ namespace Chalkboard {
             if (func1.type === "mult") {
                 if (func2.type === "curv") {
                     if (func2.definition.length === 2) {
-                        const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector as {x: number, y: number, z?: number, w?: number},
-                            d = Chalkboard.calc.dfdx(func2, val) as ChalkboardVector as {x: number, y: number, z?: number, w?: number};
+                        const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector as { x: number, y: number, z?: number, w?: number },
+                            d = Chalkboard.calc.dfdx(func2, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                         const dfdx = g.x,
                             dfdy = g.y,
                             dxdt = d.x,
                             dydt = d.y;
                         return dfdx * dxdt + dfdy * dydt;
                     } else {
-                        const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector as {x: number, y: number, z?: number, w?: number},
-                            d = Chalkboard.calc.dfdx(func2, val) as ChalkboardVector as {x: number, y: number, z?: number, w?: number};
+                        const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector as { x: number, y: number, z?: number, w?: number },
+                            d = Chalkboard.calc.dfdx(func2, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                         const dfdx = g.x,
                             dfdy = g.y,
                             dfdz = g.z,
@@ -364,7 +364,7 @@ namespace Chalkboard {
                 const dt = (tsup - tinf) / 10000;
                 if (func.definition.length === 2) {
                     for (let t = tinf; t <= tsup; t += dt) {
-                        drdt = Chalkboard.calc.dfdx(func, t) as ChalkboardVector as {x: number, y: number, z?: number, w?: number};
+                        drdt = Chalkboard.calc.dfdx(func, t) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                         result +=
                             Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t) as ChalkboardVector), Chalkboard.vect.init(-drdt.y, drdt.x)) *
                             Chalkboard.vect.mag(drdt);
@@ -537,7 +537,7 @@ namespace Chalkboard {
                     const dt = (sup - inf) / 10000;
                     for (let t = inf; t <= sup; t += dt) {
                         const fz = Chalkboard.comp.val(func1, Chalkboard.vect.toComplex(Chalkboard.real.val(func2, t) as ChalkboardVector));
-                        const rt = Chalkboard.calc.dfdx(func2, t) as ChalkboardVector as {x: number, y: number, z?: number, w?: number};
+                        const rt = Chalkboard.calc.dfdx(func2, t) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                         result = Chalkboard.comp.add(result, Chalkboard.comp.init(fz.a * rt.x - fz.b * rt.y, fz.b * rt.x + fz.a * rt.y));
                     }
                     return Chalkboard.comp.scl(result, dt);
@@ -556,7 +556,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector | ChalkboardMatrix}
          */
         export const grad = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector | ChalkboardMatrix => {
-            vect = vect as {x: number, y: number, z?: number, w?: number};
+            vect = vect as { x: number, y: number, z?: number, w?: number };
             const h = 0.000000001;
             const func = funcORvectfield as ChalkboardFunction;
             const vectfield = funcORvectfield as ChalkboardVectorField;
@@ -632,7 +632,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const grad2 = (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector): ChalkboardMatrix => {
-            vect = vect as {x: number, y: number, z?: number, w?: number};
+            vect = vect as { x: number, y: number, z?: number, w?: number };
             const h = 0.00001;
             const func = funcORvectfield as ChalkboardFunction;
             const vectfield = funcORvectfield as ChalkboardVectorField;
