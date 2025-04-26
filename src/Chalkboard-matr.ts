@@ -9,6 +9,61 @@ namespace Chalkboard {
      * @namespace
      */
     export namespace matr {
+        /** @ignore */
+        const $ = (input: ChalkboardVector): ChalkboardVector => {
+            const v = input as {x: number, y: number, z?: number, w?: number};
+            if (v && typeof v.x === "number" && typeof v.y === "number") {
+                return input as ChalkboardVector;
+            }
+            if (Array.isArray(input)) {
+                if (input.length > 0 && Array.isArray(input[0])) {
+                    const matr = input as ChalkboardMatrix;
+                    const rows = Chalkboard.matr.rows(matr);
+                    const cols = Chalkboard.matr.cols(matr);
+                    if (cols === 1) {
+                        if (rows === 2) return Chalkboard.vect.init(matr[0][0], matr[1][0]);
+                        if (rows === 3) return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0]);
+                        if (rows === 4) return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0], matr[3][0]);
+                    } else if (rows === 1) {
+                        if (cols === 2) return Chalkboard.vect.init(matr[0][0], matr[0][1]);
+                        if (cols === 3) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2]);
+                        if (cols === 4) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
+                    }
+                } else {
+                    const arr = input as number[];
+                    if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
+                    if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                    if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                }
+            }
+            if (input instanceof Float32Array || input instanceof Float64Array) {
+                const arr = input as Float32Array | Float64Array;
+                if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
+                if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+            }
+            if (typeof input === "string") {
+                try {
+                    const parsed = JSON.parse(input as string);
+                    if (parsed && typeof parsed === "object" && typeof parsed.x === "number" && typeof parsed.y === "number") {
+                        return Chalkboard.vect.init(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
+                    }
+                } catch (e) {
+                    const str = (input as string).trim();
+                    if (str.startsWith("(") && str.endsWith(")")) {
+                        const content = str.substring(1, str.length - 1);
+                        const components = content.split(",").map(part => parseFloat(part.trim()));
+                        if (components.length >= 2 && components.every(p => !isNaN(p))) {
+                            if (components.length === 2) return Chalkboard.vect.init(components[0], components[1]);
+                            if (components.length === 3) return Chalkboard.vect.init(components[0], components[1], components[2]);
+                            if (components.length === 4) return Chalkboard.vect.init(components[0], components[1], components[2], components[3]);
+                        }
+                    }
+                }
+            }
+            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
+        };
+
         /**
          * Calculates the absolute value of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
@@ -1636,6 +1691,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix | ChalkboardVector}
          */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
+            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -2053,13 +2109,13 @@ namespace Chalkboard {
 
         /**
          * Initializes a random matrix.
-         * @param {number} inf - The lower bound
-         * @param {number} sup - The upper bound
          * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
          * @param {number} [cols=rows] - The number of columns
+         * @param {number} [inf=0] - The lower bound
+         * @param {number} [sup=1] - The upper bound
          * @returns {ChalkboardMatrix}
          */
-        export const random = (inf: number, sup: number, rows: number, cols: number = rows): ChalkboardMatrix => {
+        export const random = (rows: number, cols: number = rows, inf: number = 0, sup: number = 1): ChalkboardMatrix => {
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
             } else if (rows === 3 && cols === 3) {
@@ -2228,6 +2284,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
+            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
@@ -2532,6 +2589,30 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a matrix to a typed array.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         */
+        export const toTypedArray = (matr: ChalkboardMatrix, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            const arr = Chalkboard.matr.toArray(matr);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
+
+        /**
          * Converts a matrix to a vector.
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} dimension - The dimension of the vector which can be either 2, 3, or 4
@@ -2629,6 +2710,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
+            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {

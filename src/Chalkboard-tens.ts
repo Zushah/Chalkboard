@@ -606,6 +606,30 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a tensor to a typed array.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         */
+        export const toTypedArray = (tens: ChalkboardTensor, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            const arr = Chalkboard.tens.toArray(tens);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
+
+        /**
          * Converts a tensor to a vector.
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number} dimension - The dimension of the vector, which can be 2, 3, or 4

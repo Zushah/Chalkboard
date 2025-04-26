@@ -29,13 +29,11 @@ namespace Chalkboard {
                         if (cols === 3) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2]);
                         if (cols === 4) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
                     }
-                    throw new TypeError('Matrix input must be a 2x1, 3x1, 4x1 column matrix or 1x2, 1x3, 1x4 row matrix.');
                 } else {
                     const arr = input as number[];
                     if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
                     if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
                     if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
-                    throw new TypeError('Array input must have 2, 3, or 4 elements.');
                 }
             }
             if (input instanceof Float32Array || input instanceof Float64Array) {
@@ -43,7 +41,6 @@ namespace Chalkboard {
                 if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
                 if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
                 if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
-                throw new TypeError('TypedArray input must have 2, 3, or 4 elements.');
             }
             if (typeof input === "string") {
                 try {
@@ -63,9 +60,8 @@ namespace Chalkboard {
                         }
                     }
                 }
-                throw new TypeError('String input must be a valid JSON string representing a vector or a parenthesized comma-separated list of 2-4 numbers in format "(x, y, z, w)"');
             }
-            throw new TypeError('Input must be a ChalkboardVector, array, TypedArray, ChalkboardMatrix, or string.');
+            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
         };
 
         /**
@@ -997,6 +993,31 @@ namespace Chalkboard {
                 size = size[0];
             }
             return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), ...size);
+        };
+
+        /**
+         * Converts a vector to a typed array.
+         * @param {ChalkboardVector} vect - The vector
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         */
+        export const toTypedArray = (vect: ChalkboardVector, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            vect = $(vect) as {x: number, y: number, z?: number, w?: number};
+            const arr = Chalkboard.vect.toArray(vect);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
         };
 
         /**

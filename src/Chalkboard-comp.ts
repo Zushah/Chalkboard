@@ -551,6 +551,34 @@ namespace Chalkboard {
         };
 
         /**
+         * Converts a complex number to a typed array.
+         * @param {ChalkboardComplex} comp - The complex number
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         * @example
+         * // Returns a Float32Array [3, 4]
+         * const z = Chalkboard.comp.init(3, 4);
+         * const zf32 = Chalkboard.comp.toTypedArray(z);
+         */
+        export const toTypedArray = (comp: ChalkboardComplex, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            const arr = Chalkboard.comp.toArray(comp);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
+
+        /**
          * Converts a complex number to a vector.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboadVector}

@@ -140,10 +140,11 @@ namespace Chalkboard {
          * const q = Chalkboard.quat.fromAxis(Chalkboard.vect.init(0, 1, 0), Chalkboard.PI(0.5));
          */
         export const fromAxis = (vect: ChalkboardVector, rad: number): ChalkboardQuaternion => {
+            vect = vect as {x: number, y: number, z?: number, w?: number};
             if (typeof vect.z !== "undefined") {
                 return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" that has properties "x", "y", and "z".');
+                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 3 dimensions.');
             }
         };
 
@@ -403,6 +404,34 @@ namespace Chalkboard {
                 quat_d = "- " + Math.abs(quat.d).toString() + "k ";
             }
             return quat.a.toString() + quat_b + quat_c + quat_d;
+        };
+
+        /**
+         * Converts a quaternion to a typed array.
+         * @param {ChalkboardQuaternion} quat - The quaternion
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         * @example
+         * // Returns a Float32Array [1, 2, 3, 4]
+         * const q = Chalkboard.quat.init(1, 2, 3, 4);
+         * const qf32 = Chalkboard.quat.toTypedArray(q);
+         */
+        export const toTypedArray = (quat: ChalkboardQuaternion, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            const arr = Chalkboard.quat.toArray(quat);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
         };
 
         /**
