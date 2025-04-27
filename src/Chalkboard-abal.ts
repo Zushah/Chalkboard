@@ -410,16 +410,24 @@ namespace Chalkboard {
                     (struc2.operation as (x: U, y: U) => U)(a[1], b[1])
                 ];
                 const identity: [T, U] = [struc1.identity as T, struc2.identity as U];
-                const inverter = (a: [T, U]): [T, U] => [
-                    (struc1.inverter as (x: T) => T)(a[0]),
-                    (struc2.inverter as (x: U) => U)(a[1])
-                ];
+                if ("inverter" in struc1 && "inverter" in struc2) {
+                    const inverter = (a: [T, U]): [T, U] => [
+                        (struc1.inverter as (x: T) => T)(a[0]),
+                        (struc2.inverter as (x: U) => U)(a[1])
+                    ];
+                    if (type === "sum") {
+                        if (!struc1.set.elements || !struc2.set.elements) {
+                            throw new Error("Direct sum is only defined for finite groups.");
+                        }
+                    }
+                    return Chalkboard.abal.group(set, operation, identity, inverter);
+                }
                 if (type === "sum") {
                     if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite groups.");
+                        throw new Error("Direct sum is only defined for finite structures.");
                     }
                 }
-                return Chalkboard.abal.group(set, operation, identity, inverter);
+                return Chalkboard.abal.monoid(set, operation, identity);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 if (type === "sum") {
@@ -736,85 +744,41 @@ namespace Chalkboard {
          * @param {(a: T, b: T) => T} operation - The operation
          * @returns {boolean}
          */
-        export const isClosed = <T>(set: ChalkboardSet<T> | string, operation: ((a: T, b: T) => T) | "addition" | "multiplication"): boolean => {
-            if (typeof set !== "string" && set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
-                if (operation === "addition" || operation === "multiplication") return true;
-                return false;
+        export const isClosed = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T): boolean => {
+            if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
+                return true;
             }
-            const presets = {
-                addition: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) + (b as unknown as number) as T,
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add,
-                },
-                multiplication: {
-                    Z: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    Q: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    R: <T>(a: T, b: T): T => (a as unknown as number) * (b as unknown as number) as T,
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul,
-                }
-            };
-            const _set = typeof set === "string" && (set in Chalkboard.abal) && typeof (Chalkboard.abal as Record<string, any>)[set] === "function"
-                ? (Object.prototype.hasOwnProperty.call(Chalkboard.abal, set) && typeof (Chalkboard.abal as Record<string, any>)[set] === "function" ? ((Chalkboard.abal as Record<string, any>)[set] as () => ChalkboardSet<any>)() : undefined)
-                : set;
-            if (!_set || typeof _set !== "object") {
-                throw new Error('The "set" must have a valid "id" property or be resolvable from a string.');
-            }
-            const _operation =
-                typeof operation === "string" && typeof _set !== "string" && _set.id && operation in presets && _set.id in presets[operation]
-                    ? presets[operation][_set.id as keyof typeof presets["addition"]]
-                    : operation;
-            if (!_operation) {
-                throw new Error(`Preset operation "${operation}" is not defined for set "${_set.id}".`);
-            }
-            if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
-                if (
-                    _operation === presets.addition[_set.id] ||
-                    _operation === presets.multiplication[_set.id]
-                ) {
+            if (set.id?.startsWith("M(")) {
+                if (operation === Chalkboard.matr.add as unknown as (a: T, b: T) => T) {
                     return true;
                 }
-                return false;
-            }
-            if (_set.id === "C") {
-                if (
-                    _operation === Chalkboard.comp.add ||
-                    _operation === Chalkboard.comp.mul
-                ) {
-                    return true;
-                }
-                return false;
-            }
-            if (_set.id?.startsWith("M(")) {
-                const rows = (_set as any).rows;
-                const cols = (_set as any).cols;
-                if (_operation === Chalkboard.matr.add) {
-                    return true;
-                }
-                if (_operation === Chalkboard.matr.mul) {
-                    return rows === cols;
-                }
-                return false;
-            }
-            if (typeof _set === "object" && "elements" in _set && _set.elements) {
-                for (const a of _set.elements) {
-                    for (const b of _set.elements) {
-                        if (typeof _operation === "function") {
-                            const result = _operation(a, b);
-                            if (_set.contains(result as T)) {
-                                continue;
-                            }
-                            return false;
-                        }
-                        return false;
+                if (operation === Chalkboard.matr.mul as unknown as (a: T, b: T) => T) {
+                    const dimensions = set.id.match(/\d+/g)?.map(Number);
+                    if (dimensions && dimensions.length >= 2) {
+                        return dimensions[0] === dimensions[1];
                     }
                 }
+                return false;
+            }
+            if (set.id === "C") {
+                if (operation === Chalkboard.comp.add as unknown as (a: T, b: T) => T || operation === Chalkboard.comp.mul as unknown as (a: T, b: T) => T) {
+                    return true;
+                }
+                return false;
+            }
+            if (typeof set === "object" && "elements" in set && set.elements) {
+                for (const a of set.elements) {
+                    for (const b of set.elements) {
+                        const result = operation(a, b);
+                        if (!set.contains(result)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
             }
             return true;
-        }
+        };
 
         /**
          * Checks if an algebraic structure is commutative.
@@ -944,20 +908,24 @@ namespace Chalkboard {
                 return set1.every((x) => struc2.contains(x)) && set2.every((x) => struc1.contains(x));
             }
             if ("operation" in struc1 && "operation" in struc2) {
-                const group1 = struc1 as ChalkboardStructure<T>;
-                const group2 = struc2 as ChalkboardStructure<T>;
-                return (
-                    Chalkboard.abal.isEqual(group1.set, group2.set) &&
-                    group1.identity === group2.identity &&
+                const monoiroup1 = struc1 as ChalkboardStructure<T>;
+                const monoiroup2 = struc2 as ChalkboardStructure<T>;
+                const monoidEqual = Chalkboard.abal.isEqual(monoiroup1.set, monoiroup2.set) &&
+                    monoiroup1.identity === monoiroup2.identity &&
                     (
-                        group1.operation === group2.operation ||
-                        (group1.operation as (x: T, y: T) => T).toString() === (group2.operation as (x: T, y: T) => T).toString()
-                    ) &&
-                    (
-                        group1.inverter === group2.inverter ||
-                        (group1.inverter as (x: T, y: T) => T).toString() === (group2.inverter as (x: T, y: T) => T).toString()
-                    )
-                );
+                        monoiroup1.operation === monoiroup2.operation ||
+                        (monoiroup1.operation as (x: T, y: T) => T).toString() === (monoiroup2.operation as (x: T, y: T) => T).toString()
+                    );
+                if ("inverter" in monoiroup1 && "inverter" in monoiroup2) {
+                    return monoidEqual && (
+                        monoiroup1.inverter === monoiroup2.inverter ||
+                        (monoiroup1.inverter as (x: T) => T).toString() === (monoiroup2.inverter as (x: T) => T).toString()
+                    );
+                }
+                if (("inverter" in monoiroup1) !== ("inverter" in monoiroup2)) {
+                    return false;
+                }
+                return monoidEqual;
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 const ring1 = struc1 as ChalkboardStructure<T>;
@@ -1276,6 +1244,43 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if an algebraic structure is a monoid.
+         * @template T
+         * @param {ChalkboardStructure<T>} monoid - The monoid
+         * @returns {boolean}
+         */
+        export const isMonoid = <T>(monoid: ChalkboardStructure<T>): boolean => {
+            const { set, operation, identity } = monoid;
+            if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
+                return true;
+            }
+            if (typeof set.elements === "undefined") {
+                return false;
+            }
+            if (typeof operation === "undefined" || typeof identity === "undefined") {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(set, operation)) {
+                return false;
+            }
+            for (const a of set.elements) {
+                if ($(operation(a, identity)) !== $(a) || $(operation(identity, a)) !== $(a)) {
+                    return false;
+                }
+            }
+            for (const a of set.elements) {
+                for (const b of set.elements) {
+                    for (const c of set.elements) {
+                        if ($(operation(operation(a, b), c)) !== $(operation(a, operation(b, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
+
+        /**
          * Checks if a subgroup of a group is a normal subgroup.
          * @template T
          * @param {ChalkboardStructure<T>} group - The group
@@ -1466,6 +1471,41 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if a subset is a submonoid of a monoid.
+         * @template T
+         * @param {ChalkboardStructure<T>} monoid - The monoid
+         * @param {ChalkboardSet<T>} subset - The subset
+         * @returns {boolean}
+         */
+        export const isSubmonoid = <T>(monoid: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            const { operation, identity } = monoid;
+            if (monoid.set.id && subset.id) {
+                if (subset.id === monoid.set.id) {
+                    return true;
+                }
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+            }
+            if (typeof operation === "undefined" || typeof identity === "undefined") {
+                return false;
+            }
+            if (!subset.contains(identity)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, operation)) {
+                return false;
+            }
+            return true;
+        };
+
+        /**
          * Checks if a subset is a subring of a ring.
          * @template T
          * @param {ChalkboardStructure<T>} ring - The ring
@@ -1629,6 +1669,48 @@ namespace Chalkboard {
             },
             id: `M(${rows}, ${cols})`
         });
+
+        /**
+         * Defines an algebraic structure known as a monoid.
+         * @template T
+         * @param {ChalkboardSet<T>} set - The set of the monoid
+         * @param {(a: T, b: T) => T} operation - The operation of the monoid
+         * @param {T} [identity] - The identity element of the monoid (optional if the set is Z, Q, R, C, A, S, M, or GL)
+         * @returns {ChalkboardStructure<T>}
+         */
+        export const monoid = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T): ChalkboardStructure<T> => {
+            const autoconfig = (): { identity: T } => {
+                if (!set.id) {
+                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" explicitly.');
+                }
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
+                    return { identity: 0 as T };
+                } else if (set.id === "C") {
+                    return { identity: Chalkboard.comp.init(0, 0) as T };
+                } else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    return { identity: 0 as T };
+                } else if (set.id.startsWith("C") && set.id.length > 1) {
+                    return { identity: Chalkboard.comp.init(1, 0) as T };
+                } else if (set.id.startsWith("M(")) {
+                    const rows = (set as any).rows;
+                    const cols = (set as any).cols;
+                    return { identity: Chalkboard.matr.fill(0, rows, cols) as T };
+                } else if (set.id.startsWith("GL")) {
+                    const n = parseInt(set.id.slice(2), 10);
+                    return { identity: Chalkboard.matr.identity(n) as T };
+                } else if (set.id.match(/^[SA]\d+$/)) {
+                    const n = parseInt(set.id.slice(1), 10);
+                    return { identity: Array.from({length: n}, (_, i) => i) as T };
+                }
+                throw new Error('Automatic configuration of the "identity" property is not available for the inputted "set".');
+            };
+            const configured = typeof identity === "undefined" ? autoconfig() : { identity };
+            const monoid: ChalkboardStructure<T> = { set, operation, identity: configured.identity };
+            if (!Chalkboard.abal.isMonoid(monoid)) {
+                throw new Error('The inputted "set", "operation", and "identity" do not form a monoid.');
+            }
+            return monoid;
+        };
 
         /**
          * The set of all natural numbers, denoted as N.
@@ -2047,6 +2129,34 @@ namespace Chalkboard {
             }
             if (Array.isArray(size[0])) size = size[0];
             return Chalkboard.tens.resize(result.elements, ...size);
+        };
+
+        /**
+         * Converts a set or algebraic structure to a typed array.
+         * @param {ChalkboardSet<number> | ChalkboardStructure<number>} struc - The set or structure
+         * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
+         * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         */
+        export const toTypedArray = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
+            const result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to typed array.");
+            }
+            const arr = Chalkboard.abal.toArray(result);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            } else if (type === "int16") {
+                return new Int16Array(arr);
+            } else if (type === "int32") {
+                return new Int32Array(arr);
+            } else if (type === "float32") {
+                return new Float32Array(arr);
+            } else if (type === "float64") {
+                return new Float64Array(arr);
+            } else if (type === "bigint64") {
+                return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
         };
 
         /**

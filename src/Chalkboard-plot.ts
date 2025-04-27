@@ -478,7 +478,7 @@ namespace Chalkboard {
             config.context.translate(config.x, config.y);
             for (let i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
                 for (let j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
-                    const v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
+                    const v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j)) as { x: number, y: number, z?: number, w?: number };
                     config.context.beginPath();
                     config.context.moveTo(i, j);
                     config.context.lineTo(i + v.x, j + v.y);
@@ -923,6 +923,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 5,
                 context: config.context || getContext()
             }).size /= 100;
+            vect = vect as { x: number, y: number, z?: number, w?: number }
             config.context.strokeStyle = config.strokeStyle;
             config.context.lineWidth = config.lineWidth;
             config.context.save();

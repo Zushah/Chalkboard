@@ -205,23 +205,24 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const cos = (rad: number): number => {
-            rad = Chalkboard.trig.coterminal(rad);
+            const x = Chalkboard.trig.coterminal(rad);
+            const x2 = x * x, x4 = x2 * x2, x6 = x4 * x2, x8 = x4 * x4, x10 = x6 * x4, x12 = x8 * x4, x14 = x8 * x6, x16 = x8 * x8, x18 = x10 * x8, x20 = x10 * x10, x22 = x12 * x10, x24 = x12 * x12, x26 = x14 * x12, x28 = x14 * x14;
             return (
                 1 -
-                Math.pow(rad, 2) / Chalkboard.numb.factorial(2) +
-                Math.pow(rad, 4) / Chalkboard.numb.factorial(4) -
-                Math.pow(rad, 6) / Chalkboard.numb.factorial(6) +
-                Math.pow(rad, 8) / Chalkboard.numb.factorial(8) -
-                Math.pow(rad, 10) / Chalkboard.numb.factorial(10) +
-                Math.pow(rad, 12) / Chalkboard.numb.factorial(12) -
-                Math.pow(rad, 14) / Chalkboard.numb.factorial(14) +
-                Math.pow(rad, 16) / Chalkboard.numb.factorial(16) -
-                Math.pow(rad, 18) / Chalkboard.numb.factorial(18) +
-                Math.pow(rad, 20) / Chalkboard.numb.factorial(20) -
-                Math.pow(rad, 22) / Chalkboard.numb.factorial(22) +
-                Math.pow(rad, 24) / Chalkboard.numb.factorial(24) -
-                Math.pow(rad, 26) / Chalkboard.numb.factorial(26) +
-                Math.pow(rad, 28) / Chalkboard.numb.factorial(28)
+                x2 / 2 +
+                x4 / 24 -
+                x6 / 720 +
+                x8 / 40320 -
+                x10 / 3628800 +
+                x12 / 479001600 -
+                x14 / 87178291200 +
+                x16 / 20922789888000 -
+                x18 / 6402373705728000 +
+                x20 / 2.43290200817664e+18 -
+                x22 / 1.1240007277776077e+21 +
+                x24 / 6.204484017332394e+23 -
+                x26 / 4.0329146112660565e+26 +
+                x28 / 3.0488834461171384e+29
             );
         };
 
@@ -303,23 +304,24 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const sin = (rad: number): number => {
-            rad = Chalkboard.trig.coterminal(rad);
+            const x = Chalkboard.trig.coterminal(rad);
+            const x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2;
             return (
-                rad -
-                Math.pow(rad, 3) / Chalkboard.numb.factorial(3) +
-                Math.pow(rad, 5) / Chalkboard.numb.factorial(5) -
-                Math.pow(rad, 7) / Chalkboard.numb.factorial(7) +
-                Math.pow(rad, 9) / Chalkboard.numb.factorial(9) -
-                Math.pow(rad, 11) / Chalkboard.numb.factorial(11) +
-                Math.pow(rad, 13) / Chalkboard.numb.factorial(13) -
-                Math.pow(rad, 15) / Chalkboard.numb.factorial(15) +
-                Math.pow(rad, 17) / Chalkboard.numb.factorial(17) -
-                Math.pow(rad, 19) / Chalkboard.numb.factorial(19) +
-                Math.pow(rad, 21) / Chalkboard.numb.factorial(21) -
-                Math.pow(rad, 23) / Chalkboard.numb.factorial(23) +
-                Math.pow(rad, 25) / Chalkboard.numb.factorial(25) -
-                Math.pow(rad, 27) / Chalkboard.numb.factorial(27) +
-                Math.pow(rad, 29) / Chalkboard.numb.factorial(29)
+                x -
+                x3 / 6 +
+                x5 / 120 -
+                x7 / 5040 +
+                x9 / 362880 -
+                x11 / 39916800 +
+                x13 / 6227020800 -
+                x15 / 1307674368000 +
+                x17 / 355687428096000 -
+                x19 / 1.21645100408832e+17 +
+                x21 / 5.109094217170944e+19 -
+                x23 / 2.585201673888498e+22 +
+                x25 / 1.5511210043330986e+25 -
+                x27 / 1.0888869450418352e+28 +
+                x29 / 8.841761993739701e+30
             );
         };
 
