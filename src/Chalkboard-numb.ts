@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Number Theory Namespace
-    Version 2.3.0 Boole
+    Version 2.4.0 Noether
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {

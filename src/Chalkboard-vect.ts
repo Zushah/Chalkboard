@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library - Vector Namespace
-    Version 2.3.0 Boole
+    Version 2.4.0 Noether
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -11,6 +11,15 @@ namespace Chalkboard {
     export namespace vect {
         /** @ignore */
         const $ = (input: ChalkboardVector): ChalkboardVector => {
+            const $$ = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
+                if (z === undefined && w === undefined) {
+                    return { x: x, y: y };
+                } else if (w === undefined) {
+                    return { x: x, y: y, z: z };
+                } else {
+                    return { x: x, y: y, z: z, w: w };
+                }
+            };
             const v = input as { x: number, y: number, z?: number, w?: number };
             if (v && typeof v.x === "number" && typeof v.y === "number") {
                 return input as ChalkboardVector;
@@ -21,32 +30,32 @@ namespace Chalkboard {
                     const rows = Chalkboard.matr.rows(matr);
                     const cols = Chalkboard.matr.cols(matr);
                     if (cols === 1) {
-                        if (rows === 2) return Chalkboard.vect.init(matr[0][0], matr[1][0]);
-                        if (rows === 3) return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0]);
-                        if (rows === 4) return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0], matr[3][0]);
+                        if (rows === 2) return $$(matr[0][0], matr[1][0]);
+                        if (rows === 3) return $$(matr[0][0], matr[1][0], matr[2][0]);
+                        if (rows === 4) return $$(matr[0][0], matr[1][0], matr[2][0], matr[3][0]);
                     } else if (rows === 1) {
-                        if (cols === 2) return Chalkboard.vect.init(matr[0][0], matr[0][1]);
-                        if (cols === 3) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2]);
-                        if (cols === 4) return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
+                        if (cols === 2) return $$(matr[0][0], matr[0][1]);
+                        if (cols === 3) return $$(matr[0][0], matr[0][1], matr[0][2]);
+                        if (cols === 4) return $$(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
                     }
                 } else {
                     const arr = input as number[];
-                    if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
-                    if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
-                    if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                    if (arr.length === 2) return $$(arr[0], arr[1]);
+                    if (arr.length === 3) return $$(arr[0], arr[1], arr[2]);
+                    if (arr.length === 4) return $$(arr[0], arr[1], arr[2], arr[3]);
                 }
             }
             if (input instanceof Float32Array || input instanceof Float64Array) {
                 const arr = input as Float32Array | Float64Array;
-                if (arr.length === 2) return Chalkboard.vect.init(arr[0], arr[1]);
-                if (arr.length === 3) return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
-                if (arr.length === 4) return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                if (arr.length === 2) return $$(arr[0], arr[1]);
+                if (arr.length === 3) return $$(arr[0], arr[1], arr[2]);
+                if (arr.length === 4) return $$(arr[0], arr[1], arr[2], arr[3]);
             }
             if (typeof input === "string") {
                 try {
                     const parsed = JSON.parse(input as string);
                     if (parsed && typeof parsed === "object" && typeof parsed.x === "number" && typeof parsed.y === "number") {
-                        return Chalkboard.vect.init(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
+                        return $$(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
                     }
                 } catch (e) {
                     const str = (input as string).trim();
@@ -54,9 +63,9 @@ namespace Chalkboard {
                         const content = str.substring(1, str.length - 1);
                         const components = content.split(",").map(part => parseFloat(part.trim()));
                         if (components.length >= 2 && components.every(p => !isNaN(p))) {
-                            if (components.length === 2) return Chalkboard.vect.init(components[0], components[1]);
-                            if (components.length === 3) return Chalkboard.vect.init(components[0], components[1], components[2]);
-                            if (components.length === 4) return Chalkboard.vect.init(components[0], components[1], components[2], components[3]);
+                            if (components.length === 2) return $$(components[0], components[1]);
+                            if (components.length === 3) return $$(components[0], components[1], components[2]);
+                            if (components.length === 4) return $$(components[0], components[1], components[2], components[3]);
                         }
                     }
                 }

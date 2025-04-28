@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.3.0 Boole Example Program: Fluid Flow
+    Version 2.4.0 Noether Example Program: Fluid Flow
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 
@@ -17,7 +17,7 @@ const F = cb.vect.field("y", "-x / ((1 + x * x) * (1 + x * x))");
 // Basic particle system to simulate the fluid flow
 class Particle {
     constructor() {
-        this.pos = cb.vect.random(-canvas.width / 2, canvas.width / 2, 2); // Position vector
+        this.pos = cb.vect.random(2, -canvas.width / 2, canvas.width / 2); // Position vector
         this.vel = cb.vect.init(0, 0); // Velocity vector
         this.ppos = this.pos; // Previous position vector
     }

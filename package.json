@@ -1,6 +1,6 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
   "main": "dist/Chalkboard.js",
   "types": "dist/Chalkboard.d.ts",
@@ -25,11 +25,13 @@
   },
   "keywords": [
     "algebra",
+    "boolean",
     "calculus",
     "complex",
     "geometry",
     "khan-academy",
     "mathematics",
+    "matrix",
     "number",
     "plot",
     "quaternion",
@@ -37,7 +39,6 @@
     "tensor",
     "trigonometry",
     "typescript",
-    "matrix",
     "vector"
   ],
   "author": "Zushah",

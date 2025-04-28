@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.3.0 Boole Example Program: Quaternion Donut
+    Version 2.4.0 Noether Example Program: Quaternion Donut
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

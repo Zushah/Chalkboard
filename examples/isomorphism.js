@@ -1,6 +1,6 @@
 /*
     The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.3.0 Boole Example Program: Isomorphism Visualization
+    Version 2.4.0 Noether Example Program: Isomorphism Visualization
     Authored by Zushah ===> https://www.github.com/Zushah
 */
 

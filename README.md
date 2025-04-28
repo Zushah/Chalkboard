@@ -1,11 +1,11 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/Chalkboard-logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0"><img src="https://img.shields.io/badge/release-v2.3.0_Boole-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0"><img src="https://img.shields.io/badge/release-v2.4.0_Noether-blueviolet?logo=github&logoColor=white" alt="Latest release"></a>
     <a href="https://www.github.com/microsoft/TypeScript"><img src="https://img.shields.io/github/languages/top/Zushah/Chalkboard?color=blue&logo=typescript&logoColor=white" alt="Written in TypeScript"></a>
     <a href="https://www.codefactor.io/repository/github/zushah/chalkboard"><img src="https://img.shields.io/codefactor/grade/github/Zushah/Chalkboard?color=darkgreen&logo=codefactor&logoColor=white" alt="CodeFactor grade"></a>
     <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?logo=npm&logoColor=white" alt="npm downloads"></a>
     <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/github/license/Zushah/Chalkboard?color=yellow&logo=opensourceinitiative&logoColor=white" alt="MIT License"></a>
-    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.3.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=orange&logo=files&logoColor=white" alt="Minified size"></a>
+    <a href="https://bundlephobia.com/package/@zushah/chalkboard@2.4.0"><img src="https://img.shields.io/bundlephobia/min/%40zushah/chalkboard?color=orange&logo=files&logoColor=white" alt="Minified size"></a>
     <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://img.shields.io/jsdelivr/gh/hm/Zushah/Chalkboard?color=crimson&logo=jsdelivr&logoColor=white" alt="jsDelivr requests"></a> 
     <br>
     <a href="https://zushah.github.io/Chalkboard">https://zushah.github.io/Chalkboard</a>
@@ -23,18 +23,18 @@
 </ol>
 
 # About
-The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.3.0 Boole](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0), Chalkboard has 605 unique commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
+The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user. It was developed by [Zushah](https://www.github.com/Zushah) during 2022 and 2023 and then [released](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) on November 6, 2023. As per the latest release of [v2.4.0 Noether](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0), Chalkboard has 615 unique commands. The library is available for regular JavaScript on both the client-side and the server-side as well as [Proccesing.js](https://www.processing.org/) (fully compatible with [Khan Academy](https://www.khanacademy.org/cs/chalkboard/6708642430369792)). Chalkboard's website can be visited [here](https://zushah.github.io/Chalkboard).
 
 # Installation
 If your JavaScript project is being run on the client-side within a webpage, you can install Chalkboard with this HTML tag:
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.3.0/dist/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@2.4.0/dist/Chalkboard.min.js"></script>
 ```
 If your JavaScript project is being run on the server-side within the [Node.js](https://nodejs.org/en) environment, you can install Chalkboard with this console command:
 ```bash
 npm install @zushah/chalkboard
 ```
-Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0) and put the relevant files in your project's directory.
+Alternatively, you can simply download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0) and put the relevant files in your project's directory.
 
 Chalkboard can also be downloaded on [Khan Academy](https://www.khanacademy.org) from the code in the corresponding [release](https://www.khanacademy.org/cs/chalkboard/6708642430369792).
 

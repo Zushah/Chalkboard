@@ -164,8 +164,8 @@ var Chalkboard;
             Chalkboard.VERSIONALIAS +
             " released 04/14/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard");
     };
-    Chalkboard.VERSION = "2.3.0";
-    Chalkboard.VERSIONALIAS = "Boole";
+    Chalkboard.VERSION = "2.4.0";
+    Chalkboard.VERSIONALIAS = "Noether";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined") {
     module.exports = Chalkboard;
@@ -458,16 +458,24 @@ var Chalkboard;
                     struc2.operation(a[1], b[1])
                 ]; };
                 var identity = [struc1.identity, struc2.identity];
-                var inverter = function (a) { return [
-                    struc1.inverter(a[0]),
-                    struc2.inverter(a[1])
-                ]; };
+                if ("inverter" in struc1 && "inverter" in struc2) {
+                    var inverter = function (a) { return [
+                        struc1.inverter(a[0]),
+                        struc2.inverter(a[1])
+                    ]; };
+                    if (type === "sum") {
+                        if (!struc1.set.elements || !struc2.set.elements) {
+                            throw new Error("Direct sum is only defined for finite groups.");
+                        }
+                    }
+                    return Chalkboard.abal.group(set, operation, identity, inverter);
+                }
                 if (type === "sum") {
                     if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite groups.");
+                        throw new Error("Direct sum is only defined for finite structures.");
                     }
                 }
-                return Chalkboard.abal.group(set, operation, identity, inverter);
+                return Chalkboard.abal.monoid(set, operation, identity);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 if (type === "sum") {
@@ -495,34 +503,11 @@ var Chalkboard;
             return morphism;
         };
         abal.field = function (set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter) {
-            var _a, _b;
-            var presets = {
-                addition: {
-                    Z: function (a, b) { return a + b; },
-                    Q: function (a, b) { return a + b; },
-                    R: function (a, b) { return a + b; },
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: function (a, b) { return a * b; },
-                    Q: function (a, b) { return a * b; },
-                    R: function (a, b) { return a * b; },
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                }
-            };
-            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
-            var _add = typeof add === "string" ? presets[add]["addition"] || presets[add][(_a = _set.id) !== null && _a !== void 0 ? _a : ""] : add;
-            var _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][(_b = _set.id) !== null && _b !== void 0 ? _b : ""] : mul;
-            if (!_add || !_mul) {
-                throw new Error("Preset operations \"".concat(add, "\" or \"").concat(mul, "\" are not defined for set \"").concat(_set.id, "\"."));
-            }
             var autoconfig = function () {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.');
                 }
-                if (_set.id === "Q" || _set.id === "R") {
+                if (set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0,
                         mulIdentity: 1,
@@ -530,7 +515,7 @@ var Chalkboard;
                         mulInverter: function (a) { return (1 / a); }
                     };
                 }
-                else if (_set.id === "C") {
+                else if (set.id === "C") {
                     return {
                         addIdentity: Chalkboard.comp.init(0, 0),
                         mulIdentity: Chalkboard.comp.init(1, 0),
@@ -541,7 +526,7 @@ var Chalkboard;
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
             };
             var configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined" ? autoconfig() : { addIdentity: addIdentity, mulIdentity: mulIdentity, addInverter: addInverter, mulInverter: mulInverter };
-            var field = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
+            var field = { set: set, add: add, mul: mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
             if (!Chalkboard.abal.isField(field)) {
                 throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.');
             }
@@ -585,76 +570,52 @@ var Chalkboard;
             id: "GL".concat(n)
         }); };
         abal.group = function (set, operation, identity, inverter) {
-            var presets = {
-                addition: {
-                    Z: function (a, b) { return a + b; },
-                    Q: function (a, b) { return a + b; },
-                    R: function (a, b) { return a + b; },
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: function (a, b) { return a * b; },
-                    Q: function (a, b) { return a * b; },
-                    R: function (a, b) { return a * b; },
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                }
-            };
-            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
-            var _operation = typeof operation === "string" && _set.id ? presets[operation][_set.id] : operation;
-            if (!_operation) {
-                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
-            }
-            if (!_operation) {
-                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
-            }
             var autoconfig = function () {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.');
                 }
-                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         identity: 0,
                         inverter: function (a) { return -a; }
                     };
                 }
-                else if (_set.id === "C") {
+                else if (set.id === "C") {
                     return {
                         identity: Chalkboard.comp.init(0, 0),
                         inverter: function (a) { return Chalkboard.comp.negate(a); }
                     };
                 }
-                else if (_set.id.startsWith("Z") && _set.id.length > 1) {
-                    var n_1 = parseInt(_set.id.slice(1), 10);
+                else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    var n_1 = parseInt(set.id.slice(1), 10);
                     return {
                         identity: 0,
                         inverter: function (a) { return ((n_1 - a % n_1) % n_1); }
                     };
                 }
-                else if (_set.id.startsWith("C") && _set.id.length > 1) {
+                else if (set.id.startsWith("C") && set.id.length > 1) {
                     return {
                         identity: Chalkboard.comp.init(1, 0),
                         inverter: function (a) { return Chalkboard.comp.conjugate(a); }
                     };
                 }
-                else if (_set.id.startsWith("M(")) {
-                    var rows = _set.rows;
-                    var cols = _set.cols;
+                else if (set.id.startsWith("M(")) {
+                    var rows = set.rows;
+                    var cols = set.cols;
                     return {
                         identity: Chalkboard.matr.fill(0, rows, cols),
                         inverter: function (a) { return Chalkboard.matr.negate(a); }
                     };
                 }
-                else if (_set.id.startsWith("GL")) {
-                    var n = parseInt(_set.id.slice(2), 10);
+                else if (set.id.startsWith("GL")) {
+                    var n = parseInt(set.id.slice(2), 10);
                     return {
                         identity: Chalkboard.matr.identity(n),
                         inverter: function (a) { return Chalkboard.matr.invert(a); }
                     };
                 }
-                else if (_set.id.match(/^[SA]\d+$/)) {
-                    var n = parseInt(_set.id.slice(1), 10);
+                else if (set.id.match(/^[SA]\d+$/)) {
+                    var n = parseInt(set.id.slice(1), 10);
                     return {
                         identity: Array.from({ length: n }, function (_, i) { return i; }),
                         inverter: function (a) {
@@ -669,7 +630,7 @@ var Chalkboard;
                 throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
             };
             var configured = typeof identity === "undefined" || typeof inverter === "undefined" ? autoconfig() : { identity: identity, inverter: inverter };
-            var group = { set: _set, operation: _operation, identity: configured.identity, inverter: configured.inverter };
+            var group = { set: set, operation: operation, identity: configured.identity, inverter: configured.inverter };
             if (!Chalkboard.abal.isGroup(group)) {
                 throw new Error('The inputted "set", "operation", "identity", and "inverter" do not form a group.');
             }
@@ -730,80 +691,40 @@ var Chalkboard;
             return Chalkboard.abal.isInjective(morph) && Chalkboard.abal.isSurjective(morph);
         };
         abal.isClosed = function (set, operation) {
-            var _a;
-            if (typeof set !== "string" && set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
-                if (operation === "addition" || operation === "multiplication")
-                    return true;
-                return false;
+            var _a, _b;
+            if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
+                return true;
             }
-            var presets = {
-                addition: {
-                    Z: function (a, b) { return a + b; },
-                    Q: function (a, b) { return a + b; },
-                    R: function (a, b) { return a + b; },
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add,
-                },
-                multiplication: {
-                    Z: function (a, b) { return a * b; },
-                    Q: function (a, b) { return a * b; },
-                    R: function (a, b) { return a * b; },
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul,
-                }
-            };
-            var _set = typeof set === "string" && (set in Chalkboard.abal) && typeof Chalkboard.abal[set] === "function"
-                ? (Object.prototype.hasOwnProperty.call(Chalkboard.abal, set) && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : undefined)
-                : set;
-            if (!_set || typeof _set !== "object") {
-                throw new Error('The "set" must have a valid "id" property or be resolvable from a string.');
-            }
-            var _operation = typeof operation === "string" && typeof _set !== "string" && _set.id && operation in presets && _set.id in presets[operation]
-                ? presets[operation][_set.id]
-                : operation;
-            if (!_operation) {
-                throw new Error("Preset operation \"".concat(operation, "\" is not defined for set \"").concat(_set.id, "\"."));
-            }
-            if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
-                if (_operation === presets.addition[_set.id] ||
-                    _operation === presets.multiplication[_set.id]) {
+            if ((_a = set.id) === null || _a === void 0 ? void 0 : _a.startsWith("M(")) {
+                if (operation === Chalkboard.matr.add) {
                     return true;
                 }
-                return false;
-            }
-            if (_set.id === "C") {
-                if (_operation === Chalkboard.comp.add ||
-                    _operation === Chalkboard.comp.mul) {
-                    return true;
-                }
-                return false;
-            }
-            if ((_a = _set.id) === null || _a === void 0 ? void 0 : _a.startsWith("M(")) {
-                var rows = _set.rows;
-                var cols = _set.cols;
-                if (_operation === Chalkboard.matr.add) {
-                    return true;
-                }
-                if (_operation === Chalkboard.matr.mul) {
-                    return rows === cols;
-                }
-                return false;
-            }
-            if (typeof _set === "object" && "elements" in _set && _set.elements) {
-                for (var _i = 0, _b = _set.elements; _i < _b.length; _i++) {
-                    var a = _b[_i];
-                    for (var _c = 0, _d = _set.elements; _c < _d.length; _c++) {
-                        var b = _d[_c];
-                        if (typeof _operation === "function") {
-                            var result = _operation(a, b);
-                            if (_set.contains(result)) {
-                                continue;
-                            }
-                            return false;
-                        }
-                        return false;
+                if (operation === Chalkboard.matr.mul) {
+                    var dimensions = (_b = set.id.match(/\d+/g)) === null || _b === void 0 ? void 0 : _b.map(Number);
+                    if (dimensions && dimensions.length >= 2) {
+                        return dimensions[0] === dimensions[1];
                     }
                 }
+                return false;
+            }
+            if (set.id === "C") {
+                if (operation === Chalkboard.comp.add || operation === Chalkboard.comp.mul) {
+                    return true;
+                }
+                return false;
+            }
+            if (typeof set === "object" && "elements" in set && set.elements) {
+                for (var _i = 0, _c = set.elements; _i < _c.length; _i++) {
+                    var a = _c[_i];
+                    for (var _d = 0, _e = set.elements; _d < _e.length; _d++) {
+                        var b = _e[_d];
+                        var result = operation(a, b);
+                        if (!set.contains(result)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
             }
             return true;
         };
@@ -906,14 +827,20 @@ var Chalkboard;
                 return set1.every(function (x) { return struc2.contains(x); }) && set2.every(function (x) { return struc1.contains(x); });
             }
             if ("operation" in struc1 && "operation" in struc2) {
-                var group1 = struc1;
-                var group2 = struc2;
-                return (Chalkboard.abal.isEqual(group1.set, group2.set) &&
-                    group1.identity === group2.identity &&
-                    (group1.operation === group2.operation ||
-                        group1.operation.toString() === group2.operation.toString()) &&
-                    (group1.inverter === group2.inverter ||
-                        group1.inverter.toString() === group2.inverter.toString()));
+                var monoiroup1 = struc1;
+                var monoiroup2 = struc2;
+                var monoidEqual = Chalkboard.abal.isEqual(monoiroup1.set, monoiroup2.set) &&
+                    monoiroup1.identity === monoiroup2.identity &&
+                    (monoiroup1.operation === monoiroup2.operation ||
+                        monoiroup1.operation.toString() === monoiroup2.operation.toString());
+                if ("inverter" in monoiroup1 && "inverter" in monoiroup2) {
+                    return monoidEqual && (monoiroup1.inverter === monoiroup2.inverter ||
+                        monoiroup1.inverter.toString() === monoiroup2.inverter.toString());
+                }
+                if (("inverter" in monoiroup1) !== ("inverter" in monoiroup2)) {
+                    return false;
+                }
+                return monoidEqual;
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 var ring1 = struc1;
@@ -1153,6 +1080,40 @@ var Chalkboard;
         abal.isIsomorphism = function (morph) {
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isBijective(morph);
         };
+        abal.isMonoid = function (monoid) {
+            var set = monoid.set, operation = monoid.operation, identity = monoid.identity;
+            if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
+                return true;
+            }
+            if (typeof set.elements === "undefined") {
+                return false;
+            }
+            if (typeof operation === "undefined" || typeof identity === "undefined") {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(set, operation)) {
+                return false;
+            }
+            for (var _i = 0, _a = set.elements; _i < _a.length; _i++) {
+                var a = _a[_i];
+                if ($(operation(a, identity)) !== $(a) || $(operation(identity, a)) !== $(a)) {
+                    return false;
+                }
+            }
+            for (var _b = 0, _c = set.elements; _b < _c.length; _b++) {
+                var a = _c[_b];
+                for (var _d = 0, _e = set.elements; _d < _e.length; _d++) {
+                    var b = _e[_d];
+                    for (var _f = 0, _g = set.elements; _f < _g.length; _f++) {
+                        var c = _g[_f];
+                        if ($(operation(operation(a, b), c)) !== $(operation(a, operation(b, c)))) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        };
         abal.isNormalSubgroup = function (group, subgroup) {
             var set = group.set, operation = group.operation, inverter = group.inverter;
             if (!operation || !inverter) {
@@ -1224,6 +1185,20 @@ var Chalkboard;
         };
         abal.isSubfield = function (field, subset) {
             var add = field.add, mul = field.mul, addIdentity = field.addIdentity, mulIdentity = field.mulIdentity, addInverter = field.addInverter, mulInverter = field.mulInverter;
+            if (field.set.id && subset.id) {
+                if (subset.id === field.set.id && ["Q", "R", "C"].includes(subset.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["R", "C"].includes(field.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && field.set.id === "C") {
+                    return true;
+                }
+                if (subset.id === "Z") {
+                    return false;
+                }
+            }
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined") {
                 return false;
             }
@@ -1248,7 +1223,32 @@ var Chalkboard;
             return true;
         };
         abal.isSubgroup = function (group, subset) {
+            var _a;
             var operation = group.operation, identity = group.identity, inverter = group.inverter;
+            if (group.set.id && subset.id) {
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(group.set.id)) {
+                    return true;
+                }
+                if (subset.id === "C" && group.set.id === "C") {
+                    return true;
+                }
+                if (subset.id.startsWith("Z") && group.set.id.startsWith("Z")) {
+                    var nSubset = parseInt(subset.id.slice(1), 10);
+                    var nGroup = parseInt(group.set.id.slice(1), 10);
+                    if (!isNaN(nSubset) && !isNaN(nGroup)) {
+                        return nGroup % nSubset === 0;
+                    }
+                }
+                if (((_a = subset.id) === null || _a === void 0 ? void 0 : _a.startsWith("GL")) && subset.id === group.set.id) {
+                    return true;
+                }
+            }
             if (typeof operation === "undefined" || typeof identity === "undefined" || typeof inverter === "undefined") {
                 return false;
             }
@@ -1258,16 +1258,64 @@ var Chalkboard;
             if (!Chalkboard.abal.isClosed(subset, operation)) {
                 return false;
             }
-            for (var _i = 0, _a = subset.elements || []; _i < _a.length; _i++) {
-                var a = _a[_i];
+            for (var _i = 0, _b = subset.elements || []; _i < _b.length; _i++) {
+                var a = _b[_i];
                 if (!subset.contains(inverter(a))) {
                     return false;
                 }
             }
             return true;
         };
+        abal.isSubmonoid = function (monoid, subset) {
+            var operation = monoid.operation, identity = monoid.identity;
+            if (monoid.set.id && subset.id) {
+                if (subset.id === monoid.set.id) {
+                    return true;
+                }
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(monoid.set.id)) {
+                    return true;
+                }
+            }
+            if (typeof operation === "undefined" || typeof identity === "undefined") {
+                return false;
+            }
+            if (!subset.contains(identity)) {
+                return false;
+            }
+            if (!Chalkboard.abal.isClosed(subset, operation)) {
+                return false;
+            }
+            return true;
+        };
         abal.isSubring = function (ring, subset) {
             var add = ring.add, mul = ring.mul, addIdentity = ring.addIdentity, addInverter = ring.addInverter;
+            if (ring.set.id && subset.id) {
+                if (subset.id === ring.set.id) {
+                    return true;
+                }
+                if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id === "Q" && ["Q", "R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id === "R" && ["R", "C"].includes(ring.set.id)) {
+                    return true;
+                }
+                if (subset.id.startsWith("Z") && ring.set.id.startsWith("Z")) {
+                    var nSubset = parseInt(subset.id.slice(1), 10);
+                    var nRing = parseInt(ring.set.id.slice(1), 10);
+                    if (!isNaN(nSubset) && !isNaN(nRing)) {
+                        return nRing % nSubset === 0;
+                    }
+                }
+            }
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
                 return false;
             }
@@ -1286,6 +1334,30 @@ var Chalkboard;
             return true;
         };
         abal.isSubset = function (set, superset) {
+            if (set.id && superset.id) {
+                if (set.id === superset.id) {
+                    return true;
+                }
+                if (set.id === "Z") {
+                    return ["Z", "Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id === "Q") {
+                    return ["Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id === "R") {
+                    return ["R", "C"].includes(superset.id);
+                }
+                if (set.id === "N") {
+                    return ["N", "Z", "Q", "R", "C"].includes(superset.id);
+                }
+                if (set.id.startsWith("Z") && superset.id.startsWith("Z")) {
+                    var nSet = parseInt(set.id.slice(1), 10);
+                    var nSuper = parseInt(superset.id.slice(1), 10);
+                    if (!isNaN(nSet) && !isNaN(nSuper)) {
+                        return nSuper % nSet === 0;
+                    }
+                }
+            }
             return (set.elements || []).every(function (element) { return superset.contains(element); });
         };
         abal.isSuperset = function (set, subset) {
@@ -1340,6 +1412,45 @@ var Chalkboard;
                 },
                 id: "M(".concat(rows, ", ").concat(cols, ")")
             });
+        };
+        abal.monoid = function (set, operation, identity) {
+            var autoconfig = function () {
+                if (!set.id) {
+                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" explicitly.');
+                }
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
+                    return { identity: 0 };
+                }
+                else if (set.id === "C") {
+                    return { identity: Chalkboard.comp.init(0, 0) };
+                }
+                else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    return { identity: 0 };
+                }
+                else if (set.id.startsWith("C") && set.id.length > 1) {
+                    return { identity: Chalkboard.comp.init(1, 0) };
+                }
+                else if (set.id.startsWith("M(")) {
+                    var rows = set.rows;
+                    var cols = set.cols;
+                    return { identity: Chalkboard.matr.fill(0, rows, cols) };
+                }
+                else if (set.id.startsWith("GL")) {
+                    var n = parseInt(set.id.slice(2), 10);
+                    return { identity: Chalkboard.matr.identity(n) };
+                }
+                else if (set.id.match(/^[SA]\d+$/)) {
+                    var n = parseInt(set.id.slice(1), 10);
+                    return { identity: Array.from({ length: n }, function (_, i) { return i; }) };
+                }
+                throw new Error('Automatic configuration of the "identity" property is not available for the inputted "set".');
+            };
+            var configured = typeof identity === "undefined" ? autoconfig() : { identity: identity };
+            var monoid = { set: set, operation: operation, identity: configured.identity };
+            if (!Chalkboard.abal.isMonoid(monoid)) {
+                throw new Error('The inputted "set", "operation", and "identity" do not form a monoid.');
+            }
+            return monoid;
         };
         abal.N = function () { return ({
             contains: function (element) { return Number.isInteger(element) && element > 0; },
@@ -1459,51 +1570,28 @@ var Chalkboard;
             id: "R"
         }); };
         abal.ring = function (set, add, mul, addIdentity, mulIdentity, addInverter) {
-            var _a, _b;
-            var presets = {
-                addition: {
-                    Z: function (a, b) { return a + b; },
-                    Q: function (a, b) { return a + b; },
-                    R: function (a, b) { return a + b; },
-                    C: Chalkboard.comp.add,
-                    M: Chalkboard.matr.add
-                },
-                multiplication: {
-                    Z: function (a, b) { return a * b; },
-                    Q: function (a, b) { return a * b; },
-                    R: function (a, b) { return a * b; },
-                    C: Chalkboard.comp.mul,
-                    M: Chalkboard.matr.mul
-                },
-            };
-            var _set = typeof set === "string" && typeof Chalkboard.abal[set] === "function" ? Chalkboard.abal[set]() : set;
-            var _add = typeof add === "string" ? presets[add]["addition"] || presets[add][(_a = _set.id) !== null && _a !== void 0 ? _a : ""] : add;
-            var _mul = typeof mul === "string" ? presets[mul]["multiplication"] || presets[mul][(_b = _set.id) !== null && _b !== void 0 ? _b : ""] : mul;
-            if (!_add || !_mul) {
-                throw new Error("Preset operations \"".concat(add, "\" or \"").concat(mul, "\" are not defined for set \"").concat(_set.id, "\"."));
-            }
             var autoconfig = function () {
-                if (!_set.id) {
+                if (!set.id) {
                     throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.');
                 }
-                if (_set.id === "Z" || _set.id === "Q" || _set.id === "R") {
+                if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0,
                         mulIdentity: 1,
                         addInverter: function (a) { return -a; }
                     };
                 }
-                else if (_set.id === "C") {
+                else if (set.id === "C") {
                     return {
                         addIdentity: Chalkboard.comp.init(0, 0),
                         mulIdentity: Chalkboard.comp.init(1, 0),
                         addInverter: function (a) { return Chalkboard.comp.negate(a); }
                     };
                 }
-                else if (_set.id.startsWith("Z") && _set.id.length > 1) {
-                    var n_2 = parseInt(_set.id.slice(1), 10);
+                else if (set.id.startsWith("Z") && set.id.length > 1) {
+                    var n_2 = parseInt(set.id.slice(1), 10);
                     if (isNaN(n_2) || n_2 <= 0) {
-                        throw new Error("Invalid modulus in set \"".concat(_set.id, "\"."));
+                        throw new Error("Invalid modulus in set \"".concat(set.id, "\"."));
                     }
                     return {
                         addIdentity: 0,
@@ -1511,9 +1599,9 @@ var Chalkboard;
                         addInverter: function (a) { return ((n_2 - a % n_2) % n_2); }
                     };
                 }
-                else if (_set.id.startsWith("M(")) {
-                    var rows = _set.rows;
-                    var cols = _set.cols;
+                else if (set.id.startsWith("M(")) {
+                    var rows = set.rows;
+                    var cols = set.cols;
                     if (rows !== cols) {
                         throw new Error("Only square matrices can form a ring.");
                     }
@@ -1526,7 +1614,7 @@ var Chalkboard;
                 throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
             };
             var configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" ? autoconfig() : { addIdentity: addIdentity, mulIdentity: mulIdentity, addInverter: addInverter };
-            var ring = { set: _set, add: _add, mul: _mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter };
+            var ring = { set: set, add: add, mul: mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter };
             if (!Chalkboard.abal.isRing(ring)) {
                 throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.');
             }
@@ -1651,6 +1739,33 @@ var Chalkboard;
             if (Array.isArray(size[0]))
                 size = size[0];
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([result.elements], size, false));
+        };
+        abal.toTypedArray = function (struc, type) {
+            if (type === void 0) { type = "float32"; }
+            var result = "set" in struc ? struc.set : struc;
+            if (!result.elements) {
+                throw new Error("Cannot convert infinite set to typed array.");
+            }
+            var arr = Chalkboard.abal.toArray(result);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
         };
         abal.toVector = function (struc, dimension, index) {
             if (index === void 0) { index = 0; }
@@ -1967,10 +2082,11 @@ var Chalkboard;
         };
         var mode = "boolean";
         bool.modeConfig = function (config) {
-            if (config !== "boolean" && config !== "binary") {
+            var _config = config.toLowerCase();
+            if (_config !== "boolean" && _config !== "binary") {
                 throw new Error('The mode must be either "boolean" or "binary".');
             }
-            mode = config;
+            mode = _config;
         };
         bool.NAND = function () {
             var vals = [];
@@ -2733,6 +2849,7 @@ var Chalkboard;
             return Chalkboard.calc.fxdx(Chalkboard.real.define("(" + func1.definition + ") * (" + func2.definition.replace(/x/g, "(" + val + " + x)") + ")"), -100, 100);
         };
         calc.curl = function (vectfield, vect) {
+            vect = vect;
             var h = 0.000000001;
             if (Chalkboard.vect.dimension(vectfield) === 2 && typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 var p = Chalkboard.real.parse("(x, y) => " + vectfield.p), q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
@@ -2751,7 +2868,8 @@ var Chalkboard;
         calc.curvature = function (func, val) {
             if (func.type === "curv") {
                 if (func.definition.length === 2) {
-                    var dxdt = Chalkboard.calc.dfdx(func, val).x, dydt = Chalkboard.calc.dfdx(func, val).y, d2xdt2 = Chalkboard.calc.d2fdx2(func, val).x, d2ydt2 = Chalkboard.calc.d2fdx2(func, val).y;
+                    var d = Chalkboard.calc.dfdx(func, val), d2 = Chalkboard.calc.d2fdx2(func, val);
+                    var dxdt = d.x, dydt = d.y, d2xdt2 = d2.x, d2ydt2 = d2.y;
                     return Math.abs(dxdt * d2ydt2 - dydt * d2xdt2) / Math.sqrt((dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt) * (dxdt * dxdt + dydt * dydt));
                 }
                 else {
@@ -2852,11 +2970,13 @@ var Chalkboard;
             if (func1.type === "mult") {
                 if (func2.type === "curv") {
                     if (func2.definition.length === 2) {
-                        var dfdx_1 = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)).x, dfdy = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)).y, dxdt = Chalkboard.calc.dfdx(func2, val).x, dydt = Chalkboard.calc.dfdx(func2, val).y;
+                        var g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)), d = Chalkboard.calc.dfdx(func2, val);
+                        var dfdx_1 = g.x, dfdy = g.y, dxdt = d.x, dydt = d.y;
                         return dfdx_1 * dxdt + dfdy * dydt;
                     }
                     else {
-                        var dfdx_2 = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)).x, dfdy = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)).y, dfdz_1 = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)).z, dxdt = Chalkboard.calc.dfdx(func2, val).x, dydt = Chalkboard.calc.dfdx(func2, val).y, dzdt = Chalkboard.calc.dfdx(func2, val).z;
+                        var g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)), d = Chalkboard.calc.dfdx(func2, val);
+                        var dfdx_2 = g.x, dfdy = g.y, dfdz_1 = g.z, dxdt = d.x, dydt = d.y, dzdt = d.z;
                         return dfdx_2 * dxdt + dfdy * dydt + dfdz_1 * dzdt;
                     }
                 }
@@ -3076,6 +3196,7 @@ var Chalkboard;
             }
         };
         calc.grad = function (funcORvectfield, vect) {
+            vect = vect;
             var h = 0.000000001;
             var func = funcORvectfield;
             var vectfield = funcORvectfield;
@@ -3109,6 +3230,7 @@ var Chalkboard;
             }
         };
         calc.grad2 = function (funcORvectfield, vect) {
+            vect = vect;
             var h = 0.00001;
             var func = funcORvectfield;
             var vectfield = funcORvectfield;
@@ -3426,6 +3548,29 @@ var Chalkboard;
                 return comp.a.toString() + " - " + Math.abs(comp.b).toString() + "i";
             }
         };
+        comp_2.toTypedArray = function (comp, type) {
+            if (type === void 0) { type = "float32"; }
+            var arr = Chalkboard.comp.toArray(comp);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
         comp_2.toVector = function (comp) {
             return Chalkboard.vect.init(comp.a, comp.b);
         };
@@ -3437,9 +3582,6 @@ var Chalkboard;
             else {
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a type property of "comp".');
             }
-        };
-        comp_2.zero = function (comp) {
-            return Chalkboard.comp.init(0, 0);
         };
     })(comp = Chalkboard.comp || (Chalkboard.comp = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -3602,6 +3744,77 @@ var Chalkboard;
 (function (Chalkboard) {
     var matr;
     (function (matr_2) {
+        var $ = function (input) {
+            var v = input;
+            if (v && typeof v.x === "number" && typeof v.y === "number") {
+                return input;
+            }
+            if (Array.isArray(input)) {
+                if (input.length > 0 && Array.isArray(input[0])) {
+                    var matr_3 = input;
+                    var rows_2 = Chalkboard.matr.rows(matr_3);
+                    var cols_2 = Chalkboard.matr.cols(matr_3);
+                    if (cols_2 === 1) {
+                        if (rows_2 === 2)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[1][0]);
+                        if (rows_2 === 3)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[1][0], matr_3[2][0]);
+                        if (rows_2 === 4)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[1][0], matr_3[2][0], matr_3[3][0]);
+                    }
+                    else if (rows_2 === 1) {
+                        if (cols_2 === 2)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[0][1]);
+                        if (cols_2 === 3)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[0][1], matr_3[0][2]);
+                        if (cols_2 === 4)
+                            return Chalkboard.vect.init(matr_3[0][0], matr_3[0][1], matr_3[0][2], matr_3[0][3]);
+                    }
+                }
+                else {
+                    var arr = input;
+                    if (arr.length === 2)
+                        return Chalkboard.vect.init(arr[0], arr[1]);
+                    if (arr.length === 3)
+                        return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                    if (arr.length === 4)
+                        return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                }
+            }
+            if (input instanceof Float32Array || input instanceof Float64Array) {
+                var arr = input;
+                if (arr.length === 2)
+                    return Chalkboard.vect.init(arr[0], arr[1]);
+                if (arr.length === 3)
+                    return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                if (arr.length === 4)
+                    return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+            }
+            if (typeof input === "string") {
+                try {
+                    var parsed = JSON.parse(input);
+                    if (parsed && typeof parsed === "object" && typeof parsed.x === "number" && typeof parsed.y === "number") {
+                        return Chalkboard.vect.init(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
+                    }
+                }
+                catch (e) {
+                    var str = input.trim();
+                    if (str.startsWith("(") && str.endsWith(")")) {
+                        var content = str.substring(1, str.length - 1);
+                        var components = content.split(",").map(function (part) { return parseFloat(part.trim()); });
+                        if (components.length >= 2 && components.every(function (p) { return !isNaN(p); })) {
+                            if (components.length === 2)
+                                return Chalkboard.vect.init(components[0], components[1]);
+                            if (components.length === 3)
+                                return Chalkboard.vect.init(components[0], components[1], components[2]);
+                            if (components.length === 4)
+                                return Chalkboard.vect.init(components[0], components[1], components[2], components[3]);
+                        }
+                    }
+                }
+            }
+            throw new TypeError("Invalid ChalkboardVector input: ".concat(JSON.stringify(input)));
+        };
         matr_2.absolute = function (matr) {
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
@@ -4330,7 +4543,7 @@ var Chalkboard;
             }
         };
         matr_2.isZero = function (matr) {
-            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(matr));
+            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
         matr_2.Lehmer = function (size) {
             if (size === 2) {
@@ -4907,6 +5120,7 @@ var Chalkboard;
             }
         };
         matr_2.mulVector = function (matr, vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -5248,8 +5462,10 @@ var Chalkboard;
             }
             return { Q: Q, R: R };
         };
-        matr_2.random = function (inf, sup, rows, cols) {
+        matr_2.random = function (rows, cols, inf, sup) {
             if (cols === void 0) { cols = rows; }
+            if (inf === void 0) { inf = 0; }
+            if (sup === void 0) { sup = 1; }
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
             }
@@ -5352,6 +5568,7 @@ var Chalkboard;
             });
         };
         matr_2.scaler = function (vect) {
+            vect = $(vect);
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             }
@@ -5607,6 +5824,29 @@ var Chalkboard;
             size = Array.isArray(size[0]) ? size[0] : size;
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([matr], size, false));
         };
+        matr_2.toTypedArray = function (matr, type) {
+            if (type === void 0) { type = "float32"; }
+            var arr = Chalkboard.matr.toArray(matr);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
         matr_2.toVector = function (matr, dimension, index, axis) {
             if (index === void 0) { index = 0; }
             if (axis === void 0) { axis = 0; }
@@ -5692,6 +5932,7 @@ var Chalkboard;
             }
         };
         matr_2.translator = function (vect) {
+            vect = $(vect);
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             }
@@ -5774,21 +6015,22 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_2.zero = function (matr) {
-            if (Chalkboard.matr.isSizeOf(matr, 2)) {
+        matr_2.zero = function (rows, cols) {
+            if (cols === void 0) { cols = rows; }
+            if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([0, 0], [0, 0]);
             }
-            else if (Chalkboard.matr.isSizeOf(matr, 3)) {
+            else if (rows === 3 && cols === 3) {
                 return Chalkboard.matr.init([0, 0, 0], [0, 0, 0], [0, 0, 0]);
             }
-            else if (Chalkboard.matr.isSizeOf(matr, 4)) {
+            else if (rows === 4 && cols === 4) {
                 return Chalkboard.matr.init([0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0], [0, 0, 0, 0]);
             }
             else {
                 var result = Chalkboard.matr.init();
-                for (var i = 0; i < Chalkboard.matr.rows(matr); i++) {
+                for (var i = 0; i < rows; i++) {
                     result[i] = [];
-                    for (var j = 0; j < Chalkboard.matr.cols(matr); j++) {
+                    for (var j = 0; j < cols; j++) {
                         result[i][j] = 0;
                     }
                 }
@@ -5954,9 +6196,44 @@ var Chalkboard;
             if (tolerance === void 0) { tolerance = 1e-8; }
             if (!isFinite(num))
                 return false;
+            var mult = num / Chalkboard.PI();
+            if (mult !== 0 && Math.abs(Math.round(mult) - mult) < tolerance) {
+                return false;
+            }
+            if (num > 0) {
+                var ln = Math.log(num);
+                if (ln !== 0 && Math.abs(Math.round(ln) - ln) < tolerance) {
+                    var pow = Chalkboard.E(Math.round(ln));
+                    if (Math.abs(num - pow) < tolerance) {
+                        return false;
+                    }
+                }
+            }
+            for (var d = 2; d <= 6; d++) {
+                var fract = Chalkboard.PI() / d;
+                for (var n = 1; n <= d * 4; n++) {
+                    if (n % d !== 0) {
+                        if (Math.abs(num - n * fract) < tolerance) {
+                            return false;
+                        }
+                    }
+                }
+            }
+            var knownIrrationals = [Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.real.sqrt(Chalkboard.PI()), Chalkboard.E(), Chalkboard.PI(), Chalkboard.E(2)];
+            for (var i = 2; i <= 100; i++) {
+                if (Number.isInteger(Math.sqrt(i)))
+                    continue;
+                knownIrrationals.push(Chalkboard.real.sqrt(i));
+            }
+            for (var _i = 0, knownIrrationals_1 = knownIrrationals; _i < knownIrrationals_1.length; _i++) {
+                var irr = knownIrrationals_1[_i];
+                if (Math.abs(num - irr) < tolerance) {
+                    return false;
+                }
+            }
             try {
                 var _a = Chalkboard.numb.toFraction(num, tolerance), n = _a[0], d = _a[1];
-                return Math.abs(num - n / d) < tolerance;
+                return (Math.abs(num - n / d) < tolerance) && (Math.abs(d) <= 100000);
             }
             catch (_b) {
                 return false;
@@ -6152,6 +6429,813 @@ var Chalkboard;
             return (prefix ? "0o" : "") + (num < 0 ? "-" : "") + result;
         };
     })(numb = Chalkboard.numb || (Chalkboard.numb = {}));
+})(Chalkboard || (Chalkboard = {}));
+var Chalkboard;
+(function (Chalkboard) {
+    var plot;
+    (function (plot) {
+        var getContext = function () {
+            try {
+                return Chalkboard.real.parse(Chalkboard.CONTEXT);
+            }
+            catch (e) {
+                throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
+            }
+        };
+        plot.autocorrelation = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.barplot = function (arr, bins, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                fillStyle: config.fillStyle || "white",
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                context: config.context || getContext()
+            }).size /= 100;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.fillStyle = config.fillStyle;
+            var bars = [];
+            for (var i = 0; i < bins.length; i++) {
+                if (i === 0) {
+                    bars.push(Chalkboard.stat.lt(arr, bins[0], true));
+                }
+                else if (i === bins.length) {
+                    bars.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
+                }
+                else {
+                    bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
+                }
+            }
+            var counts = [];
+            for (var i = 0; i < bars.length; i++) {
+                counts.push(bars[i].length);
+            }
+            var x = 0;
+            var width = counts.length / (2 * config.size);
+            for (var i = 0; i < counts.length; i++) {
+                config.context.fillRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
+                config.context.strokeRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
+                x += 1 / config.size;
+            }
+            config.context.restore();
+            return bars;
+        };
+        plot.comp = function (comp, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                fillStyle: config.fillStyle || "black",
+                lineWidth: config.lineWidth || 5,
+                context: config.context || getContext()
+            }).size /= 100;
+            config.context.fillStyle = config.fillStyle;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.beginPath();
+            config.context.ellipse(comp.a / config.size, -comp.b / config.size, config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
+            config.context.fill();
+            config.context.restore();
+            return [[comp.a], [comp.b]];
+        };
+        plot.convolution = function (func1, func2, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.convolution(func1, func2, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.convolution(func1, func2, i)]);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.correlation = function (func1, func2, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.correlation(func1, func2, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.correlation(func1, func2, i)]);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.definition = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain ||
+                    (func.type === "comp"
+                        ? [
+                            [-10, 10],
+                            [-10, 10]
+                        ]
+                        : [-10, 10]),
+                context: config.context || getContext()
+            }).size /= 100;
+            var xdomain = config.domain;
+            var xydomain = config.domain;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            if (func.type === "expl") {
+                var f = Chalkboard.real.parse("x => " + func.definition);
+                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(i, -f(i * config.size) / config.size);
+                    data.push([i, f(i)]);
+                }
+            }
+            else if (func.type === "inve") {
+                var f = Chalkboard.real.parse("y => " + func.definition);
+                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(f(i * config.size) / config.size, -i);
+                    data.push([f(i), i]);
+                }
+            }
+            else if (func.type === "pola") {
+                var r = Chalkboard.real.parse("O => " + func.definition);
+                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo((r(i * config.size) / config.size) * Chalkboard.trig.cos(i * config.size), (-r(i * config.size) / config.size) * Chalkboard.trig.sin(i * config.size));
+                    data.push([i, r(i)]);
+                }
+            }
+            else if (func.type === "curv") {
+                var x = Chalkboard.real.parse("t => " + func.definition[0]), y = Chalkboard.real.parse("t => " + func.definition[1]);
+                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
+                    data.push([x(i), y(i)]);
+                }
+            }
+            else if (func.type === "comp") {
+                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]), v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
+                for (var i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
+                    for (var j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
+                        var z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
+                        if (z.a === 0 && z.b === 0) {
+                            config.context.fillStyle = "rgb(0, 0, 0)";
+                        }
+                        else if (z.a === Infinity && z.b === Infinity) {
+                            config.context.fillStyle = "rgb(255, 255, 255)";
+                        }
+                        else {
+                            config.context.fillStyle =
+                                "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
+                        }
+                        config.context.fillRect(i, j, 5, 5);
+                        data.push([u(i, j), v(i, j)]);
+                    }
+                }
+            }
+            else {
+                throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a property "type" of "expl", "inve", "pola", "curv", or "comp".');
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.dfdx = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                if (func.type === "expl") {
+                    config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * config.size) / config.size);
+                    data.push([i, Chalkboard.calc.dfdx(func, i)]);
+                }
+                else if (func.type === "inve") {
+                    config.context.lineTo(Chalkboard.calc.dfdx(func, i * config.size) / config.size, -i);
+                    data.push([Chalkboard.calc.dfdx(func, i), i]);
+                }
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.d2fdx2 = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                if (func.type === "expl") {
+                    config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * config.size) / config.size);
+                    data.push([i, Chalkboard.calc.d2fdx2(func, i)]);
+                }
+                else if (func.type === "inve") {
+                    config.context.lineTo(Chalkboard.calc.d2fdx2(func, i * config.size) / config.size, -i);
+                    data.push([Chalkboard.calc.d2fdx2(func, i), i]);
+                }
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.field = function (vectfield, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [
+                    [-10, 10],
+                    [-10, 10]
+                ],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            for (var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
+                for (var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
+                    var v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
+                    config.context.beginPath();
+                    config.context.moveTo(i, j);
+                    config.context.lineTo(i + v.x, j + v.y);
+                    config.context.stroke();
+                    data.push([i + v.x, j + v.y]);
+                }
+            }
+            config.context.restore();
+            return data;
+        };
+        plot.Fourier = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * config.size) / config.size);
+                data.push([i, Chalkboard.calc.Fourier(func, i)]);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.fxdx = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                if (func.type === "expl") {
+                    config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size);
+                    data.push([i, Chalkboard.calc.fxdx(func, 0, i)]);
+                }
+                else if (func.type === "inve") {
+                    config.context.lineTo(Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size, -i);
+                    data.push([Chalkboard.calc.fxdx(func, 0, i), i]);
+                }
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.Laplace = function (func, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            if (config.domain[0] >= 0) {
+                for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
+                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
+                }
+            }
+            else {
+                for (var i = 0; i <= config.domain[1] / config.size; i += config.res) {
+                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
+                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
+                }
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.lineplot = function (arr, bins, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                context: config.context || getContext()
+            }).size /= 100;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            var verts = [];
+            for (var i = 0; i < bins.length; i++) {
+                if (i === 0) {
+                    verts.push(Chalkboard.stat.lt(arr, bins[0], true));
+                }
+                else if (i === bins.length) {
+                    verts.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
+                }
+                else {
+                    verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
+                }
+            }
+            var counts = [];
+            for (var i = 0; i < verts.length; i++) {
+                counts.push(verts[i].length);
+            }
+            config.context.beginPath();
+            for (var i = 0; i < counts.length; i++) {
+                config.context.lineTo(i / config.size, -counts[i] / config.size);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return verts;
+        };
+        plot.matr = function (matr, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                context: config.context || getContext()
+            }).size /= 100;
+            for (var i = config.domain[0]; i <= config.domain[1]; i++) {
+                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
+                    x: config.x,
+                    y: config.y + (i / config.size) * matr[1][1],
+                    size: config.size,
+                    strokeStyle: config.strokeStyle,
+                    lineWidth: config.lineWidth / 4,
+                    context: config.context
+                });
+                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), {
+                    x: config.x,
+                    y: config.y + (i / config.size) * matr[1][1],
+                    size: config.size,
+                    strokeStyle: config.strokeStyle,
+                    lineWidth: config.lineWidth / 4,
+                    context: config.context
+                });
+                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), {
+                    x: config.x + (i / config.size) * matr[0][0],
+                    y: config.y,
+                    size: config.size,
+                    strokeStyle: config.strokeStyle,
+                    lineWidth: config.lineWidth / 4,
+                    context: config.context
+                });
+                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), {
+                    x: config.x + (i / config.size) * matr[0][0],
+                    y: config.y,
+                    size: config.size,
+                    strokeStyle: config.strokeStyle,
+                    lineWidth: config.lineWidth / 4,
+                    context: config.context
+                });
+            }
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), config);
+            return matr;
+        };
+        plot.rOplane = function (config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                context: config.context || getContext()
+            }).size /= 100;
+            var cw = getContext().canvas.width;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth / 4;
+            config.context.beginPath();
+            for (var i = 0; i <= (config.size * cw) / 2; i++) {
+                config.context.ellipse(0, 0, i / config.size, i / config.size, 0, 0, Chalkboard.PI(2));
+            }
+            config.context.stroke();
+            config.context.lineWidth = config.lineWidth;
+            config.context.beginPath();
+            config.context.moveTo(-config.x, 0);
+            config.context.lineTo(cw - config.x, 0);
+            config.context.stroke();
+            config.context.beginPath();
+            config.context.moveTo(0, -config.y);
+            config.context.lineTo(0, cw - config.y);
+            config.context.stroke();
+            config.context.restore();
+        };
+        plot.scatterplot = function (arr1, arr2, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                fillStyle: config.fillStyle || "black",
+                lineWidth: config.lineWidth || 5,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.fillStyle = config.fillStyle;
+            if (arr1.length === arr2.length) {
+                for (var i = 0; i < arr1.length; i++) {
+                    config.context.beginPath();
+                    config.context.ellipse(arr1[i] / config.size - arr1.length / (2 * config.size), -arr2[i] / config.size + arr1.length / (2 * config.size), config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
+                    config.context.fill();
+                    data.push([arr1[i], arr2[i]]);
+                }
+            }
+            config.context.restore();
+            return data;
+        };
+        plot.Taylor = function (func, n, a, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                domain: config.domain || [-10, 10],
+                res: config.res || 25,
+                context: config.context || getContext()
+            }).size /= 100;
+            var data = [];
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.lineWidth = config.lineWidth;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.beginPath();
+            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
+                config.context.lineTo(i, -Chalkboard.calc.Taylor(func, i * config.size, n, a) / config.size);
+                data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
+            }
+            config.context.stroke();
+            config.context.restore();
+            return data;
+        };
+        plot.vect = function (vect, config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 5,
+                context: config.context || getContext()
+            }).size /= 100;
+            vect = vect;
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.beginPath();
+            config.context.moveTo(0, 0);
+            config.context.lineTo(vect.x / config.size, -vect.y / config.size);
+            config.context.stroke();
+            config.context.restore();
+            return [[vect.x], [vect.y]];
+        };
+        plot.xyplane = function (config) {
+            (config = {
+                x: (config = config || {}).x || getContext().canvas.width / 2,
+                y: config.y || getContext().canvas.height / 2,
+                size: config.size || 1,
+                strokeStyle: config.strokeStyle || "black",
+                lineWidth: config.lineWidth || 2,
+                context: config.context || getContext()
+            }).size /= 100;
+            var cw = getContext().canvas.width;
+            config.context.save();
+            config.context.translate(config.x, config.y);
+            config.context.strokeStyle = config.strokeStyle;
+            config.context.lineWidth = config.lineWidth / 4;
+            config.context.beginPath();
+            for (var i = Math.floor(-config.x / config.size); i <= (cw - config.x) / config.size; i++) {
+                config.context.moveTo(i / config.size, -config.y);
+                config.context.lineTo(i / config.size, cw - config.y);
+            }
+            config.context.stroke();
+            config.context.beginPath();
+            for (var i = Math.floor(-config.y / config.size); i <= (cw - config.y) / config.size; i++) {
+                config.context.moveTo(-config.x, i / config.size);
+                config.context.lineTo(cw - config.x, i / config.size);
+            }
+            config.context.stroke();
+            config.context.lineWidth = config.lineWidth;
+            config.context.beginPath();
+            config.context.moveTo(-config.x, 0);
+            config.context.lineTo(cw - config.x, 0);
+            config.context.stroke();
+            config.context.beginPath();
+            config.context.moveTo(0, -config.y);
+            config.context.lineTo(0, cw - config.y);
+            config.context.stroke();
+            config.context.restore();
+        };
+    })(plot = Chalkboard.plot || (Chalkboard.plot = {}));
+})(Chalkboard || (Chalkboard = {}));
+var Chalkboard;
+(function (Chalkboard) {
+    var quat;
+    (function (quat_2) {
+        quat_2.absolute = function (quat) {
+            return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
+        };
+        quat_2.add = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
+        };
+        quat_2.conjugate = function (quat) {
+            return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
+        };
+        quat_2.constrain = function (quat, range) {
+            if (range === void 0) { range = [0, 1]; }
+            return Chalkboard.quat.init(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
+        };
+        quat_2.copy = function (quat) {
+            return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
+        };
+        quat_2.dist = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.real.sqrt((quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d));
+        };
+        quat_2.distsq = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return (quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d);
+        };
+        quat_2.div = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.quat.init((quat1.a * quat2.a + quat1.b * quat2.b + quat1.c * quat2.c + quat1.d * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.b * quat2.a - quat1.a * quat2.b - quat1.d * quat2.c + quat1.c * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.c * quat2.a + quat1.d * quat2.b - quat1.a * quat2.c - quat1.b * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.d * quat2.a - quat1.c * quat2.b + quat1.b * quat2.c - quat1.a * quat2.d) / Chalkboard.quat.magsq(quat2));
+        };
+        quat_2.fromAxis = function (vect, rad) {
+            vect = vect;
+            if (typeof vect.z !== "undefined") {
+                return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
+            }
+            else {
+                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 3 dimensions.');
+            }
+        };
+        quat_2.init = function (a, b, c, d) {
+            if (b === void 0) { b = 0; }
+            if (c === void 0) { c = 0; }
+            if (d === void 0) { d = 0; }
+            return { a: a, b: b, c: c, d: d };
+        };
+        quat_2.invert = function (quat) {
+            return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
+        };
+        quat_2.mag = function (quat) {
+            return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
+        };
+        quat_2.magset = function (quat, num) {
+            return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
+        };
+        quat_2.magsq = function (quat) {
+            return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
+        };
+        quat_2.mul = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.quat.init(quat1.a * quat2.a - quat1.b * quat2.b - quat1.c * quat2.c - quat1.d * quat2.d, quat1.a * quat2.b + quat1.b * quat2.a + quat1.c * quat2.d - quat1.d * quat2.c, quat1.a * quat2.c - quat1.b * quat2.d + quat1.c * quat2.a + quat1.d * quat2.b, quat1.a * quat2.d + quat1.b * quat2.c - quat1.c * quat2.b + quat1.d * quat2.a);
+        };
+        quat_2.negate = function (quat) {
+            return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
+        };
+        quat_2.normalize = function (quat) {
+            return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
+        };
+        quat_2.print = function (quat) {
+            console.log(Chalkboard.quat.toString(quat));
+        };
+        quat_2.random = function (inf, sup) {
+            if (inf === void 0) { inf = 0; }
+            if (sup === void 0) { sup = 1; }
+            return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
+        };
+        quat_2.reciprocate = function (quat) {
+            return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
+        };
+        quat_2.round = function (quat) {
+            return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
+        };
+        quat_2.scl = function (quat, num) {
+            return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
+        };
+        quat_2.sub = function (quat1, quat2) {
+            if (typeof quat1 === "number")
+                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number")
+                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
+        };
+        quat_2.toArray = function (quat) {
+            return [quat.a, quat.b, quat.c, quat.d];
+        };
+        quat_2.toMatrix = function (quat) {
+            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
+        };
+        quat_2.toRotation = function (quat, vect) {
+            var vector = Chalkboard.vect.toQuaternion(vect);
+            var inverse = Chalkboard.quat.invert(quat);
+            var quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
+            return Chalkboard.vect.init(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
+        };
+        quat_2.toString = function (quat) {
+            var quat_b = "";
+            var quat_c = "";
+            var quat_d = "";
+            if (quat.b >= 0) {
+                quat_b = " + " + quat.b.toString() + "i ";
+            }
+            else if (quat.b < 0) {
+                quat_b = " - " + Math.abs(quat.b).toString() + "i ";
+            }
+            if (quat.c >= 0) {
+                quat_c = "+ " + quat.c.toString() + "j ";
+            }
+            else if (quat.c < 0) {
+                quat_c = "- " + Math.abs(quat.c).toString() + "j ";
+            }
+            if (quat.d >= 0) {
+                quat_d = "+ " + quat.d.toString() + "k ";
+            }
+            else if (quat.d < 0) {
+                quat_d = "- " + Math.abs(quat.d).toString() + "k ";
+            }
+            return quat.a.toString() + quat_b + quat_c + quat_d;
+        };
+        quat_2.toTypedArray = function (quat, type) {
+            if (type === void 0) { type = "float32"; }
+            var arr = Chalkboard.quat.toArray(quat);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
+        quat_2.toVector = function (quat) {
+            return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
+        };
+    })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
 })(Chalkboard || (Chalkboard = {}));
 var Chalkboard;
 (function (Chalkboard) {
@@ -6596,785 +7680,20 @@ var Chalkboard;
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a "type" property of "expl", "pola", "curv", "surf", or "mult".');
             }
         };
+        real.zero = function (type) {
+            if (type === void 0) { type = "expl"; }
+            if (type === "expl" || type === "inve" || type === "pola" || type === "mult") {
+                return Chalkboard.real.define("0", type);
+            }
+            else if (type === "curv") {
+                return Chalkboard.real.define(["0", "0"], type);
+            }
+            else if (type === "surf") {
+                return Chalkboard.real.define(["0", "0", "0"], type);
+            }
+            throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+        };
     })(real = Chalkboard.real || (Chalkboard.real = {}));
-})(Chalkboard || (Chalkboard = {}));
-var Chalkboard;
-(function (Chalkboard) {
-    var plot;
-    (function (plot) {
-        var PARSED_CONTEXT = Chalkboard.real.parse(Chalkboard.CONTEXT);
-        plot.autocorrelation = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.barplot = function (arr, bins, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "white",
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.fillStyle = config.fillStyle;
-            var bars = [];
-            for (var i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    bars.push(Chalkboard.stat.lt(arr, bins[0], true));
-                }
-                else if (i === bins.length) {
-                    bars.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                }
-                else {
-                    bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
-            }
-            var counts = [];
-            for (var i = 0; i < bars.length; i++) {
-                counts.push(bars[i].length);
-            }
-            var x = 0;
-            var width = counts.length / (2 * config.size);
-            for (var i = 0; i < counts.length; i++) {
-                config.context.fillRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
-                config.context.strokeRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
-                x += 1 / config.size;
-            }
-            config.context.restore();
-            return bars;
-        };
-        plot.comp = function (comp, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            config.context.fillStyle = config.fillStyle;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.beginPath();
-            config.context.ellipse(comp.a / config.size, -comp.b / config.size, config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
-            config.context.fill();
-            config.context.restore();
-            return [[comp.a], [comp.b]];
-        };
-        plot.convolution = function (func1, func2, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.convolution(func1, func2, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.convolution(func1, func2, i)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.correlation = function (func1, func2, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.correlation(func1, func2, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.correlation(func1, func2, i)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.definition = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain ||
-                    (func.type === "comp"
-                        ? [
-                            [-10, 10],
-                            [-10, 10]
-                        ]
-                        : [-10, 10]),
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var xdomain = config.domain;
-            var xydomain = config.domain;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            if (func.type === "expl") {
-                var f = Chalkboard.real.parse("x => " + func.definition);
-                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(i, -f(i * config.size) / config.size);
-                    data.push([i, f(i)]);
-                }
-            }
-            else if (func.type === "inve") {
-                var f = Chalkboard.real.parse("y => " + func.definition);
-                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(f(i * config.size) / config.size, -i);
-                    data.push([f(i), i]);
-                }
-            }
-            else if (func.type === "pola") {
-                var r = Chalkboard.real.parse("O => " + func.definition);
-                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo((r(i * config.size) / config.size) * Chalkboard.trig.cos(i * config.size), (-r(i * config.size) / config.size) * Chalkboard.trig.sin(i * config.size));
-                    data.push([i, r(i)]);
-                }
-            }
-            else if (func.type === "curv") {
-                var x = Chalkboard.real.parse("t => " + func.definition[0]), y = Chalkboard.real.parse("t => " + func.definition[1]);
-                for (var i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
-                    data.push([x(i), y(i)]);
-                }
-            }
-            else if (func.type === "comp") {
-                var u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]), v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
-                for (var i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
-                    for (var j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
-                        var z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
-                        if (z.a === 0 && z.b === 0) {
-                            config.context.fillStyle = "rgb(0, 0, 0)";
-                        }
-                        else if (z.a === Infinity && z.b === Infinity) {
-                            config.context.fillStyle = "rgb(255, 255, 255)";
-                        }
-                        else {
-                            config.context.fillStyle =
-                                "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
-                        }
-                        config.context.fillRect(i, j, 5, 5);
-                        data.push([u(i, j), v(i, j)]);
-                    }
-                }
-            }
-            else {
-                throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a property "type" of "expl", "inve", "pola", "curv", or "comp".');
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.dfdx = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
-                    config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * config.size) / config.size);
-                    data.push([i, Chalkboard.calc.dfdx(func, i)]);
-                }
-                else if (func.type === "inve") {
-                    config.context.lineTo(Chalkboard.calc.dfdx(func, i * config.size) / config.size, -i);
-                    data.push([Chalkboard.calc.dfdx(func, i), i]);
-                }
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.d2fdx2 = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
-                    config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * config.size) / config.size);
-                    data.push([i, Chalkboard.calc.d2fdx2(func, i)]);
-                }
-                else if (func.type === "inve") {
-                    config.context.lineTo(Chalkboard.calc.d2fdx2(func, i * config.size) / config.size, -i);
-                    data.push([Chalkboard.calc.d2fdx2(func, i), i]);
-                }
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.field = function (vectfield, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [
-                    [-10, 10],
-                    [-10, 10]
-                ],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            for (var i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
-                for (var j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
-                    var v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
-                    config.context.beginPath();
-                    config.context.moveTo(i, j);
-                    config.context.lineTo(i + v.x, j + v.y);
-                    config.context.stroke();
-                    data.push([i + v.x, j + v.y]);
-                }
-            }
-            config.context.restore();
-            return data;
-        };
-        plot.Fourier = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * config.size) / config.size);
-                data.push([i, Chalkboard.calc.Fourier(func, i)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.fxdx = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
-                    config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size);
-                    data.push([i, Chalkboard.calc.fxdx(func, 0, i)]);
-                }
-                else if (func.type === "inve") {
-                    config.context.lineTo(Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size, -i);
-                    data.push([Chalkboard.calc.fxdx(func, 0, i), i]);
-                }
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.Laplace = function (func, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            if (config.domain[0] >= 0) {
-                for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
-                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
-                }
-            }
-            else {
-                for (var i = 0; i <= config.domain[1] / config.size; i += config.res) {
-                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
-                    data.push([i, Chalkboard.calc.Laplace(func, i)]);
-                }
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.lineplot = function (arr, bins, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            var verts = [];
-            for (var i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    verts.push(Chalkboard.stat.lt(arr, bins[0], true));
-                }
-                else if (i === bins.length) {
-                    verts.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                }
-                else {
-                    verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
-            }
-            var counts = [];
-            for (var i = 0; i < verts.length; i++) {
-                counts.push(verts[i].length);
-            }
-            config.context.beginPath();
-            for (var i = 0; i < counts.length; i++) {
-                config.context.lineTo(i / config.size, -counts[i] / config.size);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return verts;
-        };
-        plot.matr = function (matr, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            for (var i = config.domain[0]; i <= config.domain[1]; i++) {
-                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
-                    x: config.x,
-                    y: config.y + (i / config.size) * matr[1][1],
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
-                });
-                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), {
-                    x: config.x,
-                    y: config.y + (i / config.size) * matr[1][1],
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
-                });
-                Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), {
-                    x: config.x + (i / config.size) * matr[0][0],
-                    y: config.y,
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
-                });
-                Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), {
-                    x: config.x + (i / config.size) * matr[0][0],
-                    y: config.y,
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
-                });
-            }
-            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), config);
-            return matr;
-        };
-        plot.rOplane = function (config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var cw = PARSED_CONTEXT.canvas.width;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth / 4;
-            config.context.beginPath();
-            for (var i = 0; i <= (config.size * cw) / 2; i++) {
-                config.context.ellipse(0, 0, i / config.size, i / config.size, 0, 0, Chalkboard.PI(2));
-            }
-            config.context.stroke();
-            config.context.lineWidth = config.lineWidth;
-            config.context.beginPath();
-            config.context.moveTo(-config.x, 0);
-            config.context.lineTo(cw - config.x, 0);
-            config.context.stroke();
-            config.context.beginPath();
-            config.context.moveTo(0, -config.y);
-            config.context.lineTo(0, cw - config.y);
-            config.context.stroke();
-            config.context.restore();
-        };
-        plot.scatterplot = function (arr1, arr2, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.fillStyle = config.fillStyle;
-            if (arr1.length === arr2.length) {
-                for (var i = 0; i < arr1.length; i++) {
-                    config.context.beginPath();
-                    config.context.ellipse(arr1[i] / config.size - arr1.length / (2 * config.size), -arr2[i] / config.size + arr1.length / (2 * config.size), config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
-                    config.context.fill();
-                    data.push([arr1[i], arr2[i]]);
-                }
-            }
-            config.context.restore();
-            return data;
-        };
-        plot.Taylor = function (func, n, a, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (var i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.Taylor(func, i * config.size, n, a) / config.size);
-                data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
-            }
-            config.context.stroke();
-            config.context.restore();
-            return data;
-        };
-        plot.vect = function (vect, config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.beginPath();
-            config.context.moveTo(0, 0);
-            config.context.lineTo(vect.x / config.size, -vect.y / config.size);
-            config.context.stroke();
-            config.context.restore();
-            return [[vect.x], [vect.y]];
-        };
-        plot.xyplane = function (config) {
-            (config = {
-                x: (config = config || {}).x || PARSED_CONTEXT.canvas.width / 2,
-                y: config.y || PARSED_CONTEXT.canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || PARSED_CONTEXT
-            }).size /= 100;
-            var cw = PARSED_CONTEXT.canvas.width;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth / 4;
-            config.context.beginPath();
-            for (var i = Math.floor(-config.x / config.size); i <= (cw - config.x) / config.size; i++) {
-                config.context.moveTo(i / config.size, -config.y);
-                config.context.lineTo(i / config.size, cw - config.y);
-            }
-            config.context.stroke();
-            config.context.beginPath();
-            for (var i = Math.floor(-config.y / config.size); i <= (cw - config.y) / config.size; i++) {
-                config.context.moveTo(-config.x, i / config.size);
-                config.context.lineTo(cw - config.x, i / config.size);
-            }
-            config.context.stroke();
-            config.context.lineWidth = config.lineWidth;
-            config.context.beginPath();
-            config.context.moveTo(-config.x, 0);
-            config.context.lineTo(cw - config.x, 0);
-            config.context.stroke();
-            config.context.beginPath();
-            config.context.moveTo(0, -config.y);
-            config.context.lineTo(0, cw - config.y);
-            config.context.stroke();
-            config.context.restore();
-        };
-    })(plot = Chalkboard.plot || (Chalkboard.plot = {}));
-})(Chalkboard || (Chalkboard = {}));
-var Chalkboard;
-(function (Chalkboard) {
-    var quat;
-    (function (quat_2) {
-        quat_2.absolute = function (quat) {
-            return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
-        };
-        quat_2.add = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
-        };
-        quat_2.conjugate = function (quat) {
-            return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
-        };
-        quat_2.constrain = function (quat, range) {
-            if (range === void 0) { range = [0, 1]; }
-            return Chalkboard.quat.init(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
-        };
-        quat_2.copy = function (quat) {
-            return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
-        };
-        quat_2.dist = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return Chalkboard.real.sqrt((quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d));
-        };
-        quat_2.distsq = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return (quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d);
-        };
-        quat_2.div = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return Chalkboard.quat.init((quat1.a * quat2.a + quat1.b * quat2.b + quat1.c * quat2.c + quat1.d * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.b * quat2.a - quat1.a * quat2.b - quat1.d * quat2.c + quat1.c * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.c * quat2.a + quat1.d * quat2.b - quat1.a * quat2.c - quat1.b * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.d * quat2.a - quat1.c * quat2.b + quat1.b * quat2.c - quat1.a * quat2.d) / Chalkboard.quat.magsq(quat2));
-        };
-        quat_2.fromAxis = function (vect, rad) {
-            if (typeof vect.z !== "undefined") {
-                return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
-            }
-            else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" that has properties "x", "y", and "z".');
-            }
-        };
-        quat_2.init = function (a, b, c, d) {
-            if (b === void 0) { b = 0; }
-            if (c === void 0) { c = 0; }
-            if (d === void 0) { d = 0; }
-            return { a: a, b: b, c: c, d: d };
-        };
-        quat_2.invert = function (quat) {
-            return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
-        };
-        quat_2.mag = function (quat) {
-            return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
-        };
-        quat_2.magset = function (quat, num) {
-            return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
-        };
-        quat_2.magsq = function (quat) {
-            return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
-        };
-        quat_2.mul = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return Chalkboard.quat.init(quat1.a * quat2.a - quat1.b * quat2.b - quat1.c * quat2.c - quat1.d * quat2.d, quat1.a * quat2.b + quat1.b * quat2.a + quat1.c * quat2.d - quat1.d * quat2.c, quat1.a * quat2.c - quat1.b * quat2.d + quat1.c * quat2.a + quat1.d * quat2.b, quat1.a * quat2.d + quat1.b * quat2.c - quat1.c * quat2.b + quat1.d * quat2.a);
-        };
-        quat_2.negate = function (quat) {
-            return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
-        };
-        quat_2.normalize = function (quat) {
-            return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
-        };
-        quat_2.print = function (quat) {
-            console.log(Chalkboard.quat.toString(quat));
-        };
-        quat_2.random = function (inf, sup) {
-            if (inf === void 0) { inf = 0; }
-            if (sup === void 0) { sup = 1; }
-            return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
-        };
-        quat_2.reciprocate = function (quat) {
-            return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
-        };
-        quat_2.round = function (quat) {
-            return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
-        };
-        quat_2.scl = function (quat, num) {
-            return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
-        };
-        quat_2.sub = function (quat1, quat2) {
-            if (typeof quat1 === "number")
-                quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
-            if (typeof quat2 === "number")
-                quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
-            return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
-        };
-        quat_2.toArray = function (quat) {
-            return [quat.a, quat.b, quat.c, quat.d];
-        };
-        quat_2.toMatrix = function (quat) {
-            return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
-        };
-        quat_2.toRotation = function (quat, vect) {
-            var vector = Chalkboard.vect.toQuaternion(vect);
-            var inverse = Chalkboard.quat.invert(quat);
-            var quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
-            return Chalkboard.vect.init(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
-        };
-        quat_2.toString = function (quat) {
-            var quat_b = "";
-            var quat_c = "";
-            var quat_d = "";
-            if (quat.b >= 0) {
-                quat_b = " + " + quat.b.toString() + "i ";
-            }
-            else if (quat.b < 0) {
-                quat_b = " - " + Math.abs(quat.b).toString() + "i ";
-            }
-            if (quat.c >= 0) {
-                quat_c = "+ " + quat.c.toString() + "j ";
-            }
-            else if (quat.c < 0) {
-                quat_c = "- " + Math.abs(quat.c).toString() + "j ";
-            }
-            if (quat.d >= 0) {
-                quat_d = "+ " + quat.d.toString() + "k ";
-            }
-            else if (quat.d < 0) {
-                quat_d = "- " + Math.abs(quat.d).toString() + "k ";
-            }
-            return quat.a.toString() + quat_b + quat_c + quat_d;
-        };
-        quat_2.toVector = function (quat) {
-            return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
-        };
-        quat_2.zero = function (quat) {
-            return Chalkboard.quat.init(0, 0, 0, 0);
-        };
-    })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
 })(Chalkboard || (Chalkboard = {}));
 var Chalkboard;
 (function (Chalkboard) {
@@ -8786,6 +9105,29 @@ var Chalkboard;
                 return result;
             }
         };
+        tens_1.toTypedArray = function (tens, type) {
+            if (type === void 0) { type = "float32"; }
+            var arr = Chalkboard.tens.toArray(tens);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+        };
         tens_1.toVector = function (tens, dimension, index) {
             if (index === void 0) { index = 0; }
             var arr = Chalkboard.tens.toArray(tens);
@@ -8806,17 +9148,25 @@ var Chalkboard;
             var _a;
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([tens], Chalkboard.tens.size(tens).reverse(), false));
         };
-        tens_1.zero = function (tens) {
-            var result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (var i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.zero(tens[i]);
+        tens_1.zero = function () {
+            var size = [];
+            for (var _i = 0; _i < arguments.length; _i++) {
+                size[_i] = arguments[_i];
+            }
+            size = Array.isArray(size[0]) ? size[0] : size;
+            var newNDArray = function (size) {
+                if (size.length === 0) {
+                    return 0;
+                }
+                var curr = size[0];
+                var rest = size.slice(1);
+                var result = [];
+                for (var i = 0; i < curr; i++) {
+                    result[i] = newNDArray(rest);
                 }
                 return result;
-            }
-            else {
-                return 0;
-            }
+            };
+            return newNDArray(size);
         };
     })(tens = Chalkboard.tens || (Chalkboard.tens = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -8960,22 +9310,23 @@ var Chalkboard;
             }
         };
         trig.cos = function (rad) {
-            rad = Chalkboard.trig.coterminal(rad);
+            var x = Chalkboard.trig.coterminal(rad);
+            var x2 = x * x, x4 = x2 * x2, x6 = x4 * x2, x8 = x4 * x4, x10 = x6 * x4, x12 = x8 * x4, x14 = x8 * x6, x16 = x8 * x8, x18 = x10 * x8, x20 = x10 * x10, x22 = x12 * x10, x24 = x12 * x12, x26 = x14 * x12, x28 = x14 * x14;
             return (1 -
-                Math.pow(rad, 2) / Chalkboard.numb.factorial(2) +
-                Math.pow(rad, 4) / Chalkboard.numb.factorial(4) -
-                Math.pow(rad, 6) / Chalkboard.numb.factorial(6) +
-                Math.pow(rad, 8) / Chalkboard.numb.factorial(8) -
-                Math.pow(rad, 10) / Chalkboard.numb.factorial(10) +
-                Math.pow(rad, 12) / Chalkboard.numb.factorial(12) -
-                Math.pow(rad, 14) / Chalkboard.numb.factorial(14) +
-                Math.pow(rad, 16) / Chalkboard.numb.factorial(16) -
-                Math.pow(rad, 18) / Chalkboard.numb.factorial(18) +
-                Math.pow(rad, 20) / Chalkboard.numb.factorial(20) -
-                Math.pow(rad, 22) / Chalkboard.numb.factorial(22) +
-                Math.pow(rad, 24) / Chalkboard.numb.factorial(24) -
-                Math.pow(rad, 26) / Chalkboard.numb.factorial(26) +
-                Math.pow(rad, 28) / Chalkboard.numb.factorial(28));
+                x2 / 2 +
+                x4 / 24 -
+                x6 / 720 +
+                x8 / 40320 -
+                x10 / 3628800 +
+                x12 / 479001600 -
+                x14 / 87178291200 +
+                x16 / 20922789888000 -
+                x18 / 6402373705728000 +
+                x20 / 2.43290200817664e+18 -
+                x22 / 1.1240007277776077e+21 +
+                x24 / 6.204484017332394e+23 -
+                x26 / 4.0329146112660565e+26 +
+                x28 / 3.0488834461171384e+29);
         };
         trig.cosh = function (rad) {
             return (Math.pow(Chalkboard.E(), rad) + Math.pow(Chalkboard.E(), -rad)) / 2;
@@ -9002,22 +9353,23 @@ var Chalkboard;
             return 1 / Chalkboard.trig.cosh(rad);
         };
         trig.sin = function (rad) {
-            rad = Chalkboard.trig.coterminal(rad);
-            return (rad -
-                Math.pow(rad, 3) / Chalkboard.numb.factorial(3) +
-                Math.pow(rad, 5) / Chalkboard.numb.factorial(5) -
-                Math.pow(rad, 7) / Chalkboard.numb.factorial(7) +
-                Math.pow(rad, 9) / Chalkboard.numb.factorial(9) -
-                Math.pow(rad, 11) / Chalkboard.numb.factorial(11) +
-                Math.pow(rad, 13) / Chalkboard.numb.factorial(13) -
-                Math.pow(rad, 15) / Chalkboard.numb.factorial(15) +
-                Math.pow(rad, 17) / Chalkboard.numb.factorial(17) -
-                Math.pow(rad, 19) / Chalkboard.numb.factorial(19) +
-                Math.pow(rad, 21) / Chalkboard.numb.factorial(21) -
-                Math.pow(rad, 23) / Chalkboard.numb.factorial(23) +
-                Math.pow(rad, 25) / Chalkboard.numb.factorial(25) -
-                Math.pow(rad, 27) / Chalkboard.numb.factorial(27) +
-                Math.pow(rad, 29) / Chalkboard.numb.factorial(29));
+            var x = Chalkboard.trig.coterminal(rad);
+            var x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2;
+            return (x -
+                x3 / 6 +
+                x5 / 120 -
+                x7 / 5040 +
+                x9 / 362880 -
+                x11 / 39916800 +
+                x13 / 6227020800 -
+                x15 / 1307674368000 +
+                x17 / 355687428096000 -
+                x19 / 1.21645100408832e+17 +
+                x21 / 5.109094217170944e+19 -
+                x23 / 2.585201673888498e+22 +
+                x25 / 1.5511210043330986e+25 -
+                x27 / 1.0888869450418352e+28 +
+                x29 / 8.841761993739701e+30);
         };
         trig.sinh = function (rad) {
             return (Math.pow(Chalkboard.E(), rad) - Math.pow(Chalkboard.E(), -rad)) / 2;
@@ -9040,7 +9392,90 @@ var Chalkboard;
 (function (Chalkboard) {
     var vect;
     (function (vect_4) {
+        var $ = function (input) {
+            var $$ = function (x, y, z, w) {
+                if (z === undefined && w === undefined) {
+                    return { x: x, y: y };
+                }
+                else if (w === undefined) {
+                    return { x: x, y: y, z: z };
+                }
+                else {
+                    return { x: x, y: y, z: z, w: w };
+                }
+            };
+            var v = input;
+            if (v && typeof v.x === "number" && typeof v.y === "number") {
+                return input;
+            }
+            if (Array.isArray(input)) {
+                if (input.length > 0 && Array.isArray(input[0])) {
+                    var matr_4 = input;
+                    var rows = Chalkboard.matr.rows(matr_4);
+                    var cols = Chalkboard.matr.cols(matr_4);
+                    if (cols === 1) {
+                        if (rows === 2)
+                            return $$(matr_4[0][0], matr_4[1][0]);
+                        if (rows === 3)
+                            return $$(matr_4[0][0], matr_4[1][0], matr_4[2][0]);
+                        if (rows === 4)
+                            return $$(matr_4[0][0], matr_4[1][0], matr_4[2][0], matr_4[3][0]);
+                    }
+                    else if (rows === 1) {
+                        if (cols === 2)
+                            return $$(matr_4[0][0], matr_4[0][1]);
+                        if (cols === 3)
+                            return $$(matr_4[0][0], matr_4[0][1], matr_4[0][2]);
+                        if (cols === 4)
+                            return $$(matr_4[0][0], matr_4[0][1], matr_4[0][2], matr_4[0][3]);
+                    }
+                }
+                else {
+                    var arr = input;
+                    if (arr.length === 2)
+                        return $$(arr[0], arr[1]);
+                    if (arr.length === 3)
+                        return $$(arr[0], arr[1], arr[2]);
+                    if (arr.length === 4)
+                        return $$(arr[0], arr[1], arr[2], arr[3]);
+                }
+            }
+            if (input instanceof Float32Array || input instanceof Float64Array) {
+                var arr = input;
+                if (arr.length === 2)
+                    return $$(arr[0], arr[1]);
+                if (arr.length === 3)
+                    return $$(arr[0], arr[1], arr[2]);
+                if (arr.length === 4)
+                    return $$(arr[0], arr[1], arr[2], arr[3]);
+            }
+            if (typeof input === "string") {
+                try {
+                    var parsed = JSON.parse(input);
+                    if (parsed && typeof parsed === "object" && typeof parsed.x === "number" && typeof parsed.y === "number") {
+                        return $$(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
+                    }
+                }
+                catch (e) {
+                    var str = input.trim();
+                    if (str.startsWith("(") && str.endsWith(")")) {
+                        var content = str.substring(1, str.length - 1);
+                        var components = content.split(",").map(function (part) { return parseFloat(part.trim()); });
+                        if (components.length >= 2 && components.every(function (p) { return !isNaN(p); })) {
+                            if (components.length === 2)
+                                return $$(components[0], components[1]);
+                            if (components.length === 3)
+                                return $$(components[0], components[1], components[2]);
+                            if (components.length === 4)
+                                return $$(components[0], components[1], components[2], components[3]);
+                        }
+                    }
+                }
+            }
+            throw new TypeError("Invalid ChalkboardVector input: ".concat(JSON.stringify(input)));
+        };
         vect_4.absolute = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             }
@@ -9055,6 +9490,8 @@ var Chalkboard;
             }
         };
         vect_4.add = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y);
             }
@@ -9069,19 +9506,17 @@ var Chalkboard;
             }
         };
         vect_4.ang = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.trig.arctan2(vect.y, vect.x);
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return [Math.acos(vect.x / Chalkboard.vect.mag(vect)), Math.acos(vect.y / Chalkboard.vect.mag(vect)), Math.acos(vect.z / Chalkboard.vect.mag(vect))];
+                var m = Chalkboard.vect.mag(vect);
+                return [Math.acos(vect.x / m), Math.acos(vect.y / m), Math.acos(vect.z / m)];
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
-                return [
-                    Math.acos(vect.x / Chalkboard.vect.mag(vect)),
-                    Math.acos(vect.y / Chalkboard.vect.mag(vect)),
-                    Math.acos(vect.z / Chalkboard.vect.mag(vect)),
-                    Math.acos(vect.w / Chalkboard.vect.mag(vect))
-                ];
+                var m = Chalkboard.vect.mag(vect);
+                return [Math.acos(vect.x / m), Math.acos(vect.y / m), Math.acos(vect.z / m), Math.acos(vect.w / m)];
             }
             else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
@@ -9092,6 +9527,7 @@ var Chalkboard;
         };
         vect_4.constrain = function (vect, range) {
             if (range === void 0) { range = [0, 1]; }
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
             }
@@ -9106,9 +9542,27 @@ var Chalkboard;
             }
         };
         vect_4.copy = function (vect) {
-            return Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
+            vect = $(vect);
+            var _vect = Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
+            if (mode === "vector")
+                return _vect;
+            if (mode === "array")
+                return Chalkboard.vect.toArray(_vect);
+            if (mode === "float32array")
+                return new Float32Array(Chalkboard.vect.toArray(_vect));
+            if (mode === "float64array")
+                return new Float64Array(Chalkboard.vect.toArray(_vect));
+            if (mode === "matrix")
+                return Chalkboard.vect.toMatrix(_vect);
+            if (mode === "string")
+                return Chalkboard.vect.toString(_vect);
+            if (mode === "json")
+                return JSON.stringify(_vect);
+            return _vect;
         };
         vect_4.cross = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(0, 0, vect1.x * vect2.y - vect1.y * vect2.x);
             }
@@ -9120,25 +9574,35 @@ var Chalkboard;
             }
         };
         vect_4.dimension = function (vectORvectfield) {
-            var vect = vectORvectfield;
-            var vectfield = vectORvectfield;
-            if ((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") ||
-                (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "undefined" && typeof vectfield.s === "undefined")) {
-                return 2;
+            try {
+                var v = $(vectORvectfield);
+                if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "undefined" && typeof v.w === "undefined") {
+                    return 2;
+                }
+                else if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "number" && typeof v.w === "undefined") {
+                    return 3;
+                }
+                else if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "number" && typeof v.w === "number") {
+                    return 4;
+                }
             }
-            else if ((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") ||
-                (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "string" && typeof vectfield.s === "undefined")) {
-                return 3;
+            catch (_a) {
+                var f = vectORvectfield;
+                if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "undefined" && typeof f.s === "undefined") {
+                    return 2;
+                }
+                else if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "string" && typeof f.s === "undefined") {
+                    return 3;
+                }
+                else if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "string" && typeof f.s === "string") {
+                    return 4;
+                }
             }
-            else if ((typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") ||
-                (typeof vectfield.p === "string" && typeof vectfield.q === "string" && typeof vectfield.r === "string" && typeof vectfield.s === "string")) {
-                return 4;
-            }
-            else {
-                throw new TypeError('Parameter "vectORvectfield" must be of type "ChalkboardVector" or "ChalkboardVectorField" with 2, 3, or 4 dimensions.');
-            }
+            throw new TypeError('Parameter "vectORvectfield" must be a vector or vector field with 2, 3, or 4 dimensions.');
         };
         vect_4.dist = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y));
             }
@@ -9146,16 +9610,15 @@ var Chalkboard;
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z));
             }
             else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
-                return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) +
-                    (vect2.y - vect1.y) * (vect2.y - vect1.y) +
-                    (vect2.z - vect1.z) * (vect2.z - vect1.z) +
-                    (vect2.w - vect1.w) * (vect2.w - vect1.w));
+                return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
         vect_4.distsq = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y);
             }
@@ -9163,16 +9626,15 @@ var Chalkboard;
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z);
             }
             else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
-                return ((vect2.x - vect1.x) * (vect2.x - vect1.x) +
-                    (vect2.y - vect1.y) * (vect2.y - vect1.y) +
-                    (vect2.z - vect1.z) * (vect2.z - vect1.z) +
-                    (vect2.w - vect1.w) * (vect2.w - vect1.w));
+                return ((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
                 throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
         vect_4.dot = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y;
             }
@@ -9227,6 +9689,7 @@ var Chalkboard;
             }
         };
         vect_4.fromAlternateToCartesian = function (vect, type) {
+            vect = $(vect);
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             }
@@ -9252,6 +9715,7 @@ var Chalkboard;
             }
         };
         vect_4.fromCartesianToAlternate = function (vect, type) {
+            vect = $(vect);
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect));
             }
@@ -9269,6 +9733,7 @@ var Chalkboard;
             }
         };
         vect_4.fromField = function (vectfield, vect) {
+            vect = $(vect);
             if (Chalkboard.vect.dimension(vectfield) === 2 && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 var p = Chalkboard.real.parse("(x, y) => " + vectfield.p), q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
                 return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
@@ -9286,6 +9751,7 @@ var Chalkboard;
             }
         };
         vect_4.fromVector = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x, vect.y, 0);
             }
@@ -9300,17 +9766,34 @@ var Chalkboard;
             }
         };
         vect_4.init = function (x, y, z, w) {
+            var v;
             if (z === undefined && w === undefined) {
-                return { x: x, y: y };
+                v = { x: x, y: y };
             }
             else if (w === undefined) {
-                return { x: x, y: y, z: z };
+                v = { x: x, y: y, z: z };
             }
             else {
-                return { x: x, y: y, z: z, w: w };
+                v = { x: x, y: y, z: z, w: w };
             }
+            if (mode === "vector")
+                return v;
+            if (mode === "array")
+                return Chalkboard.vect.toArray(v);
+            if (mode === "float32array")
+                return new Float32Array(Chalkboard.vect.toArray(v));
+            if (mode === "float64array")
+                return new Float64Array(Chalkboard.vect.toArray(v));
+            if (mode === "matrix")
+                return Chalkboard.vect.toMatrix(v);
+            if (mode === "string")
+                return Chalkboard.vect.toString(v);
+            if (mode === "json")
+                return JSON.stringify(v);
+            return v;
         };
-        vect_4.interp = function (vect, a, b, c, d) {
+        vect_4.interpolate = function (vect, a, b, c, d) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2) && typeof c === "undefined" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y) / (a + b), (a * vect.x + b * vect.y) / (a + b));
             }
@@ -9328,20 +9811,35 @@ var Chalkboard;
             return Chalkboard.vect.dimension(vect1) === Chalkboard.vect.dimension(vect2);
         };
         vect_4.isDimensionOf = function (vectORvectfield, dimension) {
-            if (dimension === 2) {
-                return Chalkboard.vect.dimension(vectORvectfield) === 2;
+            try {
+                var vect_5 = $(vectORvectfield);
+                if (dimension === 2) {
+                    return Chalkboard.vect.dimension(vect_5) === 2;
+                }
+                else if (dimension === 3) {
+                    return Chalkboard.vect.dimension(vect_5) === 3;
+                }
+                else if (dimension === 4) {
+                    return Chalkboard.vect.dimension(vect_5) === 4;
+                }
             }
-            else if (dimension === 3) {
-                return Chalkboard.vect.dimension(vectORvectfield) === 3;
+            catch (_a) {
+                var vectfield = vectORvectfield;
+                if (dimension === 2) {
+                    return Chalkboard.vect.dimension(vectfield) === 2;
+                }
+                else if (dimension === 3) {
+                    return Chalkboard.vect.dimension(vectfield) === 3;
+                }
+                else if (dimension === 4) {
+                    return Chalkboard.vect.dimension(vectfield) === 4;
+                }
             }
-            else if (dimension === 4) {
-                return Chalkboard.vect.dimension(vectORvectfield) === 4;
-            }
-            else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
-            }
+            throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
         };
         vect_4.isEqual = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return vect1.x === vect2.x && vect1.y === vect2.y;
@@ -9370,9 +9868,10 @@ var Chalkboard;
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2));
         };
         vect_4.isZero = function (vect) {
-            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(vect));
+            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
         };
         vect_4.mag = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             }
@@ -9390,6 +9889,7 @@ var Chalkboard;
             return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
         };
         vect_4.magsq = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             }
@@ -9403,7 +9903,16 @@ var Chalkboard;
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
             }
         };
+        var mode = "vector";
+        vect_4.modeConfig = function (config) {
+            var _config = config.toLowerCase();
+            if (["vector", "array", "float32array", "float64array", "matrix", "string", "json"].indexOf(_config) === -1) {
+                throw new Error('The mode must be "vector", "array", "float32array", "float64array", "matrix", "string", or "json".');
+            }
+            mode = _config;
+        };
         vect_4.negate = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y);
             }
@@ -9418,14 +9927,16 @@ var Chalkboard;
             }
         };
         vect_4.normalize = function (vect) {
+            vect = $(vect);
+            var m = Chalkboard.vect.mag(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
-                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect));
+                return Chalkboard.vect.init(vect.x / m, vect.y / m);
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
-                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect));
+                return Chalkboard.vect.init(vect.x / m, vect.y / m, vect.z / m);
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
-                return Chalkboard.vect.init(vect.x / Chalkboard.vect.mag(vect), vect.y / Chalkboard.vect.mag(vect), vect.z / Chalkboard.vect.mag(vect), vect.w / Chalkboard.vect.mag(vect));
+                return Chalkboard.vect.init(vect.x / m, vect.y / m, vect.z / m, vect.w / m);
             }
             else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
@@ -9440,7 +9951,9 @@ var Chalkboard;
         vect_4.proj = function (vect1, vect2) {
             return Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2) / Chalkboard.vect.dot(vect2, vect2));
         };
-        vect_4.random = function (inf, sup, dimension) {
+        vect_4.random = function (dimension, inf, sup) {
+            if (inf === void 0) { inf = 0; }
+            if (sup === void 0) { sup = 1; }
             if (dimension === 2) {
                 return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             }
@@ -9455,6 +9968,7 @@ var Chalkboard;
             }
         };
         vect_4.reciprocate = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             }
@@ -9482,6 +9996,7 @@ var Chalkboard;
             }
         };
         vect_4.round = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             }
@@ -9502,6 +10017,7 @@ var Chalkboard;
             return Chalkboard.vect.dot(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
         vect_4.scl = function (vect, num) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num);
             }
@@ -9516,6 +10032,7 @@ var Chalkboard;
             }
         };
         vect_4.slope = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.y / vect.x;
             }
@@ -9530,6 +10047,8 @@ var Chalkboard;
             }
         };
         vect_4.sub = function (vect1, vect2) {
+            vect1 = $(vect1);
+            vect2 = $(vect2);
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y);
             }
@@ -9544,6 +10063,7 @@ var Chalkboard;
             }
         };
         vect_4.toArray = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return [vect.x, vect.y];
             }
@@ -9558,10 +10078,12 @@ var Chalkboard;
             }
         };
         vect_4.toComplex = function (vect) {
+            vect = $(vect);
             return Chalkboard.comp.init(vect.x, vect.y);
         };
         vect_4.toMatrix = function (vect, axis) {
             if (axis === void 0) { axis = 0; }
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y]);
@@ -9600,6 +10122,7 @@ var Chalkboard;
             }
         };
         vect_4.toQuaternion = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             }
@@ -9614,6 +10137,7 @@ var Chalkboard;
             }
         };
         vect_4.toString = function (vect) {
+            vect = $(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             }
@@ -9633,10 +10157,35 @@ var Chalkboard;
             for (var _i = 1; _i < arguments.length; _i++) {
                 size[_i - 1] = arguments[_i];
             }
+            vect = $(vect);
             if (Array.isArray(size[0])) {
                 size = size[0];
             }
             return (_a = Chalkboard.tens).resize.apply(_a, __spreadArray([Chalkboard.vect.toMatrix(vect)], size, false));
+        };
+        vect_4.toTypedArray = function (vect, type) {
+            if (type === void 0) { type = "float32"; }
+            vect = $(vect);
+            var arr = Chalkboard.vect.toArray(vect);
+            if (type === "int8") {
+                return new Int8Array(arr);
+            }
+            else if (type === "int16") {
+                return new Int16Array(arr);
+            }
+            else if (type === "int32") {
+                return new Int32Array(arr);
+            }
+            else if (type === "float32") {
+                return new Float32Array(arr);
+            }
+            else if (type === "float64") {
+                return new Float64Array(arr);
+            }
+            else if (type === "bigint64") {
+                return new BigInt64Array(arr.map(function (n) { return BigInt(Math.floor(n)); }));
+            }
+            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
         };
         vect_4.vectorQuadruple = function (vect1, vect2, vect3, vect4) {
             return Chalkboard.vect.cross(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
@@ -9644,18 +10193,18 @@ var Chalkboard;
         vect_4.vectorTriple = function (vect1, vect2, vect3) {
             return Chalkboard.vect.cross(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
-        vect_4.zero = function (vect) {
-            if (Chalkboard.vect.isDimensionOf(vect, 2)) {
+        vect_4.zero = function (dimension) {
+            if (dimension === 2) {
                 return Chalkboard.vect.init(0, 0);
             }
-            else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
+            else if (dimension === 3) {
                 return Chalkboard.vect.init(0, 0, 0);
             }
-            else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
+            else if (dimension === 4) {
                 return Chalkboard.vect.init(0, 0, 0, 0);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new TypeError('Parameter "dimension" must be either 2, 3, or 4.');
             }
         };
     })(vect = Chalkboard.vect || (Chalkboard.vect = {}));

@@ -1,6 +1,26 @@
 # Chalkboard changelog
 All notable changes of every update of the Chalkboard library are recorded in this file.
 
+## [v2.4.0 Noether](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0) - 04/28/2025
+The fourteenth release of the Chalkboard library.
+Commits: [`v2.3.0...v2.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.3.0...v2.4.0)
+- Added `vect.modeConfig` which can change the input/output mode of the `vect` commands so that they can accept and return vectors (`"vector"` mode, which is the default), arrays (`"array"` mode), typed arrays (`"float32array"` or `"float64array"` modes), matrices (`"matrix"` mode), strings (`"string"` mode), or JSON strings (`"json"` mode)
+- Added `abal.monoid`, `abal.isMonoid`, and `abal.isSubmonoid` which defines and checks for the algebraic structures known as monoids
+- Added `abal.toTypedArray`, `comp.toTypedArray`, `matr.toTypedArray`, `quat.toTypedArray`, `tens.toTypedArray` and `vect.toTypedArray` which convert sets, structures, complex numbers, matrices, quaternions, tensors, and vectors to six different possible typed arrays
+- Added `real.zero` which defines a zero function of a specified type
+- Removed `comp.zero` and `quat.zero` because they were redundant as `comp.init` and `quat.init` already have their feature
+- Changed `trig.cos` and `trig.sin` to be roughly ten times faster
+- Changed `abal.group`, `abal.ring`, and `abal.field` to no longer use presets for sets and operations
+- Changed `abal.isSubset`, `abal.isSubgroup`, `abal.isSubring`, and `abal.isSubfield` to be able to work with infinite sets
+- Changed `abal.isClosed`, `abal.isEqual`, and `abal.direct` to be able to work with monoids
+- Changed `bool.modeConfig` to be able to work case-insensitively
+- Changed `matr.zero` and `tens.zero` to input the size of the zero matrix or tensor directly instead of inputting another matrix or tensor
+- Changed all of the `vect` commands to work with the new `vect.modeConfig` feature
+- Changed `APPLY` and some of the `calc`, `matr`, `quat`, and `real` commands to work with the new `vect.modeConfig` feature
+- Changed all of the `plot` commands to work with the new `plot.getContext` fix
+- Fixed `plot.PARSED_CONTEXT` by replacing it with `plot.getContext` as it was throwing false errors when no HTML `<canvas>` element was available even if the `plot` commands weren't in use
+- Fixed `numb.isRational` which was giving inaccurate results because it was able to turn any floating-point number into a fraction even if it's mathematically inaccurate
+
 ## [v2.3.0 Boole](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0) - 04/14/2025
 The thirteenth release of the Chalkboard library.
 Commits: [`v2.2.0...v2.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.2.0...v2.3.0)
