@@ -19,10 +19,22 @@ type ChalkboardComplex = { a: number; b: number };
 
 /**
  * The type for mathematical functions.
- * @property {string | string[]} definition - The function's definition
- * @property {"expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp"} type - The function's type, which can be "expl" for explicit functions, "inve" for inverse functions, "pola" for polar functions, "curv" for parametric curves, "surf" for parametric surfaces, "mult" for explicit multivariable functions, or "comp" for explicit complex-valued functions
+ * @property {Function | Function[]} rule - The rule of the function
+ * @property {string | string[]} domain - The domain of the function
+ * @property {string | string[]} codomain - The codomain of the function
+ * @property {"real" | "comp"} type - The type of the function, which can be "real" or "comp"
  */
-type ChalkboardFunction = { definition: string | string[]; type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp" };
+type ChalkboardFunction = {
+    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]);
+    domain: string | string[];
+    codomain: string | string[];
+    type: "real";
+} | {
+    rule: [(z: ChalkboardComplex) => ChalkboardComplex, (z: ChalkboardComplex) => ChalkboardComplex];
+    domain: string | string[];
+    codomain: string | string[];
+    type: "comp";
+};
 
 /**
  * The type for matrices.
@@ -125,15 +137,6 @@ type ChalkboardTensor = number | ChalkboardTensor[];
  * @property {number} [w] - The w-component (defined for 4D vectors)
  */
 type ChalkboardVector = { x: number; y: number; z?: number; w?: number } | number[] | Float32Array | Float64Array | ChalkboardMatrix | string;
-
-/**
- * The type for vector fields.
- * @property {string} p - The x-component (defined for 2D, 3D, and 4D vector fields)
- * @property {string} q - The y-component (defined for 2D, 3D, and 4D vector fields)
- * @property {string} [r] - The z-component (defined for 3D and 4D vector fields)
- * @property {string} [s] - The w-component (defined for 4D vector fields)
- */
-type ChalkboardVectorField = { p: string; q: string; r?: string; s?: string };
 
 /**
  * The Chalkboard library namespace.
