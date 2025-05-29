@@ -15,18 +15,36 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const absolute = (func: ChalkboardFunction): ChalkboardFunction => {
-            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
-                return Chalkboard.real.define(`Math.abs(${func.definition})`, func.type);
-            } else if (func.type === "curv" && Array.isArray(func.definition)) {
-                if (func.definition.length === 2) {
-                    return Chalkboard.real.define([`Math.abs(${func.definition[0]})`, `Math.abs(${func.definition[1]})`], "curv");
-                } else if (func.definition.length === 3) {
-                    return Chalkboard.real.define([`Math.abs(${func.definition[0]})`, `Math.abs(${func.definition[1]})`, `Math.abs(${func.definition[2]})`], "curv");
-                }
-            } else if (func.type === "surf" && Array.isArray(func.definition)) {
-                return Chalkboard.real.define([`Math.abs(${func.definition[0]})`, `Math.abs(${func.definition[1]})`, `Math.abs(${func.definition[2]})`], "surf");
+            if (func.field !== "real") {
+                throw new TypeError('Chalkboard.real.absolute: Property "field" of "func" must be "real".');
             }
-            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func.type.startsWith("scalar")) {
+                const f = func.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => Math.abs(f(...x));
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("vector")) {
+                const f = func.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((...x: number[]) => Math.abs(f[i](...x)));
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("curve")) {
+                const f = func.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((t: number) => Math.abs(f[i](t)));
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("surface")) {
+                const f = func.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((s: number, t: number) => Math.abs(f[i](s, t)));
+                }
+                return Chalkboard.real.define(g, func.type);
+            }
+            throw new TypeError('Chalkboard.real.absolute: Property "type" of "func" is not supported.');
         };
 
         /**
@@ -36,18 +54,43 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const add = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
-                return Chalkboard.real.define(`(${func1.definition}) + (${func2.definition})`, func1.type);
-            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                if (func1.definition.length === 2 && func2.definition.length === 2) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) + (${func2.definition[0]})`, `(${func1.definition[1]}) + (${func2.definition[1]})`], "curv");
-                } else if (func1.definition.length === 3 && func2.definition.length === 3) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) + (${func2.definition[0]})`, `(${func1.definition[1]}) + (${func2.definition[1]})`, `(${func1.definition[2]}) + (${func2.definition[2]})`], "curv");
-                }
-            } else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                return Chalkboard.real.define([`(${func1.definition[0]}) + (${func2.definition[0]})`, `(${func1.definition[1]}) + (${func2.definition[1]})`, `(${func1.definition[2]}) + (${func2.definition[2]})`], "surf");
+            if (func1.field !== "real" || func2.field !== "real") {
+                throw new TypeError('Chalkboard.real.add: Properties "field" of "func1" and "func2" must be "real".');
             }
-            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func1.type !== func2.type) {
+                throw new TypeError('Chalkboard.real.add: Properties "type" of "func1" and "func2" must be the same.');
+            }
+            if (func1.type.startsWith("scalar")) {
+                const f1 = func1.rule as ((...x: number[]) => number);
+                const f2 = func2.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f1(...x) + f2(...x);
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("vector")) {
+                const f1 = func1.rule as ((...x: number[]) => number)[];
+                const f2 = func2.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((...x: number[]) => f1[i](...x) + f2[i](...x));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("curve")) {
+                const f1 = func1.rule as ((t: number) => number)[];
+                const f2 = func2.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((t: number) => f1[i](t) + f2[i](t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("surface")) {
+                const f1 = func1.rule as ((s: number, t: number) => number)[];
+                const f2 = func2.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((s: number, t: number) => f1[i](s, t) + f2[i](s, t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            }
+            throw new TypeError('Chalkboard.real.add: Properties "type" of "func1" and "func2" are not supported.');
         };
 
         /**
@@ -57,22 +100,27 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const compose = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.type === "expl" && func2.type === "expl") {
-                return Chalkboard.real.define(`(${func1.definition.toString().replace(/x/g, `(${func2.definition})`)})`, "expl");
-            } else if (func1.type === "inve" && func2.type === "inve") {
-                return Chalkboard.real.define(`(${func1.definition.toString().replace(/y/g, `(${func2.definition})`)})`, "inve");
-            } else if (func1.type === "pola" && func2.type === "pola") {
-                return Chalkboard.real.define(`(${func1.definition.toString().replace(/O/g, `(${func2.definition})`)})`, "pola");
-            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                if (func1.definition.length === 2 && func2.definition.length === 2) {
-                    return Chalkboard.real.define([`(${func1.definition[0].toString().replace(/x/g, `(${func2.definition[0]})`)})`, `(${func1.definition[1].toString().replace(/y/g, `(${func2.definition[1]})`)})`], "curv");
-                } else if (func1.definition.length === 3 && func2.definition.length === 3) {
-                    return Chalkboard.real.define([`(${func1.definition[0].toString().replace(/x/g, `(${func2.definition[0]})`)})`, `(${func1.definition[1].toString().replace(/y/g, `(${func2.definition[1]})`)})`, `(${func1.definition[2].toString().replace(/z/g, `(${func2.definition[2]})`)})`], "curv");
-                }
-            } else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                return Chalkboard.real.define([`(${func1.definition[0].toString().replace(/x/g, `(${func2.definition[0]})`)})`, `(${func1.definition[1].toString().replace(/y/g, `(${func2.definition[1]})`)})`, `(${func1.definition[2].toString().replace(/z/g, `(${func2.definition[2]})`)})`], "surf");
+            if (func1.field !== "real" || func2.field !== "real") {
+                throw new TypeError('Chalkboard.real.compose: Properties "field" of "func1" and "func2" must be "real".');
             }
-            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", or "surf".');
+            if (func1.type !== func2.type) {
+                throw new TypeError('Chalkboard.real.compose: Properties "type" of "func1" and "func2" must be the same.');
+            }
+            if (func1.type.startsWith("scalar")) {
+                const f1 = func1.rule as ((...x: number[]) => number);
+                const f2 = func2.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f1(f2(...x));
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("vector")) {
+                const f1 = func1.rule as ((...x: number[]) => number)[];
+                const f2 = func2.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((...x: number[]) => f1[i](f2[i](...x)));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            }
+            throw new TypeError('Chalkboard.real.compose: Properties "type" of "func1" and "func2" are not supported.');
         };
 
         /**
@@ -172,18 +220,43 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const div = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
-                return Chalkboard.real.define(`(${func1.definition}) / (${func2.definition})`, func1.type);
-            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                if (func1.definition.length === 2) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) / (${func2.definition[0]})`, `(${func1.definition[1]}) / (${func2.definition[1]})`], "curv");
-                } else if (func1.definition.length === 3) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) / (${func2.definition[0]})`, `(${func1.definition[1]}) / (${func2.definition[1]})`, `(${func1.definition[2]}) / (${func2.definition[2]})`], "curv");
-                }
-            } else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                return Chalkboard.real.define([`(${func1.definition[0]}) / (${func2.definition[0]})`, `(${func1.definition[1]}) / (${func2.definition[1]})`, `(${func1.definition[2]}) / (${func2.definition[2]})`], "surf");
+            if (func1.field !== "real" || func2.field !== "real") {
+                throw new TypeError('Chalkboard.real.div: Properties "field" of "func1" and "func2" must be "real".');
             }
-            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func1.type !== func2.type) {
+                throw new TypeError('Chalkboard.real.div: Properties "type" of "func1" and "func2" must be the same.');
+            }
+            if (func1.type.startsWith("scalar")) {
+                const f1 = func1.rule as ((...x: number[]) => number);
+                const f2 = func2.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f1(...x) / f2(...x);
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("vector")) {
+                const f1 = func1.rule as ((...x: number[]) => number)[];
+                const f2 = func2.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((...x: number[]) => f1[i](...x) / f2[i](...x));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("curve")) {
+                const f1 = func1.rule as ((t: number) => number)[];
+                const f2 = func2.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((t: number) => f1[i](t) / f2[i](t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("surface")) {
+                const f1 = func1.rule as ((s: number, t: number) => number)[];
+                const f2 = func2.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((s: number, t: number) => f1[i](s, t) / f2[i](s, t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            }
+            throw new TypeError('Chalkboard.real.div: Properties "type" of "func1" and "func2" are not supported.');
         };
 
         /**
@@ -220,7 +293,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const linear = (x1: number, y1: number, x2: number, y2: number): ChalkboardFunction => {
-            return Chalkboard.real.define(Chalkboard.real.slope(x1, y1, x2, y2).toString() + " * (x - " + x2.toString() + ") + " + y2.toString());
+            return Chalkboard.real.define((x: number) => Chalkboard.real.slope(x1, y1, x2, y2) * (x - x2) + y2);
         };
 
         /**
@@ -247,7 +320,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const ln = (num: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define("1 / x"), 1, num) as number;
+            return Chalkboard.calc.fxdx(Chalkboard.real.define((x: number) => 1 / x), 1, num) as number;
         };
 
         /**
@@ -276,18 +349,43 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const mul = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
-                return Chalkboard.real.define(`(${func1.definition}) * (${func2.definition})`, func1.type);
-            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                if (func1.definition.length === 2) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) * (${func2.definition[0]})`, `(${func1.definition[1]}) * (${func2.definition[1]})`], "curv");
-                } else if (func1.definition.length === 3) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) * (${func2.definition[0]})`, `(${func1.definition[1]}) * (${func2.definition[1]})`, `(${func1.definition[2]}) * (${func2.definition[2]})`], "curv");
-                }
-            } else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                return Chalkboard.real.define([`(${func1.definition[0]}) * (${func2.definition[0]})`, `(${func1.definition[1]}) * (${func2.definition[1]})`, `(${func1.definition[2]}) * (${func2.definition[2]})`], "surf");
+            if (func1.field !== "real" || func2.field !== "real") {
+                throw new TypeError('Chalkboard.real.mul: Properties "field" of "func1" and "func2" must be "real".');
             }
-            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func1.type !== func2.type) {
+                throw new TypeError('Chalkboard.real.mul: Properties "type" of "func1" and "func2" must be the same.');
+            }
+            if (func1.type.startsWith("scalar")) {
+                const f1 = func1.rule as ((...x: number[]) => number);
+                const f2 = func2.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f1(...x) * f2(...x);
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("vector")) {
+                const f1 = func1.rule as ((...x: number[]) => number)[];
+                const f2 = func2.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((...x: number[]) => f1[i](...x) * f2[i](...x));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("curve")) {
+                const f1 = func1.rule as ((t: number) => number)[];
+                const f2 = func2.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((t: number) => f1[i](t) * f2[i](t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("surface")) {
+                const f1 = func1.rule as ((s: number, t: number) => number)[];
+                const f2 = func2.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((s: number, t: number) => f1[i](s, t) * f2[i](s, t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            }
+            throw new TypeError('Chalkboard.real.mul: Properties "type" of "func1" and "func2" are not supported.');
         };
 
         /**
@@ -333,31 +431,20 @@ namespace Chalkboard {
             if (coeffs.length === 1 && Array.isArray(coeffs[0])) {
                 arr = coeffs[0];
             } else {
-                arr = coeffs as number[];
+                arr = coeffs;
             }
-            let result = "";
-            for (let i = 0; i < arr.length; i++) {
-                const coeff = arr[i];
-                const exponent = arr.length - i - 1;
-                if (coeff === 0 && exponent !== 0) continue;
-                if (result !== "") {
-                    result += coeff >= 0 ? " + " : " - ";
-                } else if (coeff < 0) {
-                    result += "-";
-                }
-                const abscoeff = Math.abs(coeff);
-                let term = "";
-                if (exponent === 0) {
-                    term = abscoeff.toString();
-                } else if (exponent === 1) {
-                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x";
-                } else {
-                    term = (abscoeff === 1 ? "" : abscoeff + " * ") + "x ** " + exponent;
-                }
-                result += "(" + term + ")";
+            while (arr.length > 1 && arr[0] === 0) {
+                arr.shift();
             }
-            if (result === "") result = "0";
-            return Chalkboard.real.define(result, "expl");
+            const f = (x: number): number => {
+                if (arr.length === 0) return 0;
+                let result = arr[0];
+                for (let i = 1; i < arr.length; i++) {
+                    result = result * x + arr[i];
+                }
+                return result;
+            };
+            return Chalkboard.real.define(f);
         };
 
         /**
@@ -375,18 +462,36 @@ namespace Chalkboard {
                 }
             } else {
                 const func = base;
-                if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
-                    return Chalkboard.real.define(`(${func.definition}) ** ${num}`, func.type);
-                } else if (func.type === "curv" && Array.isArray(func.definition)) {
-                    if (func.definition.length === 2) {
-                        return Chalkboard.real.define([`(${func.definition[0]}) ** ${num}`, `(${func.definition[1]}) ** ${num}`], "curv");
-                    } else if (func.definition.length === 3) {
-                        return Chalkboard.real.define([`(${func.definition[0]}) ** ${num}`, `(${func.definition[1]}) ** ${num}`, `(${func.definition[2]}) ** ${num}`], "curv");
-                    }
-                } else if (func.type === "surf" && Array.isArray(func.definition)) {
-                    return Chalkboard.real.define([`(${func.definition[0]}) ** ${num}`, `(${func.definition[1]}) ** ${num}`, `(${func.definition[2]}) ** ${num}`], "surf");
+                if (func.field !== "real") {
+                    throw new TypeError('Chalkboard.real.pow: Property "field" of "func" must be "real".');
                 }
-                throw new TypeError('Property "type" of "base" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+                if (func.type.startsWith("scalar")) {
+                    const f = func.rule as ((...x: number[]) => number);
+                    const g = (...x: number[]) => f(...x) ** num;
+                    return Chalkboard.real.define(g, func.type);
+                } else if (func.type.startsWith("vector")) {
+                    const f = func.rule as ((...x: number[]) => number)[];
+                    const g = [];
+                    for (let i = 0; i < f.length; i++) {
+                        g.push((...x: number[]) => f[i](...x) ** num);
+                    }
+                    return Chalkboard.real.define(g, func.type);
+                } else if (func.type.startsWith("curve")) {
+                    const f = func.rule as ((t: number) => number)[];
+                    const g = [];
+                    for (let i = 0; i < f.length; i++) {
+                        g.push((t: number) => f[i](t) ** num);
+                    }
+                    return Chalkboard.real.define(g, func.type);
+                } else if (func.type.startsWith("surface")) {
+                    const f = func.rule as ((s: number, t: number) => number)[];
+                    const g = [];
+                    for (let i = 0; i < f.length; i++) {
+                        g.push((s: number, t: number) => f[i](s, t) ** num);
+                    }
+                    return Chalkboard.real.define(g, func.type);
+                }
+                throw new TypeError('Chalkboard.real.pow: Property "type" of "func" is not supported.');
             }
         };
 
@@ -421,9 +526,9 @@ namespace Chalkboard {
          */
         export const quadratic = (a: number, b: number, c: number, form: "stan" | "vert" = "stan"): ChalkboardFunction => {
             if (form === "stan") {
-                return Chalkboard.real.define(a.toString() + "* x * x + " + b.toString() + " * x +" + c.toString());
+                return Chalkboard.real.define((x: number) => a * x * x + b * x + c);
             } else if (form === "vert") {
-                return Chalkboard.real.define(a.toString() + " * ((x - " + b.toString() + ") * (x - " + b.toString() + ")) +" + c.toString());
+                return Chalkboard.real.define((x: number) => a * (x - b) * (x - b) + c);
             } else {
                 throw new TypeError('Parameter "form" must be "stan" or "vert".');
             }
@@ -479,18 +584,36 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const reciprocate = (func: ChalkboardFunction): ChalkboardFunction => {
-            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
-                return Chalkboard.real.define(`1 / (${func.definition})`, func.type);
-            } else if (func.type === "curv" && Array.isArray(func.definition)) {
-                if (func.definition.length === 2) {
-                    return Chalkboard.real.define([`1 / (${func.definition[0]})`, `1 / (${func.definition[1]})`], "curv");
-                } else if (func.definition.length === 3) {
-                    return Chalkboard.real.define([`1 / (${func.definition[0]})`, `1 / (${func.definition[1]})`, `1 / (${func.definition[2]})`], "curv");
-                }
-            } else if (func.type === "surf" && Array.isArray(func.definition)) {
-                return Chalkboard.real.define([`1 / (${func.definition[0]})`, `1 / (${func.definition[1]})`, `1 / (${func.definition[2]})`], "surf");
+            if (func.field !== "real") {
+                throw new TypeError('Chalkboard.real.reciprocate: Property "field" of "func" must be "real".');
             }
-            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func.type.startsWith("scalar")) {
+                const f = func.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => 1 / f(...x);
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("vector")) {
+                const f = func.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((...x: number[]) => 1 / f[i](...x));
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("curve")) {
+                const f = func.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((t: number) => 1 / f[i](t));
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("surface")) {
+                const f = func.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((s: number, t: number) => 1 / f[i](s, t));
+                }
+                return Chalkboard.real.define(g, func.type);
+            }
+            throw new TypeError('Chalkboard.real.reciprocate: Property "type" of "func" is not supported.');
         };
 
         /**
@@ -526,18 +649,36 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const scl = (func: ChalkboardFunction, num: number): ChalkboardFunction => {
-            if (func.type === "expl" || func.type === "inve" || func.type === "pola" || func.type === "mult") {
-                return Chalkboard.real.define(`${num} * (${func.definition})`, func.type);
-            } else if (func.type === "curv" && Array.isArray(func.definition)) {
-                if (func.definition.length === 2) {
-                    return Chalkboard.real.define([`${num} * (${func.definition[0]})`, `${num} * (${func.definition[1]})`], "curv");
-                } else if (func.definition.length === 3) {
-                    return Chalkboard.real.define([`${num} * (${func.definition[0]})`, `${num} * (${func.definition[1]})`, `${num} * (${func.definition[2]})`], "curv");
-                }
-            } else if (func.type === "surf" && Array.isArray(func.definition)) {
-                return Chalkboard.real.define([`${num} * (${func.definition[0]})`, `${num} * (${func.definition[1]})`, `${num} * (${func.definition[2]})`], "surf");
+            if (func.field !== "real") {
+                throw new TypeError('Chalkboard.real.scl: Property "field" of "func" must be "real".');
             }
-            throw new TypeError('Property "type" of "func" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func.type.startsWith("scalar")) {
+                const f = func.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f(...x) * num;
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("vector")) {
+                const f = func.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((...x: number[]) => f[i](...x) * num);
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("curve")) {
+                const f = func.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((t: number) => f[i](t) * num);
+                }
+                return Chalkboard.real.define(g, func.type);
+            } else if (func.type.startsWith("surface")) {
+                const f = func.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f.length; i++) {
+                    g.push((s: number, t: number) => f[i](s, t) * num);
+                }
+                return Chalkboard.real.define(g, func.type);
+            }
+            throw new TypeError('Chalkboard.real.scl: Property "type" of "func" is not supported.');
         };
 
         /**
@@ -572,18 +713,43 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const sub = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if ((func1.type === "expl" && func2.type === "expl") || (func1.type === "inve" && func2.type === "inve") || (func1.type === "pola" && func2.type === "pola") || (func1.type === "mult" && func2.type === "mult")) {
-                return Chalkboard.real.define(`(${func1.definition}) - (${func2.definition})`, func1.type);
-            } else if (func1.type === "curv" && func2.type === "curv" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                if (func1.definition.length === 2 && func2.definition.length === 2) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) - (${func2.definition[0]})`, `(${func1.definition[1]}) - (${func2.definition[1]})`], "curv");
-                } else if (func1.definition.length === 3 && func2.definition.length === 3) {
-                    return Chalkboard.real.define([`(${func1.definition[0]}) - (${func2.definition[0]})`, `(${func1.definition[1]}) - (${func2.definition[1]})`, `(${func1.definition[2]}) - (${func2.definition[2]})`], "curv");
-                }
-            } else if (func1.type === "surf" && func2.type === "surf" && Array.isArray(func1.definition) && Array.isArray(func2.definition)) {
-                return Chalkboard.real.define([`(${func1.definition[0]}) - (${func2.definition[0]})`, `(${func1.definition[1]}) - (${func2.definition[1]})`, `(${func1.definition[2]}) - (${func2.definition[2]})`], "surf");
+            if (func1.field !== "real" || func2.field !== "real") {
+                throw new TypeError('Chalkboard.real.sub: Properties "field" of "func1" and "func2" must be "real".');
             }
-            throw new TypeError('Property "type" of "func1" and "func2" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            if (func1.type !== func2.type) {
+                throw new TypeError('Chalkboard.real.sub: Properties "type" of "func1" and "func2" must be the same.');
+            }
+            if (func1.type.startsWith("scalar")) {
+                const f1 = func1.rule as ((...x: number[]) => number);
+                const f2 = func2.rule as ((...x: number[]) => number);
+                const g = (...x: number[]) => f1(...x) - f2(...x);
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("vector")) {
+                const f1 = func1.rule as ((...x: number[]) => number)[];
+                const f2 = func2.rule as ((...x: number[]) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((...x: number[]) => f1[i](...x) - f2[i](...x));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("curve")) {
+                const f1 = func1.rule as ((t: number) => number)[];
+                const f2 = func2.rule as ((t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((t: number) => f1[i](t) - f2[i](t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            } else if (func1.type.startsWith("surface")) {
+                const f1 = func1.rule as ((s: number, t: number) => number)[];
+                const f2 = func2.rule as ((s: number, t: number) => number)[];
+                const g = [];
+                for (let i = 0; i < f1.length; i++) {
+                    g.push((s: number, t: number) => f1[i](s, t) - f2[i](s, t));
+                }
+                return Chalkboard.real.define(g, func1.type);
+            }
+            throw new TypeError('Chalkboard.real.sub: Properties "type" of "func1" and "func2" are not supported.');
         };
 
         /**
@@ -608,76 +774,98 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const translate = (func: ChalkboardFunction, h: number = 0, v: number = 0): ChalkboardFunction => {
-            if (func.type === "expl") {
-                if (h !== 0 && v !== 0) {
-                    return Chalkboard.real.define(`(${func.definition.toString().replace(/x/g, `(x - ${h})`)}) + ${v}`, "expl");
-                } else if (h !== 0) {
-                    return Chalkboard.real.define(`${func.definition.toString().replace(/x/g, `(x - ${h})`)}`, "expl");
-                } else if (v !== 0) {
-                    return Chalkboard.real.define(`(${func.definition}) + ${v}`, "expl");
-                } else {
-                    return func;
-                }
+            if (func.field !== "real") {
+                throw new TypeError('Chalkboard.real.translate: Property "field" of "func" must be "real".');
             }
-            throw new TypeError('Property "type" of "func" must be "expl".');
+            if (func.type === "scalar2d") {
+                const f = func.rule as (x: number) => number;
+                const g = (x: number) => f(x - h) + v;
+                return Chalkboard.real.define(g, func.type);
+            }
+            throw new TypeError('Chalkboard.real.translate: Property "type" of "func" is not supported.');
         };
 
         /**
          * Calculates the value of a function at a value.
          * @param {ChalkboardFunction} func - The function
-         * @param {number} val - The value
+         * @param {number} x - The value
          * @returns {number | ChalkboardVector}
          */
-        export const val = (func: ChalkboardFunction, val: number | ChalkboardVector): number | ChalkboardVector => {
-            if (func.type === "expl") {
-                const f = Chalkboard.real.parse("x => " + func.definition);
-                return f(val);
-            } else if (func.type === "inve") {
-                const f = Chalkboard.real.parse("y => " + func.definition);
-                return f(val);
-            } else if (func.type === "pola") {
-                const r = Chalkboard.real.parse("O => " + func.definition);
-                return r(val);
-            } else if (func.type === "curv") {
-                if (func.definition.length === 2) {
-                    const x = Chalkboard.real.parse("t => " + func.definition[0]),
-                        y = Chalkboard.real.parse("t => " + func.definition[1]);
-                    return Chalkboard.vect.init(x(val), y(val));
-                } else {
-                    const x = Chalkboard.real.parse("t => " + func.definition[0]),
-                        y = Chalkboard.real.parse("t => " + func.definition[1]),
-                        z = Chalkboard.real.parse("t => " + func.definition[2]);
-                    return Chalkboard.vect.init(x(val), y(val), z(val));
-                }
-            } else if (func.type === "surf") {
-                const vect = val as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                const x = Chalkboard.real.parse("(s, t) => " + func.definition[0]),
-                    y = Chalkboard.real.parse("(s, t) => " + func.definition[1]),
-                    z = Chalkboard.real.parse("(s, t) => " + func.definition[2]);
-                return Chalkboard.vect.init(x(vect.x, vect.y), y(vect.x, vect.y), z(vect.x, vect.y));
-            } else if (func.type === "mult" && typeof val !== "number") {
-                const vect = val as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                const f = Chalkboard.real.parse("(x, y) => " + func.definition);
-                return f(vect.x, vect.y);
-            } else {
-                throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a "type" property of "expl", "pola", "curv", "surf", or "mult".');
+        export const val = (func: ChalkboardFunction, x: number | ChalkboardVector): number | ChalkboardVector => {
+            if (func.field !== "real") {
+                throw new TypeError('Chalkboard.real.val: Property "field" of "func" must be "real".');
             }
+            if (func.type === "scalar2d") {
+                const f = func.rule as (x: number) => number;
+                return f(x as number);
+            } else if (func.type === "scalar3d") {
+                const f = func.rule as (x: number, y: number) => number;
+                const v = x as ChalkboardVector as { x: number, y: number };
+                return f(v.x, v.y);
+            } else if (func.type === "scalar4d") {
+                const f = func.rule as (x: number, y: number, z: number) => number;
+                const v = x as ChalkboardVector as { x: number, y: number, z: number };
+                return f(v.x, v.y, v.z);
+            } else if (func.type === "vector2d") {
+                const f = func.rule as [(x: number, y: number) => number, (x: number, y: number) => number];
+                const v = x as ChalkboardVector as { x: number, y: number };
+                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
+            } else if (func.type === "vector3d") {
+                const f = func.rule as [(x: number, y: number, z: number) => number, (x: number, y: number, z: number) => number, (x: number, y: number, z: number) => number];
+                const v = x as ChalkboardVector as { x: number, y: number, z: number };
+                return Chalkboard.vect.init(f[0](v.x, v.y, v.z), f[1](v.x, v.y, v.z), f[2](v.x, v.y, v.z));
+            } else if (func.type === "vector4d") {
+                const f = func.rule as [(x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number];
+                const v = x as ChalkboardVector as { x: number, y: number, z: number, w: number };
+                return Chalkboard.vect.init(f[0](v.x, v.y, v.z, v.w), f[1](v.x, v.y, v.z, v.w), f[2](v.x, v.y, v.z, v.w), f[3](v.x, v.y, v.z, v.w));
+            } else if (func.type === "curve2d") {
+                const f = func.rule as [(t: number) => number, (t: number) => number];
+                const t = x as number;
+                return Chalkboard.vect.init(f[0](t), f[1](t));
+            } else if (func.type === "curve3d") {
+                const f = func.rule as [(t: number) => number, (t: number) => number, (t: number) => number];
+                const t = x as number;
+                return Chalkboard.vect.init(f[0](t), f[1](t), f[2](t));
+            } else if (func.type === "curve4d") {
+                const f = func.rule as [(t: number) => number, (t: number) => number, (t: number) => number, (t: number) => number];
+                const t = x as number;
+                return Chalkboard.vect.init(f[0](t), f[1](t), f[2](t), f[3](t));
+            } else if (func.type === "surface3d") {
+                const f = func.rule as [(s: number, t: number) => number, (s: number, t: number) => number, (s: number, t: number) => number];
+                const v = x as ChalkboardVector as { x: number, y: number };
+                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y), f[2](v.x, v.y));
+            }
+            throw new TypeError('Chalkboard.real.val: Property "type" of "func" is not supported.');
         };
 
         /**
          * Defines a zero function of a particular type.
-         * @param {"expl" | "inve" | "pola" | "curv" | "surf" | "mult"} [type="expl"] - The type of the function
+         * @param {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} [type="scalar2d"] - The type of the function
          * @returns {ChalkboardFunction}
          */
-        export const zero = (type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" = "expl"): ChalkboardFunction => {
-            if (type === "expl" || type === "inve" || type === "pola" || type === "mult") {
-                return Chalkboard.real.define("0", type);
-            } else if (type === "curv") {
-                return Chalkboard.real.define(["0", "0"], type);
-            } else if (type === "surf") {
-                return Chalkboard.real.define(["0", "0", "0"], type);
+        export const zero = (type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d"): ChalkboardFunction => {
+            if (type === "scalar2d") {
+                return Chalkboard.real.define(() => 0, type);
+            } else if (type === "scalar3d") {
+                return Chalkboard.real.define(() => 0, type);
+            } else if (type === "scalar4d") {
+                return Chalkboard.real.define(() => 0, type);
+            } else if (type === "vector2d") {
+                return Chalkboard.real.define([() => 0, () => 0], type);
+            } else if (type === "vector3d") {
+                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
+            } else if (type === "vector4d") {
+                return Chalkboard.real.define([() => 0, () => 0, () => 0, () => 0], type);
+            } else if (type === "curve2d") {
+                return Chalkboard.real.define([() => 0, () => 0], type);
+            } else if (type === "curve3d") {
+                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
+            } else if (type === "curve4d") {
+                return Chalkboard.real.define([() => 0, () => 0, () => 0, () => 0], type);
+            } else if (type === "surface3d") {
+                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
             }
-            throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            throw new TypeError('Chalkboard.real.zero: Inputted "type" is not supported.');
         };
     }
 }
