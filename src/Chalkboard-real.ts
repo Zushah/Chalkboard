@@ -76,64 +76,60 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a real-valued mathematical function.
+         * Defines a mathematical function in the field of real numbers.
          * @param {Function | Function[]} rule - The rule(s) of the function
-         * @param {object} [config] - The configurable options of the function
-         * @param {string | string[]} [config.domain="R"] - The domain of the function (optional, automatically configured if not explicitly provided)
-         * @param {string | string[]} [config.codomain="R"] - The codomain of the function (optional, automatically configured if not explicitly provided)
-         * @param {"scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"} [config.subtype] - The subtype of the function (optional, automatically configured if not explicitly provided)
+         * @param {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} [type="scalar2d"] - The type of the function (optional, automatically configured if not explicitly provided)
          * @returns {ChalkboardFunction}
          */
         export const define = (
             rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]),
-            config: {
-                domain?: string | string[],
-                codomain?: string | string[],
-                subtype?: "scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"
-            } = {}
+            type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d"
         ): ChalkboardFunction => {
-            let domain = config.domain, codomain = config.codomain, subtype = config.subtype;
-            if (!domain || !codomain || !subtype) {
+            if (!type) {
                 if (Array.isArray(rule)) {
                     const f = rule[0];
                     if (rule.length === 2) {
                         if (f.length === 1) {
-                            domain = "R", codomain = ["R", "R"], subtype = "curve2d";
+                            type = "curve2d";
                         } else if (f.length === 2) {
-                            domain = ["R", "R"], codomain = ["R", "R"], subtype = "vector2d";
+                            type = "vector2d";
                         } else {
                             throw new Error("The function must have one variable to define a parametric curve or two variables to define a vector field.");
                         }
                     } else if (rule.length === 3) {
                         if (f.length === 1) {
-                            domain = "R", codomain = ["R", "R", "R"], subtype = "curve3d";
+                            type = "curve3d";
                         } else if (f.length === 2) {
-                            domain = ["R", "R"], codomain = ["R", "R", "R"], subtype = "surface";
+                            type = "surface3d";
                         } else if (f.length === 3) {
-                            domain = ["R", "R", "R"], codomain = ["R", "R", "R"], subtype = "vector3d";
+                            type = "vector3d";
                         } else {
                             throw new Error("The function must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
                         }
                     } else if (rule.length === 4) {
-                        if (f.length === 4) {
-                            domain = ["R", "R", "R", "R"], codomain = ["R", "R", "R", "R"], subtype = "vector4d";
+                        if (f.length === 1) {
+                            type = "curve4d";
+                        } else if (f.length === 4) {
+                            type = "vector4d";
                         } else {
-                            throw new Error("The function must have four variables to define a vector field.");
+                            throw new Error("The function must have one variable to define a parametric curve or four variables to define a vector field.");
                         }
                     }
                 } else {
                     const f = rule as (...x: number[]) => number;
                     if (f.length === 1) {
-                        domain = "R", codomain = "R", subtype = "scalar2d";
+                        type = "scalar2d";
                     } else if (f.length === 2) {
-                        domain = ["R", "R"], codomain = "R", subtype = "scalar3d";
+                        type = "scalar3d";
+                    } else if (f.length === 3) {
+                        type = "scalar4d";
                     } else {
-                        throw new Error("The function must have one or two variables to define a scalar function.");
+                        throw new Error("The function must have one, two, or three variables to define a scalar function.");
                     }
                 }
             }
-            domain = domain || "R", codomain = codomain || "R", subtype = subtype || "scalar2d";
-            return { rule, domain, codomain, type: "real", subtype } as ChalkboardFunction;
+            type = type || "scalar2d";
+            return { rule, field: "real", type } as ChalkboardFunction;
         };
 
         /**

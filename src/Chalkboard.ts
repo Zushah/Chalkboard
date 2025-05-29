@@ -20,22 +20,13 @@ type ChalkboardComplex = { a: number; b: number };
 /**
  * The type for mathematical functions.
  * @property {Function | Function[]} rule - The rule of the function
- * @property {string | string[]} domain - The domain of the function
- * @property {string | string[]} codomain - The codomain of the function
- * @property {"real" | "comp"} type - The type of the function, which can be "real" or "comp"
- * @property {"scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"} subtype - The subtype of the "real"-type function, which can be "scalar2d", "scalar3d", "vector2d", "vector3d", "vector4d", "curve2d", "curve3d", or "surface"
+ * @property {"real" | "comp"} field - The field of the function, which can be "real" for the field of real numbers or "comp" for the field of complex numbers
+ * @property {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} type - The type of the function
  */
 type ChalkboardFunction = {
-    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]);
-    domain: string | string[];
-    codomain: string | string[];
-    type: "real";
-    subtype: "scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"
-} | {
-    rule: [(z: ChalkboardComplex) => ChalkboardComplex, (z: ChalkboardComplex) => ChalkboardComplex];
-    domain: string | string[];
-    codomain: string | string[];
-    type: "comp";
+    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]) | ((...x: ChalkboardComplex[]) => ChalkboardComplex) | (((...x: ChalkboardComplex[]) => ChalkboardComplex)[]);
+    field: "real" | "comp";
+    type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"
 };
 
 /**
