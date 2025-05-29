@@ -76,21 +76,64 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines an explicit, inverse, polar, parametric curve, parametric surface, or multivariable function.
-         * @param {string | string[]} definition - The definition, which can use the variable "x" for explicit, "y" for inverse, "O" for polar, "t" for parametric curve, "s" and "t" for parametric surface, and "x" and "y" for multivariable
-         * @param {"expl" | "inve" | "pola" | "curv" | "surf" | "mult"} [type="expl"] - The type, which can be "expl" for explicit, "inve" for inverse, "pola" for polar, "curv" for parametric curve, "surf" for parametric surface, or "mult" for multivariable
+         * Defines a real-valued mathematical function.
+         * @param {Function | Function[]} rule - The rule(s) of the function
+         * @param {object} [config] - The configurable options of the function
+         * @param {string | string[]} [config.domain="R"] - The domain of the function (optional, automatically configured if not explicitly provided)
+         * @param {string | string[]} [config.codomain="R"] - The codomain of the function (optional, automatically configured if not explicitly provided)
+         * @param {"scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"} [config.subtype] - The subtype of the function (optional, automatically configured if not explicitly provided)
          * @returns {ChalkboardFunction}
          */
-        export const define = (definition: string | string[], type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" = "expl"): ChalkboardFunction => {
-            if (type === "expl" || type === "inve" || type === "pola" || type === "mult") {
-                return { definition, type };
-            } else if (type === "curv" && Array.isArray(definition)) {
-                const _definition = definition.length === 2 ? [definition[0], definition[1]] : [definition[0], definition[1], definition[2]];
-                return { definition: _definition, type };
-            } else if (type === "surf" && Array.isArray(definition)) {
-                return { definition: [definition[0], definition[1], definition[2]], type };
+        export const define = (
+            rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]),
+            config: {
+                domain?: string | string[],
+                codomain?: string | string[],
+                subtype?: "scalar2d" | "scalar3d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "surface"
+            } = {}
+        ): ChalkboardFunction => {
+            let domain = config.domain, codomain = config.codomain, subtype = config.subtype;
+            if (!domain || !codomain || !subtype) {
+                if (Array.isArray(rule)) {
+                    const f = rule[0];
+                    if (rule.length === 2) {
+                        if (f.length === 1) {
+                            domain = "R", codomain = ["R", "R"], subtype = "curve2d";
+                        } else if (f.length === 2) {
+                            domain = ["R", "R"], codomain = ["R", "R"], subtype = "vector2d";
+                        } else {
+                            throw new Error("The function must have one variable to define a parametric curve or two variables to define a vector field.");
+                        }
+                    } else if (rule.length === 3) {
+                        if (f.length === 1) {
+                            domain = "R", codomain = ["R", "R", "R"], subtype = "curve3d";
+                        } else if (f.length === 2) {
+                            domain = ["R", "R"], codomain = ["R", "R", "R"], subtype = "surface";
+                        } else if (f.length === 3) {
+                            domain = ["R", "R", "R"], codomain = ["R", "R", "R"], subtype = "vector3d";
+                        } else {
+                            throw new Error("The function must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
+                        }
+                    } else if (rule.length === 4) {
+                        if (f.length === 4) {
+                            domain = ["R", "R", "R", "R"], codomain = ["R", "R", "R", "R"], subtype = "vector4d";
+                        } else {
+                            throw new Error("The function must have four variables to define a vector field.");
+                        }
+                    }
+                } else {
+                    const f = rule as (...x: number[]) => number;
+                    if (f.length === 1) {
+                        domain = "R", codomain = "R", subtype = "scalar2d";
+                    } else if (f.length === 2) {
+                        domain = ["R", "R"], codomain = "R", subtype = "scalar3d";
+                    } else {
+                        throw new Error("The function must have one or two variables to define a scalar function.");
+                    }
+                }
             }
-            throw new TypeError('Parameter "type" must be either "expl", "inve", "pola", "curv", "surf", or "mult".');
+            domain = domain || "R", codomain = codomain || "R", subtype = subtype || "scalar2d";
+            return { rule, domain, codomain, type: "real", subtype } as ChalkboardFunction;
         };
 
         /**
