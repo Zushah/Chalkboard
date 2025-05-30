@@ -249,7 +249,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Plots an explicit, inverse, polar, parametric curve, or complex function.
+         * Plots a 2D scalar function, a parametric curve, or a complex function.
          * @param {ChalkboardFunction} func - The function
          * @param {object} config - The configuration options
          * @returns {number[][]}
@@ -263,6 +263,9 @@ namespace Chalkboard {
                 strokeStyle: string;
                 lineWidth: number;
                 domain: [number, number] | [[number, number], [number, number]];
+                res: number;
+                isInverse: boolean;
+                isPolar: boolean;
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
@@ -272,14 +275,10 @@ namespace Chalkboard {
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                domain:
-                    config.domain ||
-                    (func.type === "comp"
-                        ? [
-                              [-10, 10],
-                              [-10, 10]
-                          ]
-                        : [-10, 10]),
+                domain: config.domain || (func.field === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
+                res: config.res || (func.field === "comp" ? 5 : 1),
+                isInverse: config.isInverse || false,
+                isPolar: config.isPolar || false,
                 context: config.context || getContext()
             }).size /= 100;
             const xdomain = config.domain as [number, number];
@@ -290,37 +289,35 @@ namespace Chalkboard {
             config.context.lineWidth = config.lineWidth;
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
-            if (func.type === "expl") {
-                const f = Chalkboard.real.parse("x => " + func.definition);
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+            if (func.type === "scalar2d" && !config.isInverse && !config.isPolar) {
+                const f = func.rule as (x: number) => number;
+                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
                     config.context.lineTo(i, -f(i * config.size) / config.size);
                     data.push([i, f(i)]);
                 }
-            } else if (func.type === "inve") {
-                const f = Chalkboard.real.parse("y => " + func.definition);
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+            } else if (func.type === "scalar2d" && config.isInverse && !config.isPolar) {
+                const f = func.rule as (y: number) => number;
+                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
                     config.context.lineTo(f(i * config.size) / config.size, -i);
                     data.push([f(i), i]);
                 }
-            } else if (func.type === "pola") {
-                const r = Chalkboard.real.parse("O => " + func.definition);
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
+            } else if (func.type === "scalar2d" && !config.isInverse && config.isPolar) {
+                const r = func.rule as (theta: number) => number;
+                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
                     config.context.lineTo((r(i * config.size) / config.size) * Chalkboard.trig.cos(i * config.size), (-r(i * config.size) / config.size) * Chalkboard.trig.sin(i * config.size));
                     data.push([i, r(i)]);
                 }
-            } else if (func.type === "curv") {
-                const x = Chalkboard.real.parse("t => " + func.definition[0]),
-                    y = Chalkboard.real.parse("t => " + func.definition[1]);
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i++) {
-                    config.context.lineTo(x(i * config.size) / config.size, -y(i * config.size) / config.size);
-                    data.push([x(i), y(i)]);
+            } else if (func.type === "curve2d") {
+                const f = func.rule as [(t: number) => number, (t: number) => number];
+                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
+                    config.context.lineTo(f[0](i * config.size) / config.size, -f[1](i * config.size) / config.size);
+                    data.push([f[0](i), f[1](i)]);
                 }
-            } else if (func.type === "comp") {
-                const u = Chalkboard.comp.parse("(a, b) => " + func.definition[0]),
-                    v = Chalkboard.comp.parse("(a, b) => " + func.definition[1]);
-                for (let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += 5) {
-                    for (let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += 5) {
-                        const z = Chalkboard.comp.init(u(i * config.size, j * config.size) / config.size, v(i * config.size, j * config.size) / config.size);
+            } else if (func.field === "comp") {
+                const f = func.rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                for (let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += config.res) {
+                    for (let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += config.res) {
+                        const z = Chalkboard.comp.init(f[0](i * config.size, j * config.size) / config.size, f[1](i * config.size, j * config.size) / config.size);
                         if (z.a === 0 && z.b === 0) {
                             config.context.fillStyle = "rgb(0, 0, 0)";
                         } else if (z.a === Infinity && z.b === Infinity) {
@@ -330,7 +327,7 @@ namespace Chalkboard {
                                 "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / (Chalkboard.real.pow(10, 20) as number)) + 0.5) * 100 + "%)";
                         }
                         config.context.fillRect(i, j, 5, 5);
-                        data.push([u(i, j), v(i, j)]);
+                        data.push([f[0](i, j), f[1](i, j)]);
                     }
                 }
             } else {
@@ -357,6 +354,7 @@ namespace Chalkboard {
                 lineWidth: number;
                 domain: [number, number];
                 res: number;
+                isInverse: boolean;
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
@@ -368,6 +366,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
+                isInverse: config.isInverse || false,
                 context: config.context || getContext()
             }).size /= 100;
             const data = [];
@@ -377,10 +376,10 @@ namespace Chalkboard {
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
+                if (func.type === "scalar2d" && !config.isInverse) {
                     config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * config.size) / config.size);
                     data.push([i, Chalkboard.calc.dfdx(func, i) as number]);
-                } else if (func.type === "inve") {
+                } else if (func.type === "scalar2d" && config.isInverse) {
                     config.context.lineTo((Chalkboard.calc.dfdx(func, i * config.size) as number) / config.size, -i);
                     data.push([Chalkboard.calc.dfdx(func, i) as number, i]);
                 }
@@ -406,6 +405,7 @@ namespace Chalkboard {
                 lineWidth: number;
                 domain: [number, number];
                 res: number;
+                isInverse: boolean;
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
@@ -417,6 +417,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
+                isInverse: config.isInverse || false,
                 context: config.context || getContext()
             }).size /= 100;
             const data = [];
@@ -426,10 +427,10 @@ namespace Chalkboard {
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
+                if (func.type === "scalar2d" && !config.isInverse) {
                     config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * config.size) / config.size);
                     data.push([i, Chalkboard.calc.d2fdx2(func, i) as number]);
-                } else if (func.type === "inve") {
+                } else if (func.type === "scalar2d" && config.isInverse) {
                     config.context.lineTo((Chalkboard.calc.d2fdx2(func, i * config.size) as number) / config.size, -i);
                     data.push([Chalkboard.calc.d2fdx2(func, i) as number, i]);
                 }
@@ -441,12 +442,12 @@ namespace Chalkboard {
 
         /**
          * Plots a 2D vector field.
-         * @param vectfield
+         * @param {ChalkboardFunction} vectfield
          * @param {object} config - The configuration options
          * @returns {number[][]}
          */
         export const field = (
-            vectfield: ChalkboardVectorField,
+            vectfield: ChalkboardFunction,
             config: {
                 x: number;
                 y: number;
@@ -464,10 +465,7 @@ namespace Chalkboard {
                 size: config.size || 1,
                 strokeStyle: config.strokeStyle || "black",
                 lineWidth: config.lineWidth || 2,
-                domain: config.domain || [
-                    [-10, 10],
-                    [-10, 10]
-                ],
+                domain: config.domain || [[-10, 10], [-10, 10]],
                 res: config.res || 25,
                 context: config.context || getContext()
             }).size /= 100;
@@ -550,6 +548,7 @@ namespace Chalkboard {
                 lineWidth: number;
                 domain: [number, number];
                 res: number;
+                isInverse: boolean;
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
@@ -561,6 +560,7 @@ namespace Chalkboard {
                 lineWidth: config.lineWidth || 2,
                 domain: config.domain || [-10, 10],
                 res: config.res || 25,
+                isInverse: config.isInverse || false,
                 context: config.context || getContext()
             }).size /= 100;
             const data = [];
@@ -570,10 +570,10 @@ namespace Chalkboard {
             config.context.strokeStyle = config.strokeStyle;
             config.context.beginPath();
             for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "expl") {
+                if (func.type === "scalar2d" && !config.isInverse) {
                     config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size);
                     data.push([i, Chalkboard.calc.fxdx(func, 0, i) as number]);
-                } else if (func.type === "inve") {
+                } else if (func.type === "scalar2d" && config.isInverse) {
                     config.context.lineTo((Chalkboard.calc.fxdx(func, 0, i * config.size) as number) / config.size, -i);
                     data.push([Chalkboard.calc.fxdx(func, 0, i) as number, i]);
                 }
