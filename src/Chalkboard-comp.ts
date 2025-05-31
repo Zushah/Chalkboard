@@ -10,30 +10,67 @@ namespace Chalkboard {
      */
     export namespace comp {
         /**
-         * Calculates the absolute value of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the absolute value of a complex number or complex function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 2 + 3i
          * const z = Chalkboard.comp.absolute(Chalkboard.comp.init(-2, 3));
          */
-        export const absolute = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(Math.abs(comp.a), Math.abs(comp.b));
+        export const absolute = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(Math.abs(z.a), Math.abs(z.b));
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.absolute: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => Math.abs(f[0](a, b)), (a: number, b: number) => Math.abs(f[1](a, b))];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.absolute: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
-         * Calculates the addition of two complex numbers.
-         * @param {ChalkboardComplex | number} comp1 - The first complex number
-         * @param {ChalkboardComplex | number} comp2 - The second complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the addition of two complex numbers or functions.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp1 - The first complex number or function
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp2 - The second complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 3 + 4i
          * const sum = Chalkboard.comp.add(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(1, 1));
          */
-        export const add = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
+        export const add = (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
             if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init(comp1.a + comp2.a, comp1.b + comp2.b);
+            if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
+                const z1 = comp1 as ChalkboardComplex;
+                const z2 = comp2 as ChalkboardComplex;
+                return Chalkboard.comp.init(z1.a + z2.a, z1.b + z2.b);
+            } else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
+                if (comp1.hasOwnProperty("rule")) {
+                    if ((comp1 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.add: Property 'field' of 'comp1' must be 'comp'.");
+                    if (comp2.hasOwnProperty("rule")) {
+                        if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.add: Property 'field' of 'comp2' must be 'comp'.");
+                        const f1 = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const f2 = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const g = [(a: number, b: number) => f1[0](a, b) + f2[0](a, b), (a: number, b: number) => f1[1](a, b) + f2[1](a, b)];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    } else {
+                        const f = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const z = comp2 as ChalkboardComplex;
+                        const g = [(a: number, b: number) => f[0](a, b) + z.a, (a: number, b: number) => f[1](a, b) + z.b];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    }
+                } else {
+                    if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.add: Property 'field' of 'comp2' must be 'comp'.");
+                    const z = comp1 as ChalkboardComplex;
+                    const f = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                    const g = [(a: number, b: number) => z.a + f[0](a, b), (a: number, b: number) => z.b + f[1](a, b)];
+                    return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                }
+            }
+            throw new TypeError("Chalkboard.comp.add: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -62,15 +99,25 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the conjugate of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the conjugate of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 2 - 3i
          * const conj = Chalkboard.comp.conjugate(Chalkboard.comp.init(2, 3));
          */
-        export const conjugate = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(comp.a, -comp.b);
+        export const conjugate = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(z.a, -z.b);
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.conjugate: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => f[0](a, b), (a: number, b: number) => -f[1](a, b)];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.conjugate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -100,18 +147,34 @@ namespace Chalkboard {
 
         /**
          * Defines a complex function by its real part and imaginary part.
-         * @param {(a: number, b: number) => number} real
-         * @param {(a: number, b: number) => number} imaginary
+         * @param {Function | Function[]} rule - The rule of the function, which can be a single function that takes a complex number or an array of two functions that take real and imaginary parts respectively.
          * @returns {ChalkboardFunction}
          * @example
          * // Defines f(z) = z² or f(a+bi) = (a²-b²) + (2ab)i
-         * const f = Chalkboard.comp.define(
+         * const f = Chalkboard.comp.define((z) => Chalkboard.comp.sq(z));
+         * 
+         * // Defines g(a+bi) = (a²-b²) + (2ab)i or g(z) = z²
+         * const g = Chalkboard.comp.define([
          *     (a, b) => a*a - b*b,
          *     (a, b) => 2*a*b
-         * );
+         * ]);
          */
-        export const define = (real: (a: number, b: number) => number, imaginary: (a: number, b: number) => number): ChalkboardFunction => {
-            return { rule: [real, imaginary], field: "comp", type: "scalar3d" } as ChalkboardFunction;
+        export const define = (
+            rule: ((z: ChalkboardComplex) => ChalkboardComplex) | ([(a: number, b: number) => number, (a: number, b: number) => number])
+        ): ChalkboardFunction => {
+            if (Array.isArray(rule)) {
+                if (rule.length !== 2 || rule[0].length !== 2 || rule[1].length !== 2) throw new TypeError("Chalkboard.comp.define: If 'rule' is an array, it must be an array of two functions of two variables.");
+                if (typeof rule[0](0, 0) !== "number" || typeof rule[1](0, 0) !== "number") throw new TypeError("Chalkboard.comp.define: If 'rule' is an array, the functions in it must return real numbers.");
+                return { rule, field: "comp", type: "vector2d" } as ChalkboardFunction;
+            } else {
+                if (rule.length !== 1) throw new TypeError("Chalkboard.comp.define: If 'rule' is a function, it must be a function of one variable.");
+                if (!rule(Chalkboard.comp.init(0, 0)).hasOwnProperty("a") || !rule(Chalkboard.comp.init(0, 0)).hasOwnProperty("b")) throw new TypeError("Chalkboard.comp.define: If 'rule' is a function, it must return a complex number.");
+                const f = rule as (z: ChalkboardComplex) => ChalkboardComplex;
+                return { rule: [
+                    (a: number, b: number) => f(Chalkboard.comp.init(a, b)).a,
+                    (a: number, b: number) => f(Chalkboard.comp.init(a, b)).b
+                ], field: "comp", type: "vector2d" } as ChalkboardFunction;
+            }
         };
 
         /**
@@ -145,18 +208,68 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the division of two complex numbers.
-         * @param {ChalkboardComplex | number} comp1 - The first complex number
-         * @param {ChalkboardComplex | number} comp2 - The second complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the division of two complex numbers or functions.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp1 - The first complex number or function
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp2 - The second complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 0.44 + 0.08i (approximate)
          * const quotient = Chalkboard.comp.div(Chalkboard.comp.init(2, 1), Chalkboard.comp.init(4, 2));
          */
-        export const div = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
+        export const div = (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
             if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init((comp1.a * comp2.a - comp1.b * comp2.b) / Chalkboard.comp.magsq(comp2), (comp1.b * comp2.a - comp1.a * comp2.b) / Chalkboard.comp.magsq(comp2));
+            if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
+                const z1 = comp1 as ChalkboardComplex;
+                const z2 = comp2 as ChalkboardComplex;
+                const d = z2.a * z2.a + z2.b * z2.b;
+                return Chalkboard.comp.init((z1.a * z2.a + z1.b * z2.b) / d, (z1.b * z2.a - z1.a * z2.b) / d);
+            } else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
+                if (comp1.hasOwnProperty("rule")) {
+                    if ((comp1 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.div: Property 'field' of 'comp1' must be 'comp'.");
+                    if (comp2.hasOwnProperty("rule")) {
+                        if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.div: Property 'field' of 'comp2' must be 'comp'.");
+                        const f1 = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const f2 = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const g = [
+                            (a: number, b: number) => {
+                                const d = f2[0](a, b) * f2[0](a, b) + f2[1](a, b) * f2[1](a, b);
+                                return (f1[0](a, b) * f2[0](a, b) + f1[1](a, b) * f2[1](a, b)) / d;
+                            },
+                            (a: number, b: number) => {
+                                const d = f2[0](a, b) * f2[0](a, b) + f2[1](a, b) * f2[1](a, b);
+                                return (f1[1](a, b) * f2[0](a, b) - f1[0](a, b) * f2[1](a, b)) / d;
+                            }
+                        ];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    } else {
+                        const f = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const z = comp2 as ChalkboardComplex;
+                        const d = z.a * z.a + z.b * z.b;
+                        const g = [
+                            (a: number, b: number) => (f[0](a, b) * z.a + f[1](a, b) * z.b) / d,
+                            (a: number, b: number) => (f[1](a, b) * z.a - f[0](a, b) * z.b) / d
+                        ];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    }
+                } else {
+                    if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.div: Property 'field' of 'comp2' must be 'comp'.");
+                    const z = comp1 as ChalkboardComplex;
+                    const f = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                    const g = [
+                        (a: number, b: number) => {
+                            const d = f[0](a, b) * f[0](a, b) + f[1](a, b) * f[1](a, b);
+                            return (z.a * f[0](a, b) + z.b * f[1](a, b)) / d;
+                        },
+                        (a: number, b: number) => {
+                            const d = f[0](a, b) * f[0](a, b) + f[1](a, b) * f[1](a, b);
+                            return (z.b * f[0](a, b) - z.a * f[1](a, b)) / d;
+                        }
+                    ];
+                    return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                }
+            }
+            throw new TypeError("Chalkboard.comp.div: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -247,7 +360,7 @@ namespace Chalkboard {
          * const normscl = Chalkboard.comp.magset(Chalkboard.comp.init(3, 4), 10);
          */
         export const magset = (comp: ChalkboardComplex, num: number): ChalkboardComplex => {
-            return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num);
+            return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num) as ChalkboardComplex;
         };
 
         /**
@@ -263,30 +376,67 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the multiplication of two complex numbers.
-         * @param {ChalkboardComplex | number} comp1 - The first complex number
-         * @param {ChalkboardComplex | number} comp2 - The second complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the multiplication of two complex numbers or functions.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp1 - The first complex number or function
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp2 - The second complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns -5 + 10i
          * const product = Chalkboard.comp.mul(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(1, 2));
          */
-        export const mul = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
+        export const mul = (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
             if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init(comp1.a * comp2.a - comp1.b * comp2.b, comp1.a * comp2.b + comp1.b * comp2.a);
+            if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
+                const z1 = comp1 as ChalkboardComplex;
+                const z2 = comp2 as ChalkboardComplex;
+                return Chalkboard.comp.init(z1.a * z2.a - z1.b * z2.b, z1.a * z2.b + z1.b * z2.a);
+            } else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
+                if (comp1.hasOwnProperty("rule")) {
+                    if ((comp1 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.mul: Property 'field' of 'comp1' must be 'comp'.");
+                    if (comp2.hasOwnProperty("rule")) {
+                        if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.mul: Property 'field' of 'comp2' must be 'comp'.");
+                        const f1 = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const f2 = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const g = [(a: number, b: number) => f1[0](a, b) * f2[0](a, b) - f1[1](a, b) * f2[1](a, b), (a: number, b: number) => f1[0](a, b) * f2[1](a, b) + f1[1](a, b) * f2[0](a, b)];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    } else {
+                        const f = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const z = comp2 as ChalkboardComplex;
+                        const g = [(a: number, b: number) => f[0](a, b) * z.a - f[1](a, b) * z.b, (a: number, b: number) => f[0](a, b) * z.b + f[1](a, b) * z.a];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    }
+                } else {
+                    if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.mul: Property 'field' of 'comp2' must be 'comp'.");
+                    const z = comp1 as ChalkboardComplex;
+                    const f = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                    const g = [(a: number, b: number) => z.a * f[0](a, b) - z.b * f[1](a, b), (a: number, b: number) => z.a * f[1](a, b) + z.b * f[0](a, b)];
+                    return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                }
+            }
+            throw new TypeError("Chalkboard.comp.mul: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
-         * Calculates the negation a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the negation of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns -2 - 3i
          * const negated = Chalkboard.comp.negate(Chalkboard.comp.init(2, 3));
          */
-        export const negate = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(-comp.a, -comp.b);
+        export const negate = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(-z.a, -z.b);
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.negate: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => -f[0](a, b), (a: number, b: number) => -f[1](a, b)];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.negate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -314,19 +464,42 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the exponentiation of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
+         * Calculates the exponentiation of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
          * @param {number} num - The exponent
-         * @returns {ChalkboardComplex}
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns -11 + 2i
          * const pow = Chalkboard.comp.pow(Chalkboard.comp.init(2, 1), 3);
          */
-        export const pow = (comp: ChalkboardComplex, num: number): ChalkboardComplex => {
-            return Chalkboard.comp.init(
-                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) as number * Chalkboard.trig.cos(num * Chalkboard.comp.arg(comp)),
-                Chalkboard.real.pow(Chalkboard.comp.mag(comp), num) as number * Chalkboard.trig.sin(num * Chalkboard.comp.arg(comp))
-            );
+        export const pow = (comp: ChalkboardComplex | number | ChalkboardFunction, num: number): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                const mag = Chalkboard.comp.mag(z);
+                const arg = Chalkboard.comp.arg(z);
+                return Chalkboard.comp.init(
+                    (Chalkboard.real.pow(mag, num) as number) * Chalkboard.trig.cos(num * arg),
+                    (Chalkboard.real.pow(mag, num) as number) * Chalkboard.trig.sin(num * arg)
+                );
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.pow: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [
+                    (a: number, b: number) => {
+                        const mag = Math.sqrt(f[0](a, b) * f[0](a, b) + f[1](a, b) * f[1](a, b));
+                        const arg = Math.atan2(f[1](a, b), f[0](a, b));
+                        return Math.pow(mag, num) * Math.cos(num * arg);
+                    },
+                    (a: number, b: number) => {
+                        const mag = Math.sqrt(f[0](a, b) * f[0](a, b) + f[1](a, b) * f[1](a, b));
+                        const arg = Math.atan2(f[1](a, b), f[0](a, b));
+                        return Math.pow(mag, num) * Math.sin(num * arg);
+                    }
+                ];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.pow: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -371,15 +544,25 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the reciprocal of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the reciprocal of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 0.5 + 0.3333i
          * const reciprocated = Chalkboard.comp.reciprocate(Chalkboard.comp.init(2, 3));
          */
-        export const reciprocate = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(1 / comp.a, 1 / comp.b);
+        export const reciprocate = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(1 / z.a, 1 / z.b);
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.reciprocate: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => 1 / f[0](a, b), (a: number, b: number) => 1 / f[1](a, b)];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.reciprocate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -435,16 +618,26 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the scalar multiplication of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
+         * Calculates the scalar multiplication of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
          * @param {number} num - The scalar
-         * @returns {ChalkboardComplex}
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 6 + 9i
          * const scaled = Chalkboard.comp.scl(Chalkboard.comp.init(2, 3), 3);
          */
-        export const scl = (comp: ChalkboardComplex, num: number): ChalkboardComplex => {
-            return Chalkboard.comp.init(comp.a * num, comp.b * num);
+        export const scl = (comp: ChalkboardComplex | number | ChalkboardFunction, num: number): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(z.a * num, z.b * num);
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.scl: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => f[0](a, b) * num, (a: number, b: number) => f[1](a, b) * num];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.scl: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -460,45 +653,103 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the square of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the square of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns -5 + 12i
          * const sq = Chalkboard.comp.sq(Chalkboard.comp.init(3, 2));
          */
-        export const sq = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(comp.a * comp.a - comp.b * comp.b, 2 * comp.a * comp.b);
+        export const sq = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(z.a * z.a - z.b * z.b, 2 * z.a * z.b);
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sq: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [(a: number, b: number) => f[0](a, b) * f[0](a, b) - f[1](a, b) * f[1](a, b), (a: number, b: number) => 2 * f[0](a, b) * f[1](a, b)];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.sq: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
-         * Calculates the square root of a complex number.
-         * @param {ChalkboardComplex} comp - The complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the square root of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 2 + 0.5i
          * const sqrt = Chalkboard.comp.sqrt(Chalkboard.comp.init(4, 2));
          */
-        export const sqrt = (comp: ChalkboardComplex): ChalkboardComplex => {
-            return Chalkboard.comp.init(
-                Chalkboard.real.sqrt((comp.a + Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b)) / 2),
-                Chalkboard.numb.sgn(comp.b) * Chalkboard.real.sqrt((-comp.a + Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b)) / 2)
-            );
+        export const sqrt = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(
+                    Chalkboard.real.sqrt((z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2),
+                    Chalkboard.numb.sgn(z.b) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2)
+                );
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sqrt: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                const g = [
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return Math.sqrt((re + Math.sqrt(re * re + im * im)) / 2);
+                    },
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return Math.sign(im) * Math.sqrt((-re + Math.sqrt(re * re + im * im)) / 2);
+                    }
+                ];
+                return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+            }
+            throw new TypeError("Chalkboard.comp.sqrt: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
-         * Calculates the subtraction of two complex numbers.
-         * @param {ChalkboardComplex | number} comp1 - The first complex number
-         * @param {ChalkboardComplex | number} comp2 - The second complex number
-         * @returns {ChalkboardComplex}
+         * Calculates the subtraction of two complex numbers or functions.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp1 - The first complex number or function
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp2 - The second complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
          * // Returns 1 - 1i
          * const difference = Chalkboard.comp.sub(Chalkboard.comp.init(3, 2), Chalkboard.comp.init(2, 3));
          */
-        export const sub = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): ChalkboardComplex => {
+        export const sub = (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
             if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
-            return Chalkboard.comp.init(comp1.a - comp2.a, comp1.b - comp2.b);
+            if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
+                const z1 = comp1 as ChalkboardComplex;
+                const z2 = comp2 as ChalkboardComplex;
+                return Chalkboard.comp.init(z1.a - z2.a, z1.b - z2.b);
+            } else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
+                if (comp1.hasOwnProperty("rule")) {
+                    if ((comp1 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sub: Property 'field' of 'comp1' must be 'comp'.");
+                    if (comp2.hasOwnProperty("rule")) {
+                        if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sub: Property 'field' of 'comp2' must be 'comp'.");
+                        const f1 = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const f2 = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const g = [(a: number, b: number) => f1[0](a, b) - f2[0](a, b), (a: number, b: number) => f1[1](a, b) - f2[1](a, b)];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    } else {
+                        const f = (comp1 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                        const z = comp2 as ChalkboardComplex;
+                        const g = [(a: number, b: number) => f[0](a, b) - z.a, (a: number, b: number) => f[1](a, b) - z.b];
+                        return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                    }
+                } else {
+                    if ((comp2 as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sub: Property 'field' of 'comp2' must be 'comp'.");
+                    const z = comp1 as ChalkboardComplex;
+                    const f = (comp2 as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                    const g = [(a: number, b: number) => z.a - f[0](a, b), (a: number, b: number) => z.b - f[1](a, b)];
+                    return Chalkboard.comp.define(g as [(a: number, b: number) => number, (a: number, b: number) => number]);
+                }
+            }
+            throw new TypeError("Chalkboard.comp.sub: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -607,9 +858,7 @@ namespace Chalkboard {
          * const z = Chalkboard.comp.val(f, Chalkboard.comp.init(2, 1));
          */
         export const val = (func: ChalkboardFunction, comp: ChalkboardComplex): ChalkboardComplex => {
-            if (func.field !== "comp") {
-                throw new TypeError("Chalkboard.comp.val: Property 'field' of 'func' must be 'comp'.");
-            }
+            if (func.field !== "comp") throw new TypeError("Chalkboard.comp.val: Property 'field' of 'func' must be 'comp'.");
             const f = func.rule as [(a: number, b: number) => number, (a: number, b: number) => number];
             return Chalkboard.comp.init(f[0](comp.a, comp.b), f[1](comp.a, comp.b));
         };

@@ -24,7 +24,7 @@ type ChalkboardComplex = { a: number; b: number };
  * @property {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} type - The type of the function
  */
 type ChalkboardFunction = {
-    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]) | ((...x: ChalkboardComplex[]) => ChalkboardComplex) | (((...x: ChalkboardComplex[]) => ChalkboardComplex)[]);
+    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]);
     field: "real" | "comp";
     type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"
 };
