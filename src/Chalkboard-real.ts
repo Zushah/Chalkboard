@@ -19,28 +19,28 @@ namespace Chalkboard {
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => Math.abs(f(...x));
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("vector")) {
                 const f = func.rule as ((...x: number[]) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x: number[]) => Math.abs(f[i](...x)));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("curve")) {
                 const f = func.rule as ((t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((t: number) => Math.abs(f[i](t)));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("surface")) {
                 const f = func.rule as ((s: number, t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((s: number, t: number) => Math.abs(f[i](s, t)));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.absolute: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -58,7 +58,7 @@ namespace Chalkboard {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f1(...x) + f2(...x);
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule as ((...x: number[]) => number)[];
                 const f2 = func2.rule as ((...x: number[]) => number)[];
@@ -66,7 +66,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x: number[]) => f1[i](...x) + f2[i](...x));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule as ((t: number) => number)[];
                 const f2 = func2.rule as ((t: number) => number)[];
@@ -74,7 +74,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t: number) => f1[i](t) + f2[i](t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule as ((s: number, t: number) => number)[];
                 const f2 = func2.rule as ((s: number, t: number) => number)[];
@@ -82,7 +82,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s: number, t: number) => f1[i](s, t) + f2[i](s, t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -100,7 +100,7 @@ namespace Chalkboard {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f1(f2(...x));
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule as ((...x: number[]) => number)[];
                 const f2 = func2.rule as ((...x: number[]) => number)[];
@@ -108,7 +108,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x: number[]) => f1[i](f2[i](...x)));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', or 'vector4d'.");
         };
@@ -116,58 +116,58 @@ namespace Chalkboard {
         /**
          * Defines a mathematical function in the field of real numbers.
          * @param {Function | Function[]} rule - The rule(s) of the function
-         * @param {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} [type="scalar2d"] - The type of the function (optional, automatically configured if not explicitly provided)
          * @returns {ChalkboardFunction}
          */
-        export const define = (
-            rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]),
-            type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d"
-        ): ChalkboardFunction => {
-            if (!type) {
-                if (Array.isArray(rule)) {
-                    const f = rule[0];
-                    if (rule.length === 2) {
-                        if (f.length === 1) {
-                            type = "curve2d";
-                        } else if (f.length === 2) {
-                            type = "vector2d";
-                        } else {
-                            throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or two variables to define a vector field.");
-                        }
-                    } else if (rule.length === 3) {
-                        if (f.length === 1) {
-                            type = "curve3d";
-                        } else if (f.length === 2) {
-                            type = "surface3d";
-                        } else if (f.length === 3) {
-                            type = "vector3d";
-                        } else {
-                            throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
-                        }
-                    } else if (rule.length === 4) {
-                        if (f.length === 1) {
-                            type = "curve4d";
-                        } else if (f.length === 4) {
-                            type = "vector4d";
-                        } else {
-                            throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or four variables to define a vector field.");
-                        }
-                    }
-                } else {
-                    const f = rule as (...x: number[]) => number;
-                    if (f.length === 1) {
-                        type = "scalar2d";
-                    } else if (f.length === 2) {
-                        type = "scalar3d";
-                    } else if (f.length === 3) {
-                        type = "scalar4d";
+        export const define = (...rule: (((...x: number[]) => number) | ((...x: number[]) => number)[])[]): ChalkboardFunction => {
+            let f: ((...x: number[]) => number) | ((...x: number[]) => number)[];
+            let type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d";
+            if (rule.length === 1 && Array.isArray(rule[0])) {
+                f = rule[0] as ((...x: number[]) => number)[];
+            } else if (rule.length > 1) {
+                f = rule as ((...x: number[]) => number)[];
+            } else {
+                f = rule[0] as ((...x: number[]) => number);
+            }
+            if (Array.isArray(f)) {
+                if (f.length === 2) {
+                    if (f[0].length === 1) {
+                        type = "curve2d";
+                    } else if (f[0].length === 2) {
+                        type = "vector2d";
                     } else {
-                        throw new TypeError("Chalkboard.real.define: Function 'rule' must have one, two, or three variables to define a scalar function.");
+                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or two variables to define a vector field.");
+                    }
+                } else if (f.length === 3) {
+                    if (f[0].length === 1) {
+                        type = "curve3d";
+                    } else if (f[0].length === 2) {
+                        type = "surface3d";
+                    } else if (f[0].length === 3) {
+                        type = "vector3d";
+                    } else {
+                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
+                    }
+                } else if (f.length === 4) {
+                    if (f[0].length === 1) {
+                        type = "curve4d";
+                    } else if (f[0].length === 4) {
+                        type = "vector4d";
+                    } else {
+                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or four variables to define a vector field.");
                     }
                 }
+            } else {
+                if (f.length === 1) {
+                    type = "scalar2d";
+                } else if (f.length === 2) {
+                    type = "scalar3d";
+                } else if (f.length === 3) {
+                    type = "scalar4d";
+                } else {
+                    throw new TypeError("Chalkboard.real.define: Function 'rule' must have one, two, or three variables to define a scalar function.");
+                }
             }
-            type = type || "scalar2d";
-            return { rule, field: "real", type } as ChalkboardFunction;
+            return { rule: f, field: "real", type } as ChalkboardFunction;
         };
 
         /**
@@ -216,7 +216,7 @@ namespace Chalkboard {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f1(...x) / f2(...x);
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule as ((...x: number[]) => number)[];
                 const f2 = func2.rule as ((...x: number[]) => number)[];
@@ -224,7 +224,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x: number[]) => f1[i](...x) / f2[i](...x));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule as ((t: number) => number)[];
                 const f2 = func2.rule as ((t: number) => number)[];
@@ -232,7 +232,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t: number) => f1[i](t) / f2[i](t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule as ((s: number, t: number) => number)[];
                 const f2 = func2.rule as ((s: number, t: number) => number)[];
@@ -240,7 +240,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s: number, t: number) => f1[i](s, t) / f2[i](s, t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -341,7 +341,7 @@ namespace Chalkboard {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f1(...x) * f2(...x);
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule as ((...x: number[]) => number)[];
                 const f2 = func2.rule as ((...x: number[]) => number)[];
@@ -349,7 +349,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x: number[]) => f1[i](...x) * f2[i](...x));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule as ((t: number) => number)[];
                 const f2 = func2.rule as ((t: number) => number)[];
@@ -357,7 +357,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t: number) => f1[i](t) * f2[i](t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule as ((s: number, t: number) => number)[];
                 const f2 = func2.rule as ((s: number, t: number) => number)[];
@@ -365,7 +365,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s: number, t: number) => f1[i](s, t) * f2[i](s, t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -380,28 +380,28 @@ namespace Chalkboard {
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => -f(...x);
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("vector")) {
                 const f = func.rule as ((...x: number[]) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x: number[]) => -f[i](...x));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("curve")) {
                 const f = func.rule as ((t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((t: number) => -f[i](t));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("surface")) {
                 const f = func.rule as ((s: number, t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((s: number, t: number) => -f[i](s, t));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.negate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -475,28 +475,28 @@ namespace Chalkboard {
                 if (func.type.startsWith("scalar")) {
                     const f = func.rule as ((...x: number[]) => number);
                     const g = (...x: number[]) => f(...x) ** num;
-                    return Chalkboard.real.define(g, func.type);
+                    return Chalkboard.real.define(g);
                 } else if (func.type.startsWith("vector")) {
                     const f = func.rule as ((...x: number[]) => number)[];
                     const g = [];
                     for (let i = 0; i < f.length; i++) {
                         g.push((...x: number[]) => f[i](...x) ** num);
                     }
-                    return Chalkboard.real.define(g, func.type);
+                    return Chalkboard.real.define(g);
                 } else if (func.type.startsWith("curve")) {
                     const f = func.rule as ((t: number) => number)[];
                     const g = [];
                     for (let i = 0; i < f.length; i++) {
                         g.push((t: number) => f[i](t) ** num);
                     }
-                    return Chalkboard.real.define(g, func.type);
+                    return Chalkboard.real.define(g);
                 } else if (func.type.startsWith("surface")) {
                     const f = func.rule as ((s: number, t: number) => number)[];
                     const g = [];
                     for (let i = 0; i < f.length; i++) {
                         g.push((s: number, t: number) => f[i](s, t) ** num);
                     }
-                    return Chalkboard.real.define(g, func.type);
+                    return Chalkboard.real.define(g);
                 }
                 throw new TypeError("Chalkboard.real.pow: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
             }
@@ -595,28 +595,28 @@ namespace Chalkboard {
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => 1 / f(...x);
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("vector")) {
                 const f = func.rule as ((...x: number[]) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x: number[]) => 1 / f[i](...x));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("curve")) {
                 const f = func.rule as ((t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((t: number) => 1 / f[i](t));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("surface")) {
                 const f = func.rule as ((s: number, t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((s: number, t: number) => 1 / f[i](s, t));
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.reciprocate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -658,28 +658,28 @@ namespace Chalkboard {
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f(...x) * num;
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("vector")) {
                 const f = func.rule as ((...x: number[]) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x: number[]) => f[i](...x) * num);
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("curve")) {
                 const f = func.rule as ((t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((t: number) => f[i](t) * num);
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             } else if (func.type.startsWith("surface")) {
                 const f = func.rule as ((s: number, t: number) => number)[];
                 const g = [];
                 for (let i = 0; i < f.length; i++) {
                     g.push((s: number, t: number) => f[i](s, t) * num);
                 }
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.scl: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -722,7 +722,7 @@ namespace Chalkboard {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f1(...x) - f2(...x);
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule as ((...x: number[]) => number)[];
                 const f2 = func2.rule as ((...x: number[]) => number)[];
@@ -730,7 +730,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x: number[]) => f1[i](...x) - f2[i](...x));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule as ((t: number) => number)[];
                 const f2 = func2.rule as ((t: number) => number)[];
@@ -738,7 +738,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t: number) => f1[i](t) - f2[i](t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             } else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule as ((s: number, t: number) => number)[];
                 const f2 = func2.rule as ((s: number, t: number) => number)[];
@@ -746,7 +746,7 @@ namespace Chalkboard {
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s: number, t: number) => f1[i](s, t) - f2[i](s, t));
                 }
-                return Chalkboard.real.define(g, func1.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -777,7 +777,7 @@ namespace Chalkboard {
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
                 const g = (x: number) => f(x - h) + v;
-                return Chalkboard.real.define(g, func.type);
+                return Chalkboard.real.define(g);
             }
             throw new TypeError("Chalkboard.real.translate: Property 'type' of 'func' must be 'scalar2d'.");
         };
@@ -841,25 +841,25 @@ namespace Chalkboard {
          */
         export const zero = (type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d"): ChalkboardFunction => {
             if (type === "scalar2d") {
-                return Chalkboard.real.define(() => 0, type);
+                return Chalkboard.real.define((x) => 0);
             } else if (type === "scalar3d") {
-                return Chalkboard.real.define(() => 0, type);
+                return Chalkboard.real.define((x, y) => 0);
             } else if (type === "scalar4d") {
-                return Chalkboard.real.define(() => 0, type);
+                return Chalkboard.real.define((x, y, z) => 0);
             } else if (type === "vector2d") {
-                return Chalkboard.real.define([() => 0, () => 0], type);
+                return Chalkboard.real.define((x, y) => 0, (x, y) => 0);
             } else if (type === "vector3d") {
-                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
+                return Chalkboard.real.define((x, y, z) => 0, (x, y, z) => 0, (x, y, z) => 0);
             } else if (type === "vector4d") {
-                return Chalkboard.real.define([() => 0, () => 0, () => 0, () => 0], type);
+                return Chalkboard.real.define((x, y, z, w) => 0, (x, y, z, w) => 0, (x, y, z, w) => 0, (x, y, z, w) => 0);
             } else if (type === "curve2d") {
-                return Chalkboard.real.define([() => 0, () => 0], type);
+                return Chalkboard.real.define((t) => 0, (t) => 0);
             } else if (type === "curve3d") {
-                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
+                return Chalkboard.real.define((t) => 0, (t) => 0, (t) => 0);
             } else if (type === "curve4d") {
-                return Chalkboard.real.define([() => 0, () => 0, () => 0, () => 0], type);
+                return Chalkboard.real.define((t) => 0, (t) => 0, (t) => 0, (t) => 0);
             } else if (type === "surface3d") {
-                return Chalkboard.real.define([() => 0, () => 0, () => 0], type);
+                return Chalkboard.real.define((s, t) => 0, (s, t) => 0, (s, t) => 0);
             }
             throw new TypeError("Chalkboard.real.zero: String 'type' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
