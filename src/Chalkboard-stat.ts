@@ -359,9 +359,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const Gaussian = (height: number, mean: number, deviation: number): ChalkboardFunction => {
-            return Chalkboard.real.define(
-                height.toString() + " * Math.exp(-((x - " + mean.toString() + ") * (x - " + mean.toString() + ")) / (2 * " + deviation.toString() + " * " + deviation.toString() + "))"
-            );
+            return Chalkboard.real.define((x) => height * Math.exp(-((x - mean) * (x - mean)) / (2 * deviation * deviation)));
         };
 
         /**
@@ -817,10 +815,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const normal = (x: number): number => {
-            const standardNormal = Chalkboard.real.define(
-                "1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x)"
-            );
-            return Chalkboard.real.val(standardNormal, x) as number;
+            const standardNormal = Chalkboard.real.define((x) => 1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x));
+            const f = standardNormal.rule as (x: number) => number;
+            return f(x);
         };
 
         /**
@@ -976,9 +973,9 @@ namespace Chalkboard {
                     xx += data[i][0] * data[i][0];
                     xy += data[i][0] * data[i][1];
                 }
-                const a = (data.length * xy - x * y) / (data.length * xx - x * x),
-                    b = y / data.length - (a * x) / data.length;
-                return Chalkboard.real.define(a + " * x + " + b);
+                const a = (data.length * xy - x * y) / (data.length * xx - x * x);
+                const b = y / data.length - (a * x) / data.length;
+                return Chalkboard.real.define((x) => a * x + b);
             } else if (type === "polynomial") {
                 const A = Chalkboard.matr.init();
                 for (let i = 0; i < data.length; i++) {
@@ -995,50 +992,53 @@ namespace Chalkboard {
                 const ATA = Chalkboard.matr.mul(AT, A);
                 const ATAI = Chalkboard.matr.invert(ATA);
                 const x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
-                const coeff = [];
+                const coeff: number[] = [];
                 for (let i = 0; i < x.length; i++) {
                     coeff.push(x[i][0]);
                 }
-                let f = coeff[0].toString() + " + " + coeff[1].toString() + " * x";
-                for (let i = 2; i <= degree; i++) {
-                    f += " + " + coeff[i].toString() + " * Math.pow(x, " + i + ")";
-                }
-                return Chalkboard.real.define(f);
+                return Chalkboard.real.define((x) => {
+                    let result = coeff[0];
+                    result += coeff[1] * x;
+                    for (let i = 2; i <= degree; i++) {
+                        result += coeff[i] * Math.pow(x, i);
+                    }
+                    return result;
+                });
             } else if (type === "power") {
                 const arr = [0, 0, 0, 0];
                 for (let i = 0; i < data.length; i++) {
-                    arr[0] += Chalkboard.real.ln(data[i][0]);
-                    arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
+                    arr[0] += Math.log(data[i][0]);
+                    arr[1] += data[i][1] * Math.log(data[i][0]);
                     arr[2] += data[i][1];
-                    arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
+                    arr[3] += Math.log(data[i][0]) * Math.log(data[i][0]);
                 }
-                const a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length),
-                    b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-                return Chalkboard.real.define(a + " * Math.pow(x, " + b + ")");
+                const a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length);
+                const b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
+                return Chalkboard.real.define((x) => a * Math.pow(x, b));
             } else if (type === "exponential") {
                 const arr = [0, 0, 0, 0, 0, 0];
                 for (let i = 0; i < data.length; i++) {
                     arr[0] += data[i][0];
                     arr[1] += data[i][1];
                     arr[2] += data[i][0] * data[i][0] * data[i][1];
-                    arr[3] += data[i][1] * Chalkboard.real.ln(data[i][1]);
-                    arr[4] += data[i][0] & (data[i][1] * Chalkboard.real.ln(data[i][1]));
+                    arr[3] += data[i][1] * Math.log(data[i][1]);
+                    arr[4] += data[i][0] & (data[i][1] * Math.log(data[i][1]));
                     arr[5] += data[i][0] * data[i][1];
                 }
-                const a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5])),
-                    b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
-                return Chalkboard.real.define(a + "* Math.exp(" + b + " * x)");
+                const a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5]));
+                const b = (arr[1] * arr[4] - arr[5] * arr[3]) / (arr[1] * arr[2] - arr[5] * arr[5]);
+                return Chalkboard.real.define((x) => a * Math.exp(b * x));
             } else if (type === "logarithmic") {
                 const arr = [0, 0, 0, 0];
                 for (let i = 0; i < data.length; i++) {
-                    arr[0] += Chalkboard.real.ln(data[i][0]);
-                    arr[1] += data[i][1] * Chalkboard.real.ln(data[i][0]);
+                    arr[0] += Math.log(data[i][0]);
+                    arr[1] += data[i][1] * Math.log(data[i][0]);
                     arr[2] += data[i][1];
-                    arr[3] += Chalkboard.real.ln(data[i][0]) * Chalkboard.real.ln(data[i][0]);
+                    arr[3] += Math.log(data[i][0]) * Math.log(data[i][0]);
                 }
-                const a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length,
-                    b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
-                return Chalkboard.real.define(a + " + " + b + " * Math.log(x)");
+                const a = (arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length;
+                const b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
+                return Chalkboard.real.define((x) => a + b * Math.log(x));
             } else {
                 throw new TypeError('Parameter "type" must be "linear", "polynomial", "power", "exponential", or "logarithmic".');
             }

@@ -219,13 +219,13 @@ namespace Chalkboard {
 
         /**
          * Returns the dimension of a vector or vector field, which can be 2, 3, or 4.
-         * @param {ChalkboardVector | ChalkboardVectorField} vectORvectfield - The vector or vector field
+         * @param {ChalkboardVector | ChalkboardFunction} vectORvectfield - The vector or vector field
          * @returns {number}
          * @example
          * // Returns 3
          * const dim = Chalkboard.vect.dimension(Chalkboard.vect.init(1, 2, 3));
          */
-        export const dimension = (vectORvectfield: ChalkboardVector | ChalkboardVectorField): 2 | 3 | 4 => {
+        export const dimension = (vectORvectfield: ChalkboardVector | ChalkboardFunction): 2 | 3 | 4 => {
             try {
                 const v = $(vectORvectfield as ChalkboardVector) as { x: number, y: number, z?: number, w?: number };
                 if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "undefined" && typeof v.w === "undefined") {
@@ -236,12 +236,12 @@ namespace Chalkboard {
                     return 4;
                 }
             } catch {
-                const f = vectORvectfield as ChalkboardVectorField;
-                if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "undefined" && typeof f.s === "undefined") {
+                const f = vectORvectfield as ChalkboardFunction;
+                if (f.type === "vector2d") {
                     return 2;
-                } else if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "string" && typeof f.s === "undefined") {
+                } else if (f.type === "vector3d") {
                     return 3;
-                } else if (typeof f.p === "string" && typeof f.q === "string" && typeof f.r === "string" && typeof f.s === "string") {
+                } else if (f.type === "vector4d") {
                     return 4;
                 }
             }
@@ -340,22 +340,30 @@ namespace Chalkboard {
 
         /**
          * Defines a vector field.
-         * @param {string} p - The x-component (defined for 2D, 3D, and 4D vector fields)
-         * @param {string} q - The y-component (defined for 2D, 3D, and 4D vector fields)
-         * @param {string} [r] - The z-component (defined for 3D and 4D vector fields)
-         * @param {string} [s] - The w-component (defined for 4D vector fields)
-         * @returns {ChalkboardVectorField}
+         * @param {(...x: number[]) => number} p - The x-component (defined for 2D, 3D, and 4D vector fields)
+         * @param {(...x: number[]) => number} q - The y-component (defined for 2D, 3D, and 4D vector fields)
+         * @param {(...x: number[]) => number} [r] - The z-component (defined for 3D and 4D vector fields)
+         * @param {(...x: number[]) => number} [s] - The w-component (defined for 4D vector fields)
+         * @returns {ChalkboardFunction}
          * @example
          * // Defines f(x, y) = (x^2, y^2)
-         * const f = Chalkboard.vect.field("x*x", "y*y");
+         * const f = Chalkboard.vect.field(
+         *     (x, y) => x ** 2,
+         *     (x, y) => y ** 2
+         * );
          */
-        export const field = (p: string, q: string, r?: string, s?: string): ChalkboardVectorField => {
+        export const field = (
+            p: (...x: number[]) => number,
+            q: (...x: number[]) => number,
+            r?: (...x: number[]) => number,
+            s?: (...x: number[]) => number
+        ): ChalkboardFunction => {
             if (r === undefined && s === undefined) {
-                return { p: p, q: q };
+                return { rule: [p, q], field: "real", type: "vector2d" } as ChalkboardFunction;
             } else if (s === undefined) {
-                return { p: p, q: q, r: r };
+                return { rule: [p, q, r], field: "real", type: "vector3d" } as ChalkboardFunction;
             } else {
-                return { p: p, q: q, r: r, s: s };
+                return { rule: [p, q, r, s], field: "real", type: "vector4d" } as ChalkboardFunction;
             }
         };
 
@@ -447,34 +455,28 @@ namespace Chalkboard {
 
         /**
          * Evaluates a vector field at a vector.
-         * @param {ChalkboardVectorField} vectfield - The vector field
+         * @param {ChalkboardFunction} vectfield - The vector field
          * @param {ChalkboardVector} vect - The vector
          * @returns {ChalkboardVector}
          * @example
          * // Returns (4, 1) (evaluates f(x, y) at point (2, 1))
-         * const f = Chalkboard.vect.field("x*x", "y");
+         * const f = Chalkboard.vect.field(
+         *     (x, y) => x ** 2,
+         *     (x, y) => y
+         * );
          * const v = Chalkboard.vect.fromField(f, Chalkboard.vect.init(2, 1));
          */
-        export const fromField = (vectfield: ChalkboardVectorField, vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
-            if (Chalkboard.vect.dimension(vectfield) === 2 && Chalkboard.vect.isDimensionOf(vect, 2)) {
-                const p = Chalkboard.real.parse("(x, y) => " + vectfield.p),
-                    q = Chalkboard.real.parse("(x, y) => " + vectfield.q);
-                return Chalkboard.vect.init(p(vect.x, vect.y), q(vect.x, vect.y));
-            } else if (Chalkboard.vect.dimension(vectfield) === 3 && Chalkboard.vect.isDimensionOf(vect, 3)) {
-                const p = Chalkboard.real.parse("(x, y, z) => " + vectfield.p),
-                    q = Chalkboard.real.parse("(x, y, z) => " + vectfield.q),
-                    r = Chalkboard.real.parse("(x, y, z) => " + vectfield.r);
-                return Chalkboard.vect.init(p(vect.x, vect.y, vect.z!), q(vect.x, vect.y, vect.z!), r(vect.x, vect.y, vect.z!));
-            } else if (Chalkboard.vect.dimension(vectfield) === 4 && Chalkboard.vect.isDimensionOf(vect, 4)) {
-                const p = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.p),
-                    q = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.q),
-                    r = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.r),
-                    s = Chalkboard.real.parse("(x, y, z, w) => " + vectfield.s);
-                return Chalkboard.vect.init(p(vect.x, vect.y, vect.z!, vect.w!), q(vect.x, vect.y, vect.z!, vect.w!), r(vect.x, vect.y, vect.z!, vect.w!), s(vect.x, vect.y, vect.z!, vect.w!));
-            } else {
-                throw new TypeError('Parameters "vectfield" and "vect" must respectively be of type "ChalkboardVector" and "ChalkboardVectorField" with 2, 3, or 4 dimensions.');
+        export const fromField = (vectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector => {
+            const f = vectfield.rule as ((...x: number[]) => number)[];
+            const v = vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            if (vectfield.type === "vector2d") {
+                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
+            } else if (vectfield.type === "vector3d") {
+                return Chalkboard.vect.init(f[0](v.x, v.y, v.z!), f[1](v.x, v.y, v.z!), f[2](v.x, v.y, v.z!));
+            } else if (vectfield.type === "vector4d") {
+                return Chalkboard.vect.init(f[0](v.x, v.y, v.z!, v.w!), f[1](v.x, v.y, v.z!, v.w!), f[2](v.x, v.y, v.z!, v.w!), f[3](v.x, v.y, v.z!, v.w!));
             }
+            throw new TypeError("Chalkboard.vect.fromField: Property 'type' of 'vectfield' must be 'vector2d', 'vector3d', or 'vector4d'.");
         };
 
         /**
@@ -577,14 +579,14 @@ namespace Chalkboard {
 
         /**
          * Checks if a vector or vector field is of a particular dimension.
-         * @param {ChalkboardVector | ChalkboardVectorField} vectORvectfield - The vector or vector field
+         * @param {ChalkboardVector | ChalkboardFunction} vectORvectfield - The vector or vector field
          * @param {number} dimension - The dimension, which must be 2, 3, or 4
          * @returns {boolean}
          * @example
          * // Returns true (the vector is 3D)
          * const is3D = Chalkboard.vect.isDimensionOf(Chalkboard.vect.init(1, 2, 3), 3);
          */
-        export const isDimensionOf = (vectORvectfield: ChalkboardVector | ChalkboardVectorField, dimension: 2 | 3 | 4): boolean => {
+        export const isDimensionOf = (vectORvectfield: ChalkboardVector | ChalkboardFunction, dimension: 2 | 3 | 4): boolean => {
             try {
                 const vect = $(vectORvectfield as ChalkboardVector) as { x: number, y: number, z?: number, w?: number };
                 if (dimension === 2) {
@@ -595,7 +597,7 @@ namespace Chalkboard {
                     return Chalkboard.vect.dimension(vect) === 4;
                 }
             } catch {
-                const vectfield = vectORvectfield as ChalkboardVectorField;
+                const vectfield = vectORvectfield as ChalkboardFunction;
                 if (dimension === 2) {
                     return Chalkboard.vect.dimension(vectfield) === 2;
                 } else if (dimension === 3) {
