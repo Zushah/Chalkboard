@@ -407,12 +407,267 @@ namespace Chalkboard {
         };
 
         /**
-         * Parses a string of JavaScript code.
-         * @param {string} str - The string
-         * @returns {Function}
+         * Parses, simplifies, and optionally evaluates a real number expression.
+         * @param {string} input - The real number expression to parse
+         * @param {Record<string, number>} [values] - Optional object mapping variable names to values
+         * @param {boolean} [returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
+         * @returns {string | number | { type: string, [key: string]: any }}
          */
-        export const parse = (str: string): Function => {
-            return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + " return (" + str + ")")();
+        export const parse = (input: string, values?: Record<string, number>, returnAST: boolean = false): string | number | { type: string, [key: string]: any } => {
+            const tokenize = (input: string): string[] => {
+                const tokens: string[] = [];
+                let i = 0;
+                while (i < input.length) {
+                    const ch = input[i];
+                    if (/\s/.test(ch)) {
+                        i++;
+                        continue;
+                    }
+                    if ("+-*/^(),".indexOf(ch) !== -1) {
+                        tokens.push(ch);
+                        i++;
+                    } else if (/[0-9]/.test(ch) || (ch === '.' && /[0-9]/.test(input[i+1]))) {
+                        let num = "";
+                        let hasDecimal = false;
+                        while (i < input.length && 
+                            ((/[0-9]/.test(input[i])) || 
+                            (input[i] === '.' && !hasDecimal))) {
+                            
+                            if (input[i] === '.') hasDecimal = true;
+                            num += input[i++];
+                        }
+                        tokens.push(num);
+                    } else if (/[a-zA-Z_]/.test(ch)) {
+                        let name = "";
+                        while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
+                            name += input[i++];
+                        }
+                        tokens.push(name);
+                    } else {
+                        throw new Error(`Chalkboard.real.parse: Unexpected character ${ch}`);
+                    }
+                }
+                return tokens;
+            };
+            const parseTokens = (tokens: string[]): { type: string, [key: string]: any } => {
+                let pos = 0;
+                const peek = (): string => tokens[pos] || "";
+                const consume = (token?: string): string => {
+                    if (token && tokens[pos] !== token) throw new Error(`Chalkboard.real.parse: Expected token '${token}' but found '${tokens[pos]}'`);
+                    return tokens[pos++];
+                };
+                const parseExpression = (): { type: string, [key: string]: any } => parseAdditive();
+                const parseAdditive = (): { type: string, [key: string]: any } => {
+                    let node = parseMultiplicative();
+                    while (peek() === "+" || peek() === "-") {
+                        const op = consume();
+                        const right = parseMultiplicative();
+                        node = { type: op === "+" ? "add" : "sub", left: node, right };
+                    }
+                    return node;
+                };
+                const parseMultiplicative = (): { type: string, [key: string]: any } => {
+                    let node = parseExponent();
+                    while (peek() === "*" || peek() === "/") {
+                        const op = consume();
+                        const right = parseExponent();
+                        node = { type: op === "*" ? "mul" : "div", left: node, right };
+                    }
+                    return node;
+                };
+                const parseExponent = (): { type: string, [key: string]: any } => {
+                    let node = parseUnary();
+                    if (peek() === "^") {
+                        consume("^");
+                        const right = parseExponent();
+                        node = { type: "pow", base: node, exponent: right };
+                    }
+                    return node;
+                };
+                const parseUnary = (): { type: string, [key: string]: any } => {
+                    if (peek() === "-") {
+                        consume("-");
+                        return { type: "neg", expr: parseUnary() };
+                    } else if (peek() === "+") {
+                        consume("+");
+                        return parseUnary();
+                    }
+                    return parsePrimary();
+                };
+                const parsePrimary = (): { type: string, [key: string]: any } => {
+                    const token = peek();
+                    if (/^[0-9.]/.test(token)) {
+                        consume();
+                        return { type: "num", value: parseFloat(token) };
+                    }
+                    if (/^[a-zA-Z_]/.test(token)) {
+                        const name = consume();
+                        if (peek() === "(") {
+                            consume("(");
+                            const args: { type: string, [key: string]: any }[] = [];
+                            if (peek() !== ")") {
+                                args.push(parseExpression());
+                                while (peek() === ",") {
+                                    consume(",");
+                                    args.push(parseExpression());
+                                }
+                            }
+                            consume(")");
+                            return { type: "func", name, args };
+                        }
+                        return { type: "var", name };
+                    }
+                    if (token === "(") {
+                        consume("(");
+                        const node = parseExpression();
+                        consume(")");
+                        return node;
+                    }
+                    throw new Error(`Chalkboard.real.parse: Unexpected token ${token}`);
+                };
+                const ast = parseExpression();
+                if (pos < tokens.length) throw new Error(`Chalkboard.real.parse: Unexpected token ${tokens[pos]}`);
+                return ast;
+            };
+            const evaluateNode = (node: { type: string, [key: string]: any }, values: Record<string, number>): number => {
+                switch (node.type) {
+                    case "num":
+                        return node.value;
+                    case "var":
+                        const varname = node.name;
+                        if (!(varname in values)) throw new Error(`Chalkboard.real.parse: Variable '${varname}' not defined in values`);
+                        return values[varname];
+                    case "add": return evaluateNode(node.left, values) + evaluateNode(node.right, values);
+                    case "sub": return evaluateNode(node.left, values) - evaluateNode(node.right, values);
+                    case "mul": return evaluateNode(node.left, values) * evaluateNode(node.right, values);
+                    case "div": return evaluateNode(node.left, values) / evaluateNode(node.right, values);
+                    case "pow": return Math.pow(evaluateNode(node.base, values), evaluateNode(node.exponent, values));
+                    case "neg": return -evaluateNode(node.expr, values);
+                    case "func":
+                        const funcName = node.name.toLowerCase();
+                        const args = node.args.map((arg: { type: string, [key: string]: any }) => evaluateNode(arg, values));
+                        switch (funcName) {
+                            case "sin": return Math.sin(args[0]);
+                            case "cos": return Math.cos(args[0]);
+                            case "tan": return Math.tan(args[0]);
+                            case "abs": return Math.abs(args[0]);
+                            case "sqrt": return Math.sqrt(args[0]);
+                            case "log": return args.length > 1 ? Math.log(args[0]) / Math.log(args[1]) : Math.log(args[0]);
+                            case "ln": return Math.log(args[0]);
+                            case "exp": return Math.exp(args[0]);
+                            case "min": return Math.min(...args);
+                            case "max": return Math.max(...args);
+                            default: throw new Error(`Chalkboard.real.parse: Unknown function ${node.name}`);
+                        }
+                }
+                throw new Error(`Unknown node type: ${node.type}`);
+            };
+            const nodeToString = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "num":
+                        return node.value.toString();
+                    case "var":
+                        return node.name;
+                    case "add":
+                        return `${nodeToString(node.left)} + ${nodeToString(node.right)}`;
+                    case "sub":
+                        const rightStr = node.right.type === "add" || node.right.type === "sub" ?`(${nodeToString(node.right)})` : nodeToString(node.right);
+                        return `${nodeToString(node.left)} - ${rightStr}`;
+                    case "mul":
+                        const leftMul = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
+                        const rightMul = (node.right.type === "add" || node.right.type === "sub") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
+                        return `${leftMul} * ${rightMul}`;
+                    case "div":
+                        const leftDiv = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
+                        const rightDiv = (node.right.type === "add" || node.right.type === "sub" || node.right.type === "mul" || node.right.type === "div") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
+                        return `${leftDiv} / ${rightDiv}`;
+                    case "pow":
+                        const baseStr = (node.base.type !== "num" && node.base.type !== "var") ? `(${nodeToString(node.base)})` : nodeToString(node.base);
+                        const expStr = (node.exponent.type !== "num" && node.exponent.type !== "var") ? `(${nodeToString(node.exponent)})` : nodeToString(node.exponent);
+                        return `${baseStr}^${expStr}`;
+                    case "neg":
+                        const exprStr = (node.expr.type !== "num" && node.expr.type !== "var") ? `(${nodeToString(node.expr)})` : nodeToString(node.expr);
+                        return `-${exprStr}`;
+                    case "func":
+                        return `${node.name}(${node.args.map((arg: { type: string, [key: string]: any }) => nodeToString(arg)).join(", ")})`;
+                }
+                return "";
+            };
+            const simplifyNode = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
+                switch (node.type) {
+                    case "num":
+                    case "var":
+                        return node;
+                    case "add":
+                        const left = simplifyNode(node.left);
+                        const right = simplifyNode(node.right);
+                        if (left.type === "num" && left.value === 0) return right;
+                        if (right.type === "num" && right.value === 0) return left;
+                        if (left.type === "num" && right.type === "num") return { type: "num", value: left.value + right.value };
+                        return { type: "add", left, right };
+                    case "sub":
+                        const leftSub = simplifyNode(node.left);
+                        const rightSub = simplifyNode(node.right);
+                        if (rightSub.type === "num" && rightSub.value === 0) return leftSub;
+                        if (leftSub.type === "num" && rightSub.type === "num") return { type: "num", value: leftSub.value - rightSub.value };
+                        return { type: "sub", left: leftSub, right: rightSub };
+                    case "mul":
+                        const leftMul = simplifyNode(node.left);
+                        const rightMul = simplifyNode(node.right);
+                        if ((leftMul.type === "num" && leftMul.value === 0) || (rightMul.type === "num" && rightMul.value === 0)) return { type: "num", value: 0 };
+                        if (leftMul.type === "num" && leftMul.value === 1) return rightMul;
+                        if (rightMul.type === "num" && rightMul.value === 1) return leftMul;
+                        if (leftMul.type === "num" && rightMul.type === "num") return { type: "num", value: leftMul.value * rightMul.value };
+                        return { type: "mul", left: leftMul, right: rightMul };
+                    case "div":
+                        const leftDiv = simplifyNode(node.left);
+                        const rightDiv = simplifyNode(node.right);
+                        if (leftDiv.type === "num" && leftDiv.value === 0) return { type: "num", value: 0 };
+                        if (rightDiv.type === "num" && rightDiv.value === 1) return leftDiv;
+                        if (leftDiv.type === "num" && rightDiv.type === "num") return { type: "num", value: leftDiv.value / rightDiv.value };
+                        return { type: "div", left: leftDiv, right: rightDiv };
+                    case "pow":
+                        const base = simplifyNode(node.base);
+                        const exponent = simplifyNode(node.exponent);
+                        if (exponent.type === "num" && exponent.value === 0) return { type: "num", value: 1 };
+                        if (exponent.type === "num" && exponent.value === 1) return base;
+                        if (base.type === "num" && base.value === 0 && exponent.type === "num" && exponent.value > 0) return { type: "num", value: 0 };
+                        if (base.type === "num" && base.value === 1) return { type: "num", value: 1 };
+                        if (base.type === "num" && exponent.type === "num") return { type: "num", value: Math.pow(base.value, exponent.value) };
+                        return { type: "pow", base, exponent };
+                    case "neg":
+                        const expr = simplifyNode(node.expr);
+                        if (expr.type === "neg") return expr.expr;
+                        if (expr.type === "num") return { type: "num", value: -expr.value };
+                        return { type: "neg", expr };
+                    case "func": 
+                        const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
+                        if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "num")) {
+                            try {
+                                const result = evaluateNode({ type: "func", name: node.name, args }, {});
+                                return { type: "num", value: result };
+                            } catch (e) {
+                                return { type: "func", name: node.name, args };
+                            }
+                        }
+                        return { type: "func", name: node.name, args };
+                }
+                return node;
+            };
+            try {
+                const tokens = tokenize(input);
+                const ast = parseTokens(tokens);
+                if (values && Object.keys(values).length > 0) return evaluateNode(ast, values);
+                const simplified = simplifyNode(ast);
+                if (returnAST) return simplified;
+                return nodeToString(simplified);
+            } catch (err) {
+                if (err instanceof Error) {
+                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${err.message}`);
+                } else {
+                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${String(err)}`);
+                }
+            }
         };
 
         /**
