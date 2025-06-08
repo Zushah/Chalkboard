@@ -394,15 +394,379 @@ namespace Chalkboard {
         };
 
         /**
-         * Parses a string of JavaScript code.
-         * @param {string} str - The string
-         * @returns {Function}
-         * @example
-         * // Creates a function that computes a complex operation
-         * const f = Chalkboard.comp.parse("(a, b) => a*a - b*b");
+         * Parses, simplifies, and optionally evaluates a complex number expression.
+         * @param {string} input - The complex number expression to parse
+         * @param {Record<string, ChalkboardComplex>} [values] - Optional object mapping variable names to values
+         * @param {boolean} [returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
+         * @returns {string | ChalkboardComplex | { type: string, [key: string]: any }}
          */
-        export const parse = (str: string): Function => {
-            return Function('"use strict"; ' + Chalkboard.PARSEPREFIX + " return (" + str + ")")();
+        export const parse = (input: string, values?: Record<string, ChalkboardComplex>, returnAST: boolean = false): string | ChalkboardComplex | { type: string, [key: string]: any } => {
+            const tokenize = (input: string): string[] => {
+                const tokens: string[] = [];
+                let i = 0;
+                while (i < input.length) {
+                    const ch = input[i];
+                    if (/\s/.test(ch)) {
+                        i++;
+                        continue;
+                    }
+                    if ("+-*/^(),".indexOf(ch) !== -1) {
+                        tokens.push(ch);
+                        i++;
+                        if (ch === ")" && i < input.length && (/[a-zA-Z0-9_i]/.test(input[i]))) tokens.push("*");
+                    } else if (ch === "i" && (i === 0 || !/[a-zA-Z0-9_]/.test(input[i-1]))) {
+                        tokens.push("i");
+                        i++;
+                        if (i < input.length && (/[a-zA-Z0-9_(]/.test(input[i]))) tokens.push("*");
+                    } else if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(input[i+1]))) {
+                        let num = "";
+                        let hasDecimal = false;
+                        while (i < input.length && ((/[0-9]/.test(input[i])) || (input[i] === "." && !hasDecimal))) {
+                            if (input[i] === ".") hasDecimal = true;
+                            num += input[i++];
+                        }
+                        tokens.push(num);
+                        if (i < input.length && input[i] === "i") {
+                            tokens.push("*");
+                            tokens.push("i");
+                            i++;
+                        }
+                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                    } else if (/[a-zA-Z_]/.test(ch)) {
+                        let name = "";
+                        while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
+                            name += input[i++];
+                        }
+                        tokens.push(name);
+                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                    } else {
+                        throw new Error(`Chalkboard.comp.parse: Unexpected character ${ch}`);
+                    }
+                }
+                return tokens;
+            };
+            const parseTokens = (tokens: string[]): { type: string, [key: string]: any } => {
+                let pos = 0;
+                const peek = (): string => tokens[pos] || "";
+                const consume = (token?: string): string => {
+                    if (token && tokens[pos] !== token) throw new Error(`Chalkboard.comp.parse: Expected token '${token}' but found '${tokens[pos]}'`);
+                    return tokens[pos++];
+                };
+                const parseExpression = (): { type: string, [key: string]: any } => parseAdditive();
+                const parseAdditive = (): { type: string, [key: string]: any } => {
+                    let node = parseMultiplicative();
+                    while (peek() === "+" || peek() === "-") {
+                        const op = consume();
+                        const right = parseMultiplicative();
+                        node = { type: op === "+" ? "add" : "sub", left: node, right };
+                    }
+                    return node;
+                };
+                const parseMultiplicative = (): { type: string, [key: string]: any } => {
+                    let node = parseExponent();
+                    while (peek() === "*" || peek() === "/") {
+                        const op = consume();
+                        const right = parseExponent();
+                        node = { type: op === "*" ? "mul" : "div", left: node, right };
+                    }
+                    return node;
+                };
+                const parseExponent = (): { type: string, [key: string]: any } => {
+                    let node = parseUnary();
+                    if (peek() === "^") {
+                        consume("^");
+                        const right = parseExponent();
+                        node = { type: "pow", base: node, exponent: right };
+                    }
+                    return node;
+                };
+                const parseUnary = (): { type: string, [key: string]: any } => {
+                    if (peek() === "-") {
+                        consume("-");
+                        return { type: "neg", expr: parseUnary() };
+                    } else if (peek() === "+") {
+                        consume("+");
+                        return parseUnary();
+                    }
+                    return parsePrimary();
+                };
+                const parsePrimary = (): { type: string, [key: string]: any } => {
+                    const token = peek();
+                    if (/^[0-9.]/.test(token)) {
+                        consume();
+                        return { type: "num", value: parseFloat(token) };
+                    }
+                    if (token === "i") {
+                        consume();
+                        return { type: "complex", a: 0, b: 1 };
+                    }
+                    if (/^[a-zA-Z_]/.test(token)) {
+                        const name = consume();
+                        if (peek() === "(") {
+                            consume("(");
+                            const args: { type: string, [key: string]: any }[] = [];
+                            if (peek() !== ")") {
+                                args.push(parseExpression());
+                                while (peek() === ",") {
+                                    consume(",");
+                                    args.push(parseExpression());
+                                }
+                            }
+                            consume(")");
+                            return { type: "func", name, args };
+                        }
+                        return { type: "var", name };
+                    }
+                    if (token === "(") {
+                        consume("(");
+                        const node = parseExpression();
+                        consume(")");
+                        return node;
+                    }
+                    throw new Error(`Chalkboard.comp.parse: Unexpected token ${token}`);
+                };
+                const ast = parseExpression();
+                if (pos < tokens.length) throw new Error(`Chalkboard.comp.parse: Unexpected token ${tokens[pos]}`);
+                return ast;
+            };
+            const evaluateNode = (node: { type: string, [key: string]: any }, values: Record<string, ChalkboardComplex>): ChalkboardComplex => {
+                switch (node.type) {
+                    case "num":
+                        return Chalkboard.comp.init(node.value, 0);
+                    case "complex":
+                        return Chalkboard.comp.init(node.a, node.b);
+                    case "var":
+                        const varname = node.name;
+                        if (!(varname in values)) throw new Error(`Chalkboard.comp.parse: Variable '${varname}' not defined in values`);
+                        return values[varname];
+                    case "add":
+                        return Chalkboard.comp.add(evaluateNode(node.left, values), evaluateNode(node.right, values)) as ChalkboardComplex;
+                    case "sub":
+                        return Chalkboard.comp.sub(evaluateNode(node.left, values), evaluateNode(node.right, values)) as ChalkboardComplex;
+                    case "mul":
+                        return Chalkboard.comp.mul(evaluateNode(node.left, values), evaluateNode(node.right, values)) as ChalkboardComplex;
+                    case "div":
+                        return Chalkboard.comp.div(evaluateNode(node.left, values), evaluateNode(node.right, values)) as ChalkboardComplex;
+                    case "pow":
+                        const base = evaluateNode(node.base, values);
+                        const exponent = evaluateNode(node.exponent, values);
+                        if (exponent.b === 0) {
+                            return Chalkboard.comp.pow(base, exponent.a) as ChalkboardComplex;
+                        } else {
+                            throw new Error("Chalkboard.comp.parse: Complex exponentiation with complex exponent not supported");
+                        }
+                    case "neg":
+                        return Chalkboard.comp.negate(evaluateNode(node.expr, values)) as ChalkboardComplex;
+                    case "func":
+                        const funcName = node.name.toLowerCase();
+                        const args = node.args.map((arg: { type: string, [key: string]: any }) => evaluateNode(arg, values));
+                        switch (funcName) {
+                            case "conj":
+                                return Chalkboard.comp.conjugate(args[0]) as ChalkboardComplex;
+                            case "mag":
+                                return Chalkboard.comp.init(Chalkboard.comp.mag(args[0]), 0);
+                            case "arg":
+                                return Chalkboard.comp.init(Chalkboard.comp.arg(args[0]), 0);
+                            case "re":
+                                return Chalkboard.comp.init(Chalkboard.comp.Re(args[0]) as number, 0);
+                            case "im":
+                                return Chalkboard.comp.init(Chalkboard.comp.Im(args[0]) as number, 0);
+                            case "ln":
+                                return Chalkboard.comp.ln(args[0]);
+                            case "invert":
+                                return Chalkboard.comp.invert(args[0]);
+                            case "sq":
+                                return Chalkboard.comp.sq(args[0]) as ChalkboardComplex;
+                            case "sqrt":
+                                return Chalkboard.comp.sqrt(args[0]) as ChalkboardComplex;
+                            case "pow":
+                                if (args.length < 2) throw new Error("Chalkboard.comp.parse: Function pow requires two arguments");
+                                return Chalkboard.comp.pow(args[0], args[1].a) as ChalkboardComplex;
+                            case "root":
+                                if (args.length < 2) throw new Error("Chalkboard.comp.parse: Function root requires two arguments");
+                                const index = args[1].a;
+                                if (!Number.isInteger(index) || index <= 0) throw new Error("Chalkboard.comp.parse: Root index must be a positive integer");
+                                return Chalkboard.comp.root(args[0], index)[0];
+                            default:
+                                throw new Error(`Chalkboard.comp.parse: Unknown function ${node.name}`);
+                        }
+                }
+                throw new Error(`Chalkboard.comp.parse: Unknown node type ${node.type}`);
+            };
+            const nodeToString = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "num":
+                        return node.value.toString();
+                    case "complex":
+                        if (node.a === 0 && node.b === 1) return "i";
+                        if (node.a === 0 && node.b === -1) return "-i";
+                        if (node.a === 0) return node.b + "i";
+                        if (node.b === 0) return node.a.toString();
+                        return node.b > 0 ? `${node.a} + ${node.b}i` : `${node.a} - ${-node.b}i`;
+                    case "var":
+                        return node.name;
+                    case "add":
+                        return `${nodeToString(node.left)} + ${nodeToString(node.right)}`;
+                    case "sub":
+                        const rightStr = node.right.type === "add" || node.right.type === "sub" ?`(${nodeToString(node.right)})` : nodeToString(node.right);
+                        return `${nodeToString(node.left)} - ${rightStr}`;
+                    case "mul":
+                        const leftMul = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
+                        const rightMul = (node.right.type === "add" || node.right.type === "sub") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
+                        if ((node.left.type === "num" || node.left.type === "complex") && (node.right.type === "var" || (node.right.type === "complex" && node.right.a === 0 && node.right.b === 1))) {
+                            return `${leftMul}${rightMul}`;
+                        } else {
+                            return `${leftMul} * ${rightMul}`;
+                        }
+                    case "div":
+                        const leftDiv = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
+                        const rightDiv = (node.right.type === "add" || node.right.type === "sub" || node.right.type === "mul" || node.right.type === "div") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
+                        return `${leftDiv} / ${rightDiv}`;
+                    case "pow":
+                        const baseStr = (node.base.type !== "num" && node.base.type !== "var" && node.base.type !== "complex") ? `(${nodeToString(node.base)})` : nodeToString(node.base);
+                        const expStr = (node.exponent.type !== "num" && node.exponent.type !== "var" && node.exponent.type !== "complex") ? `(${nodeToString(node.exponent)})` : nodeToString(node.exponent);
+                        return `${baseStr}^${expStr}`;
+                    case "neg":
+                        const exprStr = (node.expr.type !== "num" && node.expr.type !== "var" && node.expr.type !== "complex") ? `(${nodeToString(node.expr)})` : nodeToString(node.expr);
+                        return `-${exprStr}`;
+                    case "func":
+                        return `${node.name}(${node.args.map((arg: { type: string, [key: string]: any }) => nodeToString(arg)).join(", ")})`;
+                }
+                return "";
+            };
+            const areEqualVars = (a: { type: string, [key: string]: any }, b: { type: string, [key: string]: any }): boolean => {
+                if (a.type === "var" && b.type === "var") return a.name === b.name;
+                if (a.type === "complex" && b.type === "complex") return a.a === b.a && a.b === b.b;
+                return JSON.stringify(a) === JSON.stringify(b);
+            };
+            const simplifyNode = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
+                switch (node.type) {
+                    case "num":
+                        return { type: "complex", a: node.value, b: 0 };
+                    case "complex":
+                    case "var":
+                        return node;
+                    case "add":
+                        const leftAdd = simplifyNode(node.left);
+                        const rightAdd = simplifyNode(node.right);
+                        if (leftAdd.type === "complex" && rightAdd.type === "complex") return { type: "complex", a: leftAdd.a + rightAdd.a, b: leftAdd.b + rightAdd.b };
+                        if (leftAdd.type === "complex" && leftAdd.a === 0 && leftAdd.b === 0) return rightAdd;
+                        if (rightAdd.type === "complex" && rightAdd.a === 0 && rightAdd.b === 0) return leftAdd;
+                        if (areEqualVars(leftAdd, rightAdd)) return { type: "mul", left: { type: "num", value: 2 }, right: leftAdd };
+                        return { type: "add", left: leftAdd, right: rightAdd };
+                    case "sub":
+                        const leftSub = simplifyNode(node.left);
+                        const rightSub = simplifyNode(node.right);
+                        if (leftSub.type === "complex" && rightSub.type === "complex") return { type: "complex", a: leftSub.a - rightSub.a, b: leftSub.b - rightSub.b };
+                        if (rightSub.type === "complex" && rightSub.a === 0 && rightSub.b === 0) return leftSub;
+                        if (leftSub.type === "complex" && leftSub.a === 0 && leftSub.b === 0) return { type: "neg", expr: rightSub };
+                        if (areEqualVars(leftSub, rightSub)) return { type: "complex", a: 0, b: 0 };
+                        return { type: "sub", left: leftSub, right: rightSub };
+                    case "mul":
+                        const leftMul = simplifyNode(node.left);
+                        const rightMul = simplifyNode(node.right);
+                        if (leftMul.type === "complex" && rightMul.type === "complex") return { type: "complex", a: leftMul.a * rightMul.a - leftMul.b * rightMul.b, b: leftMul.a * rightMul.b + leftMul.b * rightMul.a };
+                        if ((leftMul.type === "complex" && leftMul.a === 0 && leftMul.b === 0) || (rightMul.type === "complex" && rightMul.a === 0 && rightMul.b === 0)) return { type: "complex", a: 0, b: 0 };
+                        if (leftMul.type === "complex" && leftMul.a === 1 && leftMul.b === 0) return rightMul;
+                        if (rightMul.type === "complex" && rightMul.a === 1 && rightMul.b === 0) return leftMul;
+                        if (leftMul.type === "complex" && leftMul.a === 0 && leftMul.b === 1 && rightMul.type === "complex") return { type: "complex", a: -rightMul.b, b: rightMul.a };
+                        return { type: "mul", left: leftMul, right: rightMul };
+                    case "div":
+                        const leftDiv = simplifyNode(node.left);
+                        const rightDiv = simplifyNode(node.right);
+                        if (leftDiv.type === "complex" && rightDiv.type === "complex") {
+                            const denominator = rightDiv.a * rightDiv.a + rightDiv.b * rightDiv.b;
+                            if (denominator === 0) throw new Error("Chalkboard.comp.parse: Division by zero.");
+                            return { type: "complex", a: (leftDiv.a * rightDiv.a + leftDiv.b * rightDiv.b) / denominator, b: (leftDiv.b * rightDiv.a - leftDiv.a * rightDiv.b) / denominator };
+                        }
+                        if (rightDiv.type === "complex" && rightDiv.a === 1 && rightDiv.b === 0) return leftDiv;
+                        if (leftDiv.type === "complex" && leftDiv.a === 0 && leftDiv.b === 0) return { type: "complex", a: 0, b: 0 };
+                        return { type: "div", left: leftDiv, right: rightDiv };
+                    case "pow":
+                        const base = simplifyNode(node.base);
+                        const exponent = simplifyNode(node.exponent);
+                        if (base.type === "complex" && exponent.type === "complex" && exponent.b === 0) {
+                            const power = exponent.a;
+                            if (power === 0) return { type: "complex", a: 1, b: 0 };
+                            if (power === 1) return base;
+                            if (base.a === 0 && base.b === 0 && power > 0) return { type: "complex", a: 0, b: 0 };
+                            if (base.a === 1 && base.b === 0) return { type: "complex", a: 1, b: 0 };
+                            if (base.a === 0 && base.b === 1) {
+                                const mod4 = Math.floor(power) % 4;
+                                if (mod4 === 0) return { type: "complex", a: 1, b: 0 };
+                                if (mod4 === 1) return { type: "complex", a: 0, b: 1 };
+                                if (mod4 === 2) return { type: "complex", a: -1, b: 0 };
+                                if (mod4 === 3) return { type: "complex", a: 0, b: -1 };
+                            }
+                            if (Number.isInteger(power) && power > 1 && power <= 3) {
+                                let result = base;
+                                for (let i = 1; i < power; i++) {
+                                    result = {
+                                        type: "complex",
+                                        a: result.a * base.a - result.b * base.b,
+                                        b: result.a * base.b + result.b * base.a
+                                    };
+                                }
+                                return result;
+                            }
+                        }
+                        return { type: "pow", base, exponent };
+                    case "neg":
+                        const expr = simplifyNode(node.expr);
+                        if (expr.type === "complex") return { type: "complex", a: -expr.a, b: -expr.b };
+                        if (expr.type === "neg") return expr.expr;
+                        return { type: "neg", expr };
+                    case "func":
+                        const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
+                        const funcName = node.name.toLowerCase();
+                        if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "complex")) {
+                            try {
+                                switch (funcName) {
+                                    case "conj":
+                                    case "conjugate":
+                                        return { type: "complex", a: args[0].a, b: -args[0].b };
+                                    case "mag":
+                                        return { type: "complex", a: Math.sqrt(args[0].a * args[0].a + args[0].b * args[0].b), b: 0 };
+                                    case "magsq":
+                                        return { type: "complex", a: args[0].a * args[0].a + args[0].b * args[0].b, b: 0 };
+                                    case "arg":
+                                        return { type: "complex", a: Math.atan2(args[0].b, args[0].a), b: 0 };
+                                    case "re":
+                                        return { type: "complex", a: args[0].a, b: 0 };
+                                    case "im":
+                                        return { type: "complex", a: args[0].b, b: 0 };
+                                    case "sqrt":
+                                        if (args[0].b === 0 && args[0].a >= 0) {
+                                            const z = Chalkboard.comp.sqrt(Chalkboard.comp.init(args[0].a, args[0].b)) as ChalkboardComplex;
+                                            return { type: "complex", a: z.a, b: z.b };
+                                        }
+                                        break;
+                                    case "sq":
+                                        const z = Chalkboard.comp.sq(Chalkboard.comp.init(args[0].a, args[0].b)) as ChalkboardComplex;
+                                        return { type: "complex", a: z.a, b: z.b };
+                                }
+                            } catch (e) {
+                                return { type: "func", name: node.name, args };
+                            }
+                        }
+                        return { type: "func", name: node.name, args };
+                }
+                return node;
+            };
+            try {
+                const tokens = tokenize(input);
+                const ast = parseTokens(tokens);
+                if (values && Object.keys(values).length > 0) return evaluateNode(ast, values);
+                const simplified = simplifyNode(ast);
+                if (returnAST) return simplified;
+                return nodeToString(simplified);
+            } catch (err) {
+                if (err instanceof Error) {
+                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression ${err.message}`);
+                } else {
+                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression ${String(err)}`);
+                }
+            }
         };
 
         /**
