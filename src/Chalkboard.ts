@@ -314,20 +314,6 @@ namespace Chalkboard {
     };
 
     /**
-     * The variable for adding custom functions to the Chalkboard parsers.
-     * @type {string}
-     * @example
-     * // Doesn't work
-     * const twentyfour = Chalkboard.real.parse("Math.factorial(4)");
-     *
-     * // Does work
-     * Chalkboard.PARSEPREFIX = "Math.factorial = function(num) { let n = 1; for (var i = 1; i <= num; i++) { n *= i; } i--; return n; };";
-     * const twentyfour = Chalkboard.real.parse("Math.factorial(4)");
-     */
-    export let PARSEPREFIX: string = "";
-    if (typeof window !== "undefined") Chalkboard.PARSEPREFIX += "const ctx = document.querySelector('canvas').getContext('2d');";
-
-    /**
      * Computes the number pi.
      * @param {number} [coefficient=1] - The coefficient to multiply pi with
      * @returns {number}
@@ -364,6 +350,36 @@ namespace Chalkboard {
                 " released 04/28/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
         );
     };
+
+    /**
+     * Registers a custom function to use with real number parsing.
+     * @param {string} name - The name of the function to register
+     * @param {(...x: number[]) => number} func - The function
+     * @returns {void}
+     * @example
+     * // Register factorial function
+     * Chalkboard.REGISTER("factorial", (x) => {
+     *   let n = 1;
+     *   for (let i = 1; i <= x; i++) n *= i;
+     *   return n;
+     * });
+     * 
+     * // Returns 24
+     * const twentyfour = Chalkboard.real.parse("factorial(4)");
+     */
+    export const REGISTER = (name: string, func: (...x: number[]) => number): void => {
+        Chalkboard.REGISTRY[name] = func;
+    };
+    
+    /**
+     * The object for storing registered custom real functions.
+     * @type {Record<string, (...x: number[]) => number>}
+     * @example
+     * // Returns { "plusone": (x) => x + 1 }
+     * Chalkboard.REGISTER("plusone", (x) => x + 1);
+     * const plusone = Chalkboard.REGISTRY["plusone"];
+     */
+    export const REGISTRY: Record<string, (...x: number[]) => number> = {};
 
     /**
      * The version of Chalkboard.

@@ -546,6 +546,9 @@ namespace Chalkboard {
                     case "func":
                         const funcName = node.name.toLowerCase();
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => evaluateNode(arg, values));
+                        if (Chalkboard.REGISTRY[funcName] !== undefined) {
+                            return Chalkboard.REGISTRY[funcName](...args);
+                        }
                         switch (funcName) {
                             case "sin": return Math.sin(args[0]);
                             case "cos": return Math.cos(args[0]);
