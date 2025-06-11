@@ -546,9 +546,7 @@ namespace Chalkboard {
                     case "func":
                         const funcName = node.name.toLowerCase();
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => evaluateNode(arg, values));
-                        if (Chalkboard.REGISTRY[funcName] !== undefined) {
-                            return Chalkboard.REGISTRY[funcName](...args);
-                        }
+                        if (Chalkboard.REGISTRY[funcName] !== undefined) return Chalkboard.REGISTRY[funcName](...args);
                         switch (funcName) {
                             case "sin": return Math.sin(args[0]);
                             case "cos": return Math.cos(args[0]);
@@ -572,19 +570,17 @@ namespace Chalkboard {
                     case "var":
                         return node.name;
                     case "add":
+                        if (node.right.type === "num" && node.right.value < 0) return `${nodeToString(node.left)} - ${nodeToString({ type: "num", value: -node.right.value })}`;
+                        if (node.right.type === "neg") return `${nodeToString(node.left)} - ${nodeToString(node.right.expr)}`;
+                        if (node.right.type === "mul" && node.right.left.type === "num" && node.right.left.value < 0) return `${nodeToString(node.left)} - ${nodeToString({ type: "mul", left: { type: "num", value: -node.right.left.value }, right: node.right.right })}`;
                         return `${nodeToString(node.left)} + ${nodeToString(node.right)}`;
                     case "sub":
                         const rightStr = node.right.type === "add" || node.right.type === "sub" ?`(${nodeToString(node.right)})` : nodeToString(node.right);
                         return `${nodeToString(node.left)} - ${rightStr}`;
                     case "mul":
-                        const leftMul = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
-                        const rightMul = (node.right.type === "add" || node.right.type === "sub") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
-                        if ((node.left.type === "num" && node.right.type === "var") || 
-                            (node.left.type === "var" && node.right.type === "var")) {
-                            return `${leftMul}${rightMul}`;
-                        } else {
-                            return `${leftMul} * ${rightMul}`;
-                        }
+                        if (node.left.type === "num" && (node.right.type === "var" || node.right.type === "pow")) return `${nodeToString(node.left)}${nodeToString(node.right)}`;
+                        if (node.left.type === "var" && node.right.type === "var") return `${nodeToString(node.left)}${nodeToString(node.right)}`;
+                        return `${nodeToString(node.left)} * ${nodeToString(node.right)}`;
                     case "div":
                         const leftDiv = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
                         const rightDiv = (node.right.type === "add" || node.right.type === "sub" || node.right.type === "mul" || node.right.type === "div") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
@@ -594,8 +590,9 @@ namespace Chalkboard {
                         const expStr = (node.exponent.type !== "num" && node.exponent.type !== "var") ? `(${nodeToString(node.exponent)})` : nodeToString(node.exponent);
                         return `${baseStr}^${expStr}`;
                     case "neg":
-                        const exprStr = (node.expr.type !== "num" && node.expr.type !== "var") ? `(${nodeToString(node.expr)})` : nodeToString(node.expr);
-                        return `-${exprStr}`;
+                        if (node.expr.type === "add" || node.expr.type === "sub") return `-(${ nodeToString(node.expr) })`;
+                        const exprStr = (node.expr.type !== "num" && node.expr.type !== "var") ? `(${ nodeToString(node.expr) })` : nodeToString(node.expr);
+                        return `-${ exprStr }`;
                     case "func":
                         return `${node.name}(${node.args.map((arg: { type: string, [key: string]: any }) => nodeToString(arg)).join(", ")})`;
                 }
@@ -613,34 +610,138 @@ namespace Chalkboard {
                     case "add":
                         const left = simplifyNode(node.left);
                         const right = simplifyNode(node.right);
-                        if (left.type === "num" && left.value === 0) return right;
-                        if (right.type === "num" && right.value === 0) return left;
-                        if (left.type === "num" && right.type === "num") return { type: "num", value: left.value + right.value };
-                        if (areEqualVars(left, right)) return { type: "mul", left: { type: "num", value: 2 }, right: left };
-                        if (left.type === "mul" && right.type === "mul" && areEqualVars(left.right, right.right)) return { type: "mul", left: { type: "add", left: simplifyNode(left.left), right: simplifyNode(right.left) }, right: left.right };
-                        if (right.type === "mul" && areEqualVars(left, right.right)) return { type: "mul", left: { type: "add", left: { type: "num", value: 1 }, right: simplifyNode(right.left) }, right: left };
-                        if (left.type === "mul" && areEqualVars(right, left.right)) return { type: "mul", left: { type: "add", left: simplifyNode(left.left), right: { type: "num", value: 1 } }, right: right };
-                        return { type: "add", left, right };
+                        const flatten = (n: any): any[] => n.type === "add" ? [...flatten(n.left), ...flatten(n.right)] : [n];
+                        const terms = flatten({ type: "add", left, right });
+                        const coeffs: Record<string, number> = {};
+                        let constants = 0;
+                        const others: any[] = [];
+                        const powers: { pow: number, name: string }[] = [];
+                        for (let i = 0; i < terms.length; i++) {
+                            const t = terms[i];
+                            if (t.type === "num") {
+                                constants += t.value;
+                            } else if (t.type === "mul" && t.left.type === "num" && t.right.type === "var") {
+                                const k = t.right.name;
+                                coeffs[k] = (coeffs[k] || 0) + t.left.value;
+                            } else if (t.type === "var") {
+                                const k = t.name;
+                                coeffs[k] = (coeffs[k] || 0) + 1;
+                            } else if (t.type === "pow" && t.base.type === "var" && t.exponent.type === "num") {
+                                const k = t.base.name + "^" + t.exponent.value;
+                                coeffs[k] = (coeffs[k] || 0) + 1;
+                                powers.push({ pow: t.exponent.value, name: k });
+                            } else if (t.type === "mul" && t.left.type === "num" && t.right.type === "pow" && t.right.base.type === "var" && t.right.exponent.type === "num") {
+                                const k = t.right.base.name + "^" + t.right.exponent.value;
+                                coeffs[k] = (coeffs[k] || 0) + t.left.value;
+                                powers.push({ pow: t.right.exponent.value, name: k });
+                            } else {
+                                others.push(t);
+                            }
+                        }
+                        const powerKeys: string[] = [];
+                        for (let i = 0; i < powers.length; i++) {
+                            let exists = false;
+                            for (let j = 0; j < powerKeys.length; j++) {
+                                if (powerKeys[j] === powers[i].name) {
+                                    exists = true;
+                                    break;
+                                }
+                            }
+                            if (!exists) powerKeys.push(powers[i].name);
+                        }
+                        for (let i = 0; i < powerKeys.length - 1; i++) {
+                            for (let j = i + 1; j < powerKeys.length; j++) {
+                                const pa = powers.find((p) => p.name === powerKeys[i])?.pow ?? 1;
+                                const pb = powers.find((p) => p.name === powerKeys[j])?.pow ?? 1;
+                                if (pb > pa) {
+                                    const tmp = powerKeys[i];
+                                    powerKeys[i] = powerKeys[j];
+                                    powerKeys[j] = tmp;
+                                }
+                            }
+                        }
+                        const coeffKeys = Object.keys(coeffs);
+                        const varKeys = coeffKeys.filter((k) => k.indexOf("^") === -1);
+                        let result: any = null;
+                        for (let i = 0; i < powerKeys.length; i++) {
+                            const k = powerKeys[i];
+                            if (coeffs[k] === 0) continue;
+                            const split = k.split("^");
+                            const name = split[0];
+                            const exp = split[1];
+                            const pownode = { type: "pow", base: { type: "var", name }, exponent: { type: "num", value: Number(exp) } };
+                            const term = coeffs[k] === 1 ? pownode : { type: "mul", left: { type: "num", value: coeffs[k] }, right: pownode };
+                            result = result ? { type: "add", left: result, right: term } : term;
+                        }
+                        for (let i = 0; i < varKeys.length; i++) {
+                            const k = varKeys[i];
+                            if (coeffs[k] === 0) continue;
+                            const term = coeffs[k] === 1 ? { type: "var", name: k } : { type: "mul", left: { type: "num", value: coeffs[k] }, right: { type: "var", name: k } };
+                            result = result ? { type: "add", left: result, right: term } : term;
+                        }
+                        if (constants !== 0) result = result ? { type: "add", left: result, right: { type: "num", value: constants } } : { type: "num", value: constants };
+                        for (let i = 0; i < others.length; i++) result = result ? { type: "add", left: result, right: others[i] } : others[i];
+                        return result || { type: "num", value: 0 };
                     case "sub":
                         const leftSub = simplifyNode(node.left);
                         const rightSub = simplifyNode(node.right);
-                        if (rightSub.type === "num" && rightSub.value === 0) return leftSub;
-                        if (leftSub.type === "num" && rightSub.type === "num") return { type: "num", value: leftSub.value - rightSub.value };
-                        if (areEqualVars(leftSub, rightSub)) return { type: "num", value: 0 };
-                        if (leftSub.type === "mul" && rightSub.type === "mul" && areEqualVars(leftSub.right, rightSub.right)) return { type: "mul", left: { type: "sub", left: simplifyNode(leftSub.left), right: simplifyNode(rightSub.left) }, right: leftSub.right };
-                        return { type: "sub", left: leftSub, right: rightSub };
+                        return simplifyNode({ type: "add", left: leftSub, right: { type: "mul", left: { type: "num", value: -1 }, right: rightSub } });
                     case "mul":
                         const leftMul = simplifyNode(node.left);
                         const rightMul = simplifyNode(node.right);
-                        if ((leftMul.type === "num" && leftMul.value === 0) || (rightMul.type === "num" && rightMul.value === 0)) return { type: "num", value: 0 };
-                        if (leftMul.type === "num" && leftMul.value === 1) return rightMul;
-                        if (rightMul.type === "num" && rightMul.value === 1) return leftMul;
-                        if (leftMul.type === "num" && rightMul.type === "num") return { type: "num", value: leftMul.value * rightMul.value };
-                        if (areEqualVars(leftMul, rightMul)) return { type: "pow", base: leftMul, exponent: { type: "num", value: 2 } };
-                        if (rightMul.type === "pow" && areEqualVars(leftMul, rightMul.base)) return { type: "pow", base: leftMul, exponent: { type: "add", left: { type: "num", value: 1 }, right: rightMul.exponent } };
-                        if (leftMul.type === "pow" && areEqualVars(rightMul, leftMul.base)) return { type: "pow", base: rightMul, exponent: { type: "add",left: leftMul.exponent, right: { type: "num", value: 1 } } };
-                        if (leftMul.type === "pow" && rightMul.type === "pow" && areEqualVars(leftMul.base, rightMul.base)) return { type: "pow", base: leftMul.base, exponent: { type: "add", left: simplifyNode(leftMul.exponent), right: simplifyNode(rightMul.exponent) } };
-                        return { type: "mul", left: leftMul, right: rightMul };
+                        if (leftMul.type === "num" && (rightMul.type === "add" || rightMul.type === "sub")) return simplifyNode({ type: rightMul.type, left: { type: "mul", left: leftMul, right: rightMul.left }, right: { type: "mul", left: leftMul, right: rightMul.right } });
+                        if (rightMul.type === "num" && (leftMul.type === "add" || leftMul.type === "sub")) return simplifyNode({ type: leftMul.type, left: { type: "mul", left: rightMul, right: leftMul.left }, right: { type: "mul", left: rightMul, right: leftMul.right } });
+                        const flattenMul = (n: any): any[] => n.type === "mul" ? [...flattenMul(n.left), ...flattenMul(n.right)] : [n];
+                        const factors = flattenMul({ type: "mul", left: leftMul, right: rightMul });
+                        let coeffMul = 1;
+                        const powersMul: Record<string, number> = {};
+                        const othersMul: any[] = [];
+                        for (let i = 0; i < factors.length; i++) {
+                            const f = factors[i];
+                            if (f.type === "num") {
+                                coeffMul *= f.value;
+                            } else if (f.type === "var") {
+                                powersMul[f.name] = (powersMul[f.name] || 0) + 1;
+                            } else if (f.type === "pow" && f.base.type === "var" && f.exponent.type === "num") {
+                                powersMul[f.base.name] = (powersMul[f.base.name] || 0) + f.exponent.value;
+                            } else {
+                                othersMul.push(f);
+                            }
+                        }
+                        const powerKeysMul: string[] = [];
+                        const powerValsMul: number[] = [];
+                        for (const k in powersMul) {
+                            if (powersMul.hasOwnProperty(k)) {
+                                powerKeysMul.push(k);
+                                powerValsMul.push(powersMul[k]);
+                            }
+                        }
+                        for (let i = 0; i < powerKeysMul.length - 1; i++) {
+                            for (let j = i + 1; j < powerKeysMul.length; j++) {
+                                if (powerValsMul[j] > powerValsMul[i]) {
+                                    const tmpK = powerKeysMul[i];
+                                    const tmpV = powerValsMul[i];
+                                    powerKeysMul[i] = powerKeysMul[j];
+                                    powerValsMul[i] = powerValsMul[j];
+                                    powerKeysMul[j] = tmpK;
+                                    powerValsMul[j] = tmpV;
+                                }
+                            }
+                        }
+                        let resultMul: any = null;
+                        if (coeffMul !== 1 || (powerKeysMul.length === 0 && othersMul.length === 0)) resultMul = { type: "num", value: coeffMul };
+                        for (let i = 0; i < powerKeysMul.length; i++) {
+                            const k = powerKeysMul[i];
+                            const v = powerValsMul[i];
+                            if (v === 0) continue;
+                            if (v === 1) {
+                                resultMul = resultMul ? { type: "mul", left: resultMul, right: { type: "var", name: k } } : { type: "var", name: k };
+                            } else {
+                                resultMul = resultMul ? { type: "mul", left: resultMul, right: { type: "pow", base: { type: "var", name: k }, exponent: { type: "num", value: v } } } : { type: "pow", base: { type: "var", name: k }, exponent: { type: "num", value: v } };
+                            }
+                        }
+                        for (let i = 0; i < othersMul.length; i++) resultMul = resultMul ? { type: "mul", left: resultMul, right: othersMul[i] } : othersMul[i];
+                        return resultMul;
                     case "div":
                         const leftDiv = simplifyNode(node.left);
                         const rightDiv = simplifyNode(node.right);
@@ -651,7 +752,66 @@ namespace Chalkboard {
                         if (leftDiv.type === "pow" && rightDiv.type === "pow" && areEqualVars(leftDiv.base, rightDiv.base)) return { type: "pow", base: leftDiv.base, exponent: { type: "sub", left: simplifyNode(leftDiv.exponent), right: simplifyNode(rightDiv.exponent) } };
                         if (leftDiv.type === "pow" && areEqualVars(leftDiv.base, rightDiv)) return { type: "pow", base: rightDiv, exponent: { type: "sub", left: simplifyNode(leftDiv.exponent), right: { type: "num", value: 1 } } };
                         if (rightDiv.type === "pow" && areEqualVars(leftDiv, rightDiv.base)) return { type: "pow", base: leftDiv, exponent: { type: "sub", left: { type: "num", value: 1 }, right: simplifyNode(rightDiv.exponent) } };
-                        return { type: "div", left: leftDiv, right: rightDiv };
+                        const flattenDiv = (n: any, type: string): any[] => n.type === type ? [...flattenDiv(n.left, type), ...flattenDiv(n.right, type)] : [n];
+                        const numFactors = flattenDiv(leftDiv, "mul");
+                        const denFactors = flattenDiv(rightDiv, "mul");
+                        let coeffNum = 1, coeffDen = 1;
+                        const powersNum: Record<string, number> = {}, powersDen: Record<string, number> = {};
+                        const othersNum: any[] = [], othersDen: any[] = [];
+                        for (let i = 0; i < numFactors.length; i++) {
+                            const f = numFactors[i];
+                            if (f.type === "num") {
+                                coeffNum *= f.value;
+                            } else if (f.type === "var") {
+                                powersNum[f.name] = (powersNum[f.name] || 0) + 1;
+                            } else if (f.type === "pow" && f.base.type === "var" && f.exponent.type === "num") {
+                                powersNum[f.base.name] = (powersNum[f.base.name] || 0) + f.exponent.value;
+                            } else {
+                                othersNum.push(f);
+                            }
+                        }
+                        for (let i = 0; i < denFactors.length; i++) {
+                            const f = denFactors[i];
+                            if (f.type === "num") {
+                                coeffDen *= f.value;
+                            } else if (f.type === "var") {
+                                powersDen[f.name] = (powersDen[f.name] || 0) + 1;
+                            } else if (f.type === "pow" && f.base.type === "var" && f.exponent.type === "num") {
+                                powersDen[f.base.name] = (powersDen[f.base.name] || 0) + f.exponent.value;
+                            } else {
+                                othersDen.push(f);
+                            }
+                        }
+                        let resultDiv: any = null;
+                        const coeffQuot = coeffNum / coeffDen;
+                        if (coeffQuot !== 1 || (Object.keys(powersNum).length === 0 && Object.keys(powersDen).length === 0 && othersNum.length === 0 && othersDen.length === 0)) resultDiv = { type: "num", value: coeffQuot };
+                        const allPowerKeys: string[] = [];
+                        for (const k in powersNum) if (allPowerKeys.indexOf(k) === -1) allPowerKeys.push(k);
+                        for (const k in powersDen) if (allPowerKeys.indexOf(k) === -1) allPowerKeys.push(k);
+                        for (let i = 0; i < allPowerKeys.length - 1; i++) {
+                            for (let j = i + 1; j < allPowerKeys.length; j++) {
+                                const pa = (powersNum[allPowerKeys[i]] || 0) - (powersDen[allPowerKeys[i]] || 0);
+                                const pb = (powersNum[allPowerKeys[j]] || 0) - (powersDen[allPowerKeys[j]] || 0);
+                                if (pb > pa) {
+                                    const tmp = allPowerKeys[i];
+                                    allPowerKeys[i] = allPowerKeys[j];
+                                    allPowerKeys[j] = tmp;
+                                }
+                            }
+                        }
+                        for (let i = 0; i < allPowerKeys.length; i++) {
+                            const k = allPowerKeys[i];
+                            const exp = (powersNum[k] || 0) - (powersDen[k] || 0);
+                            if (exp === 0) continue;
+                            if (exp === 1) {
+                                resultDiv = resultDiv ? { type: "mul", left: resultDiv, right: { type: "var", name: k } } : { type: "var", name: k };
+                            } else {
+                                resultDiv = resultDiv ? { type: "mul", left: resultDiv, right: { type: "pow", base: { type: "var", name: k }, exponent: { type: "num", value: exp } } } : { type: "pow", base: { type: "var", name: k }, exponent: { type: "num", value: exp } };
+                            }
+                        }
+                        for (let i = 0; i < othersNum.length; i++) resultDiv = resultDiv ? { type: "mul", left: resultDiv, right: othersNum[i] } : othersNum[i];
+                        for (let i = 0; i < othersDen.length; i++) resultDiv = { type: "div", left: resultDiv, right: othersDen[i] };
+                        return resultDiv;
                     case "pow":
                         const base = simplifyNode(node.base);
                         const exponent = simplifyNode(node.exponent);
@@ -661,11 +821,14 @@ namespace Chalkboard {
                         if (base.type === "num" && base.value === 1) return { type: "num", value: 1 };
                         if (base.type === "num" && exponent.type === "num") return { type: "num", value: Math.pow(base.value, exponent.value) };
                         if (base.type === "pow") return { type: "pow", base: base.base, exponent: { type: "mul", left: simplifyNode(base.exponent), right: exponent } };
+                        if (base.type === "mul" && exponent.type === "num") return simplifyNode({ type: "mul", left: { type: "pow", base: base.left, exponent }, right: { type: "pow", base: base.right, exponent } });
                         return { type: "pow", base, exponent };
                     case "neg":
                         const expr = simplifyNode(node.expr);
                         if (expr.type === "neg") return expr.expr;
                         if (expr.type === "num") return { type: "num", value: -expr.value };
+                        if (expr.type === "add") return simplifyNode({ type: "add", left: simplifyNode({ type: "neg", expr: expr.left }), right: simplifyNode({ type: "neg", expr: expr.right }) });
+                        if (expr.type === "sub") return simplifyNode({ type: "sub", left: { type: "neg", expr: expr.left }, right: expr.right });
                         return { type: "neg", expr };
                     case "func": 
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
@@ -685,7 +848,14 @@ namespace Chalkboard {
                 const tokens = tokenize(input);
                 const ast = parseTokens(tokens);
                 if (values && Object.keys(values).length > 0) return evaluateNode(ast, values);
-                const simplified = simplifyNode(ast);
+                let simplified = ast;
+                let prev = "";
+                let curr = JSON.stringify(simplified);
+                while (prev !== curr) {
+                    prev = curr;
+                    simplified = simplifyNode(simplified);
+                    curr = JSON.stringify(simplified);
+                }
                 if (returnAST) return simplified;
                 return nodeToString(simplified);
             } catch (err) {
