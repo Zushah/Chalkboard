@@ -404,6 +404,10 @@ namespace Chalkboard {
             const tokenize = (input: string): string[] => {
                 const tokens: string[] = [];
                 let i = 0;
+                const registered = ["sin", "cos", "tan", "abs", "sqrt", "log", "ln", "exp", "min", "max"];
+                const isFunction = (name: string): boolean => {
+                    return registered.includes(name.toLowerCase()) || (Chalkboard.REGISTRY && Chalkboard.REGISTRY[name.toLowerCase()] !== undefined);
+                };
                 while (i < input.length) {
                     const ch = input[i];
                     if (/\s/.test(ch)) {
@@ -438,7 +442,13 @@ namespace Chalkboard {
                             name += input[i++];
                         }
                         tokens.push(name);
-                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                        if (i < input.length && input[i] === '(') {
+                            if (!isFunction(name)) {
+                                tokens.push("*");
+                            }
+                        } else if (i < input.length && (/[a-zA-Z_]/.test(input[i]))) {
+                            tokens.push("*");
+                        }
                     } else {
                         throw new Error(`Chalkboard.comp.parse: Unexpected character ${ch}`);
                     }
@@ -560,8 +570,19 @@ namespace Chalkboard {
                     case "func":
                         const funcName = node.name.toLowerCase();
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => evaluateNode(arg, values));
+                        if (Chalkboard.REGISTRY && Chalkboard.REGISTRY[funcName]) {
+                            try {
+                                const realArgs = args.map((arg: { type: string, [key: string]: any }) => {
+                                    if (arg.b !== 0) throw new Error("Complex argument in real function");
+                                    return arg.a;
+                                });
+                                const result = Chalkboard.REGISTRY[funcName](...realArgs);
+                                return Chalkboard.comp.init(result, 0);
+                            } catch (e) {}
+                        }
                         switch (funcName) {
                             case "conj":
+                            case "conjugate":
                                 return Chalkboard.comp.conjugate(args[0]) as ChalkboardComplex;
                             case "mag":
                                 return Chalkboard.comp.init(Chalkboard.comp.mag(args[0]), 0);
@@ -608,7 +629,7 @@ namespace Chalkboard {
                     case "add":
                         return `${nodeToString(node.left)} + ${nodeToString(node.right)}`;
                     case "sub":
-                        const rightStr = node.right.type === "add" || node.right.type === "sub" ?`(${nodeToString(node.right)})` : nodeToString(node.right);
+                        const rightStr = node.right.type === "add" || node.right.type === "sub" ? `(${nodeToString(node.right)})` : nodeToString(node.right);
                         return `${nodeToString(node.left)} - ${rightStr}`;
                     case "mul":
                         const leftMul = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
@@ -640,6 +661,14 @@ namespace Chalkboard {
                 return JSON.stringify(a) === JSON.stringify(b);
             };
             const simplifyNode = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
+                const isRealOnly = (node: { type: string, [key: string]: any }): boolean => {
+                    if (node.type === "complex") return node.b === 0;
+                    if (node.type === "num") return true;
+                    if (node.type === "var") return false;
+                    if (node.type === "add" || node.type === "sub" || node.type === "mul" || node.type === "div" || node.type === "pow") return isRealOnly(node.left) && isRealOnly(node.right);
+                    if (node.type === "neg") return isRealOnly(node.expr);
+                    return false;
+                };
                 switch (node.type) {
                     case "num":
                         return { type: "complex", a: node.value, b: 0 };
@@ -701,11 +730,7 @@ namespace Chalkboard {
                             if (Number.isInteger(power) && power > 1 && power <= 3) {
                                 let result = base;
                                 for (let i = 1; i < power; i++) {
-                                    result = {
-                                        type: "complex",
-                                        a: result.a * base.a - result.b * base.b,
-                                        b: result.a * base.b + result.b * base.a
-                                    };
+                                    result = { type: "complex", a: result.a * base.a - result.b * base.b, b: result.a * base.b + result.b * base.a };
                                 }
                                 return result;
                             }
@@ -745,9 +770,21 @@ namespace Chalkboard {
                                         const z = Chalkboard.comp.sq(Chalkboard.comp.init(args[0].a, args[0].b)) as ChalkboardComplex;
                                         return { type: "complex", a: z.a, b: z.b };
                                 }
-                            } catch (e) {
-                                return { type: "func", name: node.name, args };
-                            }
+                            } catch (e) {}
+                        }
+                        if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "complex" && arg.b === 0)) {
+                            try {
+                                switch (funcName) {
+                                    case "sin":
+                                    case "cos":
+                                    case "tan":
+                                    case "log":
+                                    case "ln":
+                                    case "exp":
+                                    case "abs":
+                                        break;
+                                }
+                            } catch (e) {}
                         }
                         return { type: "func", name: node.name, args };
                 }
@@ -757,7 +794,14 @@ namespace Chalkboard {
                 const tokens = tokenize(input);
                 const ast = parseTokens(tokens);
                 if (values && Object.keys(values).length > 0) return evaluateNode(ast, values);
-                const simplified = simplifyNode(ast);
+                let simplified = ast;
+                let prev = "";
+                let curr = JSON.stringify(simplified);
+                while (prev !== curr) {
+                    prev = curr;
+                    simplified = simplifyNode(simplified);
+                    curr = JSON.stringify(simplified);
+                }
                 if (returnAST) return simplified;
                 return nodeToString(simplified);
             } catch (err) {

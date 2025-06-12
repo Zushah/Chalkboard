@@ -414,9 +414,14 @@ namespace Chalkboard {
          * @returns {string | number | { type: string, [key: string]: any }}
          */
         export const parse = (input: string, values?: Record<string, number>, returnAST: boolean = false): string | number | { type: string, [key: string]: any } => {
+            if (input === "") return "";
             const tokenize = (input: string): string[] => {
                 const tokens: string[] = [];
                 let i = 0;
+                const registered = ["sin", "cos", "tan", "abs", "sqrt", "log", "ln", "exp", "min", "max"];
+                const isFunction = (name: string): boolean => {
+                    return registered.includes(name) || Chalkboard.REGISTRY[name] !== undefined;
+                };
                 while (i < input.length) {
                     const ch = input[i];
                     if (/\s/.test(ch)) {
@@ -426,7 +431,7 @@ namespace Chalkboard {
                     if ("+-*/^(),".indexOf(ch) !== -1) {
                         tokens.push(ch);
                         i++;
-                        if (ch === ")" && i < input.length && (/[a-zA-Z0-9_]/.test(input[i]))) tokens.push("*");
+                        if (ch === ")" && i < input.length && (/[a-zA-Z0-9_(]/.test(input[i]))) tokens.push("*");
                     } else if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(input[i+1]))) {
                         let num = "";
                         let hasDecimal = false;
@@ -435,14 +440,20 @@ namespace Chalkboard {
                             num += input[i++];
                         }
                         tokens.push(num);
-                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                        if (i < input.length && (/[a-zA-Z_(]/.test(input[i]))) tokens.push("*");
                     } else if (/[a-zA-Z_]/.test(ch)) {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
                             name += input[i++];
                         }
                         tokens.push(name);
-                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                        if (i < input.length && input[i] === '(') {
+                            if (!isFunction(name)) {
+                                tokens.push("*");
+                            }
+                        } else if (i < input.length && (/[a-zA-Z_]/.test(input[i]))) {
+                            tokens.push("*");
+                        }
                     } else {
                         throw new Error(`Chalkboard.real.parse: Unexpected character ${ch}`);
                     }
@@ -467,32 +478,32 @@ namespace Chalkboard {
                     return node;
                 };
                 const parseMultiplicative = (): { type: string, [key: string]: any } => {
-                    let node = parseExponent();
+                    let node = parseUnary();
                     while (peek() === "*" || peek() === "/") {
                         const op = consume();
-                        const right = parseExponent();
+                        const right = parseUnary();
                         node = { type: op === "*" ? "mul" : "div", left: node, right };
-                    }
-                    return node;
-                };
-                const parseExponent = (): { type: string, [key: string]: any } => {
-                    let node = parseUnary();
-                    if (peek() === "^") {
-                        consume("^");
-                        const right = parseExponent();
-                        node = { type: "pow", base: node, exponent: right };
                     }
                     return node;
                 };
                 const parseUnary = (): { type: string, [key: string]: any } => {
                     if (peek() === "-") {
                         consume("-");
-                        return { type: "neg", expr: parseUnary() };
+                        return { type: "neg", expr: parseExponent() }; 
                     } else if (peek() === "+") {
                         consume("+");
-                        return parseUnary();
+                        return parseExponent();
                     }
-                    return parsePrimary();
+                    return parseExponent();
+                };
+                const parseExponent = (): { type: string, [key: string]: any } => {
+                    let node = parsePrimary();
+                    if (peek() === "^") {
+                        consume("^");
+                        const right = parseExponent(); 
+                        node = { type: "pow", base: node, exponent: right };
+                    }
+                    return node;
                 };
                 const parsePrimary = (): { type: string, [key: string]: any } => {
                     const token = peek();
@@ -540,7 +551,11 @@ namespace Chalkboard {
                     case "add": return evaluateNode(node.left, values) + evaluateNode(node.right, values);
                     case "sub": return evaluateNode(node.left, values) - evaluateNode(node.right, values);
                     case "mul": return evaluateNode(node.left, values) * evaluateNode(node.right, values);
-                    case "div": return evaluateNode(node.left, values) / evaluateNode(node.right, values);
+                    case "div": 
+                        const numerator = evaluateNode(node.left, values);
+                        const denominator = evaluateNode(node.right, values);
+                        if (denominator === 0) throw new Error(`Chalkboard.real.parse: Division by zero`);
+                        return numerator / denominator;
                     case "pow": return Math.pow(evaluateNode(node.base, values), evaluateNode(node.exponent, values));
                     case "neg": return -evaluateNode(node.expr, values);
                     case "func":
@@ -580,6 +595,7 @@ namespace Chalkboard {
                     case "mul":
                         if (node.left.type === "num" && (node.right.type === "var" || node.right.type === "pow")) return `${nodeToString(node.left)}${nodeToString(node.right)}`;
                         if (node.left.type === "var" && node.right.type === "var") return `${nodeToString(node.left)}${nodeToString(node.right)}`;
+                        if (node.left.type === "mul" && ((node.left.left.type === "num" || node.left.right.type === "var" || node.left.right.type === "pow") || (node.left.right.type === "var" || node.left.right.type === "pow")) && (node.right.type === "var" || node.right.type === "pow")) return `${nodeToString(node.left)}${nodeToString(node.right)}`;
                         return `${nodeToString(node.left)} * ${nodeToString(node.right)}`;
                     case "div":
                         const leftDiv = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
@@ -834,6 +850,11 @@ namespace Chalkboard {
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
                         if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "num")) {
                             try {
+                                const funcName = node.name.toLowerCase();
+                                if (Chalkboard.REGISTRY[funcName] !== undefined) {
+                                    const argValues = args.map((arg: { type: string, [key: string]: any }) => arg.value);
+                                    return { type: "num", value: Chalkboard.REGISTRY[funcName](...argValues) };
+                                }
                                 const result = evaluateNode({ type: "func", name: node.name, args }, {});
                                 return { type: "num", value: result };
                             } catch (e) {
