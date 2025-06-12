@@ -419,20 +419,33 @@ namespace Chalkboard {
                 const tokens: string[] = [];
                 let i = 0;
                 const registered = ["sin", "cos", "tan", "abs", "sqrt", "log", "ln", "exp", "min", "max"];
-                const isFunction = (name: string): boolean => {
-                    return registered.includes(name) || Chalkboard.REGISTRY[name] !== undefined;
-                };
+                const isFunction = (name: string): boolean => registered.includes(name) || Chalkboard.REGISTRY[name] !== undefined;
                 while (i < input.length) {
                     const ch = input[i];
                     if (/\s/.test(ch)) {
                         i++;
                         continue;
                     }
-                    if ("+-*/^(),".indexOf(ch) !== -1) {
+                    if ("+-*/(),".indexOf(ch) !== -1) {
                         tokens.push(ch);
                         i++;
                         if (ch === ")" && i < input.length && (/[a-zA-Z0-9_(]/.test(input[i]))) tokens.push("*");
-                    } else if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(input[i+1]))) {
+                    } else if (ch === "^") {
+                        tokens.push(ch);
+                        i++;
+                        if (i < input.length && input[i] === '-') {
+                            let num = '-';
+                            i++;
+                            while (i < input.length && /[0-9.]/.test(input[i])) {
+                                num += input[i++];
+                            }
+                            if (num !== '-') {
+                                tokens.push(num);
+                            } else {
+                                tokens.push('-');
+                            }
+                        }
+                    } else if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(input[i + 1]))) {
                         let num = "";
                         let hasDecimal = false;
                         while (i < input.length && ((/[0-9]/.test(input[i])) || (input[i] === "." && !hasDecimal))) {
@@ -507,7 +520,7 @@ namespace Chalkboard {
                 };
                 const parsePrimary = (): { type: string, [key: string]: any } => {
                     const token = peek();
-                    if (/^[0-9.]/.test(token)) {
+                    if (/^-?[0-9]/.test(token) || /^-?\.[0-9]/.test(token)) {
                         consume();
                         return { type: "num", value: parseFloat(token) };
                     }
@@ -546,8 +559,20 @@ namespace Chalkboard {
                         return node.value;
                     case "var":
                         const varname = node.name;
-                        if (!(varname in values)) throw new Error(`Chalkboard.real.parse: Variable '${varname}' not defined in values`);
-                        return values[varname];
+                        if (varname in values) return values[varname];
+                        for (let i = 1; i < varname.length; i++) {
+                            const left = varname.substring(0, i);
+                            const right = varname.substring(i);
+                            if (left in values) {
+                                try {
+                                    const rightResult = evaluateNode({ type: "var", name: right }, values);
+                                    return values[left] * rightResult;
+                                } catch {
+                                    continue;
+                                }
+                            }
+                        }
+                        throw new Error(`Chalkboard.real.parse: Variable '${varname}' not defined in values`);
                     case "add": return evaluateNode(node.left, values) + evaluateNode(node.right, values);
                     case "sub": return evaluateNode(node.left, values) - evaluateNode(node.right, values);
                     case "mul": return evaluateNode(node.left, values) * evaluateNode(node.right, values);
@@ -593,14 +618,15 @@ namespace Chalkboard {
                         const rightStr = node.right.type === "add" || node.right.type === "sub" ?`(${nodeToString(node.right)})` : nodeToString(node.right);
                         return `${nodeToString(node.left)} - ${rightStr}`;
                     case "mul":
+                        if (node.left.type === "num" && node.left.value === -1 && node.right.type === "var") return `-${nodeToString(node.right)}`;
                         if (node.left.type === "num" && (node.right.type === "var" || node.right.type === "pow")) return `${nodeToString(node.left)}${nodeToString(node.right)}`;
                         if (node.left.type === "var" && node.right.type === "var") return `${nodeToString(node.left)}${nodeToString(node.right)}`;
                         if (node.left.type === "mul" && ((node.left.left.type === "num" || node.left.right.type === "var" || node.left.right.type === "pow") || (node.left.right.type === "var" || node.left.right.type === "pow")) && (node.right.type === "var" || node.right.type === "pow")) return `${nodeToString(node.left)}${nodeToString(node.right)}`;
                         return `${nodeToString(node.left)} * ${nodeToString(node.right)}`;
                     case "div":
-                        const leftDiv = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
-                        const rightDiv = (node.right.type === "add" || node.right.type === "sub" || node.right.type === "mul" || node.right.type === "div") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
-                        return `${leftDiv} / ${rightDiv}`;
+                        const powNode = { type: "pow", base: node.right, exponent: { type: "num", value: -1 } };
+                        const mulNode = { type: "mul", left: node.left, right: powNode };
+                        return nodeToString(mulNode);
                     case "pow":
                         const baseStr = (node.base.type !== "num" && node.base.type !== "var") ? `(${nodeToString(node.base)})` : nodeToString(node.base);
                         const expStr = (node.exponent.type !== "num" && node.exponent.type !== "var") ? `(${nodeToString(node.exponent)})` : nodeToString(node.exponent);
@@ -705,8 +731,48 @@ namespace Chalkboard {
                     case "mul":
                         const leftMul = simplifyNode(node.left);
                         const rightMul = simplifyNode(node.right);
-                        if (leftMul.type === "num" && (rightMul.type === "add" || rightMul.type === "sub")) return simplifyNode({ type: rightMul.type, left: { type: "mul", left: leftMul, right: rightMul.left }, right: { type: "mul", left: leftMul, right: rightMul.right } });
-                        if (rightMul.type === "num" && (leftMul.type === "add" || leftMul.type === "sub")) return simplifyNode({ type: leftMul.type, left: { type: "mul", left: rightMul, right: leftMul.left }, right: { type: "mul", left: rightMul, right: leftMul.right } });
+                        if (rightMul.type === "add" || rightMul.type === "sub") return simplifyNode({ type: rightMul.type, left: { type: "mul", left: leftMul, right: rightMul.left }, right: { type: "mul", left: leftMul, right: rightMul.right } });
+                        if (leftMul.type === "add" || leftMul.type === "sub") return simplifyNode({ type: leftMul.type, left: { type: "mul", left: rightMul, right: leftMul.left }, right: { type: "mul", left: rightMul, right: leftMul.right } });
+                        if ((leftMul.type === "add" || leftMul.type === "sub") && (rightMul.type === "add" || rightMul.type === "sub")) {
+                            const extractTerms = (node: any): any[] => {
+                                if (node.type === "add") {
+                                    return [...extractTerms(node.left), ...extractTerms(node.right)];
+                                } else if (node.type === "sub") {
+                                    const rightTerms = extractTerms(node.right).map(term => ({ 
+                                        type: "neg", 
+                                        expr: term 
+                                    }));
+                                    return [...extractTerms(node.left), ...rightTerms];
+                                } else {
+                                    return [node];
+                                }
+                            };
+                            const leftTerms = extractTerms(leftMul);
+                            const rightTerms = extractTerms(rightMul);
+                            const products = [];
+                            for (const leftTerm of leftTerms) {
+                                for (const rightTerm of rightTerms) {
+                                    if (leftTerm.type === "neg" && rightTerm.type === "neg") {
+                                        products.push(simplifyNode({ type: "mul", left: leftTerm.expr, right: rightTerm.expr }));
+                                    } else if (leftTerm.type === "neg") {
+                                        products.push(simplifyNode({ type: "neg", expr: { type: "mul", left: leftTerm.expr, right: rightTerm } }));
+                                    } else if (rightTerm.type === "neg") {
+                                        products.push(simplifyNode({ type: "neg", expr: { type: "mul", left: leftTerm, right: rightTerm.expr } }));
+                                    } else {
+                                        products.push(simplifyNode({ type: "mul", left: leftTerm, right: rightTerm }));
+                                    }
+                                }
+                            }
+                            let result = products[0];
+                            for (let i = 1; i < products.length; i++) {
+                                result = { 
+                                    type: "add", 
+                                    left: result, 
+                                    right: products[i] 
+                                };
+                            }
+                            return simplifyNode(result);
+                        }
                         const flattenMul = (n: any): any[] => n.type === "mul" ? [...flattenMul(n.left), ...flattenMul(n.right)] : [n];
                         const factors = flattenMul({ type: "mul", left: leftMul, right: rightMul });
                         let coeffMul = 1;
@@ -761,14 +827,26 @@ namespace Chalkboard {
                     case "div":
                         const leftDiv = simplifyNode(node.left);
                         const rightDiv = simplifyNode(node.right);
+                        if (leftDiv.type === "num" && leftDiv.value === 1 && (rightDiv.type === "add" || rightDiv.type === "sub")) return { type: "pow", base: rightDiv, exponent: { type: "num", value: -1 } };
+                        if (leftDiv.type === "add" || leftDiv.type === "sub") {
+                            const left = { type: "div", left: leftDiv.left, right: JSON.parse(JSON.stringify(rightDiv)) };
+                            const right = { type: "div", left: leftDiv.right, right: JSON.parse(JSON.stringify(rightDiv)) };
+                            return { type: leftDiv.type, left: simplifyNode(left), right: simplifyNode(right) };
+                        }
                         if (leftDiv.type === "num" && leftDiv.value === 0) return { type: "num", value: 0 };
                         if (rightDiv.type === "num" && rightDiv.value === 1) return leftDiv;
                         if (leftDiv.type === "num" && rightDiv.type === "num") return { type: "num", value: leftDiv.value / rightDiv.value };
                         if (areEqualVars(leftDiv, rightDiv)) return { type: "num", value: 1 };
+                        if (leftDiv.type === "num" && leftDiv.value === 1 && (rightDiv.type === "add" || rightDiv.type === "sub")) return { type: "pow", base: rightDiv, exponent: { type: "num", value: -1 } };
+                        if (leftDiv.type === "mul" && areEqualVars(leftDiv.right, rightDiv)) return simplifyNode(leftDiv.left);
+                        if (leftDiv.type === "mul" && areEqualVars(leftDiv.left, rightDiv)) return simplifyNode(leftDiv.right);
                         if (leftDiv.type === "pow" && rightDiv.type === "pow" && areEqualVars(leftDiv.base, rightDiv.base)) return { type: "pow", base: leftDiv.base, exponent: { type: "sub", left: simplifyNode(leftDiv.exponent), right: simplifyNode(rightDiv.exponent) } };
                         if (leftDiv.type === "pow" && areEqualVars(leftDiv.base, rightDiv)) return { type: "pow", base: rightDiv, exponent: { type: "sub", left: simplifyNode(leftDiv.exponent), right: { type: "num", value: 1 } } };
                         if (rightDiv.type === "pow" && areEqualVars(leftDiv, rightDiv.base)) return { type: "pow", base: leftDiv, exponent: { type: "sub", left: { type: "num", value: 1 }, right: simplifyNode(rightDiv.exponent) } };
-                        const flattenDiv = (n: any, type: string): any[] => n.type === type ? [...flattenDiv(n.left, type), ...flattenDiv(n.right, type)] : [n];
+                        const flattenDiv = (n: any, type: string): any[] => {
+                            if (!n) return [];
+                            return n.type === type ? [...flattenDiv(n.left, type), ...flattenDiv(n.right, type)] : [n];
+                        };
                         const numFactors = flattenDiv(leftDiv, "mul");
                         const denFactors = flattenDiv(rightDiv, "mul");
                         let coeffNum = 1, coeffDen = 1;
@@ -831,6 +909,49 @@ namespace Chalkboard {
                     case "pow":
                         const base = simplifyNode(node.base);
                         const exponent = simplifyNode(node.exponent);
+                        if ((base.type === "add" || base.type === "sub") && exponent.type === "num" && Number.isInteger(exponent.value)) {
+                            if (exponent.value < 0) {
+                                const absExpr = Math.abs(exponent.value);
+                                if (absExpr === 1) {
+                                    return { type: "pow", base: base, exponent: { type: "num", value: -1 } };
+                                } else {
+                                    const positiveExpr = { type: "pow", base, exponent: { type: "num", value: absExpr } };
+                                    const expanded = simplifyNode(positiveExpr);
+                                    return { type: "pow", base: expanded, exponent: { type: "num", value: -1 } };
+                                }
+                            } else if (exponent.value > 0) {
+                                const n = exponent.value;
+                                const a = base.left;
+                                const b = base.right;
+                                const sign = base.type === "add" ? 1 : -1;
+                                let result = null;
+                                for (let k = 0; k <= n; k++) {
+                                    const c = Chalkboard.numb.binomial(n, k);
+                                    const leftPower = n - k === 0 ? { type: "num", value: 1 } : (n - k === 1 ? a : simplifyNode({ type: "pow", base: a, exponent: { type: "num", value: n - k } }));
+                                    const rightPower = k === 0 ? { type: "num", value: 1 } : (k === 1 ? (sign === 1 ? b : { type: "neg", expr: b }) : simplifyNode({ type: "pow", base: b, exponent: { type: "num", value: k } }));
+                                    const termSign = (sign === -1 && k % 2 === 1) ? -1 : 1;
+                                    let term;
+                                    if (k === 0) {
+                                        term = leftPower;
+                                    } else if (n - k === 0) {
+                                        term = rightPower;
+                                    } else {
+                                        term = simplifyNode({ type: "mul", left: leftPower, right: rightPower });
+                                    }
+                                    if (c !== 1) {
+                                        term = simplifyNode({ type: "mul", left: { type: "num", value: termSign * c }, right: term });
+                                    } else if (termSign === -1) {
+                                        term = { type: "neg", expr: term };
+                                    }
+                                    if (result === null) {
+                                        result = term;
+                                    } else {
+                                        result = simplifyNode({ type: "add", left: result, right: term });
+                                    }
+                                }
+                                return result;
+                            }
+                        }
                         if (exponent.type === "num" && exponent.value === 0) return { type: "num", value: 1 };
                         if (exponent.type === "num" && exponent.value === 1) return base;
                         if (base.type === "num" && base.value === 0 && exponent.type === "num" && exponent.value > 0) return { type: "num", value: 0 };
@@ -844,7 +965,7 @@ namespace Chalkboard {
                         if (expr.type === "neg") return expr.expr;
                         if (expr.type === "num") return { type: "num", value: -expr.value };
                         if (expr.type === "add") return simplifyNode({ type: "add", left: simplifyNode({ type: "neg", expr: expr.left }), right: simplifyNode({ type: "neg", expr: expr.right }) });
-                        if (expr.type === "sub") return simplifyNode({ type: "sub", left: { type: "neg", expr: expr.left }, right: expr.right });
+                        if (expr.type === "sub") return simplifyNode({ type: "add", left: simplifyNode({ type: "neg", expr: expr.left }), right: expr.right });
                         return { type: "neg", expr };
                     case "func": 
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
@@ -869,14 +990,10 @@ namespace Chalkboard {
                 const tokens = tokenize(input);
                 const ast = parseTokens(tokens);
                 if (values && Object.keys(values).length > 0) return evaluateNode(ast, values);
-                let simplified = ast;
-                let prev = "";
-                let curr = JSON.stringify(simplified);
-                while (prev !== curr) {
-                    prev = curr;
-                    simplified = simplifyNode(simplified);
-                    curr = JSON.stringify(simplified);
-                }
+                let simplified = simplifyNode(ast);
+                let normalizedast = parseTokens(tokenize(nodeToString(simplified)));
+                simplified = simplifyNode(normalizedast);
+                simplified = simplifyNode(simplified);
                 if (returnAST) return simplified;
                 return nodeToString(simplified);
             } catch (err) {
