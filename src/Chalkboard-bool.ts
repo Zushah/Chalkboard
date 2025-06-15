@@ -454,7 +454,7 @@ namespace Chalkboard {
          * @param {Record<string, boolean | 0 | 1>} [config.values] - Optional object mapping variable names to values
          * @param {boolean} [config.returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
          * @param {boolean} [config.returnJSON=false] - If true, returns an AST in JSON instead of a string
-         * @param {boolean} [config.returnLATEX=false] - If true, returns LaTeX code instead of a string
+         * @param {boolean} [config.returnLaTeX=false] - If true, returns LaTeX code instead of a string
          * @returns {string | boolean | 0 | 1 | { type: string, [key: string]: any }}
          * @example
          * // Simplify expression
@@ -474,8 +474,8 @@ namespace Chalkboard {
                 values?: Record<string, boolean | 0 | 1>,
                 returnAST?: boolean,
                 returnJSON?: boolean,
-                returnLATEX?: boolean
-            } = { returnAST: false, returnJSON: false, returnLATEX: false }
+                returnLaTeX?: boolean
+            } = { returnAST: false, returnJSON: false, returnLaTeX: false }
         ): string | boolean | 0 | 1 | { type: string, [key: string]: any } => {
             const tokenize = (input: string): string[] => {
                 const tokens: string[] = [];
@@ -599,6 +599,28 @@ namespace Chalkboard {
                 }
                 return "";
             };
+            const nodeToLaTeX = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "bool": {
+                        return node.value ? "1" : "0";
+                    }
+                    case "var": {
+                        return node.name;
+                    }
+                    case "not": {
+                        return `\\neg ${nodeToLaTeX(node.expr)}`;
+                    }
+                    case "and": {
+                        return `${nodeToLaTeX(node.left)} \\land ${nodeToLaTeX(node.right)}`;
+                    }
+                    case "or": {
+                        return `${nodeToLaTeX(node.left)} \\lor ${nodeToLaTeX(node.right)}`;
+                    }
+                    default: {
+                        throw new Error(`Chalkboard.bool.parse: Unknown node type ${node.type}`);
+                    }
+                }
+            };
             const getAndFactors = (node: { type: string, [key: string]: any }): Array<{ type: string, [key: string]: any }> => {
                 if (node.type === "and") return [...getAndFactors(node.left), ...getAndFactors(node.right)];
                 return [node];
@@ -714,6 +736,7 @@ namespace Chalkboard {
                 simplified = simplifyNode(simplified);
                 if (config.returnAST) return simplified;
                 if (config.returnJSON) return JSON.stringify(simplified);
+                if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
                 if (err instanceof Error) {

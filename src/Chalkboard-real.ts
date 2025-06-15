@@ -413,7 +413,7 @@ namespace Chalkboard {
          * @param {number} [config.roundTo] - Optional number of decimal places to round the result to
          * @param {boolean} [config.returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
          * @param {boolean} [config.returnJSON=false] - If true, returns an AST in JSON instead of a string
-         * @param {boolean} [config.returnLATEX=false] - If true, returns LaTeX code instead of a string
+         * @param {boolean} [config.returnLaTeX=false] - If true, returns LaTeX code instead of a string
          * @returns {string | number | { type: string, [key: string]: any }}
          */
         export const parse = (
@@ -423,8 +423,8 @@ namespace Chalkboard {
                 roundTo?: number,
                 returnAST?: boolean,
                 returnJSON?: boolean,
-                returnLATEX?: boolean
-            } = { returnAST: false, returnJSON: false, returnLATEX: false }
+                returnLaTeX?: boolean
+            } = { returnAST: false, returnJSON: false, returnLaTeX: false }
         ): string | number | { type: string, [key: string]: any } => {
             if (expr === "") return "";
             const tokenize = (input: string): string[] => {
@@ -674,6 +674,40 @@ namespace Chalkboard {
                     }
                 }
                 return "";
+            };
+            const nodeToLaTeX = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "num": {
+                        return node.value.toString();
+                    }
+                    case "var": {
+                        return node.name;
+                    }
+                    case "add": {
+                        return `${nodeToLaTeX(node.left)} + ${nodeToLaTeX(node.right)}`;
+                    }
+                    case "sub": {
+                        return `${nodeToLaTeX(node.left)} - ${nodeToLaTeX(node.right)}`;
+                    }
+                    case "mul": {
+                        return `${nodeToLaTeX(node.left)}${nodeToLaTeX(node.right)}`;
+                    }
+                    case "div": {
+                        return `\\frac{${nodeToLaTeX(node.left)}}{${nodeToLaTeX(node.right)}}`;
+                    }
+                    case "pow": {
+                        return `${nodeToLaTeX(node.base)}^{${nodeToLaTeX(node.exponent)}}`;
+                    }
+                    case "neg": {
+                        return `-${nodeToLaTeX(node.expr)}`;
+                    }
+                    case "func": {
+                        return `\\mathrm{${node.name}}\\left(${node.args.map(nodeToLaTeX).join(", ")}\\right)`;
+                    }
+                    default: {
+                        throw new Error(`Chalkboard.real.parse: Unknown node type ${node.type}`);
+                    }
+                }
             };
             const areEqualVars = (a: { type: string, [key: string]: any }, b: { type: string, [key: string]: any }): boolean => {
                 if (a.type === "var" && b.type === "var") return a.name === b.name;
@@ -1059,6 +1093,7 @@ namespace Chalkboard {
                 }
                 if (config.returnAST) return simplified;
                 if (config.returnJSON) return JSON.stringify(simplified);
+                if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
                 if (err instanceof Error) {
