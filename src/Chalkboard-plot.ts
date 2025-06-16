@@ -12,7 +12,7 @@ namespace Chalkboard {
         /** @ignore */
         const getContext = (): CanvasRenderingContext2D => {
             try {
-                return Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D;
+                return Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')() as CanvasRenderingContext2D;
             } catch (e) {
                 throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
             }

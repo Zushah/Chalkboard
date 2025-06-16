@@ -447,19 +447,18 @@ namespace Chalkboard {
 
         /**
          * Returns the product of a sequence.
-         * @param {string} formula - Sequence written in product notation with the variable "n"
+         * @param {(n: number) => number} formula - Sequence written in product notation
          * @param {number} inf - Lower bound
          * @param {number} sup - Upper bound
          * @returns {number}
          * @example
          * // Returns 120
-         * const mul = Chalkboard.numb.mul("n + 1", 0, 5);
+         * const mul = Chalkboard.numb.mul((n) => n + 1, 0, 5);
          */
-        export const mul = (formula: string, inf: number, sup: number): number => {
+        export const mul = (formula: (n: number) => number, inf: number, sup: number): number => {
             let result = 1;
-            const f = Chalkboard.real.parse("n => " + formula);
             for (let i = inf; i <= sup; i++) {
-                result *= f(i);
+                result *= formula(i);
             }
             return result;
         };
@@ -645,19 +644,18 @@ namespace Chalkboard {
 
         /**
          * Returns the summation of a sequence.
-         * @param {string} formula - Sequence written in summation notation with the variable "n"
+         * @param {(n: number) => number} formula - Sequence written in summation notation
          * @param {number} inf - Lower bound
          * @param {number} sup - Upper bound
          * @returns {number}
          * @example
          * // Returns almost π²/6
-         * const sum = Chalkboard.numb.sum("1 / (n * n)", 0, 1000);
+         * const sum = Chalkboard.numb.sum((n) => 1 / (n * n), 0, 1000);
          */
-        export const sum = (formula: string, inf: number, sup: number): number => {
+        export const sum = (formula: (n: number) => number, inf: number, sup: number): number => {
             let result = 0;
-            const f = Chalkboard.real.parse("n => " + formula);
             for (let i = inf; i <= sup; i++) {
-                result += f(i);
+                result += formula(i);
             }
             return result;
         };

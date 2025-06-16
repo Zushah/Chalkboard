@@ -100,7 +100,7 @@ namespace Chalkboard {
         export const isEqual = (expr1: string, expr2: string): boolean | 0 | 1 => {
             const variables: string[] = [];
             const varextract = (expr: string): void => {
-                const ast = Chalkboard.bool.parse(expr, {}, true) as { type: string, [key: string]: any };
+                const ast = Chalkboard.bool.parse(expr, { returnAST: true }) as { type: string, [key: string]: any };
                 const traverse = (node: { type: string, [key: string]: any }): void => {
                     if (node.type === "var" && !variables.includes(node.name)) {
                         variables.push(node.name);
@@ -119,15 +119,12 @@ namespace Chalkboard {
                 if (index >= vars.length) return [current];
                 const withTrue = { ...current, [vars[index]]: true };
                 const withFalse = { ...current, [vars[index]]: false };
-                return [
-                    ...generateAssignments(vars, index + 1, withTrue),
-                    ...generateAssignments(vars, index + 1, withFalse)
-                ];
+                return [...generateAssignments(vars, index + 1, withTrue), ...generateAssignments(vars, index + 1, withFalse)];
             };
             const assignments = generateAssignments(variables);
-            for (const assignment of assignments) {
-                const result1 = Chalkboard.bool.parse(expr1, assignment);
-                const result2 = Chalkboard.bool.parse(expr2, assignment);
+            for (const values of assignments) {
+                const result1 = Chalkboard.bool.parse(expr1, { values});
+                const result2 = Chalkboard.bool.parse(expr2, { values});
                 if (result1 !== result2) return $(false);
             }
             return $(true);
@@ -190,7 +187,7 @@ namespace Chalkboard {
                     for (let j = 0; j < colvars.length; j++) {
                         values[colvars[j]] = c[j] === "1";
                     }
-                    const parsed = Chalkboard.bool.parse(input, values);
+                    const parsed = Chalkboard.bool.parse(input, { values });
                     const booled = parsed === true || parsed === 1;
                     row.push($(booled));
                 }
@@ -274,7 +271,7 @@ namespace Chalkboard {
                     values[variables[i]] = args[i];
                 }
                 return expressions.map((expr) => {
-                    const parsed = Chalkboard.bool.parse(expr, values);
+                    const parsed = Chalkboard.bool.parse(expr, { values });
                     const booled = parsed === true || parsed === 1;
                     return $(booled);
                 });
@@ -291,7 +288,7 @@ namespace Chalkboard {
          */
         export const minimize = (input: string, variables: string[]): string => {
             if (variables.length === 0) {
-                const result = Chalkboard.bool.parse(input, {});
+                const result = Chalkboard.bool.parse(input);
                 return result ? "true" : "false";
             }
             if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
@@ -453,9 +450,11 @@ namespace Chalkboard {
 
         /**
          * Parses, simplifies, and optionally evaluates a boolean expression. When called with values, it evaluates the expression with the provided variable values, and otherwise, it simplifies the expression to its minimal form. Supports variables (a-z, A-Z, 0-9, _), operators (!, &, |), and parentheses.
-         * @param {string} input - The boolean expression to parse
-         * @param {Record<string, boolean | 0 | 1>} [values] - Optional object mapping variable names to values
-         * @param {boolean} [returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
+         * @param {string} expr - The boolean expression to parse
+         * @param {Record<string, boolean | 0 | 1>} [config.values] - Optional object mapping variable names to values
+         * @param {boolean} [config.returnAST=false] - If true, returns an abstract syntax tree (AST) instead of a string
+         * @param {boolean} [config.returnJSON=false] - If true, returns an AST in JSON instead of a string
+         * @param {boolean} [config.returnLaTeX=false] - If true, returns LaTeX code instead of a string
          * @returns {string | boolean | 0 | 1 | { type: string, [key: string]: any }}
          * @example
          * // Simplify expression
@@ -463,13 +462,21 @@ namespace Chalkboard {
          * const q = Chalkboard.bool.parse("(x & y) | (x & z)"); // Returns "x & (y | z)"
          * 
          * // Evaluate expression with values
-         * const r = Chalkboard.bool.parse("x & y | z", { x: true, y: false, z: true }); // Returns true
-         * const s = Chalkboard.bool.parse("a & !b", { a: 1, b: 0 }); // Returns true
+         * const r = Chalkboard.bool.parse("x & y | z", { values: { x: true, y: false, z: true } }); // Returns true
+         * const s = Chalkboard.bool.parse("a & !b", { values: { a: 1, b: 0 } }); // Returns true
          * 
          * // Get AST representation
-         * const t = Chalkboard.bool.parse("x & y", {}, true); // Returns AST object
+         * const t = Chalkboard.bool.parse("x & y", { returnAST: true }); // Returns AST object
          */
-        export const parse = (input: string, values?: Record<string, boolean | 0 | 1>, returnAST: boolean = false): string | boolean | 0 | 1 | { type: string, [key: string]: any } => {
+        export const parse = (
+            expr: string,
+            config: {
+                values?: Record<string, boolean | 0 | 1>,
+                returnAST?: boolean,
+                returnJSON?: boolean,
+                returnLaTeX?: boolean
+            } = { returnAST: false, returnJSON: false, returnLaTeX: false }
+        ): string | boolean | 0 | 1 | { type: string, [key: string]: any } => {
             const tokenize = (input: string): string[] => {
                 const tokens: string[] = [];
                 let i = 0;
@@ -551,66 +558,83 @@ namespace Chalkboard {
             const nodeEqual = (a: { type: string, [key: string]: any }, b: { type: string, [key: string]: any }): boolean => {
                 if (a.type !== b.type) return false;
                 switch(a.type) {
-                    case "bool":
+                    case "bool": {
                         return a.value === b.value;
-                    case "var":
+                    }
+                    case "var": {
                         return a.name === b.name;
-                    case "not":
+                    }
+                    case "not": {
                         return nodeEqual(a.expr, b.expr);
-                    case "and":
-                    case "or":
+                    }
+                    case "and": {
                         return nodeEqual(a.left, b.left) && nodeEqual(a.right, b.right);
+                    }
+                    case "or": {
+                        return nodeEqual(a.left, b.left) && nodeEqual(a.right, b.right);
+                    }
                 }
                 return false;
             };
             const nodeToString = (node: { type: string, [key: string]: any }): string => {
                 switch (node.type) {
-                    case "bool":
+                    case "bool": {
                         return node.value ? "true" : "false";
-                    case "var":
+                    }
+                    case "var": {
                         return node.name;
-                    case "not":
-                        const inner = node.expr.type === "var" ? 
-                            nodeToString(node.expr) : 
-                            `(${nodeToString(node.expr)})`;
+                    }
+                    case "not": {
+                        const inner = node.expr.type === "var" ? nodeToString(node.expr) : `(${nodeToString(node.expr)})`;
                         return `!${inner}`;
-                    case "and":
-                        const leftAnd = node.left.type === "or" ? 
-                            `(${nodeToString(node.left)})` : 
-                            nodeToString(node.left);
-                        const rightAnd = node.right.type === "or" ? 
-                            `(${nodeToString(node.right)})` : 
-                            nodeToString(node.right);
+                    }
+                    case "and": {
+                        const leftAnd = node.left.type === "or" ? `(${nodeToString(node.left)})` : nodeToString(node.left);
+                        const rightAnd = node.right.type === "or" ? `(${nodeToString(node.right)})` : nodeToString(node.right);
                         return `${leftAnd} & ${rightAnd}`;
-                    case "or":
+                    }
+                    case "or": {
                         return `${nodeToString(node.left)} | ${nodeToString(node.right)}`;
+                    }
                 }
                 return "";
             };
-            const getAndFactors = (node: { type: string, [key: string]: any }): Array<{ type: string, [key: string]: any }> => {
-                if (node.type === "and") {
-                    return [...getAndFactors(node.left), ...getAndFactors(node.right)];
+            const nodeToLaTeX = (node: { type: string, [key: string]: any }): string => {
+                switch (node.type) {
+                    case "bool": {
+                        return node.value ? "1" : "0";
+                    }
+                    case "var": {
+                        return node.name;
+                    }
+                    case "not": {
+                        return `\\neg ${nodeToLaTeX(node.expr)}`;
+                    }
+                    case "and": {
+                        return `${nodeToLaTeX(node.left)} \\land ${nodeToLaTeX(node.right)}`;
+                    }
+                    case "or": {
+                        return `${nodeToLaTeX(node.left)} \\lor ${nodeToLaTeX(node.right)}`;
+                    }
+                    default: {
+                        throw new Error(`Chalkboard.bool.parse: Unknown node type ${node.type}`);
+                    }
                 }
+            };
+            const getAndFactors = (node: { type: string, [key: string]: any }): Array<{ type: string, [key: string]: any }> => {
+                if (node.type === "and") return [...getAndFactors(node.left), ...getAndFactors(node.right)];
                 return [node];
             };
             const detectTautology = (left: { type: string, [key: string]: any }, right: { type: string, [key: string]: any }): boolean => {
-                if (left.type === "not" && right.type === "var" && 
-                    nodeEqual(left.expr, right)) {
-                    return true;
-                }
-                if (right.type === "not" && left.type === "var" && 
-                    nodeEqual(right.expr, left)) {
-                    return true;
-                }
+                if (left.type === "not" && right.type === "var" && nodeEqual(left.expr, right)) return true;
+                if (right.type === "not" && left.type === "var" && nodeEqual(right.expr, left)) return true;
                 return false;
             };
             const simplifyOrNode = (node: { type: string, left: any, right: any, [key: string]: any }): { type: string, [key: string]: any } => {
                 if (node.type !== "or") return node;
                 const left = simplifyNode(node.left);
                 const right = simplifyNode(node.right);
-                if (detectTautology(left, right)) {
-                    return { type: "bool", value: true };
-                }
+                if (detectTautology(left, right)) return { type: "bool", value: true };
                 if (left.type === "bool" && left.value === true) return { type: "bool", value: true };
                 if (right.type === "bool" && right.value === true) return { type: "bool", value: true };
                 if (left.type === "bool" && left.value === false) return right;
@@ -618,111 +642,101 @@ namespace Chalkboard {
                 const leftFactors = left.type === "and" ? getAndFactors(left) : [left];
                 const rightFactors = right.type === "and" ? getAndFactors(right) : [right];
                 const commons: Array<{ type: string, [key: string]: any }> = [];
-                leftFactors.forEach(fa => {
-                    if (rightFactors.some(fb => nodeEqual(fa, fb)) &&
-                        !commons.some(c => nodeEqual(c, fa))) {
+                leftFactors.forEach((fa) => {
+                    if (rightFactors.some((fb) => nodeEqual(fa, fb)) && !commons.some((c) => nodeEqual(c, fa))) {
                         commons.push(fa);
                     }
                 });
                 for (let i = 0; i < leftFactors.length; i++) {
                     for (let j = 0; j < rightFactors.length; j++) {
                         if (detectTautology(leftFactors[i], rightFactors[j])) {
-                            return commons.length === 0 ? 
-                                { type: "bool", value: true } : 
-                                commons.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }));
+                            return commons.length === 0 ? { type: "bool", value: true } : commons.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }));
                         }
                     }
                 }
                 if (commons.length > 0) {
                     const removeCommon = (factors: Array<{ type: string, [key: string]: any }>): { type: string, [key: string]: any } => {
-                        const remaining = factors.filter(f => 
-                            !commons.some(c => nodeEqual(c, f))
-                        );
+                        const remaining = factors.filter((f) => !commons.some(c => nodeEqual(c, f)));
                         if (remaining.length === 0) return { type: "bool", value: true };
                         if (remaining.length === 1) return remaining[0];
-                        return remaining.reduce((acc, cur) => 
-                            ({ type: "and", left: acc, right: cur })
-                        );
+                        return remaining.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }));
                     };
-                    
                     const newLeft = removeCommon(leftFactors);
                     const newRight = removeCommon(rightFactors);
-
                     let combined: { type: string, [key: string]: any };
-                    if ((newLeft.type === "bool" && newLeft.value === true) || 
-                        (newRight.type === "bool" && newRight.value === true)) {
+                    if ((newLeft.type === "bool" && newLeft.value === true) || (newRight.type === "bool" && newRight.value === true)) {
                         combined = { type: "bool", value: true };
                     } else {
                         combined = { type: "or", left: newLeft, right: newRight };
                     }
-
-                    return commons.reduce((acc, cur) => 
-                        ({ type: "and", left: acc, right: cur }), combined);
+                    return commons.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }), combined);
                 }
                 return { type: "or", left, right };
             };
             const simplifyNode = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
                 switch (node.type) {
-                    case "bool":
-                    case "var":
+                    case "bool": {
                         return node;
-                    case "not":
+                    }
+                    case "var": {
+                        return node;
+                    }
+                    case "not": {
                         const expr = simplifyNode(node.expr);
                         if (expr.type === "not") return simplifyNode(expr.expr);
                         if (expr.type === "bool") return { type: "bool", value: !expr.value };
                         return { type: "not", expr };
-                    case "and":
+                    }
+                    case "and": {
                         const left = simplifyNode(node.left);
                         const right = simplifyNode(node.right);
-
-                        if ((left.type === "bool" && left.value === false) || 
-                            (right.type === "bool" && right.value === false)) {
-                            return { type: "bool", value: false };
-                        }
+                        if ((left.type === "bool" && left.value === false) || (right.type === "bool" && right.value === false)) return { type: "bool", value: false };
                         if (left.type === "bool" && left.value === true) return right;
                         if (right.type === "bool" && right.value === true) return left;
                         if (nodeEqual(left, right)) return left;
-
-                        if ((left.type === "not" && nodeEqual(left.expr, right)) ||
-                            (right.type === "not" && nodeEqual(right.expr, left))) {
-                            return { type: "bool", value: false };
-                        }
+                        if ((left.type === "not" && nodeEqual(left.expr, right)) || (right.type === "not" && nodeEqual(right.expr, left))) return { type: "bool", value: false };
                         return { type: "and", left, right };
-                    case "or":
+                    }
+                    case "or": {
                         return simplifyOrNode(node as { type: string, left: any, right: any, [key: string]: any });
+                    }
                 }
                 return node;
             };
             const evaluateNode = (node: { type: string, [key: string]: any }, values: Record<string, boolean | 0 | 1>): boolean => {
                 switch (node.type) {
-                    case "bool":
+                    case "bool": {
                         return node.value;
-                    case "var":
+                    }
+                    case "var": {
                         const varname = node.name;
-                        if (!(varname in values)) {
-                            throw new Error(`Variable "${varname}" not defined in values`);
-                        }
+                        if (!(varname in values)) throw new Error(`Variable "${varname}" not defined in values`);
                         const value = values[varname];
                         return value === true || value === 1;
-                    case "not":
+                    }
+                    case "not": {
                         return !evaluateNode(node.expr, values);
-                    case "and":
+                    }
+                    case "and": {
                         return evaluateNode(node.left, values) && evaluateNode(node.right, values);
-                    case "or":
+                    }
+                    case "or": {
                         return evaluateNode(node.left, values) || evaluateNode(node.right, values);
+                    }
                 }
                 throw new Error(`Unknown node type: ${node.type}`);
             };
             try {
-                const tokens = tokenize(input);
+                const tokens = tokenize(expr);
                 const ast = parseTokens(tokens);
-                if (values && Object.keys(values).length > 0) {
-                    return $(evaluateNode(ast, values));
-                }
-                const simplified = simplifyNode(ast);
-                if (returnAST) {
-                    return simplified;
-                }
+                if (config.values && Object.keys(config.values).length > 0) return $(evaluateNode(ast, config.values));
+                let simplified = simplifyNode(ast);
+                let normalizedast = parseTokens(tokenize(nodeToString(simplified)));
+                simplified = simplifyNode(normalizedast);
+                simplified = simplifyNode(simplified);
+                if (config.returnAST) return simplified;
+                if (config.returnJSON) return JSON.stringify(simplified);
+                if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
                 if (err instanceof Error) {
@@ -910,7 +924,7 @@ namespace Chalkboard {
             if (simplified.includes(" & ") && !simplified.includes(" | ")) {
                 return simplified;
             }
-            const ast = Chalkboard.bool.parse(input, {}, true) as { type: string, [key: string]: any };
+            const ast = Chalkboard.bool.parse(input, { returnAST: true }) as { type: string, [key: string]: any };
             const convertToCNF = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
                 switch (node.type) {
                     case "bool":
@@ -992,7 +1006,7 @@ namespace Chalkboard {
             if (simplified.includes(" | ") && !simplified.includes(" & ")) {
                 return simplified;
             }
-            const ast = Chalkboard.bool.parse(input, {}, true) as { type: string, [key: string]: any };
+            const ast = Chalkboard.bool.parse(input, { returnAST: true }) as { type: string, [key: string]: any };
             const convertToDNF = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
                 switch (node.type) {
                     case "bool":
