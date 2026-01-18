@@ -608,13 +608,18 @@ namespace Chalkboard {
                         return node.name;
                     }
                     case "not": {
-                        return `\\neg ${nodeToLaTeX(node.expr)}`;
+                        const inner = (node.expr.type === "var" || node.expr.type === "bool") ? nodeToLaTeX(node.expr) : `\\left(${nodeToLaTeX(node.expr)}\\right)`;
+                        return `\\neg ${inner}`;
                     }
                     case "and": {
-                        return `${nodeToLaTeX(node.left)} \\land ${nodeToLaTeX(node.right)}`;
+                        const left = node.left.type === "or" ? `\\left(${nodeToLaTeX(node.left)}\\right)` : nodeToLaTeX(node.left);
+                        const right = node.right.type === "or" ? `\\left(${nodeToLaTeX(node.right)}\\right)` : nodeToLaTeX(node.right);
+                        return `${left} \\land ${right}`;
                     }
                     case "or": {
-                        return `${nodeToLaTeX(node.left)} \\lor ${nodeToLaTeX(node.right)}`;
+                        const left = node.left.type === "and" ? `\\left(${nodeToLaTeX(node.left)}\\right)` : nodeToLaTeX(node.left);
+                        const right = node.right.type === "and" ? `\\left(${nodeToLaTeX(node.right)}\\right)` : nodeToLaTeX(node.right);
+                        return `${left} \\lor ${right}`;
                     }
                     default: {
                         throw new Error(`Chalkboard.bool.parse: Unknown node type ${node.type}`);
