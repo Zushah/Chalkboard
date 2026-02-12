@@ -424,29 +424,18 @@ namespace Chalkboard {
                         i++;
                         continue;
                     }
-                    if ("+-*/(),".indexOf(ch) !== -1) {
+                    if ("+-*/(),^".indexOf(ch) !== -1) {
                         tokens.push(ch);
                         i++;
-                        if (ch === ")" && i < input.length && (/[a-zA-Z0-9_i]/.test(input[i]))) tokens.push("*");
-                    } else if (ch === "^") {
-                        tokens.push(ch);
-                        i++;
-                        if (i < input.length && input[i] === "-") {
-                            let num = "-";
-                            i++;
-                            while (i < input.length && /[0-9.]/.test(input[i])) {
-                                num += input[i++];
-                            }
-                            if (num !== "-") {
-                                tokens.push(num);
-                            } else {
-                                tokens.push("-");
-                            }
+                        if (ch === ")" && i < input.length && (/[a-zA-Z0-9_i(]/.test(input[i]))) {
+                            if (tokens[tokens.length - 1] !== "*") tokens.push("*");
                         }
                     } else if (ch === "i" && (i === 0 || !/[a-zA-Z0-9_]/.test(input[i - 1]))) {
                         tokens.push("i");
                         i++;
-                        if (i < input.length && (/[a-zA-Z0-9_(]/.test(input[i]))) tokens.push("*");
+                        if (i < input.length && (/[a-zA-Z0-9_(]/.test(input[i]))) {
+                            if (tokens[tokens.length - 1] !== "*") tokens.push("*");
+                        }
                     } else if (/[0-9]/.test(ch) || (ch === "." && /[0-9]/.test(input[i + 1]))) {
                         let num = "";
                         let hasDecimal = false;
@@ -456,23 +445,32 @@ namespace Chalkboard {
                         }
                         tokens.push(num);
                         if (i < input.length && input[i] === "i") {
-                            tokens.push("*");
+                            if (tokens[tokens.length - 1] !== "*") tokens.push("*");
                             tokens.push("i");
                             i++;
                         }
-                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) tokens.push("*");
+                        if (i < input.length && (/[a-zA-Z_]/.test(input[i]) || input[i] === "(")) {
+                            if (tokens[tokens.length - 1] !== "*") tokens.push("*");
+                        }
                     } else if (/[a-zA-Z_]/.test(ch)) {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
                             name += input[i++];
                         }
-                        tokens.push(name);
+                        if (/^[a-zA-Z]+$/.test(name) && name.length > 1 && !isFunction(name)) {
+                            for (let j = 0; j < name.length; j++) {
+                                tokens.push(name[j]);
+                                if (j < name.length - 1) tokens.push("*");
+                            }
+                        } else {
+                            tokens.push(name);
+                        }
                         if (i < input.length && input[i] === "(") {
                             if (!isFunction(name)) {
-                                tokens.push("*");
+                                if (tokens[tokens.length - 1] !== "*") tokens.push("*");
                             }
                         } else if (i < input.length && (/[a-zA-Z_]/.test(input[i]))) {
-                            tokens.push("*");
+                            if (tokens[tokens.length - 1] !== "*") tokens.push("*");
                         }
                     } else {
                         throw new Error(`Chalkboard.comp.parse: Unexpected character ${ch}`);
@@ -509,7 +507,7 @@ namespace Chalkboard {
                 const parseUnary = (): { type: string, [key: string]: any } => {
                     if (peek() === "-") {
                         consume("-");
-                        return { type: "neg", expr: parseExponent() }; 
+                        return { type: "neg", expr: parseExponent() };
                     } else if (peek() === "+") {
                         consume("+");
                         return parseExponent();
@@ -520,10 +518,15 @@ namespace Chalkboard {
                     let node = parsePrimary();
                     if (peek() === "^") {
                         consume("^");
-                        const right = parseExponent(); 
+                        const right = parseExponentUnary();
                         node = { type: "pow", base: node, exponent: right };
                     }
                     return node;
+                };
+                const parseExponentUnary = (): { type: string, [key: string]: any } => {
+                    if (peek() === "-") { consume("-"); return { type:"neg", expr: parseExponentUnary() }; }
+                    if (peek() === "+") { consume("+"); return parseExponentUnary(); }
+                    return parseExponent();
                 };
                 const parsePrimary = (): { type: string, [key: string]: any } => {
                     const token = peek();
@@ -575,18 +578,6 @@ namespace Chalkboard {
                     case "var": {
                         const varname = node.name;
                         if (varname in values) return values[varname];
-                        for (let i = 1; i < varname.length; i++) {
-                            const left = varname.substring(0, i);
-                            const right = varname.substring(i);
-                            if (left in values) {
-                                try {
-                                    const rightResult = evaluateNode({ type: "var", name: right }, values);
-                                    return Chalkboard.comp.mul(values[left], rightResult) as ChalkboardComplex;
-                                } catch {
-                                    continue;
-                                }
-                            }
-                        }
                         throw new Error(`Chalkboard.comp.parse: Variable '${varname}' not defined in values`);
                     }
                     case "add": {
@@ -627,9 +618,7 @@ namespace Chalkboard {
                             } catch (e) {}
                         }
                         switch (funcName) {
-                            case "conj": {
-                                return Chalkboard.comp.conjugate(args[0]) as ChalkboardComplex;
-                            }
+                            case "conj":
                             case "conjugate": {
                                 return Chalkboard.comp.conjugate(args[0]) as ChalkboardComplex;
                             }
@@ -675,6 +664,11 @@ namespace Chalkboard {
                 }
                 throw new Error(`Chalkboard.comp.parse: Unknown node type ${node.type}`);
             };
+            const needsParensInPow = (z: { a: number, b: number }): boolean => {
+                if (z.b === 0) return false;
+                if (z.a === 0 && (z.b === 1 || z.b === -1)) return false;
+                return true;
+            };
             const nodeToString = (node: { type: string, [key: string]: any }): string => {
                 switch (node.type) {
                     case "num": {
@@ -691,16 +685,21 @@ namespace Chalkboard {
                         return node.name;
                     }
                     case "add": {
-                        return `${nodeToString(node.left)} + ${nodeToString(node.right)}`;
+                        const rightStr = nodeToString(node.right);
+                        if (rightStr.startsWith("-")) return `${nodeToString(node.left)} - ${rightStr.slice(1)}`;
+                        return `${nodeToString(node.left)} + ${rightStr}`;
                     }
                     case "sub": {
                         const rightStr = node.right.type === "add" || node.right.type === "sub" ? `(${nodeToString(node.right)})` : nodeToString(node.right);
                         return `${nodeToString(node.left)} - ${rightStr}`;
                     }
                     case "mul": {
+                        if (node.left.type === "num" && node.left.value === 1) return nodeToString(node.right);
+                        if (node.right.type === "num" && node.right.value === 1) return nodeToString(node.left);
                         const leftMul = (node.left.type === "add" || node.left.type === "sub") ? `(${nodeToString(node.left)})` : nodeToString(node.left);
                         const rightMul = (node.right.type === "add" || node.right.type === "sub") ? `(${nodeToString(node.right)})` : nodeToString(node.right);
                         if (node.left.type === "num" && node.left.value === -1 && node.right.type === "var") return `-${nodeToString(node.right)}`;
+                        if (node.left.type === "num" && node.left.value === -1 && node.right.type === "pow") return `-${nodeToString(node.right)}`;
                         if ((node.left.type === "num" || node.left.type === "complex") && (node.right.type === "var" || (node.right.type === "complex" && node.right.a === 0 && node.right.b === 1))) {
                             return `${leftMul}${rightMul}`;
                         } else {
@@ -713,7 +712,15 @@ namespace Chalkboard {
                         return nodeToString(mulNode);
                     }
                     case "pow": {
-                        const baseStr = (node.base.type !== "num" && node.base.type !== "var" && node.base.type !== "complex") ? `(${nodeToString(node.base)})` : nodeToString(node.base);
+                        const baseIsComplex = node.base?.type === "complex";
+                        const baseStrRaw = nodeToString(node.base);
+                        const baseStr =
+                            baseIsComplex && needsParensInPow(node.base)
+                                ? `(${baseStrRaw})`
+                                : (node.base.type !== "num" && node.base.type !== "var" && node.base.type !== "complex")
+                                    ? `(${baseStrRaw})`
+                                    : baseStrRaw;
+
                         const expStr = (node.exponent.type !== "num" && node.exponent.type !== "var" && node.exponent.type !== "complex") ? `(${nodeToString(node.exponent)})` : nodeToString(node.exponent);
                         return `${baseStr}^${expStr}`;
                     }
@@ -744,13 +751,26 @@ namespace Chalkboard {
                         return node.name;
                     }
                     case "add": {
-                        return `${nodeToLaTeX(node.left)} + ${nodeToLaTeX(node.right)}`;
+                        const right = nodeToLaTeX(node.right);
+                        if (right.startsWith("-")) return `${nodeToLaTeX(node.left)} - ${right.slice(1)}`;
+                        return `${nodeToLaTeX(node.left)} + ${right}`;
                     }
                     case "sub": {
-                        return `${nodeToLaTeX(node.left)} - ${nodeToLaTeX(node.right)}`;
+                        const right = nodeToLaTeX(node.right);
+                        if (right.startsWith("-")) return `${nodeToLaTeX(node.left)} + ${right.slice(1)}`;
+                        return `${nodeToLaTeX(node.left)} - ${right}`;
                     }
                     case "mul": {
-                        return `${nodeToLaTeX(node.left)}${nodeToLaTeX(node.right)}`;
+                        const isAtomicLaTeX = (n: any): boolean => n.type === "num" || n.type === "var" || n.type === "complex" || n.type === "pow" || n.type === "func";
+                        const wrapIfNeeded = (n: any): string => {
+                            const s = nodeToLaTeX(n);
+                            if (n.type === "add" || n.type === "sub") return `\\left(${s}\\right)`;
+                            return s;
+                        };
+                        const left = wrapIfNeeded(node.left);
+                        const right = wrapIfNeeded(node.right);
+                        if (isAtomicLaTeX(node.left) && isAtomicLaTeX(node.right)) return `${left}${right}`;
+                        return `${left} \\cdot ${right}`;
                     }
                     case "div": {
                         return `\\frac{${nodeToLaTeX(node.left)}}{${nodeToLaTeX(node.right)}}`;
@@ -775,14 +795,6 @@ namespace Chalkboard {
                 return JSON.stringify(a) === JSON.stringify(b);
             };
             const simplifyNode = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
-                const isRealOnly = (node: { type: string, [key: string]: any }): boolean => {
-                    if (node.type === "complex") return node.b === 0;
-                    if (node.type === "num") return true;
-                    if (node.type === "var") return false;
-                    if (node.type === "add" || node.type === "sub" || node.type === "mul" || node.type === "div" || node.type === "pow") return isRealOnly(node.left) && isRealOnly(node.right);
-                    if (node.type === "neg") return isRealOnly(node.expr);
-                    return false;
-                };
                 switch (node.type) {
                     case "num": {
                         return { type: "complex", a: node.value, b: 0 };
@@ -819,9 +831,9 @@ namespace Chalkboard {
                                 if (node.type === "add") {
                                     return [...extractTerms(node.left), ...extractTerms(node.right)];
                                 } else if (node.type === "sub") {
-                                    const rightTerms = extractTerms(node.right).map(term => ({ 
-                                        type: "neg", 
-                                        expr: term 
+                                    const rightTerms = extractTerms(node.right).map(term => ({
+                                        type: "neg",
+                                        expr: term
                                     }));
                                     return [...extractTerms(node.left), ...rightTerms];
                                 } else {
@@ -846,10 +858,10 @@ namespace Chalkboard {
                             }
                             let result = products[0];
                             for (let i = 1; i < products.length; i++) {
-                                result = { 
-                                    type: "add", 
-                                    left: result, 
-                                    right: products[i] 
+                                result = {
+                                    type: "add",
+                                    left: result,
+                                    right: products[i]
                                 };
                             }
                             return simplifyNode(result);
@@ -881,70 +893,6 @@ namespace Chalkboard {
                     case "pow": {
                         const base = simplifyNode(node.base);
                         const exponent = simplifyNode(node.exponent);
-                        if ((base.type === "add" || base.type === "sub") && exponent.type === "complex" && exponent.b === 0 && Number.isInteger(exponent.a)) {
-                            if (exponent.a < 0) {
-                                const absExpr = Math.abs(exponent.a);
-                                if (absExpr === 1) {
-                                    return { type: "pow", base: base, exponent: { type: "complex", a: -1, b: 0 } };
-                                } else {
-                                    const positiveExpr = { type: "pow", base, exponent: { type: "complex", a: absExpr, b: 0 } };
-                                    const expanded = simplifyNode(positiveExpr);
-                                    return { type: "pow", base: expanded, exponent: { type: "complex", a: -1, b: 0 } };
-                                }
-                            } else if (exponent.a > 0) {
-                                const n = exponent.a;
-                                const a = base.left;
-                                const b = base.right;
-                                const sign = base.type === "add" ? 1 : -1;
-                                let result = null;
-                                for (let k = 0; k <= n; k++) {
-                                    const c = Chalkboard.numb.binomial(n, k);
-                                    const leftPower = n - k === 0 ? { type: "complex", a: 1, b: 0 } : (n - k === 1 ? a : simplifyNode({ type: "pow", base: a, exponent: { type: "complex", a: n - k, b: 0 } }));
-                                    const rightPower = k === 0 ? { type: "complex", a: 1, b: 0 } : (k === 1 ? (sign === 1 ? b : { type: "neg", expr: b }) : simplifyNode({ type: "pow", base: b, exponent: { type: "complex", a: k, b: 0 } }));
-                                    const termSign = (sign === -1 && k % 2 === 1) ? -1 : 1;
-                                    let term;
-                                    if (k === 0) {
-                                        term = leftPower;
-                                    } else if (n - k === 0) {
-                                        term = rightPower;
-                                    } else {
-                                        term = simplifyNode({ type: "mul", left: leftPower, right: rightPower });
-                                    }
-                                    if (c !== 1) {
-                                        term = simplifyNode({ type: "mul", left: { type: "complex", a: termSign * c, b: 0 }, right: term });
-                                    } else if (termSign === -1) {
-                                        term = { type: "neg", expr: term };
-                                    }
-                                    if (result === null) {
-                                        result = term;
-                                    } else {
-                                        result = simplifyNode({ type: "add", left: result, right: term });
-                                    }
-                                }
-                                return result;
-                            }
-                        }
-                        if (base.type === "complex" && exponent.type === "complex" && exponent.b === 0) {
-                            const power = exponent.a;
-                            if (power === 0) return { type: "complex", a: 1, b: 0 };
-                            if (power === 1) return base;
-                            if (base.a === 0 && base.b === 0 && power > 0) return { type: "complex", a: 0, b: 0 };
-                            if (base.a === 1 && base.b === 0) return { type: "complex", a: 1, b: 0 };
-                            if (base.a === 0 && base.b === 1) {
-                                const mod4 = Math.floor(power) % 4;
-                                if (mod4 === 0) return { type: "complex", a: 1, b: 0 };
-                                if (mod4 === 1) return { type: "complex", a: 0, b: 1 };
-                                if (mod4 === 2) return { type: "complex", a: -1, b: 0 };
-                                if (mod4 === 3) return { type: "complex", a: 0, b: -1 };
-                            }
-                            if (Number.isInteger(power) && power > 1 && power <= 3) {
-                                let result = base;
-                                for (let i = 1; i < power; i++) {
-                                    result = { type: "complex", a: result.a * base.a - result.b * base.b, b: result.a * base.b + result.b * base.a };
-                                }
-                                return result;
-                            }
-                        }
                         return { type: "pow", base, exponent };
                     }
                     case "neg": {
@@ -955,53 +903,177 @@ namespace Chalkboard {
                     }
                     case "func": {
                         const args = node.args.map((arg: { type: string, [key: string]: any }) => simplifyNode(arg));
-                        const funcName = node.name.toLowerCase();
-                        if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "complex")) {
-                            try {
-                                switch (funcName) {
-                                    case "conj":
-                                    case "conjugate":
-                                        return { type: "complex", a: args[0].a, b: -args[0].b };
-                                    case "mag":
-                                        return { type: "complex", a: Math.sqrt(args[0].a * args[0].a + args[0].b * args[0].b), b: 0 };
-                                    case "magsq":
-                                        return { type: "complex", a: args[0].a * args[0].a + args[0].b * args[0].b, b: 0 };
-                                    case "arg":
-                                        return { type: "complex", a: Math.atan2(args[0].b, args[0].a), b: 0 };
-                                    case "re":
-                                        return { type: "complex", a: args[0].a, b: 0 };
-                                    case "im":
-                                        return { type: "complex", a: args[0].b, b: 0 };
-                                    case "sqrt":
-                                        if (args[0].b === 0 && args[0].a >= 0) {
-                                            const z = Chalkboard.comp.sqrt(Chalkboard.comp.init(args[0].a, args[0].b)) as ChalkboardComplex;
-                                            return { type: "complex", a: z.a, b: z.b };
-                                        }
-                                        break;
-                                    case "sq":
-                                        const z = Chalkboard.comp.sq(Chalkboard.comp.init(args[0].a, args[0].b)) as ChalkboardComplex;
-                                        return { type: "complex", a: z.a, b: z.b };
-                                }
-                            } catch (e) {}
-                        }
-                        if (args.every((arg: { type: string, [key: string]: any }) => arg.type === "complex" && arg.b === 0)) {
-                            try {
-                                switch (funcName) {
-                                    case "sin":
-                                    case "cos":
-                                    case "tan":
-                                    case "log":
-                                    case "ln":
-                                    case "exp":
-                                    case "abs":
-                                        break;
-                                }
-                            } catch (e) {}
-                        }
                         return { type: "func", name: node.name, args };
                     }
                 }
                 return node;
+            };
+            const isRealOnly = (node: { type: string, [key: string]: any }): boolean => {
+                switch (node.type) {
+                    case "num": return true;
+                    case "var": return true;
+                    case "complex": return node.b === 0;
+                    case "neg": return isRealOnly(node.expr);
+                    case "add":
+                    case "sub":
+                    case "mul":
+                    case "div": return isRealOnly(node.left) && isRealOnly(node.right);
+                    case "pow": return isRealOnly(node.base) && isRealOnly(node.exponent);
+                    case "func": return node.args.every(isRealOnly);
+                    default: return false;
+                }
+            };
+            const realNum = (n: number): any => ({ type: "num", value: n });
+            const realAdd = (l: any, r: any): any => ({ type: "add", left: l, right: r });
+            const realSub = (l: any, r: any): any => ({ type: "sub", left: l, right: r });
+            const realMul = (l: any, r: any): any => ({ type: "mul", left: l, right: r });
+            const realDiv = (l: any, r: any): any => ({ type: "div", left: l, right: r });
+            const realPow = (b: any, e: any): any => ({ type: "pow", base: b, exponent: e });
+            const realNeg = (x: any): any => ({ type: "neg", expr: x });
+            const realNodeToString = (node: any): string => {
+                switch (node.type) {
+                    case "num": return node.value.toString();
+                    case "var": return node.name;
+                    case "add": return `${realNodeToString(node.left)} + ${realNodeToString(node.right)}`;
+                    case "sub": return `${realNodeToString(node.left)} - ${realNodeToString(node.right)}`;
+                    case "mul": {
+                        const L = (node.left.type === "add" || node.left.type === "sub") ? `(${realNodeToString(node.left)})` : realNodeToString(node.left);
+                        const R = (node.right.type === "add" || node.right.type === "sub") ? `(${realNodeToString(node.right)})` : realNodeToString(node.right);
+                        return `${L} * ${R}`;
+                    }
+                    case "div": {
+                        const L = (node.left.type === "add" || node.left.type === "sub") ? `(${realNodeToString(node.left)})` : realNodeToString(node.left);
+                        const R = (node.right.type === "add" || node.right.type === "sub") ? `(${realNodeToString(node.right)})` : realNodeToString(node.right);
+                        return `${L} / ${R}`;
+                    }
+                    case "pow": {
+                        const B = (node.base.type === "num" || node.base.type === "var") ? realNodeToString(node.base) : `(${realNodeToString(node.base)})`;
+                        const E = (node.exponent.type === "num" || node.exponent.type === "var") ? realNodeToString(node.exponent) : `(${realNodeToString(node.exponent)})`;
+                        return `${B}^${E}`;
+                    }
+                    case "neg": {
+                        const inner = (node.expr.type === "num" || node.expr.type === "var") ? realNodeToString(node.expr) : `(${realNodeToString(node.expr)})`;
+                        return `-${inner}`;
+                    }
+                    default: {
+                        throw new Error(`Chalkboard.comp.parse: Unsupported real-node type ${node.type}`);
+                    }
+                }
+            };
+            const simplifyRealString = (s: string): string => {
+                return Chalkboard.real.parse(s, {
+                    roundTo: config.roundTo,
+                    returnAST: false,
+                    returnJSON: false,
+                    returnLaTeX: false
+                }) as string;
+            };
+            const toReIm = (node: any): { re: any, im: any } => {
+                switch (node.type) {
+                    case "num": {
+                        return { re: realNum(node.value), im: realNum(0) };
+                    }
+                    case "var": {
+                        if (node.name === "i") return { re: realNum(0), im: realNum(1) };
+                        return { re: { type: "var", name: node.name }, im: realNum(0) };
+                    }
+                    case "complex": {
+                        return { re: realNum(node.a), im: realNum(node.b) };
+                    }
+                    case "neg": {
+                        const p = toReIm(node.expr);
+                        return { re: realNeg(p.re), im: realNeg(p.im) };
+                    }
+                    case "add": {
+                        const L = toReIm(node.left);
+                        const R = toReIm(node.right);
+                        return { re: realAdd(L.re, R.re), im: realAdd(L.im, R.im) };
+                    }
+                    case "sub": {
+                        const L = toReIm(node.left);
+                        const R = toReIm(node.right);
+                        return { re: realSub(L.re, R.re), im: realSub(L.im, R.im) };
+                    }
+                    case "mul": {
+                        const L = toReIm(node.left);
+                        const R = toReIm(node.right);
+                        const ac = realMul(L.re, R.re);
+                        const bd = realMul(L.im, R.im);
+                        const ad = realMul(L.re, R.im);
+                        const bc = realMul(L.im, R.re);
+                        return { re: realSub(ac, bd), im: realAdd(ad, bc) };
+                    }
+                    case "div": {
+                        const L = toReIm(node.left);
+                        const R = toReIm(node.right);
+                        const c2 = realPow(R.re, realNum(2));
+                        const d2 = realPow(R.im, realNum(2));
+                        const denom = realAdd(c2, d2);
+                        const ac = realMul(L.re, R.re);
+                        const bd = realMul(L.im, R.im);
+                        const bc = realMul(L.im, R.re);
+                        const ad = realMul(L.re, R.im);
+                        const reNum = realAdd(ac, bd);
+                        const imNum = realSub(bc, ad);
+                        return { re: realDiv(reNum, denom), im: realDiv(imNum, denom) };
+                    }
+                    case "pow": {
+                        const expParts = toReIm(node.exponent);
+                        const expImStr = simplifyRealString(realNodeToString(expParts.im));
+                        if (expImStr !== "0") throw new Error("Chalkboard.comp.parse: Complex exponent not supported in symbolic splitting.");
+                        const expReStr = simplifyRealString(realNodeToString(expParts.re));
+                        const n = Number(expReStr);
+                        if (!Number.isInteger(n)) throw new Error("Chalkboard.comp.parse: Non-integer exponent not supported in symbolic splitting.");
+                        const baseParts = toReIm(node.base);
+                        let re = realNum(1);
+                        let im = realNum(0);
+                        const steps = Math.abs(n);
+                        for (let i = 0; i < steps; i++) {
+                            const a = re;
+                            const b = im;
+                            const c = baseParts.re;
+                            const d = baseParts.im;
+                            const newRe = realSub(realMul(a, c), realMul(b, d));
+                            const newIm = realAdd(realMul(a, d), realMul(b, c));
+                            re = newRe;
+                            im = newIm;
+                        }
+                        if (n < 0) {
+                            const denom = realAdd(realPow(re, realNum(2)), realPow(im, realNum(2)));
+                            const reInv = realDiv(re, denom);
+                            const imInv = realNeg(realDiv(im, denom));
+                            return { re: reInv, im: imInv };
+                        }
+                        return { re, im };
+                    }
+                    case "func": {
+                        throw new Error(`Chalkboard.comp.parse: Symbolic splitting for function '${node.name}' not supported.`);
+                    }
+                }
+                throw new Error(`Chalkboard.comp.parse: Unsupported node type '${node.type}' in symbolic splitting.`);
+            };
+            const combineReImStrings = (reStr: string, imStr: string): string => {
+                const reS = reStr.trim();
+                const imS = imStr.trim();
+                const isZero = (s: string): boolean => s === "0" || s === "0.0";
+                const needsParens = (s: string): boolean => {
+                    return s.includes(" + ") || s.includes(" - ");
+                };
+                if (isZero(imS)) return reS;
+                if (isZero(reS)) {
+                    if (imS === "1") return "i";
+                    if (imS === "-1") return "-i";
+                    return needsParens(imS) ? `(${imS})i` : `${imS}i`;
+                }
+                const imWithI = imS === "1" ? "i" : imS === "-1" ? "-i" : needsParens(imS) ? `(${imS})i` : `${imS}i`;
+                if (!needsParens(imS) && imS.startsWith("-")) {
+                    const mag = imS.slice(1);
+                    if (mag === "1") return `${reS} - i`;
+                    return `${reS} - ${mag}i`;
+                } else {
+                    if (imWithI.startsWith("-")) return `${reS} - ${imWithI.slice(1)}`;
+                    return `${reS} + ${imWithI}`;
+                }
             };
             try {
                 const tokens = tokenize(expr);
@@ -1009,13 +1081,44 @@ namespace Chalkboard {
                 if (config.values && Object.keys(config.values).length > 0) {
                     const result = evaluateNode(ast, config.values);
                     if (config.roundTo !== undefined) {
-                        return Chalkboard.comp.init(Chalkboard.numb.roundTo(result.a, config.roundTo), Chalkboard.numb.roundTo(result.b, config.roundTo));
+                        return Chalkboard.comp.init(
+                            Chalkboard.numb.roundTo(result.a, config.roundTo),
+                            Chalkboard.numb.roundTo(result.b, config.roundTo)
+                        );
                     }
                     return result;
                 }
+                if (isRealOnly(ast)) {
+                    return Chalkboard.real.parse(expr, {
+                        roundTo: config.roundTo,
+                        returnAST: config.returnAST,
+                        returnJSON: config.returnJSON,
+                        returnLaTeX: config.returnLaTeX
+                    }) as any;
+                }
+                if (!config.returnAST && !config.returnJSON) {
+                    try {
+                        const parts = toReIm(ast);
+                        const reExprStr = realNodeToString(parts.re);
+                        const imExprStr = realNodeToString(parts.im);
+                        if (reExprStr.includes("i") || imExprStr.includes("i")) {
+                            throw new Error("Chalkboard.comp.parse: Internal error: 'i' leaked into real split.");
+                        }
+                        const reSimpl = simplifyRealString(reExprStr);
+                        const imSimpl = simplifyRealString(imExprStr);
+                        if (config.returnLaTeX) {
+                            const reTex = Chalkboard.real.parse(reExprStr, { returnLaTeX: true, roundTo: config.roundTo }) as string;
+                            const imTex = Chalkboard.real.parse(imExprStr, { returnLaTeX: true, roundTo: config.roundTo }) as string;
+                            if (imTex.trim() === "0") return reTex;
+                            if (reTex.trim() === "0") return `${imTex}i`;
+                            return `${reTex} + ${String.raw`\left(${imTex}\right)`}i`;
+                        }
+                        return combineReImStrings(reSimpl, imSimpl);
+                    } catch (e) {
+
+                    }
+                }
                 let simplified = simplifyNode(ast);
-                let normalizedast = parseTokens(tokenize(nodeToString(simplified)));
-                simplified = simplifyNode(normalizedast);
                 simplified = simplifyNode(simplified);
                 if (config.roundTo !== undefined) {
                     const roundNodes = (node: { type: string, [key: string]: any }): { type: string, [key: string]: any } => {
@@ -1032,7 +1135,9 @@ namespace Chalkboard {
                 }
                 if (config.returnAST) return simplified;
                 if (config.returnJSON) return JSON.stringify(simplified);
-                if (config.returnLaTeX) return nodeToLaTeX(simplified);
+                if (config.returnLaTeX) {
+                    return nodeToLaTeX(simplified);
+                }
                 return nodeToString(simplified);
             } catch (err) {
                 if (err instanceof Error) {

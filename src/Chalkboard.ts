@@ -48,6 +48,20 @@ type ChalkboardMorphism<T, U> = {
 };
 
 /**
+ * The type for ordinary differential equations.
+ * @property {(t: number, y: number[]) => number[]} rule - Canonical first-order system rule: y' = F(t, y)
+ * @property {number} order - Original order of equation if constructed from scalar, else 1 for systems
+ * @property {number} dimension - Dimension of canonical state vector y
+ * @property {"single" | "system"} type - "single" for scalar input rules (order 1 or 2), "system" for user-supplied systems
+ */
+type ChalkboardODE = {
+    rule: (t: number, y: number[]) => number[];
+    order: number;
+    dimension: number;
+    type: "single" | "system";
+};
+
+/**
  * The type for quaternions.
  * @property {number} a - The real part
  * @property {number} b - The first imaginary part
@@ -226,6 +240,11 @@ namespace Chalkboard {
             }
         }
         throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
+    };
+
+    /** @ignore */
+    export const ASSERT = (cond: any, msg: string): void => {
+        if (!cond) throw new Error(msg);
     };
 
     /**

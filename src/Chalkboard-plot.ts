@@ -21,7 +21,14 @@ namespace Chalkboard {
         /**
          * Plots the autocorrelation of an explicit function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const autocorrelation = (
@@ -64,9 +71,15 @@ namespace Chalkboard {
 
         /**
          * Plots a bar plot/chart/graph for an array of data with bins specified by another array.
-         * @param arr
-         * @param bins
-         * @param {object} config - The configuration options
+         * @param {number[]} arr - The data array
+         * @param {number[]} bins - The bins array (must be sorted in ascending order)
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.fillStyle="white"] - Fill color for bars
+         * @param {string} [config.strokeStyle="black"] - Stroke color for bars
+         * @param {number} [config.lineWidth=2] - Stroke width for bars
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const barplot = (
@@ -123,8 +136,13 @@ namespace Chalkboard {
 
         /**
          * Plots a complex number.
-         * @param comp
-         * @param {object} config - The configuration options
+         * @param {ChalkboardComplex} comp - The complex number
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.fillStyle="black"] - Fill color for the complex number
+         * @param {number} [config.lineWidth=5] - Line width for the complex number
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const comp = (
@@ -160,7 +178,14 @@ namespace Chalkboard {
          * Plots the convolution of two explicit functions.
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const convolution = (
@@ -206,7 +231,14 @@ namespace Chalkboard {
          * Plots the cross-correlation of two explicit functions.
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const correlation = (
@@ -251,7 +283,16 @@ namespace Chalkboard {
         /**
          * Plots a 2D scalar function, a parametric curve, or a complex function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {boolean} [config.isInverse=false] - Whether to plot the inverse of the function (only for scalar2d)
+         * @param {boolean} [config.isPolar=false] - Whether to plot in polar coordinates (only for scalar2d)
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const definition = (
@@ -341,7 +382,15 @@ namespace Chalkboard {
         /**
          * Plots the first-order derivative of an explicit or inverse function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {boolean} [config.isInverse=false] - Whether to plot the derivative of the inverse of the function (only for scalar2d)
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const dfdx = (
@@ -392,7 +441,15 @@ namespace Chalkboard {
         /**
          * Plots the second-order derivative of an explicit or inverse function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {boolean} [config.isInverse=false] - Whether to plot the second derivative of the inverse of the function (only for scalar2d)
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const d2fdx2 = (
@@ -443,7 +500,14 @@ namespace Chalkboard {
         /**
          * Plots a 2D vector field.
          * @param {ChalkboardFunction} vectfield
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[][]} [config.domain=[[-10, 10], [-10, 10]]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const field = (
@@ -491,7 +555,14 @@ namespace Chalkboard {
         /**
          * Plots the Fourier transform of an explicit function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const Fourier = (
@@ -535,7 +606,15 @@ namespace Chalkboard {
         /**
          * Plots the antiderivative (or integral) of an explicit or inverse function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {boolean} [config.isInverse=false] - Whether to plot the inverse function
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const fxdx = (
@@ -586,7 +665,14 @@ namespace Chalkboard {
         /**
          * Plots the Laplace transform of an explicit function.
          * @param {ChalkboardFunction} func - The function
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the function, not pixels)
+         * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const Laplace = (
@@ -636,9 +722,14 @@ namespace Chalkboard {
 
         /**
          * Plots a line chart/plot/graph for an array of data with bins specified by another array.
-         * @param arr
-         * @param bins
-         * @param {object} config - The configuration options
+         * @param {number[]} arr - The data array
+         * @param {number[]} bins - The bin edges array (length should be one more than the number of bins)
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const lineplot = (
@@ -690,8 +781,14 @@ namespace Chalkboard {
 
         /**
          * Plots a 2x2 matrix.
-         * @param matr
-         * @param {object} config - The configuration options
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the matrix, not pixels)
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const matr = (
@@ -757,8 +854,98 @@ namespace Chalkboard {
         };
 
         /**
+         * Plots an ODE solution. Supports both scalar and system ODEs. For scalar ODEs, plots y(t). For systems, can plot either y[j] vs t or y[j] vs y[i] (phase plot) based on the "phase" config option.
+         * @param {{ t: number[]; y: number[][] }} sol - The solution object from Chalkboard.diff.solve or Chalkboard.diff.solveAdaptive
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number} [config.i=0] - x-component index (for phase plots)
+         * @param {number} [config.j=1] - y-component index (for phase plots)
+         * @param {boolean} [config.phase=false] - If true, plots y[j] vs y[i] (phase plot), if false, plots y[i] vs t
+         * @param {CanvasRenderingContext2D} [config.context] - Canvas context
+         * @returns {number[][]}
+         * @example
+         * // Plot scalar solution y(t)
+         * const ode1 = Chalkboard.diff.exponential(-1);
+         * const sol1 = Chalkboard.diff.solve(ode1, { t0: 0, t1: 5, steps: 300, y0: 1 });
+         * Chalkboard.plot.ode(sol1, { strokeStyle: "red", size: 1 });
+         * 
+         * // Phase plot for harmonic oscillator (y vs dy)
+         * const ode2 = Chalkboard.diff.harmonic();
+         * const sol2 = Chalkboard.diff.solve(ode2, { t0: 0, t1: 20, steps: 2000, y0: { y0: 1, dy0: 0 } });
+         * Chalkboard.plot.ode(sol2, { phase: true, i: 0, j: 1, strokeStyle: "blue" });
+         */
+        export const ode = (
+            sol: { t: number[]; y: number[][] },
+            config: {
+                x?: number;
+                y?: number;
+                size?: number;
+                strokeStyle?: string;
+                lineWidth?: number;
+                i?: number;
+                j?: number;
+                phase?: boolean;
+                context?: CanvasRenderingContext2D;
+            } = {}
+        ): number[][] => {
+            ASSERT(sol && Array.isArray(sol.t) && Array.isArray(sol.y), `Chalkboard.plot.ode: Parameter "sol" must have properties "t" and "y" as arrays.`);
+            ASSERT(sol.t.length === sol.y.length && sol.t.length > 0, `Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
+            const ctx = config.context || getContext();
+            const x0 = (config.x ?? ctx.canvas.width / 2);
+            const y0 = (config.y ?? ctx.canvas.height / 2);
+            const strokeStyle = config.strokeStyle ?? "black";
+            const lineWidth = config.lineWidth ?? 2;
+            const size = ((config.size ?? 1) / 100);
+            const phase = config.phase ?? false;
+            const i = config.i ?? 0;
+            const j = config.j ?? 1;
+            const dim = sol.y[0].length;
+            ASSERT(Number.isInteger(i) && i >= 0, `Chalkboard.plot.ode: "i" must be an integer >= 0.`);
+            ASSERT(i < dim, `Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
+            if (phase) {
+                ASSERT(Number.isInteger(j) && j >= 0, `Chalkboard.plot.ode: "j" must be an integer >= 0.`);
+                ASSERT(j < dim, `Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
+                ASSERT(i !== j, `Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
+            }
+            const data: number[][] = [];
+            ctx.save();
+            ctx.translate(x0, y0);
+            ctx.lineWidth = lineWidth;
+            ctx.strokeStyle = strokeStyle;
+            ctx.beginPath();
+            if (!phase) {
+                for (let k = 0; k < sol.t.length; k++) {
+                    const X = sol.t[k] / size;
+                    const Y = -sol.y[k][i] / size;
+                    if (k === 0) ctx.moveTo(X, Y);
+                    else ctx.lineTo(X, Y);
+                    data.push([sol.t[k], sol.y[k][i]]);
+                }
+            } else {
+                for (let k = 0; k < sol.y.length; k++) {
+                    const X = sol.y[k][i] / size;
+                    const Y = -sol.y[k][j] / size;
+                    if (k === 0) ctx.moveTo(X, Y);
+                    else ctx.lineTo(X, Y);
+                    data.push([sol.y[k][i], sol.y[k][j]]);
+                }
+            }
+            ctx.stroke();
+            ctx.restore();
+            return data;
+        };
+
+        /**
          * Plots the polar coordinate plane.
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {void}
          */
         export const rOplane = (config: {
@@ -801,9 +988,14 @@ namespace Chalkboard {
 
         /**
          * Plots a scatter plot of two arrays of data.
-         * @param arr1
-         * @param arr2
-         * @param {object} config - The configuration options
+         * @param {number[]} arr1 - The first data array (x-coordinates)
+         * @param {number[]} arr2 - The second data array (y-coordinates)
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.fillStyle="black"] - Fill color for the points
+         * @param {number} [config.lineWidth=5] - Diameter of the points in pixels
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const scatterplot = (
@@ -853,9 +1045,16 @@ namespace Chalkboard {
         /**
          * Plots the nth-degree Taylor series approximation for an explicit function.
          * @param {ChalkboardFunction} func - The function
-         * @param n
-         * @param a
-         * @param {object} config - The configuration options
+         * @param {0 | 1 | 2} n - The degree of the Taylor approximation (0 for constant, 1 for linear, 2 for quadratic)
+         * @param {number} a - The point of expansion (in units of the function, not pixels)
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the matrix, not pixels)
+         * @param {number} [config.res=25] - Resolution of the plot
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const Taylor = (
@@ -900,8 +1099,13 @@ namespace Chalkboard {
 
         /**
          * Plots a 2D vector.
-         * @param vect
-         * @param {object} config - The configuration options
+         * @param {ChalkboardVector} vect - The vector
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=5] - Stroke width
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
          */
         export const vect = (
@@ -938,7 +1142,12 @@ namespace Chalkboard {
 
         /**
          * Plots the Cartesian coordinate plane.
-         * @param {object} config - The configuration options
+         * @param {number} [config.x] - x-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.y] - y-offset (canvas translation), defaults to canvas center
+         * @param {number} [config.size=1] - Scale, defaults to 1, divided by 100 internally for finer control
+         * @param {string} [config.strokeStyle="black"] - Stroke color
+         * @param {number} [config.lineWidth=2] - Stroke width
+         * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {void}
          */
         export const xyplane = (config: {

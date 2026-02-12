@@ -243,7 +243,7 @@ namespace Chalkboard {
          */
         export const cummul = (arr: number[]): number[] => {
             const result = [];
-            let mul = 0;
+            let mul = 1;
             for (let i = 0; i < arr.length; i++) {
                 mul *= arr[i];
                 result.push(mul);
@@ -757,7 +757,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mul = (arr: number[]): number => {
-            let result = 0;
+            let result = 1;
             for (let i = 0; i < arr.length; i++) {
                 result *= arr[i];
             }
