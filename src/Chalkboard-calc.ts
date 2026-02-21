@@ -231,6 +231,33 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the discrete Fourier transform of an array of numbers or complex numbers.
+         * @param {(number | ChalkboardComplex)[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const dft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.dft: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            const out: ChalkboardComplex[] = new Array(N);
+            for (let k = 0; k < N; k++) {
+                let sumA = 0;
+                let sumB = 0;
+                for (let n = 0; n < N; n++) {
+                    const v = arr[n];
+                    const a = typeof v === "number" ? v : v.a;
+                    const b = typeof v === "number" ? 0 : v.b;
+                    const theta = Chalkboard.PI(2 * k * n) / N;
+                    const c = Chalkboard.trig.cos(theta);
+                    const s = Chalkboard.trig.sin(theta);
+                    sumA += a * c + b * s;
+                    sumB += b * c - a * s;
+                }
+                out[k] = Chalkboard.comp.init(sumA, sumB);
+            }
+            return out;
+        };
+
+        /**
          * Calculates the divergence of a vector field at a vector.
          * @param {ChalkboardFunction} vectfield - The vector field
          * @param {ChalkboardVector} vect - The vector
@@ -297,6 +324,108 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the fast Fourier transform of an array of numbers or complex numbers. The input length must be a power of two.
+         * @param {(number | ChalkboardComplex)[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const fft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.fft: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.fft: Input length must be a positive integer.");
+            if ((N & (N - 1)) !== 0) throw new TypeError("Chalkboard.calc.fft: Input length must be a power of two.");
+            const re: number[] = new Array(N);
+            const im: number[] = new Array(N);
+            for (let i = 0; i < N; i++) {
+                const v = arr[i];
+                re[i] = typeof v === "number" ? v : v.a;
+                im[i] = typeof v === "number" ? 0 : v.b;
+            }
+            let bits = 0;
+            for (let t = N; t > 1; t >>= 1) bits++;
+            for (let i = 0; i < N; i++) {
+                let x = i;
+                let j = 0;
+                for (let b = 0; b < bits; b++) {
+                    j = (j << 1) | (x & 1);
+                    x >>= 1;
+                }
+                if (j > i) {
+                    let tmp = re[i]; re[i] = re[j]; re[j] = tmp;
+                    tmp = im[i]; im[i] = im[j]; im[j] = tmp;
+                }
+            }
+            for (let len = 2; len <= N; len <<= 1) {
+                const ang = Chalkboard.PI(-2) / len;
+                const wLenCos = Chalkboard.trig.cos(ang);
+                const wLenSin = Chalkboard.trig.sin(ang);
+                for (let i = 0; i < N; i += len) {
+                    let wCos = 1;
+                    let wSin = 0;
+                    const half = len >> 1;
+                    for (let j = 0; j < half; j++) {
+                        const uRe = re[i + j];
+                        const uIm = im[i + j];
+                        const vRe0 = re[i + j + half];
+                        const vIm0 = im[i + j + half];
+                        const vRe = vRe0 * wCos - vIm0 * wSin;
+                        const vIm = vRe0 * wSin + vIm0 * wCos;
+                        re[i + j] = uRe + vRe;
+                        im[i + j] = uIm + vIm;
+                        re[i + j + half] = uRe - vRe;
+                        im[i + j + half] = uIm - vIm;
+                        const nextCos = wCos * wLenCos - wSin * wLenSin;
+                        const nextSin = wCos * wLenSin + wSin * wLenCos;
+                        wCos = nextCos;
+                        wSin = nextSin;
+                    }
+                }
+            }
+            const out: ChalkboardComplex[] = new Array(N);
+            for (let i = 0; i < N; i++) out[i] = Chalkboard.comp.init(re[i], im[i]);
+            return out;
+        };
+
+        /**
+         * Calculates the FFT frequencies for a given FFT length and sample spacing, which are the frequencies corresponding to the output of the FFT.
+         * @param {number} n - FFT length
+         * @param {number} [d=1] - Sample spacing
+         * @returns {number[]}
+         */
+        export const fftfreq = (n: number, d: number = 1): number[] => {
+            if (!Number.isInteger(n) || n <= 0) throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'n' must be a positive integer.");
+            if (typeof d !== "number" || !Number.isFinite(d) || d <= 0) throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'd' must be a positive finite number.");
+            const result: number[] = new Array(n);
+            const scale = 1 / (n * d);
+            if (n % 2 === 0) {
+                const half = n / 2;
+                for (let i = 0; i < n; i++) {
+                    const k = i < half ? i : i - n;
+                    result[i] = k * scale;
+                }
+            } else {
+                const half = (n - 1) / 2;
+                for (let i = 0; i < n; i++) {
+                    const k = i <= half ? i : i - n;
+                    result[i] = k * scale;
+                }
+            }
+            return result;
+        };
+
+        /**
+         * Calculates the FFT shift of an array of numbers or complex numbers, which rearranges the output of the FFT by moving the zero-frequency component to the center of the array.
+         * @param {ChalkboardComplex[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const fftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.fftshift: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            if (N === 0) return [];
+            const shift = Math.floor((N + 1) / 2);
+            return arr.slice(shift).concat(arr.slice(0, shift));
+        };
+
+        /**
          * Calculates the flux (line/surface integration over a vector field) of a parametric curve or a parametric surface through a 2D or 3D vector field, respectively.
          * @param {ChalkboardFunction} vectfield - The vector field
          * @param {ChalkboardFunction} func - The function
@@ -340,16 +469,28 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the Fourier transform of a function at a value.
+         * Calculates the Fourier transform of a function at a value within an interval.
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
+         * @param {number} [inf=0] - The lower bound
+         * @param {number} [sup=10] - The upper bound
+         * @param {number} [steps=10000] - The number of steps for numerical integration
          * @returns {number}
          */
-        export const Fourier = (func: ChalkboardFunction, val: number): number => {
+        export const Fourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.Fourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
             const f = func.rule as (x: number) => number;
-            const g = (x: number): number => f(x) * Math.cos(val * x);
-            return (2 * (Chalkboard.calc.fxdx(Chalkboard.real.define(g), 0, 10) as number)) / Chalkboard.PI();
+            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps)) throw new TypeError("Chalkboard.calc.Fourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
+            if (steps <= 0 || !Number.isInteger(steps)) throw new TypeError("Chalkboard.calc.Fourier: Parameter 'steps' must be a positive integer.");
+            if (sup === inf) return 0;
+            const dx = (sup - inf) / steps;
+            let sum = 0;
+            for (let i = 0; i <= steps; i++) {
+                const x = inf + i * dx;
+                const w = (i === 0 || i === steps) ? 0.5 : 1;
+                sum += w * (f(x) * Math.cos(val * x));
+            }
+            return (2 * sum * dx) / Chalkboard.PI();
         };
 
         /**
@@ -613,6 +754,130 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the inverse discrete Fourier transform of an array of numbers or complex numbers.
+         * @param {(number | ChalkboardComplex)[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const idft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.idft: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            const out: ChalkboardComplex[] = new Array(N);
+            for (let n = 0; n < N; n++) {
+                let sumA = 0;
+                let sumB = 0;
+                for (let k = 0; k < N; k++) {
+                    const v = arr[k];
+                    const A = typeof v === "number" ? v : v.a;
+                    const B = typeof v === "number" ? 0 : v.b;
+                    const theta = Chalkboard.PI(2 * k * n) / N;
+                    const c = Chalkboard.trig.cos(theta);
+                    const s = Chalkboard.trig.sin(theta);
+                    sumA += A * c - B * s;
+                    sumB += A * s + B * c;
+                }
+                out[n] = Chalkboard.comp.init(sumA / N, sumB / N);
+            }
+            return out;
+        };
+
+        /**
+         * Calculates the inverse fast Fourier transform of an array of numbers or complex numbers. The input length must be a power of two.
+         * @param {(number | ChalkboardComplex)[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const ifft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.ifft: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.ifft: Input length must be a positive integer.");
+            if ((N & (N - 1)) !== 0) throw new TypeError("Chalkboard.calc.ifft: Input length must be a power of two.");
+            const conjIn: ChalkboardComplex[] = new Array(N);
+            for (let i = 0; i < N; i++) {
+                const v = arr[i];
+                const a = typeof v === "number" ? v : v.a;
+                const b = typeof v === "number" ? 0 : v.b;
+                conjIn[i] = Chalkboard.comp.init(a, -b);
+            }
+            const Y = Chalkboard.calc.fft(conjIn);
+            const out: ChalkboardComplex[] = new Array(N);
+            for (let i = 0; i < N; i++) out[i] = Chalkboard.comp.init(Y[i].a / N, -Y[i].b / N);
+            return out;
+        };
+
+        /**
+         * Calculates the inverse FFT shift of an array, which undoes the effect of fftshift by moving the zero-frequency component back to the beginning of the array.
+         * @param {ChalkboardComplex[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const ifftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.ifftshift: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            if (N === 0) return [];
+            const shift = Math.floor(N / 2);
+            return arr.slice(shift).concat(arr.slice(0, shift));
+        };
+
+        /**
+         * Calculates the inverse Fourier transform of a function at a value within an interval.
+         * @param {ChalkboardFunction} func - The function
+         * @param {number} val - The value
+         * @param {number} [inf=0] - The lower bound
+         * @param {number} [sup=10] - The upper bound
+         * @param {number} [steps=10000] - The number of steps for numerical integration
+         * @returns {number}
+         */
+        export const iFourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
+            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.iFourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            const F = func.rule as (w: number) => number;
+            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps)) throw new TypeError("Chalkboard.calc.iFourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
+            if (steps <= 0 || !Number.isInteger(steps)) throw new TypeError("Chalkboard.calc.iFourier: Parameter 'steps' must be a positive integer.");
+            if (sup === inf) return 0;
+            const dw = (sup - inf) / steps;
+            let sum = 0;
+            for (let i = 0; i <= steps; i++) {
+                const w = inf + i * dw;
+                const weight = (i === 0 || i === steps) ? 0.5 : 1;
+                sum += weight * (F(w) * Math.cos(w * val));
+            }
+            return sum * dw;
+        };
+
+        /**
+         * Calculates the inverse real-valued fast Fourier transform of a non-negative frequency spectrum, returning a real-valued signal.
+         * @param {(number | ChalkboardComplex)[]} arr - Non-negative frequency spectrum
+         * @param {number} [n] - Length of the output real signal
+         * @returns {number[]}
+         */
+        export const irfft = (arr: (number | ChalkboardComplex)[], n?: number): number[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.irfft: Parameter 'arr' must be an array.");
+            if (arr.length === 0) return [];
+            const N = typeof n === "number" ? n : 2 * (arr.length - 1);
+            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.irfft: Parameter 'n' must be a positive integer.");
+            const expected = Math.floor(N / 2) + 1;
+            if (arr.length !== expected) throw new RangeError("Chalkboard.calc.irfft: Input spectrum length must be floor(n/2)+1.");
+            const full: ChalkboardComplex[] = new Array(N);
+            {
+                const v = arr[0];
+                const a = typeof v === "number" ? v : v.a;
+                const b = typeof v === "number" ? 0 : v.b;
+                full[0] = Chalkboard.comp.init(a, b);
+            }
+            const half = Math.floor(N / 2);
+            for (let k = 1; k <= half; k++) {
+                const v = arr[k];
+                const a = typeof v === "number" ? v : v.a;
+                const b = typeof v === "number" ? 0 : v.b;
+                full[k] = Chalkboard.comp.init(a, b);
+            }
+            if (N % 2 === 0) for (let k = 1; k < half; k++) full[N - k] = Chalkboard.comp.init(full[k].a, -full[k].b);
+            else for (let k = 1; k <= half; k++) full[N - k] = Chalkboard.comp.init(full[k].a, -full[k].b);
+            const isPow2 = (N & (N - 1)) === 0;
+            const x = isPow2 ? Chalkboard.calc.ifft(full) : Chalkboard.calc.idft(full);
+            const out: number[] = new Array(N);
+            for (let i = 0; i < N; i++) out[i] = x[i].a;
+            return out;
+        };
+
+        /**
          * Calculates the Laplace transform of a function at a value.
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
@@ -703,6 +968,19 @@ namespace Chalkboard {
         export const normal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if (func.field !== "real" || !func.type.startsWith("curve")) throw new TypeError("Chalkboard.calc.normal: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
             return Chalkboard.vect.normalize(Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector);
+        };
+
+        /**
+         * Calculates the real-valued discrete Fourier transform of an array of numbers.
+         * @param {number[]} arr - The array
+         * @returns {ChalkboardComplex[]}
+         */
+        export const rfft = (arr: number[]): ChalkboardComplex[] => {
+            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.rfft: Parameter 'arr' must be an array.");
+            const N = arr.length;
+            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.rfft: Input length must be a positive integer.");
+            const X = ((N & (N - 1)) === 0) ? Chalkboard.calc.fft(arr) : Chalkboard.calc.dft(arr);
+            return X.slice(0, Math.floor(N / 2) + 1);
         };
 
         /**

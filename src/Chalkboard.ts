@@ -242,11 +242,6 @@ namespace Chalkboard {
         throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
     };
 
-    /** @ignore */
-    export const ASSERT = (cond: any, msg: string): void => {
-        if (!cond) throw new Error(msg);
-    };
-
     /**
      * The variable for setting the default JavaScript Canvas API context for Chalkboard to use.
      * @type {string}

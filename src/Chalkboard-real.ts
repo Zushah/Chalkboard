@@ -246,6 +246,59 @@ namespace Chalkboard {
         };
 
         /**
+         * Evaluates the error function erf(x) on a number.
+         * @param {number} num - The number
+         * @returns {number}
+         */
+        export const erf = (num: number): number => {
+            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.erf: Parameter 'num' must be a finite number.");
+            const sign = num < 0 ? -1 : 1;
+            const x = Math.abs(num);
+            const p = 0.3275911;
+            const a1 = 0.254829592;
+            const a2 = -0.284496736;
+            const a3 = 1.421413741;
+            const a4 = -1.453152027;
+            const a5 = 1.061405429;
+            const t = 1 / (1 + p * x);
+            const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
+            return sign * y;
+        };
+
+        /**
+         * Evaluates the Gamma function Γ(x) on a number.
+         * @param {number} num - The number
+         * @returns {number}
+         */
+        export const Gamma = (num: number): number => {
+            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.gamma: Parameter 'num' must be a finite number.");
+            if (Number.isInteger(num) && num <= 0) return NaN;
+            const p0 = 0.99999999999980993;
+            const p1 = 676.5203681218851;
+            const p2 = -1259.1392167224028;
+            const p3 = 771.32342877765313;
+            const p4 = -176.61502916214059;
+            const p5 = 12.507343278686905;
+            const p6 = -0.13857109526572012;
+            const p7 = 9.9843695780195716e-6;
+            const p8 = 1.5056327351493116e-7;
+            if (num < 0.5) return Math.PI / (Math.sin(Math.PI * num) * Chalkboard.real.Gamma(1 - num));
+            const g = 7;
+            let x = num - 1;
+            let a = p0;
+            a += p1 / (x + 1);
+            a += p2 / (x + 2);
+            a += p3 / (x + 3);
+            a += p4 / (x + 4);
+            a += p5 / (x + 5);
+            a += p6 / (x + 6);
+            a += p7 / (x + 7);
+            a += p8 / (x + 8);
+            const t = x + g + 0.5;
+            return Math.sqrt(2 * Math.PI) * Math.pow(t, x + 0.5) * Math.exp(-t) * a;
+        };
+
+        /**
          * Evaluates the Heaviside step function on a number.
          * @param {number} num - The number
          * @param {number} edge - The edge of the function
@@ -415,6 +468,21 @@ namespace Chalkboard {
          * @param {boolean} [config.returnJSON=false] - If true, returns an AST in JSON instead of a string
          * @param {boolean} [config.returnLaTeX=false] - If true, returns LaTeX code instead of a string
          * @returns {string | number | { type: string, [key: string]: any }}
+         * @example
+         * // Returns 5
+         * const expr1 = Chalkboard.real.parse("x^2 + 1", { values: { x: 2 } });
+         * 
+         * // Returns 16x^4 + 81y^4 + 96x^3y + 216x^2y^2 + 216y^3x
+         * const expr2 = Chalkboard.real.parse("(2x + 3y)^4");
+         * 
+         * // Returns 25.1672 + 8.3891sin(4x)
+         * const expr3 = Chalkboard.real.parse("(1 + exp(2))(3 + sin(4x))");
+         * 
+         * // Returns y^{2}\mathrm{tan}\left(x\right) + 2y \cdot \mathrm{tan}\left(x\right) + \mathrm{tan}\left(x\right)
+         * const expr4 = Chalkboard.real.parse("tan(x)(y + 1)^2", { returnLaTeX: true });
+         * 
+         * // Returns {"type":"mul","left":{"type":"func","name":"tan","args":[{"type":"var","name":"x"}]},"right":{"type":"pow","base":{"type":"add","left":{"type":"var","name":"y"},"right":{"type":"num","value":1}},"exponent":{"type":"num","value":2}}}
+         * const expr5 = Chalkboard.real.parse("tan(x)(y + 1)^2", { returnJSON: true });
          */
         export const parse = (
             expr: string,
@@ -1082,11 +1150,11 @@ namespace Chalkboard {
             try {
                 const tokens = tokenize(expr);
                 const ast = parseTokens(tokens);
+                if (config.returnAST) return ast;
+                if (config.returnJSON) return JSON.stringify(ast);
                 if (config.values && Object.keys(config.values).length > 0) {
                     const result = evaluateNode(ast, config.values);
-                    if (config.roundTo !== undefined) {
-                        return Chalkboard.numb.roundTo(result, config.roundTo);
-                    }
+                    if (config.roundTo !== undefined) return Chalkboard.numb.roundTo(result, config.roundTo);
                     return result;
                 }
                 let simplified = simplifyNode(ast);
@@ -1105,8 +1173,6 @@ namespace Chalkboard {
                     };
                     simplified = roundNodes(simplified);
                 }
-                if (config.returnAST) return simplified;
-                if (config.returnJSON) return JSON.stringify(simplified);
                 if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {

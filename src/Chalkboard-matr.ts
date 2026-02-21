@@ -158,6 +158,33 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the Cholesky decomposition of a symmetric positive definite matrix.
+         * @param {ChalkboardMatrix} matr - The matrix
+         * @returns {{ L: ChalkboardMatrix, U: ChalkboardMatrix }}
+         */
+        export const Cholesky = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
+            if (!Chalkboard.matr.isSquare(matr)) throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.');
+            if (!Chalkboard.matr.isSymmetric(matr)) throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.');
+            const n = Chalkboard.matr.rows(matr);
+            const L = Chalkboard.matr.fill(0, n);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j <= i; j++) {
+                    let sum = matr[i][j];
+                    for (let k = 0; k < j; k++) {
+                        sum -= L[i][k] * L[j][k];
+                    }
+                    if (i === j) {
+                        if (sum <= 0) throw new RangeError('Chalkboard.matr.Cholesky: Matrix is not positive definite.');
+                        L[i][j] = Chalkboard.real.sqrt(sum);
+                    } else {
+                        L[i][j] = sum / L[j][j];
+                    }
+                }
+            }
+            return { L: L, U: Chalkboard.matr.transpose(L) };
+        };
+
+        /**
          * Calculates the cofactor matrix of a matrix at a row and column.
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} row - The row
