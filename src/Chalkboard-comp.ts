@@ -130,6 +130,44 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the cosine of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
+         * @example
+         * // Returns 1
+         * const z = Chalkboard.comp.random();
+         * const sin = Chalkboard.comp.sin(z);
+         * const cos = Chalkboard.comp.cos(z);
+         * const w = Chalkboard.comp.add(Chalkboard.comp.sq(sin), Chalkboard.comp.sq(cos));
+         */
+        export const cos = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(
+                    Chalkboard.trig.cos(z.a) * Chalkboard.trig.cosh(z.b),
+                    -Chalkboard.trig.sin(z.a) * Chalkboard.trig.sinh(z.b)
+                );
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.cos: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                return Chalkboard.comp.define(
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return Chalkboard.trig.cos(re) * Chalkboard.trig.cosh(im);
+                    },
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return -Chalkboard.trig.sin(re) * Chalkboard.trig.sinh(im);
+                    }
+                );
+            }
+            throw new TypeError("Chalkboard.comp.cos: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+        };
+
+        /**
          * Defines a mathematical function in the field of complex numbers.
          * @param {Function | Function[]} rule - The rule of the function, which can be a single function that takes a complex number or an array of two functions that take real and imaginary parts respectively.
          * @returns {ChalkboardFunction}
@@ -240,6 +278,37 @@ namespace Chalkboard {
          */
         export const Euler = (rad: number): ChalkboardComplex => {
             return Chalkboard.comp.init(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
+        };
+
+        /**
+         * Calculates the exponential of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
+         * @example
+         * // Returns approximately -e
+         * const z = Chalkboard.comp.exp(Chalkboard.comp.init(1, Chalkboard.PI()));
+         */
+        export const exp = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                const expRe = Math.exp(z.a);
+                return Chalkboard.comp.init(expRe * Math.cos(z.b), expRe * Math.sin(z.b));
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.exp: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                return Chalkboard.comp.define(
+                    (a: number, b: number) => {
+                        const expRe = Math.exp(f[0](a, b));
+                        return expRe * Math.cos(f[1](a, b));
+                    },
+                    (a: number, b: number) => {
+                        const expRe = Math.exp(f[0](a, b));
+                        return expRe * Math.sin(f[1](a, b));
+                    }
+                );
+            }
+            throw new TypeError("Chalkboard.comp.exp: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
         };
 
         /**
@@ -402,6 +471,21 @@ namespace Chalkboard {
          * @param {boolean} [config.returnJSON=false] - If true, returns an AST in JSON instead of a string
          * @param {boolean} [config.returnLaTeX=false] - If true, returns LaTeX code instead of a string
          * @returns {string | ChalkboardComplex | { type: string, [key: string]: any }}
+         * @example
+         * // Returns -2 + 4i
+         * const expr1 = Chalkboard.comp.parse("z^2 + 1", { values: { z: Chalkboard.comp.init(1, 2) } });
+         * 
+         * // Returns 16x^4 + 81y^4 + 96x^3y + 216x^2y^2 + 216y^3x
+         * const expr2 = Chalkboard.comp.parse("(2x + 3y)^4");
+         * 
+         * // Returns -23.0631 + 18.6612i
+         * const expr3 = Chalkboard.comp.parse("(1 + exp(2i))(3 + sin(4i))");
+         * 
+         * // Returns w\mathrm{exp}\left(z\right) + \mathrm{exp}\left(z\right)
+         * const expr4 = Chalkboard.comp.parse("exp(z)(w + 1)", { returnLaTeX: true });
+         * 
+         * // Returns {"type":"add","left":{"type":"mul","left":{"type":"var","name":"w"},"right":{"type":"func","name":"exp","args":[{"type":"var","name":"z"}]}},"right":{"type":"func","name":"exp","args":[{"type":"var","name":"z"}]}}
+         * const expr5 = Chalkboard.comp.parse("exp(z)(w + 1)", { returnJSON: true });
          */
         export const parse = (
             expr: string,
@@ -416,7 +500,7 @@ namespace Chalkboard {
             const tokenize = (input: string): string[] => {
                 const tokens: string[] = [];
                 let i = 0;
-                const registered = ["sin", "cos", "tan", "abs", "sqrt", "log", "ln", "exp", "min", "max"];
+                const registered = ["sin", "cos", "tan", "abs", "sq", "sqrt", "root", "ln", "exp", "conj", "conjugate", "invert", "mag", "arg", "re", "im"];
                 const isFunction = (name: string): boolean => registered.includes(name) || Chalkboard.REGISTRY[name] !== undefined;
                 while (i < input.length) {
                     const ch = input[i];
@@ -618,6 +702,9 @@ namespace Chalkboard {
                             } catch (e) {}
                         }
                         switch (funcName) {
+                            case "abs": {
+                                return Chalkboard.comp.absolute(args[0]) as ChalkboardComplex;
+                            }
                             case "conj":
                             case "conjugate": {
                                 return Chalkboard.comp.conjugate(args[0]) as ChalkboardComplex;
@@ -636,6 +723,18 @@ namespace Chalkboard {
                             }
                             case "ln": {
                                 return Chalkboard.comp.ln(args[0]);
+                            }
+                            case "sin": {
+                                return Chalkboard.comp.sin(args[0]) as ChalkboardComplex;
+                            }
+                            case "cos": {
+                                return Chalkboard.comp.cos(args[0]) as ChalkboardComplex;
+                            }
+                            case "tan": {
+                                return Chalkboard.comp.tan(args[0]) as ChalkboardComplex;
+                            }
+                            case "exp": {
+                                return Chalkboard.comp.exp(args[0]) as ChalkboardComplex;
                             }
                             case "invert": {
                                 return Chalkboard.comp.invert(args[0]);
@@ -677,8 +776,10 @@ namespace Chalkboard {
                     case "complex": {
                         if (node.a === 0 && node.b === 1) return "i";
                         if (node.a === 0 && node.b === -1) return "-i";
-                        if (node.a === 0) return node.b + "i";
+                        if (node.a === 0) return `${node.b}i`;
                         if (node.b === 0) return node.a.toString();
+                        if (node.b === 1) return `${node.a} + i`;
+                        if (node.b === -1) return `${node.a} - i`;
                         return node.b > 0 ? `${node.a} + ${node.b}i` : `${node.a} - ${-node.b}i`;
                     }
                     case "var": {
@@ -1078,15 +1179,38 @@ namespace Chalkboard {
             try {
                 const tokens = tokenize(expr);
                 const ast = parseTokens(tokens);
-                if (config.values && Object.keys(config.values).length > 0) {
-                    const result = evaluateNode(ast, config.values);
-                    if (config.roundTo !== undefined) {
-                        return Chalkboard.comp.init(
-                            Chalkboard.numb.roundTo(result.a, config.roundTo),
-                            Chalkboard.numb.roundTo(result.b, config.roundTo)
-                        );
+                const hasVars = (node: { type: string, [key: string]: any }): boolean => {
+                    switch (node.type) {
+                        case "var": return true;
+                        case "num": return false;
+                        case "complex": return false;
+                        case "neg": return hasVars(node.expr);
+                        case "add":
+                        case "sub":
+                        case "mul":
+                        case "div": return hasVars(node.left) || hasVars(node.right);
+                        case "pow": return hasVars(node.base) || hasVars(node.exponent);
+                        case "func": return node.args.some(hasVars);
+                        default: return false;
                     }
-                    return result;
+                };
+                if (!config.returnAST && !config.returnJSON) {
+                    const values = config.values || {};
+                    if ((config.values && Object.keys(config.values).length > 0) || !hasVars(ast)) {
+                        try {
+                            let result = evaluateNode(ast, values);
+                            if (config.roundTo !== undefined) {
+                                result = Chalkboard.comp.init(
+                                    Chalkboard.numb.roundTo(result.a, config.roundTo),
+                                    Chalkboard.numb.roundTo(result.b, config.roundTo)
+                                );
+                            }
+                            if (config.returnLaTeX) return nodeToLaTeX({ type: "complex", a: result.a, b: result.b });
+                            return result;
+                        } catch (e) {
+                            
+                        }
+                    }
                 }
                 if (isRealOnly(ast)) {
                     return Chalkboard.real.parse(expr, {
@@ -1326,6 +1450,44 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the sine of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
+         * @example
+         * // Returns 1
+         * const z = Chalkboard.comp.random();
+         * const sin = Chalkboard.comp.sin(z);
+         * const cos = Chalkboard.comp.cos(z);
+         * const w = Chalkboard.comp.add(Chalkboard.comp.sq(sin), Chalkboard.comp.sq(cos));
+         */
+        export const sin = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
+                const z = comp as ChalkboardComplex;
+                return Chalkboard.comp.init(
+                    Chalkboard.trig.sin(z.a) * Chalkboard.trig.cosh(z.b),
+                    Chalkboard.trig.cos(z.a) * Chalkboard.trig.sinh(z.b)
+                );
+            } else if (comp.hasOwnProperty("rule")) {
+                if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sin: Property 'field' of 'comp' must be 'comp'.");
+                const f = (comp as ChalkboardFunction).rule as [(a: number, b: number) => number, (a: number, b: number) => number];
+                return Chalkboard.comp.define(
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return Chalkboard.trig.sin(re) * Chalkboard.trig.cosh(im);
+                    },
+                    (a: number, b: number) => {
+                        const re = f[0](a, b);
+                        const im = f[1](a, b);
+                        return Chalkboard.trig.cos(re) * Chalkboard.trig.sinh(im);
+                    }
+                );
+            }
+            throw new TypeError("Chalkboard.comp.sin: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+        };
+
+        /**
          * Calculates the slope of a complex number.
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {number}
@@ -1373,7 +1535,7 @@ namespace Chalkboard {
                 const z = comp as ChalkboardComplex;
                 return Chalkboard.comp.init(
                     Chalkboard.real.sqrt((z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2),
-                    Chalkboard.numb.sgn(z.b) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2)
+                    (Chalkboard.numb.sgn(z.b) as 0 | 1 | -1) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2)
                 );
             } else if (comp.hasOwnProperty("rule")) {
                 if ((comp as ChalkboardFunction).field !== "comp") throw new TypeError("Chalkboard.comp.sqrt: Property 'field' of 'comp' must be 'comp'.");
@@ -1387,7 +1549,7 @@ namespace Chalkboard {
                     (a: number, b: number) => {
                         const re = f[0](a, b);
                         const im = f[1](a, b);
-                        return Chalkboard.numb.sgn(im) * Chalkboard.real.sqrt((-re + Chalkboard.real.sqrt(re * re + im * im)) / 2);
+                        return (Chalkboard.numb.sgn(im) as 0 | 1 | -1) * Chalkboard.real.sqrt((-re + Chalkboard.real.sqrt(re * re + im * im)) / 2);
                     }
                 ];
                 return Chalkboard.comp.define(...g);
@@ -1419,6 +1581,18 @@ namespace Chalkboard {
                 return Chalkboard.comp.define(...g);
             }
             throw new TypeError("Chalkboard.comp.sub: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+        };
+
+        /**
+         * Calculates the tangent of a complex number or function.
+         * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
+         * @returns {ChalkboardComplex | ChalkboardFunction}
+         * @example
+         * // Returns ((e² - 1) / (e² + 1))i
+         * const z = Chalkboard.comp.tan(Chalkboard.I());
+         */
+        export const tan = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
+            return Chalkboard.comp.div(Chalkboard.comp.sin(comp), Chalkboard.comp.cos(comp));
         };
 
         /**
@@ -1467,9 +1641,9 @@ namespace Chalkboard {
             } else if (comp.a === 0 && comp.b === -1) {
                 return "-i";
             } else if (comp.b >= 0) {
-                return comp.a.toString() + " + " + comp.b.toString() + "i";
+                return comp.a.toString() + " + " + (comp.b === 1 ? "i" : comp.b.toString() + "i");
             } else {
-                return comp.a.toString() + " - " + Math.abs(comp.b).toString() + "i";
+                return comp.a.toString() + " - " + (comp.b === -1 ? "i" : Math.abs(comp.b).toString() + "i");
             }
         };
 

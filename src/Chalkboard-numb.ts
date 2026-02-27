@@ -18,7 +18,7 @@ namespace Chalkboard {
          * const bernoulliRandom = Chalkboard.numb.Bernoullian();
          */
         export const Bernoullian = (p: number = 0.5): number => {
-            if (typeof p !== "number" || !Number.isFinite(p) || p < 0 || p > 1) throw new Error('Chalkboard.numb.Bernoullian: Parameter "p" must be a finite number between 0 and 1.');
+            if (typeof p !== "number" || !Number.isFinite(p) || p < 0 || p > 1) throw new Error(`Chalkboard.numb.Bernoullian: Parameter "p" must be a finite number between 0 and 1.`);
             return Math.random() < p ? 1 : 0;
         };
 
@@ -32,7 +32,7 @@ namespace Chalkboard {
          * const coeff = Chalkboard.numb.binomial(7, 3);
          */
         export const binomial = (n: number, k: number): number => {
-            if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0) throw new Error('Chalkboard.numb.binomial: Parameters "n" and "k" must be non-negative integers.');
+            if (!Number.isInteger(n) || !Number.isInteger(k) || n < 0 || k < 0) throw new Error(`Chalkboard.numb.binomial: Parameters "n" and "k" must be non-negative integers.`);
             if (k < 0 || k > n) return 0;
             if (k === 0 || k === n) return 1;
             if (k === 1 || k === n - 1) return n;
@@ -52,8 +52,8 @@ namespace Chalkboard {
          * const change = Chalkboard.numb.change(1, 2);
          */
         export const change = (initial: number, final: number): number => {
-            if (typeof initial !== "number" || typeof final !== "number" || !Number.isFinite(initial) || !Number.isFinite(final)) throw new Error('Chalkboard.numb.change: Parameters "initial" and "final" must be finite numbers.');
-            if (initial === 0) throw new Error('Chalkboard.numb.change: Parameter "initial" must be non-zero.');
+            if (typeof initial !== "number" || typeof final !== "number" || !Number.isFinite(initial) || !Number.isFinite(final)) throw new Error(`Chalkboard.numb.change: Parameters "initial" and "final" must be finite numbers.`);
+            if (initial === 0) throw new Error(`Chalkboard.numb.change: Parameter "initial" must be non-zero.`);
             return (final - initial) / initial;
         };
 
@@ -67,7 +67,7 @@ namespace Chalkboard {
          * const combine = Chalkboard.numb.combination(52, 5);
          */
         export const combination = (n: number, r: number): number => {
-            if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error('Chalkboard.numb.combination: Parameters "n" and "r" must be integers with 0 <= r <= n.');
+            if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error(`Chalkboard.numb.combination: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
             return Chalkboard.numb.factorial(n) / (Chalkboard.numb.factorial(n - r) * Chalkboard.numb.factorial(r));
         };
 
@@ -81,8 +81,8 @@ namespace Chalkboard {
          * const arr = Chalkboard.numb.compositeArr(0, 1000);
          */
         export const compositeArr = (inf: number, sup: number): number[] => {
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.compositeArr: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.compositeArr: Parameter "inf" must be less than or equal to "sup".');
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.compositeArr: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.compositeArr: Parameter "inf" must be less than or equal to "sup".`);
             const result: number[] = [];
             for (let i = inf; i <= sup; i++) if (i > 1 && !Chalkboard.numb.isPrime(i)) result.push(i);
             return result;
@@ -98,8 +98,8 @@ namespace Chalkboard {
          * const composites = Chalkboard.numb.compositeCount(0, 1000);
          */
         export const compositeCount = (inf: number, sup: number): number => {
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.compositeCount: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.compositeCount: Parameter "inf" must be less than or equal to "sup".');
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.compositeCount: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.compositeCount: Parameter "inf" must be less than or equal to "sup".`);
             return Chalkboard.numb.compositeArr(inf, sup).length;
         };
 
@@ -116,8 +116,8 @@ namespace Chalkboard {
          * const n5 = Chalkboard.numb.constrain(-1); // Returns 0
          */
         export const constrain = (num: number, range: [number, number] = [0, 1]): number => {
-            if (typeof num !== "number" || !Number.isFinite(num)) throw new Error('Chalkboard.numb.constrain: Parameter "num" must be a finite number.');
-            if (!Array.isArray(range) || range.length !== 2 || typeof range[0] !== "number" || typeof range[1] !== "number" || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[0] > range[1]) throw new Error('Chalkboard.numb.constrain: Parameter "range" must be an array of two finite numbers [min, max] with min <= max.');
+            if (typeof num !== "number" || !Number.isFinite(num)) throw new Error(`Chalkboard.numb.constrain: Parameter "num" must be a finite number.`);
+            if (!Array.isArray(range) || range.length !== 2 || typeof range[0] !== "number" || typeof range[1] !== "number" || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[0] > range[1]) throw new Error(`Chalkboard.numb.constrain: Parameter "range" must be an array of two finite numbers [min, max] with min <= max.`);
             return Math.max(Math.min(num, range[1]), range[0]);
         };
 
@@ -315,7 +315,7 @@ namespace Chalkboard {
          * const divisors = Chalkboard.numb.divisors(1000000);
          */
         export const divisors = (num: number): number[] => {
-            if (!Number.isInteger(num) || num <= 0) throw new Error('Chalkboard.numb.divisors: Parameter "num" must be a positive integer.');
+            if (!Number.isInteger(num) || num <= 0) throw new Error(`Chalkboard.numb.divisors: Parameter "num" must be a positive integer.`);
             const result: number[] = [];
             for (let i = 1; i <= num; i++) if (num % i === 0) result.push(i);
             return result;
@@ -330,7 +330,7 @@ namespace Chalkboard {
          * const totient = Chalkboard.numb.Euler(10);
          */
         export const Euler = (num: number): number => {
-            if (!Number.isInteger(num) || num <= 0) throw new Error('Chalkboard.numb.Euler: Parameter "num" must be a positive integer.');
+            if (!Number.isInteger(num) || num <= 0) throw new Error(`Chalkboard.numb.Euler: Parameter "num" must be a positive integer.`);
             const primeFactors = Chalkboard.numb.factors(num);
             const uniquePrimes: number[] = [];
             for (let i = 0; i < primeFactors.length; i++) {
@@ -351,8 +351,8 @@ namespace Chalkboard {
          * const expRandom = Chalkboard.numb.exponential(0.1);
          */
         export const exponential = (l: number = 1): number => {
-            if (typeof l !== "number" || !Number.isFinite(l)) throw new Error('Chalkboard.numb.exponential: Parameter "l" must be a finite number.');
-            if (l <= 0) throw new Error('Chalkboard.numb.exponential: Parameter "l" must be positive.');
+            if (typeof l !== "number" || !Number.isFinite(l)) throw new Error(`Chalkboard.numb.exponential: Parameter "l" must be a finite number.`);
+            if (l <= 0) throw new Error(`Chalkboard.numb.exponential: Parameter "l" must be positive.`);
             const u = 1 - Math.random();
             return -Math.log(u) / l;
         };
@@ -366,7 +366,7 @@ namespace Chalkboard {
          * const factorial = Chalkboard.numb.factorial(5);
          */
         export const factorial = (num: number): number => {
-            if (!Number.isInteger(num) || num < 0) throw new Error('Chalkboard.numb.factorial: Parameter "num" must be a non-negative integer.');
+            if (!Number.isInteger(num) || num < 0) throw new Error(`Chalkboard.numb.factorial: Parameter "num" must be a non-negative integer.`);
             let n = 1;
             for (let i = 2; i <= num; i++) n *= i;
             return n;
@@ -381,8 +381,8 @@ namespace Chalkboard {
          * const factors = Chalkboard.numb.factors(1000000);
          */
         export const factors = (num: number): number[] => {
-            if (!Number.isInteger(num)) throw new Error('Chalkboard.numb.factors: Parameter "num" must be an integer.');
-            if (num === 0) throw new Error('Chalkboard.numb.factors: Parameter "num" must be non-zero.');
+            if (!Number.isInteger(num)) throw new Error(`Chalkboard.numb.factors: Parameter "num" must be an integer.`);
+            if (num === 0) throw new Error(`Chalkboard.numb.factors: Parameter "num" must be non-zero.`);
             const result: number[] = [];
             if (num < 0) {
                 result.push(-1);
@@ -411,7 +411,7 @@ namespace Chalkboard {
          * const fibnum = Chalkboard.numb.Fibonacci(10);
          */
         export const Fibonacci = (num: number): number => {
-            if (!Number.isInteger(num) || num < 0) throw new Error('Chalkboard.numb.Fibonacci: Parameter "num" must be a non-negative integer.');
+            if (!Number.isInteger(num) || num < 0) throw new Error(`Chalkboard.numb.Fibonacci: Parameter "num" must be a non-negative integer.`);
             if (num === 0) return 0;
             if (num === 1) return 1;
             let a = 0, b = 1;
@@ -433,8 +433,8 @@ namespace Chalkboard {
          * const gaussRandom = Chalkboard.numb.Gaussian(0, 1);
          */
         export const Gaussian = (mean: number, deviation: number): number => {
-            if (!Number.isFinite(mean) || !Number.isFinite(deviation)) throw new Error('Chalkboard.numb.Gaussian: Parameters "mean" and "deviation" must be finite numbers.');
-            if (deviation <= 0) throw new Error('Chalkboard.numb.Gaussian: Parameter "deviation" must be positive.');
+            if (!Number.isFinite(mean) || !Number.isFinite(deviation)) throw new Error(`Chalkboard.numb.Gaussian: Parameters "mean" and "deviation" must be finite numbers.`);
+            if (deviation <= 0) throw new Error(`Chalkboard.numb.Gaussian: Parameter "deviation" must be positive.`);
             let u1 = 0;
             while (u1 === 0) u1 = Math.random();
             const u2 = Math.random();
@@ -452,7 +452,7 @@ namespace Chalkboard {
          * const gcd = Chalkboard.numb.gcd(68, 119);
          */
         export const gcd = (a: number, b: number): number => {
-            if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error('Chalkboard.numb.gcd: Parameters "a" and "b" must be integers.');
+            if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(`Chalkboard.numb.gcd: Parameters "a" and "b" must be integers.`);
             a = Math.abs(a);
             b = Math.abs(b);
             while (b !== 0) {
@@ -472,7 +472,7 @@ namespace Chalkboard {
          * const primes = Chalkboard.numb.Goldbach(12);
          */
         export const Goldbach = (num: number): [number, number] | undefined => {
-            if (!Number.isInteger(num) || num < 4 || num % 2 !== 0) throw new Error('Chalkboard.numb.Goldbach: Parameter "num" must be an even integer greater than or equal to 4.');
+            if (!Number.isInteger(num) || num < 4 || num % 2 !== 0) throw new Error(`Chalkboard.numb.Goldbach: Parameter "num" must be an even integer greater than or equal to 4.`);
             if (num !== 4) {
                 let a = num / 2, b = num / 2;
                 if (a % 2 === 0) {
@@ -501,7 +501,7 @@ namespace Chalkboard {
          * const approx = Chalkboard.numb.isApproxEqual(0.1 + 0.2, 0.3);
          */
         export const isApproxEqual = (a: number, b: number, precision: number = 0.000001): boolean => {
-            if (typeof a !== "number" || typeof b !== "number" || typeof precision !== "number" || !Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(precision) || precision <= 0) throw new Error('Chalkboard.numb.isApproxEqual: Parameters "a", "b", and "precision" must be finite numbers, and "precision" must be positive.');
+            if (typeof a !== "number" || typeof b !== "number" || typeof precision !== "number" || !Number.isFinite(a) || !Number.isFinite(b) || !Number.isFinite(precision) || precision <= 0) throw new Error(`Chalkboard.numb.isApproxEqual: Parameters "a", "b", and "precision" must be finite numbers, and "precision" must be positive.`);
             return Math.abs(a - b) < precision;
         };
 
@@ -590,7 +590,7 @@ namespace Chalkboard {
          * const no = Chalkboard.numb.Kronecker(1, 10); // Returns 0
          */
         export const Kronecker = (a: number, b: number): 1 | 0 => {
-            if (typeof a !== "number" || typeof b !== "number" || !Number.isFinite(a) || !Number.isFinite(b)) throw new Error('Chalkboard.numb.Kronecker: Parameters "a" and "b" must be finite numbers.');
+            if (typeof a !== "number" || typeof b !== "number" || !Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.numb.Kronecker: Parameters "a" and "b" must be finite numbers.`);
             if (a === b) return 1;
             else return 0;
         };
@@ -605,7 +605,7 @@ namespace Chalkboard {
          * const lcm = Chalkboard.numb.lcm(4, 6);
          */
         export const lcm = (a: number, b: number): number => {
-            if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error('Chalkboard.numb.lcm: Parameters "a" and "b" must be integers.');
+            if (!Number.isInteger(a) || !Number.isInteger(b)) throw new Error(`Chalkboard.numb.lcm: Parameters "a" and "b" must be integers.`);
             if (a === 0 || b === 0) return 0;
             return Math.abs(a / Chalkboard.numb.gcd(a, b) * b);
         };
@@ -621,11 +621,11 @@ namespace Chalkboard {
          * const map = Chalkboard.numb.map(23, [0, 25], [0, 1]);
          */
         export const map = (num: number, range1: number[], range2: number[]): number => {
-            if (!Array.isArray(range1) || !Array.isArray(range2)) throw new Error('Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays.');
-            if (range1.length !== 2 || range2.length !== 2) throw new Error('Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays of length 2.');
-            if (typeof num !== "number" || !Number.isFinite(num)) throw new Error('Chalkboard.numb.map: Parameter "num" must be a finite number.');
-            if (typeof range1[0] !== "number" || typeof range1[1] !== "number" || !Number.isFinite(range1[0]) || !Number.isFinite(range1[1]) || range1[0] >= range1[1]) throw new Error('Chalkboard.numb.map: Parameter "range1" must be an array of two finite numbers [min, max] with min < max.');
-            if (typeof range2[0] !== "number" || typeof range2[1] !== "number" || !Number.isFinite(range2[0]) || !Number.isFinite(range2[1]) || range2[0] > range2[1]) throw new Error('Chalkboard.numb.map: Parameter "range2" must be an array of two finite numbers [min, max] with min <= max.');
+            if (!Array.isArray(range1) || !Array.isArray(range2)) throw new Error(`Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays.`);
+            if (range1.length !== 2 || range2.length !== 2) throw new Error(`Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays of length 2.`);
+            if (typeof num !== "number" || !Number.isFinite(num)) throw new Error(`Chalkboard.numb.map: Parameter "num" must be a finite number.`);
+            if (typeof range1[0] !== "number" || typeof range1[1] !== "number" || !Number.isFinite(range1[0]) || !Number.isFinite(range1[1]) || range1[0] >= range1[1]) throw new Error(`Chalkboard.numb.map: Parameter "range1" must be an array of two finite numbers [min, max] with min < max.`);
+            if (typeof range2[0] !== "number" || typeof range2[1] !== "number" || !Number.isFinite(range2[0]) || !Number.isFinite(range2[1]) || range2[0] > range2[1]) throw new Error(`Chalkboard.numb.map: Parameter "range2" must be an array of two finite numbers [min, max] with min <= max.`);
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
         };
 
@@ -639,8 +639,8 @@ namespace Chalkboard {
          * const mod = Chalkboard.numb.mod(5, -3);
          */
         export const mod = (a: number, b: number): number => {
-            if (typeof a !== "number" || typeof b !== "number" || !Number.isFinite(a) || !Number.isFinite(b)) throw new Error('Chalkboard.numb.mod: Parameters "a" and "b" must be finite numbers.');
-            if (b === 0) throw new Error('Chalkboard.numb.mod: Parameter "b" must be non-zero.');
+            if (typeof a !== "number" || typeof b !== "number" || !Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.numb.mod: Parameters "a" and "b" must be finite numbers.`);
+            if (b === 0) throw new Error(`Chalkboard.numb.mod: Parameter "b" must be non-zero.`);
             return ((a % b) + b) % b;
         };
 
@@ -655,9 +655,9 @@ namespace Chalkboard {
          * const mul = Chalkboard.numb.mul((n) => n + 1, 0, 5);
          */
         export const mul = (formula: (n: number) => number, inf: number, sup: number): number => {
-            if (typeof formula !== "function") throw new Error('Chalkboard.numb.mul: Parameter "formula" must be a function.');
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.mul: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.mul: Parameter "inf" must be less than or equal to "sup".');
+            if (typeof formula !== "function") throw new Error(`Chalkboard.numb.mul: Parameter "formula" must be a function.`);
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.mul: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.mul: Parameter "inf" must be less than or equal to "sup".`);
             let result = 1;
             for (let i = inf; i <= sup; i++) result *= formula(i);
             return result;
@@ -672,7 +672,7 @@ namespace Chalkboard {
          * const prime = Chalkboard.numb.nextPrime(523);
          */
         export const nextPrime = (num: number): number => {
-            if (!Number.isFinite(num)) throw new Error('Chalkboard.numb.nextPrime: Parameter "num" must be finite.');
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.numb.nextPrime: Parameter "num" must be finite.`);
             let result = Math.floor(num) + 1;
             if (result <= 2) return 2;
             if (result % 2 === 0) result++;
@@ -690,7 +690,7 @@ namespace Chalkboard {
          * const permute = Chalkboard.numb.permutation(4, 4);
          */
         export const permutation = (n: number, r: number): number => {
-            if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error('Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with 0 <= r <= n.');
+            if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error(`Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
             return Chalkboard.numb.factorial(n) / Chalkboard.numb.factorial(n - r);
         };
 
@@ -703,8 +703,8 @@ namespace Chalkboard {
          * const poissonRandom = Chalkboard.numb.Poissonian(0.5);
          */
         export const Poissonian = (l: number = 1): number => {
-            if (typeof l !== "number" || !Number.isFinite(l)) throw new Error('Chalkboard.numb.Poissonian: Parameter "l" must be a finite number.');
-            if (l <= 0) throw new Error('Chalkboard.numb.Poissonian: Parameter "l" must be positive.');
+            if (typeof l !== "number" || !Number.isFinite(l)) throw new Error(`Chalkboard.numb.Poissonian: Parameter "l" must be a finite number.`);
+            if (l <= 0) throw new Error(`Chalkboard.numb.Poissonian: Parameter "l" must be positive.`);
             const L = Chalkboard.E(-l);
             let p = 1, k = 0;
             for (; p > L; ++k) p *= Math.random();
@@ -720,7 +720,7 @@ namespace Chalkboard {
          * const prime = Chalkboard.numb.prime(100);
          */
         export const prime = (num: number): number => {
-            if (!Number.isInteger(num) || num < 1) throw new Error('Chalkboard.numb.prime: Parameter "num" must be a positive integer.');
+            if (!Number.isInteger(num) || num < 1) throw new Error(`Chalkboard.numb.prime: Parameter "num" must be a positive integer.`);
             if (num === 1) return 2;
             let count = 1;
             let p = 3;
@@ -743,8 +743,8 @@ namespace Chalkboard {
          * const arr = Chalkboard.numb.primeArr(0, 1000);
          */
         export const primeArr = (inf: number, sup: number): number[] => {
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.primeArr: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.primeArr: Parameter "inf" must be less than or equal to "sup".');
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.primeArr: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.primeArr: Parameter "inf" must be less than or equal to "sup".`);
             const result: number[] = [];
             for (let i = inf; i <= sup; i++) if (Chalkboard.numb.isPrime(i)) result.push(i);
             return result;
@@ -760,8 +760,8 @@ namespace Chalkboard {
          * const primes = Chalkboard.numb.primeCount(0, 1000);
          */
         export const primeCount = (inf: number, sup: number): number => {
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.primeCount: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.primeCount: Parameter "inf" must be less than or equal to "sup".');
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.primeCount: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.primeCount: Parameter "inf" must be less than or equal to "sup".`);
             return Chalkboard.numb.primeArr(inf, sup).length;
         };
 
@@ -775,8 +775,8 @@ namespace Chalkboard {
          * const gap = Chalkboard.numb.primeGap(1, 100);
          */
         export const primeGap = (inf: number, sup: number): number => {
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.primeGap: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.primeGap: Parameter "inf" must be less than or equal to "sup".');
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.primeGap: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.primeGap: Parameter "inf" must be less than or equal to "sup".`);
             let prime: number | null = null;
             let gap = 0;
             for (let i = inf; i <= sup; i++) if (Chalkboard.numb.isPrime(i)) {
@@ -799,8 +799,8 @@ namespace Chalkboard {
          * const random = Chalkboard.numb.random(-1, 1);
          */
         export const random = (inf: number = 0, sup: number = 1): number => {
-            if (typeof inf !== "number" || typeof sup !== "number" || !Number.isFinite(inf) || !Number.isFinite(sup)) throw new Error('Chalkboard.numb.random: Parameters "inf" and "sup" must be finite numbers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.random: Parameter "inf" must be less than or equal to "sup".');
+            if (typeof inf !== "number" || typeof sup !== "number" || !Number.isFinite(inf) || !Number.isFinite(sup)) throw new Error(`Chalkboard.numb.random: Parameters "inf" and "sup" must be finite numbers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.random: Parameter "inf" must be less than or equal to "sup".`);
             return inf + (sup - inf) * Math.random();
         };
 
@@ -814,8 +814,8 @@ namespace Chalkboard {
          * const rounded = Chalkboard.numb.roundTo(1237, 10);
          */
         export const roundTo = (num: number, positionalIndex: number): number => {
-            if (!Number.isFinite(num) || !Number.isFinite(positionalIndex)) throw new Error('Chalkboard.numb.roundTo: Parameters must be finite numbers.');
-            if (positionalIndex === 0) throw new Error('Chalkboard.numb.roundTo: Parameter "positionalIndex" must be non-zero.');
+            if (!Number.isFinite(num) || !Number.isFinite(positionalIndex)) throw new Error(`Chalkboard.numb.roundTo: Parameters must be finite numbers.`);
+            if (positionalIndex === 0) throw new Error(`Chalkboard.numb.roundTo: Parameter "positionalIndex" must be non-zero.`);
             return Math.round(num / positionalIndex) * positionalIndex;
         };
 
@@ -830,7 +830,7 @@ namespace Chalkboard {
          */
         export const sgn = (num: number): -1 | 0 | 1 | undefined => {
             if (Number.isNaN(num)) return undefined;
-            if (!Number.isFinite(num)) throw new Error('Chalkboard.numb.sgn: Parameter "num" must be a finite number.');
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.numb.sgn: Parameter "num" must be a finite number.`);
             if (num > 0) return 1;
             else if (num < 0) return -1;
             else return 0;
@@ -847,9 +847,9 @@ namespace Chalkboard {
          * const sum = Chalkboard.numb.sum((n) => 1 / (n * n), 0, 1000);
          */
         export const sum = (formula: (n: number) => number, inf: number, sup: number): number => {
-            if (typeof formula !== "function") throw new Error('Chalkboard.numb.sum: Parameter "formula" must be a function.');
-            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error('Chalkboard.numb.sum: Parameters "inf" and "sup" must be integers.');
-            if (inf > sup) throw new Error('Chalkboard.numb.sum: Parameter "inf" must be less than or equal to "sup".');
+            if (typeof formula !== "function") throw new Error(`Chalkboard.numb.sum: Parameter "formula" must be a function.`);
+            if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.sum: Parameters "inf" and "sup" must be integers.`);
+            if (inf > sup) throw new Error(`Chalkboard.numb.sum: Parameter "inf" must be less than or equal to "sup".`);
             let result = 0;
             for (let i = inf; i <= sup; i++) result += formula(i);
             return result;
@@ -865,7 +865,7 @@ namespace Chalkboard {
          * const bin2 = Chalkboard.numb.toBinary(10, true); // Returns "0b1010"
          */
         export const toBinary = (num: number, prefix: boolean = false): string => {
-            if (!Number.isInteger(num)) throw new Error('Chalkboard.numb.toBinary: Parameter "num" must be an integer.');
+            if (!Number.isInteger(num)) throw new Error(`Chalkboard.numb.toBinary: Parameter "num" must be an integer.`);
             const sign = num < 0 ? "-" : "";
             const digits = Math.abs(num).toString(2);
             return sign + (prefix ? "0b" : "") + digits;
@@ -882,19 +882,19 @@ namespace Chalkboard {
          * const dec3 = Chalkboard.numb.toDecimal("0x2a", 16); // Returns 42
          */
         export const toDecimal = (num: string, base: number): number => {
-            if (typeof num !== "string") throw new Error('Chalkboard.numb.toDecimal: Parameter "num" must be a string.');
-            if (!Number.isInteger(base) || base < 2 || base > 36) throw new Error('Chalkboard.numb.toDecimal: Parameter "base" must be an integer between 2 and 36.');
+            if (typeof num !== "string") throw new Error(`Chalkboard.numb.toDecimal: Parameter "num" must be a string.`);
+            if (!Number.isInteger(base) || base < 2 || base > 36) throw new Error(`Chalkboard.numb.toDecimal: Parameter "base" must be an integer between 2 and 36.`);
             num = num.toLowerCase().trim();
             const isNegative = num.startsWith("-");
             if (isNegative) num = num.substring(1);
             if (base === 2 && num.startsWith("0b")) num = num.substring(2);
             if (base === 8 && num.startsWith("0o")) num = num.substring(2);
             if (base === 16 && num.startsWith("0x")) num = num.substring(2);
-            if (num.length === 0) throw new Error('Chalkboard.numb.toDecimal: Parameter "num" must contain digits.');
+            if (num.length === 0) throw new Error(`Chalkboard.numb.toDecimal: Parameter "num" must contain digits.`);
             const chars = "0123456789abcdefghijklmnopqrstuvwxyz".substring(0, base);
             for (const char of num) if (!chars.includes(char)) throw new Error(`Chalkboard.numb.toDecimal: Invalid character "${char}" for base ${base}.`);
             const result = parseInt(num, base);
-            if (!Number.isFinite(result)) throw new Error('Chalkboard.numb.toDecimal: Failed to parse "num".');
+            if (!Number.isFinite(result)) throw new Error(`Chalkboard.numb.toDecimal: Failed to parse "num".`);
             return isNegative ? -result : result;
         };
 
@@ -908,11 +908,11 @@ namespace Chalkboard {
          * const fraction = Chalkboard.numb.toFraction(-1.25);
          */
         export const toFraction = (num: number, tolerance: number = 1e-8): [number, number] => {
-            if (typeof num !== "number" || typeof tolerance !== "number") throw new Error('Chalkboard.numb.toFraction: Parameters "num" and "tolerance" must be numbers.');
-            if (!Number.isFinite(num)) throw new Error('Chalkboard.numb.toFraction: The parameter "num" must be finite to be converted to a fraction.');
-            if (!Number.isFinite(tolerance) || tolerance <= 0) throw new Error('Chalkboard.numb.toFraction: The parameter "tolerance" must be a positive finite number.');
+            if (typeof num !== "number" || typeof tolerance !== "number") throw new Error(`Chalkboard.numb.toFraction: Parameters "num" and "tolerance" must be numbers.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.numb.toFraction: The parameter "num" must be finite to be converted to a fraction.`);
+            if (!Number.isFinite(tolerance) || tolerance <= 0) throw new Error(`Chalkboard.numb.toFraction: The parameter "tolerance" must be a positive finite number.`);
             const sign = Chalkboard.numb.sgn(num);
-            if (sign === undefined) throw new Error('Chalkboard.numb.toFraction: The parameter "num" must be a valid number to be converted to a fraction.');
+            if (sign === undefined) throw new Error(`Chalkboard.numb.toFraction: The parameter "num" must be a valid number to be converted to a fraction.`);
             const x = Math.abs(num);
             if (Number.isInteger(x)) return [sign * x, 1];
             let h1 = 1, h2 = 0, k1 = 0, k2 = 1;
@@ -941,7 +941,7 @@ namespace Chalkboard {
                     return [sign * (h / g), k / g];
                 }
             }
-            throw new Error('Chalkboard.numb.toFraction: Failed to converge to a fraction within the iteration limit.');
+            throw new Error(`Chalkboard.numb.toFraction: Failed to converge to a fraction within the iteration limit.`);
         };
 
         /**
@@ -955,7 +955,7 @@ namespace Chalkboard {
          * const hex2 = Chalkboard.numb.toHexadecimal(26, true, true); // Returns "0x1A"
          */
         export const toHexadecimal = (num: number, prefix: boolean = false, uppercase: boolean = false): string => {
-            if (!Number.isInteger(num)) throw new Error('Chalkboard.numb.toHexadecimal: The parameter "num" must be an integer.');
+            if (!Number.isInteger(num)) throw new Error(`Chalkboard.numb.toHexadecimal: The parameter "num" must be an integer.`);
             const sign = num < 0 ? "-" : "";
             let digits = Math.abs(num).toString(16);
             if (uppercase) digits = digits.toUpperCase();
@@ -972,7 +972,7 @@ namespace Chalkboard {
          * const oct2 = Chalkboard.numb.toOctal(10, true); // Returns "0o12"
          */
         export const toOctal = (num: number, prefix: boolean = false): string => {
-            if (!Number.isInteger(num)) throw new Error('Chalkboard.numb.toOctal: The parameter "num" must be an integer.');
+            if (!Number.isInteger(num)) throw new Error(`Chalkboard.numb.toOctal: The parameter "num" must be an integer.`);
             const sign = num < 0 ? "-" : "";
             const digits = Math.abs(num).toString(8);
             return sign + (prefix ? "0o" : "") + digits;

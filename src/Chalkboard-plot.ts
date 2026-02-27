@@ -891,8 +891,8 @@ namespace Chalkboard {
                 context?: CanvasRenderingContext2D;
             } = {}
         ): number[][] => {
-            ASSERT(sol && Array.isArray(sol.t) && Array.isArray(sol.y), `Chalkboard.plot.ode: Parameter "sol" must have properties "t" and "y" as arrays.`);
-            ASSERT(sol.t.length === sol.y.length && sol.t.length > 0, `Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
+            if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y)) throw new Error(`Chalkboard.plot.ode: Parameter "sol" must have properties "t" and "y" as arrays.`);
+            if (sol.t.length !== sol.y.length || sol.t.length === 0) throw new Error(`Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
             const ctx = config.context || getContext();
             const x0 = (config.x ?? ctx.canvas.width / 2);
             const y0 = (config.y ?? ctx.canvas.height / 2);
@@ -903,12 +903,12 @@ namespace Chalkboard {
             const i = config.i ?? 0;
             const j = config.j ?? 1;
             const dim = sol.y[0].length;
-            ASSERT(Number.isInteger(i) && i >= 0, `Chalkboard.plot.ode: "i" must be an integer >= 0.`);
-            ASSERT(i < dim, `Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
+            if (!Number.isInteger(i) || i < 0) throw new Error(`Chalkboard.plot.ode: "i" must be an integer >= 0.`);
+            if (i >= dim) throw new Error(`Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
             if (phase) {
-                ASSERT(Number.isInteger(j) && j >= 0, `Chalkboard.plot.ode: "j" must be an integer >= 0.`);
-                ASSERT(j < dim, `Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
-                ASSERT(i !== j, `Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
+                if (!Number.isInteger(j) || j < 0) throw new Error(`Chalkboard.plot.ode: "j" must be an integer >= 0.`);
+                if (j >= dim) throw new Error(`Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
+                if (i === j) throw new Error(`Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
             }
             const data: number[][] = [];
             ctx.save();

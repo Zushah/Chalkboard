@@ -734,13 +734,13 @@ namespace Chalkboard {
             try {
                 const tokens = tokenize(expr);
                 const ast = parseTokens(tokens);
+                if (config.returnAST) return ast;
+                if (config.returnJSON) return JSON.stringify(ast);
                 if (config.values && Object.keys(config.values).length > 0) return $(evaluateNode(ast, config.values));
                 let simplified = simplifyNode(ast);
                 let normalizedast = parseTokens(tokenize(nodeToString(simplified)));
                 simplified = simplifyNode(normalizedast);
                 simplified = simplifyNode(simplified);
-                if (config.returnAST) return simplified;
-                if (config.returnJSON) return JSON.stringify(simplified);
                 if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
