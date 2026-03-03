@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Number Theory Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Number Theory Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -127,6 +133,14 @@ namespace Chalkboard {
          * @param {string} from - Original measurement unit
          * @param {string} to - Desired measurement unit
          * @returns {number | number[]}
+         * @example
+         * const m = cb.numb.convert(1500, "mm", "m"); // Length conversion
+         * const sqmi = cb.numb.convert(1000000, "m2", "mi2"); // Area conversion
+         * const kg = cb.numb.convert(5000, "g", "kg"); // Mass conversion
+         * const ml = cb.numb.convert(3, "gal", "mL"); // Volume conversion
+         * const pa = cb.numb.convert(1, "atm", "Pa"); // Pressure conversion
+         * const ns = cb.numb.convert(2, "hr", "ns"); // Time conversion
+         * const k = cb.numb.convert(98.6, "F", "K"); // Temperature conversion
          */
         export const convert = (num: number | number[], from: string, to: string): number | number[] => {
             if (typeof from !== "string" || typeof to !== "string") throw new Error(`Chalkboard.numb.convert: Parameters "from" and "to" must be strings.`);

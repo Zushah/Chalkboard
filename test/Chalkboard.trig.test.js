@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Trigonometry Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Trigonometry Namespace
 */
 
 import assert from "assert";
@@ -59,5 +62,3 @@ import cb from "../dist/Chalkboard.js";
     assert.ok(Math.abs(cb.trig.arccsch(1) - Math.log(1 + Math.sqrt(2))) < 1e-3);
     assert.ok(Math.abs(cb.trig.arcsech(1) - 0) < 1e-3);
 }
-
-console.log("🟩 Chalkboard.trig tests passed.");

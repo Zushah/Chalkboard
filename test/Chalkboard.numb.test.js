@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Number Theory Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Number Theory Namespace
 */
 
 import assert from "assert";
@@ -81,5 +84,3 @@ import cb from "../dist/Chalkboard.js";
     assert.ok(e >= 0);
     assert.strictEqual(cb.numb.random(5, 5), 5);
 }
-
-console.log("🟩 Chalkboard.numb tests passed.");

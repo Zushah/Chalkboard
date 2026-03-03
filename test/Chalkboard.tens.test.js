@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Tensor Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Tensor Namespace
 */
 
 import assert from "assert";
@@ -49,16 +52,18 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.tens.size(t), [1, 2, 2]);
 }
 
-// tens.isEqual, tens.isRankEqual, tens.isRankOf, tens.isSizeEqual, tens.isSizeOf, tens.isSizeUniform
+// tens.isApproxEqual, tens.isEqual, tens.isRankEqual, tens.isRankOf, tens.isSizeEqual, tens.isSizeOf, tens.isSizeUniform, tens.isZero
 {
     const t1 = cb.tens.init([[1, 2], [3, 4]]);
     const t2 = cb.tens.init([[5, 6], [7, 8]]);
+    assert.strictEqual(cb.tens.isApproxEqual(t1, cb.tens.init([[1.000000000000001, 2.000000000000001], [3.000000000001, 4.0]])), true);
     assert.strictEqual(cb.tens.isEqual(t1, cb.tens.init([[1, 2], [3, 4]])), true);
     assert.strictEqual(cb.tens.isRankEqual(t1, t2), true);
     assert.strictEqual(cb.tens.isRankOf(t1, 2), true);
     assert.strictEqual(cb.tens.isSizeEqual(t1, t2), true);
     assert.strictEqual(cb.tens.isSizeOf(t1, 2, 2), true);
     assert.strictEqual(cb.tens.isSizeUniform(t1), true);
+    assert.strictEqual(cb.tens.isZero(cb.tens.zero(2, 2)), true);
 }
 
 // tens.concat, tens.constrain, tens.contract, tens.pull, tens.push, tens.resize, tens.transpose
@@ -87,5 +92,3 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.tens.toTypedArray(t, "float32"), new Float32Array([1, 2, 3, 4]));
     assert.deepStrictEqual(cb.tens.toVector(t, 2, 0), { x: 1, y: 2 });
 }
-
-console.log("🟩 Chalkboard.tens tests passed.");

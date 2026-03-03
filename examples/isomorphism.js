@@ -1,15 +1,18 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Isomorphism Visualization
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Isomorphism Visualization
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
 // Define the sets
 const Z4 = cb.abal.Z(4); // The set of integers modulo 4 is the set {0, 1, 2, 3}
@@ -20,7 +23,7 @@ const G = cb.abal.group(Z4, (a, b) => (a + b) % 4); // The group G is the set Z�
 const H = cb.abal.group(C4, (z, w) => cb.comp.mul(z, w)); // The group H is the set C₄ with complex multiplication
 
 // Define the isomorphism
-const F = cb.abal.isomorphism(G, H, (n) => cb.comp.round(cb.comp.pow(cb.comp.init(0, 1), n))); // The isomorphism F: G → H is defined by F(n) = iⁿ for all n in Z₄
+const F = cb.abal.isomorphism(G, H, (n) => cb.I(n)); // The isomorphism F: G → H is defined by F(n) = iⁿ for all n in Z₄
 
 // F is an isomorphism because it is (1) a homomorphism and it is (2) a bijection.
 // Proof:
@@ -56,7 +59,7 @@ console.log("Is F⁻¹ an isomorphism?", cb.abal.isIsomorphism(Fi));
 
 const drawSet = (elements, x, y, radius, label, results = []) => {
     ctx.beginPath();
-    ctx.arc(x, y, radius + 40, 0, 2 * cb.PI());
+    ctx.arc(x, y, radius + 40, 0, cb.PI(2));
     ctx.fillStyle = "lightgray";
     ctx.fill();
     ctx.strokeStyle = "black";
@@ -69,11 +72,11 @@ const drawSet = (elements, x, y, radius, label, results = []) => {
     const angleStep = (2 * cb.PI()) / elements.length;
     const positions = [];
     for (let i = 0; i < elements.length; i++) {
-        const angle = i * angleStep - cb.PI() / 2;
+        const angle = i * angleStep - cb.PI(1/2);
         const px = x + radius * cb.trig.cos(angle);
         const py = y + radius * cb.trig.sin(angle);
         ctx.beginPath();
-        ctx.ellipse(px, py, 30, 30, 0, 0, 2 * cb.PI());
+        ctx.ellipse(px, py, 30, 30, 0, 0, cb.PI(2));
         ctx.fillStyle = "white";
         ctx.fill();
         ctx.strokeStyle = "black";
@@ -99,7 +102,7 @@ const drawArrow = (from, to) => {
     const startAngle = cb.PI() / 4;
     const startX = from.x + circleRadius * cb.trig.cos(startAngle);
     const startY = from.y - circleRadius * cb.trig.sin(startAngle);
-    const endAngle = (3 * cb.PI()) / 4;
+    const endAngle = cb.PI(3/4);
     const endX = to.x + circleRadius * cb.trig.cos(endAngle);
     const endY = to.y - circleRadius * cb.trig.sin(endAngle);
     const dx = endX - startX;
@@ -117,12 +120,12 @@ const drawArrow = (from, to) => {
     ctx.beginPath();
     ctx.moveTo(endX, endY);
     ctx.lineTo(
-        endX - arrowSize * cb.trig.cos(arrowAngle - cb.PI() / 6),
-        endY - arrowSize * cb.trig.sin(arrowAngle - cb.PI() / 6)
+        endX - arrowSize * cb.trig.cos(arrowAngle - cb.PI(1/6)),
+        endY - arrowSize * cb.trig.sin(arrowAngle - cb.PI(1/6))
     );
     ctx.lineTo(
-        endX - arrowSize * cb.trig.cos(arrowAngle + cb.PI() / 6),
-        endY - arrowSize * cb.trig.sin(arrowAngle + cb.PI() / 6)
+        endX - arrowSize * cb.trig.cos(arrowAngle + cb.PI(1/6)),
+        endY - arrowSize * cb.trig.sin(arrowAngle + cb.PI(1/6))
     );
     ctx.closePath();
     ctx.fillStyle = "blue";
@@ -131,12 +134,12 @@ const drawArrow = (from, to) => {
     ctx.beginPath();
     ctx.moveTo(startX, startY);
     ctx.lineTo(
-        startX + arrowSize * cb.trig.cos(startArrowAngle - cb.PI() / 6),
-        startY + arrowSize * cb.trig.sin(startArrowAngle - cb.PI() / 6)
+        startX + arrowSize * cb.trig.cos(startArrowAngle - cb.PI(1/6)),
+        startY + arrowSize * cb.trig.sin(startArrowAngle - cb.PI(1/6))
     );
     ctx.lineTo(
-        startX + arrowSize * cb.trig.cos(startArrowAngle + cb.PI() / 6),
-        startY + arrowSize * cb.trig.sin(startArrowAngle + cb.PI() / 6)
+        startX + arrowSize * cb.trig.cos(startArrowAngle + cb.PI(1/6)),
+        startY + arrowSize * cb.trig.sin(startArrowAngle + cb.PI(1/6))
     );
     ctx.closePath();
     ctx.fillStyle = "blue";
@@ -153,9 +156,7 @@ const main = () => {
     const C4Results = C4.elements.map((z) => `F⁻¹(${cb.comp.toString(z)}) = ${Fi.mapping(z)}`);
     const Z4Positions = drawSet(Z4.elements, leftX, centerY, radius, "Z₄", Z4Results);
     const C4Positions = drawSet(C4.elements.map((z) => cb.comp.toString(z)), rightX, centerY, radius, "C₄", C4Results);
-    for (let i = 0; i < Z4Positions.length; i++) {
-        drawArrow(Z4Positions[i], C4Positions[i]);
-    }
+    for (let i = 0; i < Z4Positions.length; i++) drawArrow(Z4Positions[i], C4Positions[i]);
     ctx.fillStyle = "black";
     ctx.font = "20px monospace";
     ctx.textAlign = "center";

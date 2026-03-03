@@ -1,18 +1,22 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Fluid Flow
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Fluid Flow
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
-// Vector field defined as F(x, y) = (-y, -x/(1 + x^2)^2), adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
-const F = cb.vect.field("y", "-x / ((1 + x * x) * (1 + x * x))");
+// Vector field defined as F(x, y) = (y, -x/(1 + x^2)^2)
+// adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
+const F = cb.vect.field((x, y) => y, (x, y) => -x / ((1 + x*x) * (1 + x*x)));
 
 // Basic particle system to simulate the fluid flow
 class Particle {

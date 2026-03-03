@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Statistics Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Statistics Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -639,6 +645,7 @@ namespace Chalkboard {
                 }
                 return result / arr.length;
             } else if (type === "geometric") {
+                result = 1;
                 for (let i = 0; i < arr.length; i++) {
                     result *= arr[i];
                 }
@@ -1008,8 +1015,8 @@ namespace Chalkboard {
                 const arr = [0, 0, 0, 0];
                 for (let i = 0; i < data.length; i++) {
                     arr[0] += Math.log(data[i][0]);
-                    arr[1] += data[i][1] * Math.log(data[i][0]);
-                    arr[2] += data[i][1];
+                    arr[1] += Math.log(data[i][1]) * Math.log(data[i][0]);
+                    arr[2] += Math.log(data[i][1]);
                     arr[3] += Math.log(data[i][0]) * Math.log(data[i][0]);
                 }
                 const a = Chalkboard.E((arr[2] - ((data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0])) * arr[0]) / data.length);
@@ -1022,7 +1029,7 @@ namespace Chalkboard {
                     arr[1] += data[i][1];
                     arr[2] += data[i][0] * data[i][0] * data[i][1];
                     arr[3] += data[i][1] * Math.log(data[i][1]);
-                    arr[4] += data[i][0] & (data[i][1] * Math.log(data[i][1]));
+                    arr[4] += data[i][0] * (data[i][1] * Math.log(data[i][1]));
                     arr[5] += data[i][0] * data[i][1];
                 }
                 const a = Chalkboard.E((arr[2] * arr[3] - arr[5] * arr[4]) / (arr[1] * arr[2] - arr[5] * arr[5]));

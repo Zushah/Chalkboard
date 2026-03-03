@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Boolean Algebra Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Boolean Algebra Namespace
 */
 
 import assert from "assert";
@@ -86,5 +89,3 @@ import cb from "../dist/Chalkboard.js";
     assert.strictEqual(cb.bool.isEqual("x & y", "y & x"), true);
     assert.strictEqual(cb.bool.isEqual("x | y", "x & y"), false);
 }
-
-console.log("🟩 Chalkboard.bool tests passed.");

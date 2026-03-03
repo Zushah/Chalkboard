@@ -1,15 +1,18 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Quaternion Donut
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Quaternion Donut
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
 // Generate the donut's points with parametric equations
 let points = [];
@@ -29,9 +32,7 @@ function main() {
     // Make the donut rotate with a rotation quaternion
     const r = cb.quat.fromAxis(cb.vect.normalize(cb.vect.init(1, 1, 1)), theta);
     let qoints = [];  // We'll say that "qoints" are the new rotated points
-    for (let i = 0; i < points.length; i++) {
-        qoints.push(cb.quat.toRotation(r, points[i]));
-    }
+    for (let i = 0; i < points.length; i++) qoints.push(cb.quat.toRotation(r, points[i]));
     theta += cb.trig.toRad(1);
 
     ctx.save();

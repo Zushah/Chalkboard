@@ -1,15 +1,18 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Matrix Donut
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Matrix Donut
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
 // Generate the donut's points with parametric equations
 let points = [];
@@ -28,7 +31,6 @@ const R = cb.matr.rotator(0.01, 0.01, 0.01);
 function main() {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.strokeStyle = "black";
@@ -41,11 +43,9 @@ function main() {
         }
     }
     ctx.restore();
-
     for (let i = 0; i < points.length; i++) {
         points[i] = cb.matr.mulVector(R, points[i]); // Multiply the rotation matrix with the points' vectors
     }
-
     window.requestAnimationFrame(main);
 }
 main();

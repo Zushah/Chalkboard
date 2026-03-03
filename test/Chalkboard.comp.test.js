@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Complex Numbers Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Complex Numbers Namespace
 */
 
 import assert from "assert";
@@ -17,7 +20,7 @@ import cb from "../dist/Chalkboard.js";
 {
     const z = cb.comp.init(1, -2);
     assert.deepStrictEqual(cb.comp.absolute(z), { a: 1, b: 2 });
-    assert.strictEqual(cb.comp.arg(z), -1.1071487177940904);
+    assert.strictEqual(cb.comp.arg(z), -1.1071487177940906);
     assert.deepStrictEqual(cb.comp.conjugate(z), { a: 1, b: 2 });
     assert.strictEqual(cb.comp.Im(z), -2);
     assert.deepStrictEqual(cb.comp.invert(z), { a: 0.2, b: 0.4 });
@@ -57,9 +60,9 @@ import cb from "../dist/Chalkboard.js";
 // comp.pow, comp.root, comp.rotate, comp.sq, comp.sqrt
 {
     const z = cb.comp.init(1, -2);
-    assert.deepStrictEqual(cb.comp.pow(z, 3), { a: -11, b: 2 });
-    assert.deepStrictEqual(cb.comp.root(z, 4), [{ a: 1.1763010734364077, b: -0.3341624842102652 }, { a: 0.33416248421026506, b: 1.1763010734364074 }, { a: -1.1763010734364077, b: 0.33416248421026484 }, { a: -0.33416248421014944, b: -1.1763010734363915 }]);
-    assert.deepStrictEqual(cb.comp.rotate(z, 1), { a: 2.2232442754839328, b: -0.23913362692838272 });
+    assert.deepStrictEqual(cb.comp.pow(z, 3), { a: -10.999999999999996, b: 2.000000000000008 });
+    assert.deepStrictEqual(cb.comp.root(z, 4), [{ a: 1.1763010734364077, b: -0.33416248421026523 }, { a: 0.33416248421026506, b: 1.1763010734364074 }, { a: -1.1763010734364077, b: 0.33416248421026484 }, { a: -0.33416248421014944, b: -1.1763010734363915 }]);
+    assert.deepStrictEqual(cb.comp.rotate(z, 1), { a: 2.2232442754839328, b: -0.23913362692838322 });
     assert.deepStrictEqual(cb.comp.sq(z), { a: -3, b: -4 });
     assert.deepStrictEqual(cb.comp.sqrt(z), { a: 1.272019649514069, b: -0.7861513777574234 });
 }
@@ -70,9 +73,20 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.comp.cos(z), { a: 2.0327230070196642, b: 3.051897799151799 });
     assert.deepStrictEqual(cb.comp.Euler(1), { a: 0.5403023058681397, b: 0.8414709848078965 });
     assert.deepStrictEqual(cb.comp.exp(z), { a: -1.1312043837568135, b: -2.4717266720048188 });
-    assert.deepStrictEqual(cb.comp.ln(z), { a: 0.8047189562170279, b: -1.1071487177940904 });
+    assert.deepStrictEqual(cb.comp.ln(z), { a: 0.8047189562170279, b: -1.1071487177940906 });
     assert.deepStrictEqual(cb.comp.sin(z), { a: 3.1657785132161664, b: -1.9596010414216047 });
     assert.deepStrictEqual(cb.comp.tan(z), { a: 0.033812826079896635, b: -1.0147936161466335 });
+}
+
+// comp.isApproxEqual, comp.isEqual, comp.isInverse, comp.isNormalized, comp.isZero
+{
+    const z = cb.comp.init(1, -2);
+    const w = cb.comp.init(1.000000000000001, -2.000000000000001);
+    assert.strictEqual(cb.comp.isApproxEqual(z, w), true);
+    assert.strictEqual(cb.comp.isEqual(z, w), false);
+    assert.strictEqual(cb.comp.isInverse(z, cb.comp.invert(z)), true);
+    assert.strictEqual(cb.comp.isNormalized(z), false);
+    assert.strictEqual(cb.comp.isZero(cb.comp.init(0, 0)), true);
 }
 
 // comp.copy, comp.print, comp.toArray, comp.toMatrix, comp.toString, comp.toTypedArray, comp.toVector
@@ -128,5 +142,3 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.comp.parse("5 * 2 + 3 * 4i + i + 6 - 7i", { returnAST: true }), { type: "complex", a: 16, b: 6 });
     assert.deepStrictEqual(cb.comp.parse("5 * 2 + 3 * 4i + i + 6 - 7i", { values: { z: cb.comp.init(1, 2) } }), { a: 16, b: 6 });
 }
-
-console.log("🟩 Chalkboard.comp tests passed.");

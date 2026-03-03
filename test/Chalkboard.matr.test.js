@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Matrix Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Matrix Namespace
 */
 
 import assert from "assert";
@@ -78,10 +81,11 @@ import cb from "../dist/Chalkboard.js";
     assert.ok(cb.matr.eigenvector(em).length === 2);
 }
 
-// matr.isDiagonal, matr.isEqual, matr.isIdentity, matr.isInvertible, matr.isLowerTriangular, matr.isOrthogonal, matr.isSizeEqual, matr.isSizeOf, matr.isSkewSymmetric, matr.isSquare, matr.isSymmetric, matr.isUpperTriangular, matr.isZero
+// matr.isApproxEqual, matr.isDiagonal, matr.isEqual, matr.isIdentity, matr.isInvertible, matr.isLowerTriangular, matr.isOrthogonal, matr.isSizeEqual, matr.isSizeOf, matr.isSkewSymmetric, matr.isSquare, matr.isSymmetric, matr.isUpperTriangular, matr.isZero
 {
     const m1 = cb.matr.init([1, 2], [3, 4]);
     const i = cb.matr.identity(2);
+    assert.strictEqual(cb.matr.isApproxEqual(m1, cb.matr.init([1.000000000000001, 2.000000000000001], [3.000000000000001, 4.000000000000001])), true);
     assert.strictEqual(cb.matr.isDiagonal(cb.matr.init([1, 0], [0, 2])), true);
     assert.strictEqual(cb.matr.isEqual(m1, cb.matr.init([1, 2], [3, 4])), true);
     assert.strictEqual(cb.matr.isIdentity(i), true);
@@ -137,5 +141,3 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.matr.toTypedArray(m, "float32"), new Float32Array([1, 2, 3, 4]));
     assert.deepStrictEqual(cb.matr.toVector(m, 2, 0, 0), { x: 1, y: 3 });
 }
-
-console.log("🟩 Chalkboard.matr tests passed.");

@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Differential Equations Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Differential Equations Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -829,7 +835,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Solves an ordinary differential equation using the adaptive Dormand–Prince RK45 method. Produces a variable-step solution.
+         * Solves an ordinary differential equation using the adaptive Dormand–Prince (or Runge–Kutta–Fehlberg) method. Produces a variable-step solution.
          * @param {ChalkboardODE} ode - The ordinary differential equation to solve.
          * @param {number} [config.t0=0] - Initial time.
          * @param {number} config.t1 - Final time.

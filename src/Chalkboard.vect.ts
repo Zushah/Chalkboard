@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Vector Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Vector Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -565,6 +571,37 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two vectors are approximately equal within a particular precision.
+         * @param {ChalkboardVector} vect1 - The first vector
+         * @param {ChalkboardVector} vect2 - The second vector
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const approx = Chalkboard.vect.isApproxEqual(Chalkboard.vect.init(1, 2, 3), Chalkboard.vect.init(1, 2, 3.0000001));
+         * 
+         * // Returns false
+         * const notApprox = Chalkboard.vect.isApproxEqual(Chalkboard.vect.init(1, 2, 3), Chalkboard.vect.init(1, 2, 3.1));
+         */
+        export const isApproxEqual = (vect1: ChalkboardVector, vect2: ChalkboardVector, precision: number = 0.000001): boolean => {
+            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
+                if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
+                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision);
+                } else if (Chalkboard.vect.isDimensionOf(vect1, 3)) {
+                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision) && Chalkboard.numb.isApproxEqual(vect1.z!, vect2.z!, precision);
+                } else if (Chalkboard.vect.isDimensionOf(vect1, 4)) {
+                    return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision) && Chalkboard.numb.isApproxEqual(vect1.z!, vect2.z!, precision) && Chalkboard.numb.isApproxEqual(vect1.w!, vect2.w!, precision);
+                } else {
+                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                }
+            } else {
+                return false;
+            }
+        };
+
+        /**
          * Checks if the dimensions of two vectors are equal.
          * @param {ChalkboardVector} vect1 - The first vector
          * @param {ChalkboardVector} vect2 - The second vector
@@ -645,7 +682,7 @@ namespace Chalkboard {
          * const normalized = Chalkboard.vect.isNormalized(Chalkboard.vect.init(0.6, 0.8));
          */
         export const isNormalized = (vect: ChalkboardVector): boolean => {
-            return Chalkboard.vect.magsq(vect) === 1;
+            return Chalkboard.numb.isApproxEqual(Chalkboard.vect.magsq(vect), 1);
         };
 
         /**
@@ -658,7 +695,7 @@ namespace Chalkboard {
          * const orthogonal = Chalkboard.vect.isOrthogonal(Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0, 1));
          */
         export const isOrthogonal = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
-            return Chalkboard.vect.dot(vect1, vect2) === 0;
+            return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), 0);
         };
 
         /**
@@ -683,7 +720,7 @@ namespace Chalkboard {
          * const zero = Chalkboard.vect.isZero(Chalkboard.vect.init(0, 0));
          */
         export const isZero = (vect: ChalkboardVector): boolean => {
-            return Chalkboard.vect.isEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
+            return Chalkboard.vect.isApproxEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
         };
 
         /**

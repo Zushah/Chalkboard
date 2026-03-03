@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Tensor Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Tensor Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -197,6 +203,29 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two tensors are approximately equal within a particular precision.
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         */
+        export const isApproxEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor, precision: number = 0.000001): boolean => {
+            if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
+                (tens1 = tens1 as ChalkboardTensor[]), (tens2 = tens2 as ChalkboardTensor[]);
+                for (let i = 0; i < tens1.length; i++) {
+                    if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
+                        if (!Chalkboard.tens.isApproxEqual(tens1[i], tens2[i], precision)) return false;
+                    } else {
+                        if (!Chalkboard.numb.isApproxEqual(tens1[i] as number, tens2[i] as number, precision)) return false;
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        /**
          * Checks if two tensors are equal.
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
@@ -278,6 +307,22 @@ namespace Chalkboard {
                 if (Chalkboard.tens.size(tens)[i] !== Chalkboard.tens.size(tens)[0]) score++;
             }
             return score === 0;
+        };
+
+        /**
+         * Checks if a tensor is a zero tensor.
+         * @param {ChalkboardTensor} tens - The tensor
+         * @returns {boolean}
+         */
+        export const isZero = (tens: ChalkboardTensor): boolean => {
+            if (Array.isArray(tens)) {
+                for (let i = 0; i < tens.length; i++) {
+                    if (!Chalkboard.tens.isZero(tens[i])) return false;
+                }
+                return true;
+            } else {
+                return Chalkboard.numb.isApproxEqual(tens, 0);
+            }
         };
 
         /**

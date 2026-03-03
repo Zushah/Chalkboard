@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Statistics Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Statistics Namespace
 */
 
 import assert from "assert";
@@ -137,8 +140,8 @@ import cb from "../dist/Chalkboard.js";
 {
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 1], [1, 3], [2, 5]], "linear"), 2), 5);
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 0], [1, 1], [2, 4]], "polynomial", 2), 3), 9);
-    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 2], [2, 16], [3, 54]], "power"), 2), 8);
-    assert.strictEqual(cb.real.val(cb.stat.regression([[0, 2], [1, 2*cb.E(0.5)], [2, 2*cb.E()]], "exponential"), 1), 9.69496301514105);
+    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 2], [2, 16], [3, 54]], "power"), 2), 15.999999999999998);
+    assert.strictEqual(cb.real.val(cb.stat.regression([[0, 2], [1, 2*cb.E(0.5)], [2, 2*cb.E()]], "exponential"), 1), 3.2974425414002564);
     assert.strictEqual(cb.real.val(cb.stat.regression([[1, 1], [2, 1+2*cb.real.ln(2)], [4, 1+2*cb.real.ln(4)]], "logarithmic"), 2), 2.386294361119929);
 }
 
@@ -153,5 +156,3 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.stat.toTensor([1, 2, 3, 4], 2, 2), [[1, 2], [3, 4]]);
     assert.ok(cb.stat.toSet([1, 2, 2, 3]).contains(1) && cb.stat.toSet([1, 2, 2, 3]).contains(3) && !cb.stat.toSet([1, 2, 2, 3]).contains(4));
 }
-
-console.log("🟩 Chalkboard.stat tests passed.");

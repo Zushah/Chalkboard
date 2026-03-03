@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Quaternion Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Quaternion Namespace
 */
 
 import assert from "assert";
@@ -61,6 +64,17 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.quat.toRotation(q, v), { x: 0.9999999999999999, y: 0, z: -1.0000000000000002 });
 }
 
+// quat.isApproxEqual, quat.isEqual, quat.isInverse, quat.isNormalized, quat.isZero
+{
+    const q = cb.quat.init(1, 2, 3, 4);
+    const r = cb.quat.init(1.000000000000001, 2.000000000000001, 3.000000000000001, 4.000000000000001);
+    assert.strictEqual(cb.quat.isApproxEqual(q, r), true);
+    assert.strictEqual(cb.quat.isEqual(q, r), false);
+    assert.strictEqual(cb.quat.isInverse(q, cb.quat.invert(q)), true);
+    assert.strictEqual(cb.quat.isNormalized(q), false);
+    assert.strictEqual(cb.quat.isZero(cb.quat.init(0, 0, 0, 0)), true);
+}
+
 // quat.copy, quat.print, quat.toArray, quat.toMatrix, quat.toString, quat.toTypedArray, quat.toVector
 {
     const q = cb.quat.init(1, 2, 3, 4);
@@ -68,9 +82,7 @@ import cb from "../dist/Chalkboard.js";
     assert.doesNotThrow(() => cb.quat.print(q));
     assert.deepStrictEqual(cb.quat.toArray(q), [1, 2, 3, 4]);
     assert.deepStrictEqual(cb.quat.toMatrix(q), [[1, -2, -3, -4], [2, 1, -4, 3], [3, 4, 1, -2], [4, -3, 2, 1]]);
-    assert.strictEqual(cb.quat.toString(q), "1 + 2i + 3j + 4k ");
+    assert.strictEqual(cb.quat.toString(q), "1 + 2i + 3j + 4k");
     assert.deepStrictEqual(cb.quat.toTypedArray(q, "float32"), new Float32Array([1, 2, 3, 4]));
     assert.deepStrictEqual(cb.quat.toVector(q), { x: 1, y: 2, z: 3, w: 4 });
 }
-
-console.log("🟩 Chalkboard.quat tests passed.");

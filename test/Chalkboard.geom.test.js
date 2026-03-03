@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Geometry Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Geometry Namespace
 */
 
 import assert from "assert";
@@ -59,5 +62,3 @@ import cb from "../dist/Chalkboard.js";
     cb.geom.line3D(0, 1, 0, 1, 2, 0, ctx);
     assert.deepStrictEqual(calls, ["beginPath", ["moveTo", 0, 1], ["lineTo", 1, 2], "stroke"]);
 }
-
-console.log("🟩 Chalkboard.geom tests passed.");

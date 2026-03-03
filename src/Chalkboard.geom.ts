@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Geometry Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Geometry Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -214,7 +220,7 @@ namespace Chalkboard {
             x2: number,
             y2: number,
             z2: number,
-            context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D
+            context: CanvasRenderingContext2D = Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')() as CanvasRenderingContext2D
         ): void => {
             context.beginPath();
             context.moveTo(x1 / (z1 * 0.0025 + 1), y1 / (z1 * 0.0025 + 1));

@@ -1,15 +1,18 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Hyperbolic Functions
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Hyperbolic Functions
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
 let theta = 0;
 function main() {
@@ -18,7 +21,7 @@ function main() {
     cb.plot.xyplane({lineWidth: 2});
 
     // Plot the unit hyperbola with a parametric function
-    const f = cb.real.define(["(t * t + 1) / (2 * t)", "(t * t - 1) / (2 * t)"], "curv");
+    const f = cb.real.define((t) => (t*t + 1) / (2*t), (t) => (t*t - 1) / (2*t));
     cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", domain: [0, 10], lineWidth: 4});
     cb.plot.definition(f, {strokeStyle: "rgb(100, 100, 255)", domain: [-10, 0], lineWidth: 4});
 
@@ -81,7 +84,7 @@ function main() {
         ctx.fillText("arccoth(θ) = undefined", 20, 720);
     }
     
-    theta += 0.05;
+    theta += 0.01;
     if (theta > 2.5) {
         theta = -2.5;
     }

@@ -1,7 +1,7 @@
 {
   "include": ["./src/**/*"],
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2023",
     "moduleResolution": "node",
     "lib": ["es2023", "dom"],
     "rootDir": "./src/",

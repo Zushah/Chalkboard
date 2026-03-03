@@ -3,14 +3,21 @@ type ChalkboardComplex = {
     b: number;
 };
 type ChalkboardFunction = {
-    definition: string | string[];
-    type: "expl" | "inve" | "pola" | "curv" | "surf" | "mult" | "comp";
+    rule: ((...x: number[]) => number) | (((...x: number[]) => number)[]);
+    field: "real" | "comp";
+    type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d";
 };
 type ChalkboardMatrix = number[][];
 type ChalkboardMorphism<T, U> = {
     struc1: ChalkboardStructure<T>;
     struc2: ChalkboardStructure<U>;
     mapping: (a: T) => U;
+};
+type ChalkboardODE = {
+    rule: (t: number, y: number[]) => number[];
+    order: number;
+    dimension: number;
+    type: "single" | "system";
 };
 type ChalkboardQuaternion = {
     a: number;
@@ -51,23 +58,16 @@ type ChalkboardVector = {
     z?: number;
     w?: number;
 } | number[] | Float32Array | Float64Array | ChalkboardMatrix | string;
-type ChalkboardVectorField = {
-    p: string;
-    q: string;
-    r?: string;
-    s?: string;
-};
 declare namespace Chalkboard {
     const APPLY: <T>(object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>, callback: (x: any) => any) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>;
     let CONTEXT: string;
     const E: (exponent?: number) => number;
     const I: (exponent?: number) => ChalkboardComplex;
-    const LOGO: (x?: number, y?: number, size?: number, context?: CanvasRenderingContext2D) => void;
-    let PARSEPREFIX: string;
     const PI: (coefficient?: number) => number;
-    const README: () => void;
-    const VERSION: "2.4.0";
-    const VERSIONALIAS: "Noether";
+    const REGISTER: (name: string, func: (...x: number[]) => number) => void;
+    const REGISTRY: Record<string, (...x: number[]) => number>;
+    const VERSION: "3.0.0";
+    const VERSIONALIAS: "Euler";
 }
 declare namespace Chalkboard {
     namespace abal {
@@ -173,7 +173,12 @@ declare namespace Chalkboard {
         const NOR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
         const NOT: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
         const OR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
-        const parse: (input: string, values?: Record<string, boolean | 0 | 1>, returnAST?: boolean) => string | boolean | 0 | 1 | {
+        const parse: (expr: string, config?: {
+            values?: Record<string, boolean | 0 | 1>;
+            returnAST?: boolean;
+            returnJSON?: boolean;
+            returnLaTeX?: boolean;
+        }) => string | boolean | 0 | 1 | {
             type: string;
             [key: string]: any;
         };
@@ -190,7 +195,7 @@ declare namespace Chalkboard {
         const binormal: (func: ChalkboardFunction, val: number) => ChalkboardVector;
         const convolution: (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number) => number;
         const correlation: (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number) => number;
-        const curl: (vectfield: ChalkboardVectorField, vect: ChalkboardVector) => ChalkboardVector;
+        const curl: (vectfield: ChalkboardFunction, vect: ChalkboardVector) => ChalkboardVector;
         const curvature: (func: ChalkboardFunction, val: number) => number;
         const dfdv: (func: ChalkboardFunction, vectpos: ChalkboardVector, vectdir: ChalkboardVector) => number;
         const dfdx: (func: ChalkboardFunction, val: number) => number | ChalkboardVector;
@@ -198,70 +203,206 @@ declare namespace Chalkboard {
         const dfdz: (func: ChalkboardFunction, comp: ChalkboardComplex) => [ChalkboardComplex, ChalkboardComplex];
         const d2fdz2: (func: ChalkboardFunction, comp: ChalkboardComplex) => [ChalkboardComplex, ChalkboardComplex];
         const dfrdt: (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number) => number;
-        const div: (vectfield: ChalkboardVectorField, vect: ChalkboardVector) => number;
+        const dft: (arr: (number | ChalkboardComplex)[]) => ChalkboardComplex[];
+        const div: (vectfield: ChalkboardFunction, vect: ChalkboardVector) => number;
         const extrema: (func: ChalkboardFunction, domain: [number, number]) => number[];
         const fds: (func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number) => number;
-        const fnds: (vectfield: ChalkboardVectorField, func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number) => number;
-        const Fourier: (func: ChalkboardFunction, val: number) => number;
-        const frds: (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, func: ChalkboardFunction, inf: number, sup: number) => number;
+        const fft: (arr: (number | ChalkboardComplex)[]) => ChalkboardComplex[];
+        const fftfreq: (n: number, d?: number) => number[];
+        const fftshift: (arr: ChalkboardComplex[]) => ChalkboardComplex[];
+        const fnds: (vectfield: ChalkboardFunction, func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number) => number;
+        const Fourier: (func: ChalkboardFunction, val: number, inf?: number, sup?: number, steps?: number) => number;
+        const frds: (funcORvectfield: ChalkboardFunction, func: ChalkboardFunction, inf: number, sup: number) => number;
         const fxdx: (func: ChalkboardFunction, inf: number, sup: number) => number | ChalkboardVector;
         const fxydxdy: (func: ChalkboardFunction, xinf: number, xsup: number, yinf: number, ysup: number) => number;
         const fzdz: (func1: ChalkboardFunction, func2: ChalkboardFunction, inf: number, sup: number) => ChalkboardComplex;
-        const grad: (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector) => ChalkboardVector | ChalkboardMatrix;
-        const grad2: (funcORvectfield: ChalkboardFunction | ChalkboardVectorField, vect: ChalkboardVector) => ChalkboardMatrix;
+        const grad: (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector) => ChalkboardVector | ChalkboardMatrix;
+        const grad2: (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector) => ChalkboardMatrix;
+        const idft: (arr: (number | ChalkboardComplex)[]) => ChalkboardComplex[];
+        const ifft: (arr: (number | ChalkboardComplex)[]) => ChalkboardComplex[];
+        const ifftshift: (arr: ChalkboardComplex[]) => ChalkboardComplex[];
+        const iFourier: (func: ChalkboardFunction, val: number, inf?: number, sup?: number, steps?: number) => number;
+        const irfft: (arr: (number | ChalkboardComplex)[], n?: number) => number[];
         const Laplace: (func: ChalkboardFunction, val: number) => number;
         const lim: (func: ChalkboardFunction, val: number) => number | undefined;
         const mean: (func: ChalkboardFunction, inf: number, sup: number) => number;
         const Newton: (func: ChalkboardFunction, domain?: [number, number]) => number;
         const normal: (func: ChalkboardFunction, val: number) => ChalkboardVector;
+        const rfft: (arr: number[]) => ChalkboardComplex[];
         const tangent: (func: ChalkboardFunction, val: number) => ChalkboardVector;
         const Taylor: (func: ChalkboardFunction, val: number, n: 0 | 1 | 2, a: number) => number;
     }
 }
 declare namespace Chalkboard {
     namespace comp {
-        const absolute: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const add: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
+        const absolute: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const add: (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const arg: (comp: ChalkboardComplex) => number;
         const argBetween: (comp1: ChalkboardComplex, comp2: ChalkboardComplex) => number;
-        const conjugate: (comp: ChalkboardComplex) => ChalkboardComplex;
+        const conjugate: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const constrain: (comp: ChalkboardComplex, range?: [number, number]) => ChalkboardComplex;
         const copy: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const define: (realDefinition: string, imagDefinition: string) => ChalkboardFunction;
+        const cos: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const define: (...rule: (((z: ChalkboardComplex) => ChalkboardComplex) | ((a: number, b: number) => number))[]) => ChalkboardFunction;
         const dist: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => number;
         const distsq: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => number;
-        const div: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
+        const div: (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const Euler: (rad: number) => ChalkboardComplex;
-        const Im: (funcORcomp: ChalkboardFunction | ChalkboardComplex) => string | number;
+        const exp: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const Im: (funcORcomp: ChalkboardFunction | ChalkboardComplex) => Function | number;
         const init: (a: number, b?: number) => ChalkboardComplex;
         const invert: (comp: ChalkboardComplex) => ChalkboardComplex;
+        const isApproxEqual: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number, precision?: number) => boolean;
+        const isEqual: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => boolean;
+        const isInverse: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number, precision?: number) => boolean;
+        const isNormalized: (comp: ChalkboardComplex) => boolean;
+        const isZero: (comp: ChalkboardComplex | number) => boolean;
         const ln: (comp: ChalkboardComplex) => ChalkboardComplex;
         const mag: (comp: ChalkboardComplex) => number;
         const magset: (comp: ChalkboardComplex, num: number) => ChalkboardComplex;
         const magsq: (comp: ChalkboardComplex) => number;
-        const mul: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
-        const negate: (comp: ChalkboardComplex) => ChalkboardComplex;
+        const mul: (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const negate: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const normalize: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const parse: (str: string) => Function;
-        const pow: (comp: ChalkboardComplex, num: number) => ChalkboardComplex;
+        const parse: (expr: string, config?: {
+            values?: Record<string, ChalkboardComplex>;
+            roundTo?: number;
+            returnAST?: boolean;
+            returnJSON?: boolean;
+            returnLaTeX?: boolean;
+        }) => string | ChalkboardComplex | {
+            type: string;
+            [key: string]: any;
+        };
+        const pow: (comp: ChalkboardComplex | number | ChalkboardFunction, num: number) => ChalkboardComplex | ChalkboardFunction;
         const print: (comp: ChalkboardComplex) => void;
         const random: (inf?: number, sup?: number) => ChalkboardComplex;
-        const Re: (funcORcomp: ChalkboardFunction | ChalkboardComplex) => string | number;
-        const reciprocate: (comp: ChalkboardComplex) => ChalkboardComplex;
+        const Re: (funcORcomp: ChalkboardFunction | ChalkboardComplex) => Function | number;
+        const reciprocate: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const root: (comp: ChalkboardComplex, index?: number) => ChalkboardComplex[];
         const rotate: (comp: ChalkboardComplex, rad: number) => ChalkboardComplex;
         const round: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const scl: (comp: ChalkboardComplex, num: number) => ChalkboardComplex;
+        const scl: (comp: ChalkboardComplex | number | ChalkboardFunction, num: number) => ChalkboardComplex | ChalkboardFunction;
+        const sin: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const slope: (comp: ChalkboardComplex) => number;
-        const sq: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const sqrt: (comp: ChalkboardComplex) => ChalkboardComplex;
-        const sub: (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number) => ChalkboardComplex;
+        const sq: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const sqrt: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const sub: (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
+        const tan: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const toArray: (comp: ChalkboardComplex) => [number, number];
         const toMatrix: (comp: ChalkboardComplex) => ChalkboardMatrix;
         const toString: (comp: ChalkboardComplex) => string;
         const toTypedArray: (comp: ChalkboardComplex, type?: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64") => Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array;
         const toVector: (comp: ChalkboardComplex) => ChalkboardVector;
         const val: (func: ChalkboardFunction, comp: ChalkboardComplex) => ChalkboardComplex;
+    }
+}
+declare namespace Chalkboard {
+    namespace diff {
+        const at: (sol: {
+            t: number[];
+            y: number[][];
+        }, time: number) => number[];
+        const Bernoulli: (p: number | ((t: number) => number), q: number | ((t: number) => number), n: number) => ChalkboardODE;
+        const BesselI: (nu?: number) => ChalkboardODE;
+        const BesselJ: (nu?: number) => ChalkboardODE;
+        const closestIndex: (t: number[], target: number) => number;
+        const component: (sol: {
+            t: number[];
+            y: number[][];
+        }, index: number) => number[];
+        const derivative: (sol: {
+            t: number[];
+            y: number[][];
+        }) => number[][];
+        const Duffing: (delta: number, alpha: number, beta: number, gamma: number, omega: number) => ChalkboardODE;
+        const error: (sol: {
+            t: number[];
+            y: number[][];
+        }, ode: ChalkboardODE, norm?: "L1" | "L2" | "LInfinity") => {
+            t: number[];
+            e: number[];
+            max: number;
+            mean: number;
+            rmse: number;
+        };
+        const exponential: (k?: number) => ChalkboardODE;
+        const Gompertz: (a?: number, K?: number) => ChalkboardODE;
+        const harmonic: (w?: number) => ChalkboardODE;
+        const harmonicDamped: (w?: number, zeta?: number) => ChalkboardODE;
+        const harmonicForced: (w: number, zeta: number, F: (t: number) => number) => ChalkboardODE;
+        const init: (rule: ((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[]), dimension?: number) => ChalkboardODE;
+        const Kepler2D: (mu?: number) => ChalkboardODE;
+        const Kepler3D: (mu?: number) => ChalkboardODE;
+        const linear1: (a: ((t: number) => number) | number, b: ((t: number) => number) | number) => ChalkboardODE;
+        const linear2: (a: ((t: number) => number) | number, b: ((t: number) => number) | number, c: ((t: number) => number) | number) => ChalkboardODE;
+        const logistic: (r?: number, K?: number) => ChalkboardODE;
+        const Lorenz: (sigma?: number, rho?: number, beta?: number) => ChalkboardODE;
+        const LotkaVolterra: (alpha?: number, beta?: number, gamma?: number, delta?: number) => ChalkboardODE;
+        const massSpringDamper: (m: number, c: number, k: number) => ChalkboardODE;
+        const pendulum: (params?: {
+            g?: number;
+            L?: number;
+            b?: number;
+            tau?: (t: number) => number;
+        }) => ChalkboardODE;
+        const pendulumDrag: (params?: {
+            g?: number;
+            L?: number;
+            b?: number;
+            c?: number;
+            tau?: (t: number) => number;
+        }) => ChalkboardODE;
+        const pendulumDriven: (q?: number, A?: number, Omega?: number) => ChalkboardODE;
+        const phase: (sol: {
+            t: number[];
+            y: number[][];
+        }, i: number, j: number) => number[][];
+        const sample: (sol: {
+            t: number[];
+            y: number[][];
+        }, times: number[]) => number[][];
+        const separable: (f: (t: number) => number, g: (y: number) => number) => ChalkboardODE;
+        const SEIR: (beta?: number, sigma?: number, gamma?: number) => ChalkboardODE;
+        const SIR: (beta?: number, gamma?: number) => ChalkboardODE;
+        const SIS: (beta?: number, gamma?: number) => ChalkboardODE;
+        const solve: (ode: ChalkboardODE, config: {
+            t0?: number;
+            t1: number;
+            h?: number;
+            steps?: number;
+            y0: number | number[] | Record<string, any>;
+            method?: "euler" | "midpoint" | "heun" | "ralston" | "rk4";
+            returnObject?: boolean;
+        }) => {
+            t: number[];
+            y: number[][];
+            yObj?: {
+                [key: string]: number;
+            }[];
+        };
+        const solveAdaptive: (ode: ChalkboardODE, config: {
+            t0?: number;
+            t1: number;
+            y0: number | number[] | Record<string, any>;
+            h0?: number;
+            hMin?: number;
+            hMax?: number;
+            rtol?: number;
+            atol?: number;
+            maxSteps?: number;
+            returnObject?: boolean;
+        }) => {
+            t: number[];
+            y: number[][];
+            yObj?: {
+                [key: string]: number;
+            }[];
+        };
+        const toScalarSeries: (sol: {
+            t: number[];
+            y: number[][];
+        }) => number[];
     }
 }
 declare namespace Chalkboard {
@@ -310,6 +451,10 @@ declare namespace Chalkboard {
         const add: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const addKronecker: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const adjugate: (matr: ChalkboardMatrix, row: number, col: number) => ChalkboardMatrix;
+        const Cholesky: (matr: ChalkboardMatrix) => {
+            L: ChalkboardMatrix;
+            U: ChalkboardMatrix;
+        };
         const cofactor: (matr: ChalkboardMatrix, row: number, col: number) => ChalkboardMatrix;
         const cols: (matr: ChalkboardMatrix) => number;
         const colspace: (matr: ChalkboardMatrix) => ChalkboardMatrix;
@@ -328,6 +473,7 @@ declare namespace Chalkboard {
         const identity: (size: number) => ChalkboardMatrix;
         const init: (...matrix: number[][] | number[][][]) => ChalkboardMatrix;
         const invert: (matr: ChalkboardMatrix) => ChalkboardMatrix;
+        const isApproxEqual: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, precision?: number) => boolean;
         const isDiagonal: (matr: ChalkboardMatrix) => boolean;
         const isEqual: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => boolean;
         const isIdentity: (matr: ChalkboardMatrix) => boolean;
@@ -404,13 +550,14 @@ declare namespace Chalkboard {
         const compositeArr: (inf: number, sup: number) => number[];
         const compositeCount: (inf: number, sup: number) => number;
         const constrain: (num: number, range?: [number, number]) => number;
+        const convert: (num: number | number[], from: string, to: string) => number | number[];
         const divisors: (num: number) => number[];
-        const Euler: (num: number) => number | undefined;
+        const Euler: (num: number) => number;
         const exponential: (l?: number) => number;
         const factorial: (num: number) => number;
         const factors: (num: number) => number[];
         const Fibonacci: (num: number) => number;
-        const Gaussian: (height: number, mean: number, deviation: number) => number;
+        const Gaussian: (mean: number, deviation: number) => number;
         const gcd: (a: number, b: number) => number;
         const Goldbach: (num: number) => [number, number] | undefined;
         const isApproxEqual: (a: number, b: number, precision?: number) => boolean;
@@ -420,7 +567,7 @@ declare namespace Chalkboard {
         const lcm: (a: number, b: number) => number;
         const map: (num: number, range1: number[], range2: number[]) => number;
         const mod: (a: number, b: number) => number;
-        const mul: (formula: string, inf: number, sup: number) => number;
+        const mul: (formula: (n: number) => number, inf: number, sup: number) => number;
         const nextPrime: (num: number) => number;
         const permutation: (n: number, r: number) => number;
         const Poissonian: (l?: number) => number;
@@ -430,8 +577,8 @@ declare namespace Chalkboard {
         const primeGap: (inf: number, sup: number) => number;
         const random: (inf?: number, sup?: number) => number;
         const roundTo: (num: number, positionalIndex: number) => number;
-        const sgn: (num: number) => -1 | 0 | 1;
-        const sum: (formula: string, inf: number, sup: number) => number;
+        const sgn: (num: number) => -1 | 0 | 1 | undefined;
+        const sum: (formula: (n: number) => number, inf: number, sup: number) => number;
         const toBinary: (num: number, prefix?: boolean) => string;
         const toDecimal: (num: string, base: number) => number;
         const toFraction: (num: number, tolerance?: number) => [number, number];
@@ -495,6 +642,9 @@ declare namespace Chalkboard {
             strokeStyle: string;
             lineWidth: number;
             domain: [number, number] | [[number, number], [number, number]];
+            res: number;
+            isInverse: boolean;
+            isPolar: boolean;
             context: CanvasRenderingContext2D;
         }) => number[][];
         const dfdx: (func: ChalkboardFunction, config: {
@@ -505,6 +655,7 @@ declare namespace Chalkboard {
             lineWidth: number;
             domain: [number, number];
             res: number;
+            isInverse: boolean;
             context: CanvasRenderingContext2D;
         }) => number[][];
         const d2fdx2: (func: ChalkboardFunction, config: {
@@ -515,9 +666,10 @@ declare namespace Chalkboard {
             lineWidth: number;
             domain: [number, number];
             res: number;
+            isInverse: boolean;
             context: CanvasRenderingContext2D;
         }) => number[][];
-        const field: (vectfield: ChalkboardVectorField, config: {
+        const field: (vectfield: ChalkboardFunction, config: {
             x: number;
             y: number;
             size: number;
@@ -545,6 +697,7 @@ declare namespace Chalkboard {
             lineWidth: number;
             domain: [number, number];
             res: number;
+            isInverse: boolean;
             context: CanvasRenderingContext2D;
         }) => number[][];
         const Laplace: (func: ChalkboardFunction, config: {
@@ -573,6 +726,20 @@ declare namespace Chalkboard {
             lineWidth: number;
             domain: [number, number];
             context: CanvasRenderingContext2D;
+        }) => number[][];
+        const ode: (sol: {
+            t: number[];
+            y: number[][];
+        }, config?: {
+            x?: number;
+            y?: number;
+            size?: number;
+            strokeStyle?: string;
+            lineWidth?: number;
+            i?: number;
+            j?: number;
+            phase?: boolean;
+            context?: CanvasRenderingContext2D;
         }) => number[][];
         const rOplane: (config: {
             x: number;
@@ -631,6 +798,11 @@ declare namespace Chalkboard {
         const fromAxis: (vect: ChalkboardVector, rad: number) => ChalkboardQuaternion;
         const init: (a: number, b?: number, c?: number, d?: number) => ChalkboardQuaternion;
         const invert: (quat: ChalkboardQuaternion) => ChalkboardQuaternion;
+        const isApproxEqual: (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision?: number) => boolean;
+        const isEqual: (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number) => boolean;
+        const isInverse: (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision?: number) => boolean;
+        const isNormalized: (quat: ChalkboardQuaternion) => boolean;
+        const isZero: (quat: ChalkboardQuaternion | number) => boolean;
         const mag: (quat: ChalkboardQuaternion) => number;
         const magset: (quat: ChalkboardQuaternion, num: number) => ChalkboardQuaternion;
         const magsq: (quat: ChalkboardQuaternion) => number;
@@ -656,10 +828,12 @@ declare namespace Chalkboard {
         const absolute: (func: ChalkboardFunction) => ChalkboardFunction;
         const add: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const compose: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
-        const define: (definition: string | string[], type?: "expl" | "inve" | "pola" | "curv" | "surf" | "mult") => ChalkboardFunction;
+        const define: (...rule: (((...x: number[]) => number) | ((...x: number[]) => number)[])[]) => ChalkboardFunction;
         const Dirac: (num: number, edge?: number, scl?: number) => number;
         const discriminant: (a: number, b: number, c: number, form?: "stan" | "vert") => number;
         const div: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
+        const erf: (num: number) => number;
+        const Gamma: (num: number) => number;
         const Heaviside: (num: number, edge?: number, scl?: number) => number;
         const lerp: (p: [number, number], t: number) => number;
         const linear: (x1: number, y1: number, x2: number, y2: number) => ChalkboardFunction;
@@ -669,7 +843,16 @@ declare namespace Chalkboard {
         const log10: (num: number) => number;
         const mul: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const negate: (func: ChalkboardFunction) => ChalkboardFunction;
-        const parse: (str: string) => Function;
+        const parse: (expr: string, config?: {
+            values?: Record<string, number>;
+            roundTo?: number;
+            returnAST?: boolean;
+            returnJSON?: boolean;
+            returnLaTeX?: boolean;
+        }) => string | number | {
+            type: string;
+            [key: string]: any;
+        };
         const pingpong: (num: number, edge?: number, scl?: number) => number;
         const polynomial: (...coeffs: number[]) => ChalkboardFunction;
         const pow: (base: number | ChalkboardFunction, num: number) => number | ChalkboardFunction;
@@ -688,7 +871,7 @@ declare namespace Chalkboard {
         const tetration: (base: number, num: number) => number | undefined;
         const translate: (func: ChalkboardFunction, h?: number, v?: number) => ChalkboardFunction;
         const val: (func: ChalkboardFunction, val: number | ChalkboardVector) => number | ChalkboardVector;
-        const zero: (type?: "expl" | "inve" | "pola" | "curv" | "surf" | "mult") => ChalkboardFunction;
+        const zero: (type?: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d") => ChalkboardFunction;
     }
 }
 declare namespace Chalkboard {
@@ -774,12 +957,14 @@ declare namespace Chalkboard {
         const empty: (...size: number[]) => ChalkboardTensor;
         const fill: (element: number, ...size: number[]) => ChalkboardTensor;
         const init: (...tensor: ChalkboardTensor[]) => ChalkboardTensor;
+        const isApproxEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor, precision?: number) => boolean;
         const isEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
         const isRankEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
         const isRankOf: (tens: ChalkboardTensor, rank: number) => boolean;
         const isSizeEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
         const isSizeOf: (tens: ChalkboardTensor, ...size: number[]) => boolean;
         const isSizeUniform: (tens: ChalkboardTensor) => boolean;
+        const isZero: (tens: ChalkboardTensor) => boolean;
         const mul: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
         const negate: (tens: ChalkboardTensor) => ChalkboardTensor;
         const print: (tens: ChalkboardTensor) => void;
@@ -845,22 +1030,23 @@ declare namespace Chalkboard {
         const constrain: (vect: ChalkboardVector, range?: [number, number]) => ChalkboardVector;
         const copy: (vect: ChalkboardVector) => ChalkboardVector;
         const cross: (vect1: ChalkboardVector, vect2: ChalkboardVector) => ChalkboardVector;
-        const dimension: (vectORvectfield: ChalkboardVector | ChalkboardVectorField) => 2 | 3 | 4;
+        const dimension: (vectORvectfield: ChalkboardVector | ChalkboardFunction) => 2 | 3 | 4;
         const dist: (vect1: ChalkboardVector, vect2: ChalkboardVector) => number;
         const distsq: (vect1: ChalkboardVector, vect2: ChalkboardVector) => number;
         const dot: (vect1: ChalkboardVector, vect2: ChalkboardVector) => number;
         const empty: (dimension: 2 | 3 | 4) => ChalkboardVector;
-        const field: (p: string, q: string, r?: string, s?: string) => ChalkboardVectorField;
+        const field: (p: (...x: number[]) => number, q: (...x: number[]) => number, r?: (...x: number[]) => number, s?: (...x: number[]) => number) => ChalkboardFunction;
         const fill: (num: number, dimension: 2 | 3 | 4) => ChalkboardVector;
         const fromAlternateToCartesian: (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical") => ChalkboardVector;
         const fromAngle: (rad1: number, rad2?: number) => ChalkboardVector;
         const fromCartesianToAlternate: (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical") => ChalkboardVector;
-        const fromField: (vectfield: ChalkboardVectorField, vect: ChalkboardVector) => ChalkboardVector;
+        const fromField: (vectfield: ChalkboardFunction, vect: ChalkboardVector) => ChalkboardVector;
         const fromVector: (vect: ChalkboardVector) => ChalkboardVector;
         const init: (x: number, y: number, z?: number, w?: number) => ChalkboardVector;
         const interpolate: (vect: ChalkboardVector, a: number, b: number, c?: number, d?: number) => ChalkboardVector;
+        const isApproxEqual: (vect1: ChalkboardVector, vect2: ChalkboardVector, precision?: number) => boolean;
         const isDimensionEqual: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
-        const isDimensionOf: (vectORvectfield: ChalkboardVector | ChalkboardVectorField, dimension: 2 | 3 | 4) => boolean;
+        const isDimensionOf: (vectORvectfield: ChalkboardVector | ChalkboardFunction, dimension: 2 | 3 | 4) => boolean;
         const isEqual: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;
         const isNormalized: (vect: ChalkboardVector) => boolean;
         const isOrthogonal: (vect1: ChalkboardVector, vect2: ChalkboardVector) => boolean;

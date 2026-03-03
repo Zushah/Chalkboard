@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Real Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Real Numbers Namespace
 */
 
 import assert from "assert";
@@ -113,5 +116,3 @@ import cb from "../dist/Chalkboard.js";
     assert.strictEqual(cb.real.parse("x^2 + 2x + 1", { returnJSON: true }), '{"type":"add","left":{"type":"add","left":{"type":"pow","base":{"type":"var","name":"x"},"exponent":{"type":"num","value":2}},"right":{"type":"mul","left":{"type":"num","value":2},"right":{"type":"var","name":"x"}}},"right":{"type":"num","value":1}}');
     assert.deepStrictEqual(cb.real.parse("x^2 + 2x + 1", { returnAST: true }), { type: "add", left: { type: "add", left: { type: "pow", base: { type: "var", name: "x" }, exponent: { type: "num", value: 2 } }, right: { type: "mul", left: { type: "num", value: 2 }, right: { type: "var", name: "x" } } }, right: { type: "num", value: 1 } });
 }
-
-console.log("🟩 Chalkboard.real tests passed.");

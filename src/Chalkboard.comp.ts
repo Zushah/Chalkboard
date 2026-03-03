@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Complex Numbers Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Complex Numbers Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -351,6 +357,92 @@ namespace Chalkboard {
          */
         export const invert = (comp: ChalkboardComplex): ChalkboardComplex => {
             return Chalkboard.comp.init(comp.a / Chalkboard.comp.magsq(comp), -comp.b / Chalkboard.comp.magsq(comp));
+        };
+
+        /**
+         * Checks if two complex numbers are approximately equal within a particular precision.
+         * @param {ChalkboardComplex | number} comp1 - The first complex number
+         * @param {ChalkboardComplex | number} comp2 - The second complex number
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.comp.isApproxEqual(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(2.0000001, 3.0000001));
+         * 
+         * // Returns false
+         * const no = Chalkboard.comp.isApproxEqual(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(2.1, 3.1));
+         */
+        export const isApproxEqual = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number, precision: number = 0.000001): boolean => {
+            if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
+            if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
+            return Chalkboard.numb.isApproxEqual(comp1.a, comp2.a, precision) && Chalkboard.numb.isApproxEqual(comp1.b, comp2.b, precision);
+        };
+
+        /**
+         * Checks if two complex numbers are equal.
+         * @param {ChalkboardComplex | number} comp1 - The first complex number
+         * @param {ChalkboardComplex | number} comp2 - The second complex number
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.comp.isEqual(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(2, 3));
+         * 
+         * // Returns false
+         * const no = Chalkboard.comp.isEqual(Chalkboard.comp.init(2, 3), Chalkboard.comp.init(2.0000001, 3.0000001));
+         */
+        export const isEqual = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number): boolean => {
+            if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
+            if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
+            return comp1.a === comp2.a && comp1.b === comp2.b;
+        };
+
+        /**
+         * Checks if two complex numbers are inverses of each other within a particular precision.
+         * @param {ChalkboardComplex | number} comp1 - The first complex number
+         * @param {ChalkboardComplex | number} comp2 - The second complex number
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const z = Chalkboard.comp.init(2, 3);
+         * const zi = Chalkboard.comp.invert(z);
+         * const yes = Chalkboard.comp.isInverse(z, zi);
+         */
+        export const isInverse = (comp1: ChalkboardComplex | number, comp2: ChalkboardComplex | number, precision: number = 0.000001): boolean => {
+            if (typeof comp1 === "number") comp1 = Chalkboard.comp.init(comp1, 0);
+            if (typeof comp2 === "number") comp2 = Chalkboard.comp.init(comp2, 0);
+            return Chalkboard.comp.isApproxEqual(Chalkboard.comp.mul(comp1, comp2) as ChalkboardComplex, Chalkboard.comp.init(1, 0), precision);
+        };
+
+        /**
+         * Checks if a complex number is normalized.
+         * @param {ChalkboardComplex} comp - The complex number
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.comp.isNormalized(Chalkboard.comp.init(1, 0));
+         * 
+         * // Returns false
+         * const no = Chalkboard.comp.isNormalized(Chalkboard.comp.init(2, 3));
+         */
+        export const isNormalized = (comp: ChalkboardComplex): boolean => {
+            return Chalkboard.numb.isApproxEqual(Chalkboard.comp.magsq(comp), 1);
+        };
+
+        /**
+         * Checks if a complex number is zero.
+         * @param {ChalkboardComplex | number} comp - The complex number
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.comp.isZero(Chalkboard.comp.init(0, 0));
+         * 
+         * // Returns false
+         * const no = Chalkboard.comp.isZero(Chalkboard.comp.init(1, 2));
+         */
+        export const isZero = (comp: ChalkboardComplex | number): boolean => {
+            if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
+            return Chalkboard.comp.isApproxEqual(comp, Chalkboard.comp.init(0, 0));
         };
 
         /**

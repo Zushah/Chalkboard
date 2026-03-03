@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Vector Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Vector Namespace
 */
 
 import assert from "assert";
@@ -26,7 +29,7 @@ import cb from "../dist/Chalkboard.js";
 {
     const v = cb.vect.init(3, -4);
     assert.deepStrictEqual(cb.vect.absolute(v), { x: 3, y: 4 });
-    assert.strictEqual(cb.vect.ang(v), -0.9272952180016122);
+    assert.strictEqual(cb.vect.ang(v), -0.9272952180016123);
     const vcopy = cb.vect.copy(v); assert.strictEqual(vcopy.x, 3); assert.strictEqual(vcopy.y, -4);
     assert.strictEqual(cb.vect.dimension(v), 2);
     assert.deepStrictEqual(cb.vect.empty(2), { x: null, y: null });
@@ -83,10 +86,11 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.vect.interpolate(cb.vect.init(1, 2), 2, 3), { x: 1.6, y: 1.6 });
 }
 
-// vect.isDimensionEqual, vect.isDimensionOf, vect.isEqual, vect.isNormalized, vect.isOrthogonal, vect.isParallel, vect.isZero
+// vect.isApproxEqual, vect.isDimensionEqual, vect.isDimensionOf, vect.isEqual, vect.isNormalized, vect.isOrthogonal, vect.isParallel, vect.isZero
 {
     const v = cb.vect.init(3, 4);
     const w = cb.vect.init(1, 0);
+    assert.strictEqual(cb.vect.isApproxEqual(v, cb.vect.init(3.000000000000001, 4.000000000000001)), true);
     assert.strictEqual(cb.vect.isDimensionEqual(v, w), true);
     assert.strictEqual(cb.vect.isDimensionOf(v, 2), true);
     assert.strictEqual(cb.vect.isEqual(v, cb.vect.init(3, 4)), true);
@@ -128,5 +132,3 @@ import cb from "../dist/Chalkboard.js";
     const f4 = cb.vect.field((x, y, z, w) => x * y * z * w, (x, y, z, w) => x + y + z + w, (x, y, z, w) => x - y - z - w, (x, y, z, w) => x * x + y * y + z * z + w * w);
     assert.deepStrictEqual(cb.vect.fromField(f4, cb.vect.init(2, 1, 3, 4)), { x: 24, y: 10, z: -6, w: 30 });
 }
-
-console.log("🟩 Chalkboard.vect tests passed.");

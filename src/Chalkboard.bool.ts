@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Boolean Algebra Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Boolean Algebra Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -652,13 +658,9 @@ namespace Chalkboard {
                         commons.push(fa);
                     }
                 });
-                for (let i = 0; i < leftFactors.length; i++) {
-                    for (let j = 0; j < rightFactors.length; j++) {
-                        if (detectTautology(leftFactors[i], rightFactors[j])) {
-                            return commons.length === 0 ? { type: "bool", value: true } : commons.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }));
-                        }
-                    }
-                }
+                const leftRemainder = leftFactors.filter((f) => !commons.some((c) => nodeEqual(c, f)));
+                const rightRemainder = rightFactors.filter((f) => !commons.some((c) => nodeEqual(c, f)));
+                if (leftRemainder.length === 1 && rightRemainder.length === 1 && detectTautology(leftRemainder[0], rightRemainder[0])) return commons.length === 0 ? { type: "bool", value: true } : commons.reduce((acc, cur) => ({ type: "and", left: acc, right: cur }));
                 if (commons.length > 0) {
                     const removeCommon = (factors: Array<{ type: string, [key: string]: any }>): { type: string, [key: string]: any } => {
                         const remaining = factors.filter((f) => !commons.some(c => nodeEqual(c, f)));

@@ -1,23 +1,27 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "2.4.0",
-  "description": "The Chalkboard library provides a plethora of mathematical functionalities for its user.",
-  "main": "dist/Chalkboard.js",
-  "types": "dist/Chalkboard.d.ts",
+  "version": "3.0.0",
+  "description": "A library at the intersection of pure mathematics and web engineering.",
+  "main": "./dist/Chalkboard.js",
+  "types": "./dist/Chalkboard.d.ts",
   "files": [
-    "dist",
-    "CHANGELOG.md",
-    "LICENSE.md",
-    "package.json",
-    "README.md"
+    "./dist/",
+    "./CHANGELOG.md",
+    "./LICENSE.md",
+    "./package.json",
+    "./README.md"
   ],
   "scripts": {
-    "build": "tsc --project tsconfig.json",
-    "lint": "eslint src/**",
-    "lint:fix": "eslint --fix src/**",
-    "format": "prettier src",
-    "format:fix": "prettier --write src",
-    "docs": "typedoc --options typedoc.json"
+    "build": "tsc --project ./tsconfig.json && terser ./dist/Chalkboard.js --compress --mangle --output ./dist/Chalkboard.min.js",
+    "test": "node --test ./test/*.test.js",
+    "docs": "typedoc --options ./typedoc.json --favicon ./assets/favicon.png"
+  },
+  "devDependencies": {
+    "@types/node": "^25.2",
+    "terser": "^5.46.0",
+    "typedoc": "^0.28.16",
+    "typedoc-material-theme": "^1.4.1",
+    "typescript": "^5.9.3"
   },
   "repository": {
     "type": "git",
@@ -28,6 +32,7 @@
     "boolean",
     "calculus",
     "complex",
+    "diffeq",
     "geometry",
     "khan-academy",
     "mathematics",
@@ -42,7 +47,7 @@
     "vector"
   ],
   "author": "Zushah",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/Zushah/Chalkboard/issues"
   },
@@ -50,15 +55,5 @@
   "publishConfig": {
     "access": "public"
   },
-  "save-prefix": "",
-  "devDependencies": {
-    "@types/node": "22.14.0",
-    "@typescript-eslint/eslint-plugin": "7.18.0",
-    "@typescript-eslint/parser": "7.18.0",
-    "eslint": "8.57.0",
-    "prettier": "3.2.5",
-    "typedoc": "0.27.9",
-    "typedoc-material-theme": "1.3.0",
-    "typescript": "5.5.4"
-  }
+  "save-prefix": ""
 }

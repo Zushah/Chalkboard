@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Trigonometry Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Trigonometry Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -15,12 +21,16 @@ namespace Chalkboard {
          * @returns {number | undefined}
          */
         export const arccos = (rad: number): number | undefined => {
-            if (rad > -1 && rad < 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (Math.sqrt(1 - x * x))), rad, 1) as number;
-            } else if (rad === 1) {
+            if (rad === 1) {
                 return 0;
             } else if (rad === -1) {
                 return Chalkboard.PI();
+            } else if (rad > -1 && rad < 1) {
+                if (rad >= 0) {
+                    return 2 * Chalkboard.trig.arctan(Chalkboard.real.sqrt((1 - rad) / (1 + rad)));
+                } else {
+                    return Chalkboard.PI() - 2 * Chalkboard.trig.arctan(Chalkboard.real.sqrt((1 + rad) / (1 - rad)));
+                }
             } else {
                 return undefined;
             }
@@ -45,7 +55,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const arccot = (rad: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (1 + x * x)), rad, 1000) as number;
+            return Chalkboard.PI(0.5) - Chalkboard.trig.arctan(rad);
         };
 
         /**
@@ -67,14 +77,12 @@ namespace Chalkboard {
          * @returns {number | undefined}
          */
         export const arccsc = (rad: number): number | undefined => {
-            if (rad > 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (x * Math.sqrt(x * x - 1))), rad, 1000) as number;
-            } else if (rad === 1) {
-                return Chalkboard.PI() / 2;
+            if (rad === 1) {
+                return Chalkboard.PI(0.5);
             } else if (rad === -1) {
-                return -Chalkboard.PI() / 2;
-            } else if (rad < 1) {
-                return -Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (x * Math.sqrt(x * x - 1))), Math.abs(rad), 1000);
+                return Chalkboard.PI(-0.5);
+            } else if (rad > 1 || rad < -1) {
+                return Chalkboard.trig.arcsin(1 / rad);
             } else {
                 return undefined;
             }
@@ -99,12 +107,12 @@ namespace Chalkboard {
          * @returns {number | undefined}
          */
         export const arcsec = (rad: number): number | undefined => {
-            if (rad > 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (x * Math.sqrt(x * x - 1))), 1.000001, rad) as number;
-            } else if (rad === 1) {
+            if (rad === 1) {
                 return 0;
             } else if (rad === -1) {
                 return Chalkboard.PI();
+            } else if (rad > 1 || rad < -1) {
+                return Chalkboard.trig.arccos(1 / rad);
             } else {
                 return undefined;
             }
@@ -130,11 +138,13 @@ namespace Chalkboard {
          */
         export const arcsin = (rad: number): number | undefined => {
             if (rad > -1 && rad < 1) {
-                return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (Math.sqrt(1 - x * x))), 0, rad) as number;
+                const t = 1 - rad * rad;
+                const s = Chalkboard.real.sqrt(t < 0 ? 0 : t);
+                return 2 * Chalkboard.trig.arctan(rad / (1 + s));
             } else if (rad === 1) {
-                return Chalkboard.PI() / 2;
+                return Chalkboard.PI(0.5);
             } else if (rad === -1) {
-                return -Chalkboard.PI() / 2;
+                return Chalkboard.PI(-0.5);
             } else {
                 return undefined;
             }
@@ -155,7 +165,33 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const arctan = (rad: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / (1 + x * x)), 0, rad) as number;
+            const series = (x: number): number => {
+                let sum = x;
+                let term = x;
+                const xx = x * x;
+                for (let n = 1; n < 20; n++) {
+                    term *= -xx;
+                    sum += term / (2 * n + 1);
+                }
+                return sum;
+            };
+            if (rad === 0) {
+                return 0;
+            }
+            if (!Number.isFinite(rad)) {
+                return rad > 0 ? Chalkboard.PI(0.5) : Chalkboard.PI(-0.5);
+            }
+            const sign = rad < 0 ? -1 : 1;
+            const x = Math.abs(rad);
+            let result: number;
+            if (x <= Chalkboard.real.sqrt(2) - 1) {
+                result = series(x);
+            } else if (x <= Chalkboard.real.sqrt(2) + 1) {
+                result = Chalkboard.PI(0.25) + series((x - 1) / (x + 1));
+            } else {
+                result = Chalkboard.PI(0.5) - series(1 / x);
+            }
+            return sign * result;
         };
 
         /**
@@ -180,21 +216,21 @@ namespace Chalkboard {
         export const arctan2 = (y: number, x: number): number => {
             if (x === 0) {
                 if (y > 0) {
-                    return Math.PI / 2;
+                    return Chalkboard.PI(0.5);
                 } else if (y < 0) {
-                    return -Math.PI / 2;
+                    return Chalkboard.PI(-0.5);
                 } else {
                     return 0;
                 }
             } else {
                 if (x > 0 && y >= 0) {
-                    return Math.atan(Math.abs(y / x));
+                    return Chalkboard.trig.arctan(y / x);
                 } else if (x < 0 && y >= 0) {
-                    return Math.PI - Math.atan(Math.abs(y / x));
+                    return Chalkboard.trig.arctan(y / x) + Chalkboard.PI();
                 } else if (x < 0 && y < 0) {
-                    return -Math.PI + Math.atan(Math.abs(y / x));
+                    return Chalkboard.trig.arctan(y / x) - Chalkboard.PI();
                 } else {
-                    return -Math.atan(Math.abs(y / x));
+                    return Chalkboard.trig.arctan(y / x);
                 }
             }
         };

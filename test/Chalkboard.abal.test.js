@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Abstract Algebra Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Abstract Algebra Namespace
 */
 
 import assert from "assert";
@@ -252,5 +255,3 @@ import cb from "../dist/Chalkboard.js";
 
     assert.doesNotThrow(() => cb.abal.print(cosets));
 }
-
-console.log("🟩 Chalkboard.abal tests passed.");

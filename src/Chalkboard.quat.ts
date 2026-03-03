@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Quaternion Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Quaternion Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -173,6 +179,92 @@ namespace Chalkboard {
          */
         export const invert = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
+        };
+
+        /**
+         * Checks if two quaternions are approximately equal within a particular precision.
+         * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
+         * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.quat.isApproxEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1, 2, 3, 4.0000001));
+         * 
+         * // Returns false
+         * const no = Chalkboard.quat.isApproxEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1.1, 2.1, 3.1, 4.1));
+         */
+        export const isApproxEqual = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision: number = 0.000001): boolean => {
+            if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.numb.isApproxEqual(quat1.a, quat2.a, precision) && Chalkboard.numb.isApproxEqual(quat1.b, quat2.b, precision) && Chalkboard.numb.isApproxEqual(quat1.c, quat2.c, precision) && Chalkboard.numb.isApproxEqual(quat1.d, quat2.d, precision);
+        };
+
+        /**
+         * Checks if two quaternions are equal.
+         * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
+         * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.quat.isEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1, 2, 3, 4));
+         * 
+         * // Returns false
+         * const no = Chalkboard.quat.isEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1, 2, 3, 4.0000001));
+         */
+        export const isEqual = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): boolean => {
+            if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return quat1.a === quat2.a && quat1.b === quat2.b && quat1.c === quat2.c && quat1.d === quat2.d;
+        };
+
+        /**
+         * Checks if two quaternions are inverses of each other within a particular precision.
+         * @param {ChalkboardQuaternion | number} quat1 - The first quaternion
+         * @param {ChalkboardQuaternion | number} quat2 - The second quaternion
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const q = Chalkboard.quat.init(1, 2, 3, 4);
+         * const qi = Chalkboard.quat.invert(q);
+         * const yes = Chalkboard.quat.isInverse(q, qi);
+         */
+        export const isInverse = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision: number = 0.000001): boolean => {
+            if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
+            if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
+            return Chalkboard.quat.isApproxEqual(Chalkboard.quat.mul(quat1, quat2), Chalkboard.quat.init(1, 0, 0, 0), precision);
+        };
+
+        /**
+         * Checks if a quaternion is normalized.
+         * @param {ChalkboardQuaternion} quat - The quaternion
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.quat.isNormalized(Chalkboard.quat.init(1, 0, 0, 0));
+         * 
+         * // Returns false
+         * const no = Chalkboard.quat.isNormalized(Chalkboard.quat.init(1, 2, 3, 4));
+         */
+        export const isNormalized = (quat: ChalkboardQuaternion): boolean => {
+            return Chalkboard.numb.isApproxEqual(Chalkboard.quat.magsq(quat), 1);
+        };
+
+        /**
+         * Checks if a quaternion is zero.
+         * @param {ChalkboardQuaternion | number} quat - The quaternion
+         * @returns {boolean}
+         * @example
+         * // Returns true
+         * const yes = Chalkboard.quat.isZero(Chalkboard.quat.init(0, 0, 0, 0));
+         * 
+         * // Returns false
+         * const no = Chalkboard.quat.isZero(Chalkboard.quat.init(1, 2, 3, 4));
+         */
+        export const isZero = (quat: ChalkboardQuaternion | number): boolean => {
+            if (typeof quat === "number") quat = Chalkboard.quat.init(quat, 0, 0, 0);
+            return Chalkboard.quat.isApproxEqual(quat, Chalkboard.quat.init(0, 0, 0, 0));
         };
 
         /**
@@ -385,25 +477,23 @@ namespace Chalkboard {
          * const str = Chalkboard.quat.toString(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toString = (quat: ChalkboardQuaternion): string => {
-            let quat_b = "";
-            let quat_c = "";
-            let quat_d = "";
+            let str = quat.a.toString();
             if (quat.b >= 0) {
-                quat_b = " + " + quat.b.toString() + "i ";
-            } else if (quat.b < 0) {
-                quat_b = " - " + Math.abs(quat.b).toString() + "i ";
+                str += " + " + (quat.b === 1 ? "i" : quat.b.toString() + "i");
+            } else {
+                str += " - " + (quat.b === -1 ? "i" : Math.abs(quat.b).toString() + "i");
             }
             if (quat.c >= 0) {
-                quat_c = "+ " + quat.c.toString() + "j ";
-            } else if (quat.c < 0) {
-                quat_c = "- " + Math.abs(quat.c).toString() + "j ";
+                str += " + " + (quat.c === 1 ? "j" : quat.c.toString() + "j");
+            } else {
+                str += " - " + (quat.c === -1 ? "j" : Math.abs(quat.c).toString() + "j");
             }
             if (quat.d >= 0) {
-                quat_d = "+ " + quat.d.toString() + "k ";
-            } else if (quat.d < 0) {
-                quat_d = "- " + Math.abs(quat.d).toString() + "k ";
+                str += " + " + (quat.d === 1 ? "k" : quat.d.toString() + "k");
+            } else {
+                str += " - " + (quat.d === -1 ? "k" : Math.abs(quat.d).toString() + "k");
             }
-            return quat.a.toString() + quat_b + quat_c + quat_d;
+            return str;
         };
 
         /**

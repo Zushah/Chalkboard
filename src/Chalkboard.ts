@@ -1,13 +1,16 @@
 /*
-    The Chalkboard Library
-    Version 2.4.0 Noether released 04/28/2025
-    Authored by Zushah ===> https://www.github.com/Zushah
-    Available under the MIT License ===> https://www.opensource.org/license/mit/
-
-    The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
-
-    Repository ===> https://www.github.com/Zushah/Chalkboard
-    Website ===> https://zushah.github.io/Chalkboard
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
+    Repository: https://www.github.com/Zushah/Chalkboard
+    Website: https://zushah.github.io/Chalkboard
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 
 /**
@@ -284,50 +287,6 @@ namespace Chalkboard {
     };
 
     /**
-     * Draws the Chalkboard logo.
-     * @param {number} [x=canvas.width/2] - The x-position
-     * @param {number} [y=canvas.height/2] - The y-position
-     * @param {number} [size=1] - The size
-     * @param {CanvasRenderingContext2D} [context=Chalkboard.CONTEXT] - The JavaScript Canvas API context
-     * @returns {void}
-     * @example
-     * // Draws the logo at (250, 250) with a scale of 2
-     * Chalkboard.LOGO(250, 250, 2);
-     */
-    export const LOGO = (
-        x: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.width / 2,
-        y: number = (Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D).canvas.height / 2,
-        size: number = 1,
-        context: CanvasRenderingContext2D = Chalkboard.real.parse(Chalkboard.CONTEXT) as unknown as CanvasRenderingContext2D
-    ): void => {
-        context.save();
-        context.translate(x, y);
-        context.scale(size, size);
-        context.fillStyle = "rgb(25, 25, 25)";
-        context.beginPath();
-        context.ellipse(0, 0, 50, 50, 0, 0, Chalkboard.PI(2));
-        context.fill();
-        context.fillStyle = "rgb(50, 125, 200)";
-        context.textAlign = "center";
-        context.textBaseline = "middle";
-        context.font = "75px Times New Roman";
-        context.fillText("C", -25, 6);
-        context.fillText("B", 25, 6);
-        context.strokeStyle = "rgb(50, 125, 200)";
-        context.lineWidth = 6;
-        context.lineCap = "butt";
-        context.beginPath();
-        context.moveTo(-30, 25);
-        context.lineTo(-30, -22.5);
-        context.stroke();
-        context.beginPath();
-        context.moveTo(22, 25);
-        context.lineTo(22, -22.5);
-        context.stroke();
-        context.restore();
-    };
-
-    /**
      * Computes the number pi.
      * @param {number} [coefficient=1] - The coefficient to multiply pi with
      * @returns {number}
@@ -340,33 +299,7 @@ namespace Chalkboard {
     };
 
     /**
-     * Prints basic information about Chalkboard into the console.
-     * @returns {void}
-     * @example
-     * Chalkboard.README();
-     * // Returns in the console:
-     * //   The Chalkboard Library
-     * //   Version 2.4.0 Noether released 04/28/2025
-     * //   Authored by Zushah ===> https://www.github.com/Zushah
-     * //   Available under the MIT License ===> https://www.opensource.org/license/mit/
-     * //
-     * //   The Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.
-     * //
-     * //   Repository ===> https://www.github.com/Zushah/Chalkboard
-     * //   Website ===> https://zushah.github.io/Chalkboard
-     */
-    export const README = (): void => {
-        console.log(
-            "The Chalkboard Library\nVersion " +
-                Chalkboard.VERSION +
-                " " +
-                Chalkboard.VERSIONALIAS +
-                " released 04/28/2025\nAuthored by Zushah ===> https://www.github.com/Zushah\nAvailable under the MIT License ===> https://www.opensource.org/license/mit/\n\nThe Chalkboard library is a JavaScript namespace that provides a plethora of both practical and abstract mathematical functionalities for its user.\n\nRepository ===> https://www.github.com/Zushah/Chalkboard\nWebsite ===> https://zushah.github.io/Chalkboard"
-        );
-    };
-
-    /**
-     * Registers a custom function to use with real number parsing.
+     * Registers a custom function to use with real/complex-valued parsing.
      * @param {string} name - The name of the function to register
      * @param {(...x: number[]) => number} func - The function
      * @returns {void}
@@ -397,25 +330,22 @@ namespace Chalkboard {
 
     /**
      * The version of Chalkboard.
-     * @type {"2.4.0"}
+     * @type {"3.0.0"}
      * @example
-     * // Returns "2.4.0"
+     * // Returns "3.0.0"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "2.4.0" = "2.4.0";
+    export const VERSION: "3.0.0" = "3.0.0";
 
     /**
      * The alias of the version of Chalkboard.
-     * @type {"Noether"}
+     * @type {"Euler"}
      * @example
-     * // Returns "Noether"
+     * // Returns "Euler"
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "Noether" = "Noether";
+    export const VERSIONALIAS: "Euler" = "Euler";
 }
 
-if (typeof window === "undefined") {
-    module.exports = Chalkboard;
-} else {
-    window.Chalkboard = Chalkboard;
-}
+if (typeof window === "undefined") module.exports = Chalkboard;
+else window.Chalkboard = Chalkboard;

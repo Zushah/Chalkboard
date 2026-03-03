@@ -1,22 +1,25 @@
 /*
-    The Chalkboard Library ===> https://www.github.com/Zushah/Chalkboard
-    Version 2.4.0 Noether Example Program: Newton's Method
-    Authored by Zushah ===> https://www.github.com/Zushah
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Example Program: Newton's Method
 */
 
-// Get the JavaScript Canvas API
+// Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const cb = Chalkboard; // Initialize Chalkboard as cb
+// Initialize Chalkboard
+const cb = Chalkboard;
 
 // Random fourth-degree polynomial
 const f = cb.real.randomPolynomial(4, -3, 3);
 
 // Newton's method's solution and tangent line
 const root = cb.calc.Newton(f, [-5, 5]);
-const y = cb.real.define(cb.calc.dfdx(f, root) + " * (x - " + root + ") + " + cb.real.val(f, root));
+const y = cb.real.define((x) => cb.calc.dfdx(f, root) * (x - root) + cb.real.val(f, root));
 
 function main() {
     ctx.fillStyle = "rgb(255, 255, 255)";
@@ -39,8 +42,6 @@ function main() {
         ctx.ellipse(root * 100, 0, 5, 5, 0, 0, cb.PI(2));
         ctx.fill();
         ctx.restore();
-    } else {
-        ctx.fillText("A possible root was not found", 20, 70);
-    }
+    } else ctx.fillText("A possible root was not found", 20, 70);
 }
 main();

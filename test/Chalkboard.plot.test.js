@@ -1,6 +1,9 @@
 /*
-    The Chalkboard Library - Plotting Namespace Tests
-    Version 2.4.0 Noether
+    Chalkboard
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Test: Plotting Namespace
 */
 
 import assert from "assert";
@@ -85,5 +88,3 @@ cb.CONTEXT = "globalThis.__ChalkboardPlotContext";
 {
     assert.deepStrictEqual(cb.plot.ode({ t: [0, 1, 2], y: [[0], [1], [4]] }, { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, isPhase: false, context: ctx }), [[0, 0], [1, 1], [2, 4]]);
 }
-
-console.log("🟩 Chalkboard.plot tests passed.");

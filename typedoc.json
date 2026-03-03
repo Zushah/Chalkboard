@@ -11,5 +11,5 @@
         "Examples": "https://zushah.github.io/Chalkboard/examples/index.html"
     },
     "plugin": ["typedoc-material-theme"],
-    "themeColor": "#013d57"
+    "themeColor": "#013D57"
 }

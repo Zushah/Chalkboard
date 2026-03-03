@@ -1,6 +1,12 @@
 /*
-    The Chalkboard Library - Matrix Namespace
-    Version 2.4.0 Noether
+    Chalkboard - Matrix Namespace
+    Version 3.0.0 Euler
+    Released March 2nd, 2026
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
 */
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
@@ -721,6 +727,28 @@ namespace Chalkboard {
         };
 
         /**
+         * Checks if two matrices are approximately equal to each other within a particular precision.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @param {number} [precision=0.000001] - The precision to check
+         * @returns {boolean}
+         */
+        export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, precision: number = 0.000001): boolean => {
+            if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
+                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        if (!Chalkboard.numb.isApproxEqual(matr1[i][j], matr2[i][j], precision)) {
+                            return false;
+                        }
+                    }
+                }
+                return true;
+            } else {
+                return false;
+            }
+        };
+
+        /**
          * Checks if a matrix is a diagonal matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
@@ -728,19 +756,18 @@ namespace Chalkboard {
         export const isDiagonal = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                    return matr[0][1] !== 0 && matr[1][0] !== 0;
+                    return Chalkboard.numb.isApproxEqual(matr[0][1], 0) && Chalkboard.numb.isApproxEqual(matr[1][0], 0);
                 } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0;
+                    return Chalkboard.numb.isApproxEqual(matr[0][1], 0) && Chalkboard.numb.isApproxEqual(matr[0][2], 0) && Chalkboard.numb.isApproxEqual(matr[1][0], 0) && Chalkboard.numb.isApproxEqual(matr[1][2], 0) && Chalkboard.numb.isApproxEqual(matr[2][0], 0) && Chalkboard.numb.isApproxEqual(matr[2][1], 0);
                 } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                    return matr[0][1] !== 0 && matr[0][2] !== 0 && matr[0][3] !== 0 && matr[1][0] !== 0 && matr[1][2] !== 0 && matr[1][3] !== 0 && matr[2][0] !== 0 && matr[2][1] !== 0 && matr[2][3] !== 0 && matr[3][0] !== 0 && matr[3][1] !== 0 && matr[3][2] !== 0;
+                    return Chalkboard.numb.isApproxEqual(matr[0][1], 0) && Chalkboard.numb.isApproxEqual(matr[0][2], 0) && Chalkboard.numb.isApproxEqual(matr[0][3], 0) && Chalkboard.numb.isApproxEqual(matr[1][0], 0) && Chalkboard.numb.isApproxEqual(matr[1][2], 0) && Chalkboard.numb.isApproxEqual(matr[1][3], 0) && Chalkboard.numb.isApproxEqual(matr[2][0], 0) && Chalkboard.numb.isApproxEqual(matr[2][1], 0) && Chalkboard.numb.isApproxEqual(matr[2][3], 0) && Chalkboard.numb.isApproxEqual(matr[3][0], 0) && Chalkboard.numb.isApproxEqual(matr[3][1], 0) && Chalkboard.numb.isApproxEqual(matr[3][2], 0);
                 } else {
-                    let score = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                         for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                            if (i !== j && matr[i][j] !== 0) score++;
+                            if (i !== j && !Chalkboard.numb.isApproxEqual(matr[i][j], 0)) return false;
                         }
                     }
-                    return score === 0;
+                    return true;
                 }
             } else {
                 return false;
@@ -762,13 +789,12 @@ namespace Chalkboard {
                 } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[0][2] === matr2[0][2] && matr1[0][3] === matr2[0][3] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1] && matr1[1][2] === matr2[1][2] && matr1[1][3] === matr2[1][3] && matr1[2][0] === matr2[2][0] && matr1[2][1] === matr2[2][1] && matr1[2][2] === matr2[2][2] && matr1[2][3] === matr2[2][3] && matr1[3][0] === matr2[3][0] && matr1[3][1] === matr2[3][1] && matr1[3][2] === matr2[3][2] && matr1[3][3] === matr2[3][3];
                 } else {
-                    let score = Chalkboard.matr.rows(matr1) * Chalkboard.matr.cols(matr2);
                     for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                         for (let j = 0; j < Chalkboard.matr.cols(matr2); j++) {
-                            if (matr1[i][j] === matr2[i][j]) score--;
+                            if (!(matr1[i][j] === matr2[i][j])) return false;
                         }
                     }
-                    return score === 0;
+                    return true;
                 }
             } else {
                 return false;
@@ -783,17 +809,13 @@ namespace Chalkboard {
         export const isIdentity = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isDiagonal(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                    return matr[0][0] === 1 && matr[1][1] === 1;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(2));
                 } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(3));
                 } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                    return matr[0][0] === 1 && matr[1][1] === 1 && matr[2][2] === 1 && matr[3][3] === 1;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(4));
                 } else {
-                    let score = 0;
-                    for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        if (matr[i][i] !== 1) score++;
-                    }
-                    return score === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(Chalkboard.matr.rows(matr)));
                 }
             } else {
                 return false;
@@ -817,11 +839,11 @@ namespace Chalkboard {
         export const isLowerTriangular = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                    return matr[0][1] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], 0], [matr[1][0], matr[1][1]]));
                 } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[1][2] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], 0, 0], [matr[1][0], matr[1][1], 0], [matr[2][0], matr[2][1], matr[2][2]]));
                 } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                    return matr[0][1] === 0 && matr[0][2] === 0 && matr[0][3] === 0 && matr[1][2] === 0 && matr[1][3] === 0 && matr[2][3] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], 0, 0, 0], [matr[1][0], matr[1][1], 0, 0], [matr[2][0], matr[2][1], matr[2][2], 0], [matr[3][0], matr[3][1], matr[3][2], matr[3][3]]));
                 } else {
                     let score = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -843,7 +865,7 @@ namespace Chalkboard {
          */
         export const isOrthogonal = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isInvertible(matr)) {
-                return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
+                return Chalkboard.matr.isApproxEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
             } else {
                 return false;
             }
@@ -904,11 +926,11 @@ namespace Chalkboard {
         export const isUpperTriangular = (matr: ChalkboardMatrix): boolean => {
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                    return matr[1][0] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], matr[0][1]], [0, matr[1][1]]));
                 } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2]], [0, matr[1][1], matr[1][2]], [0, 0, matr[2][2]]));
                 } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                    return matr[1][0] === 0 && matr[2][0] === 0 && matr[2][1] === 0 && matr[3][0] === 0 && matr[3][1] === 0 && matr[3][2] === 0;
+                    return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], matr[0][1], matr[0][2], matr[0][3]], [0, matr[1][1], matr[1][2], matr[1][3]], [0, 0, matr[2][2], matr[2][3]], [0, 0, 0, matr[3][3]]));
                 } else {
                     let score = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
@@ -929,7 +951,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (matr: ChalkboardMatrix): boolean => {
-            return Chalkboard.matr.isEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
+            return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
 
         /**

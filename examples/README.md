@@ -1,13 +1,16 @@
 # Chalkboard examples
-Seven basic programs made by Zushah that utilize [Chalkboard v2.4.0 Noether](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0) are located in this directory.
+Ten example programs that show off a few features of Chalkboard are located in this directory.
 
-They can be viewed in action here:
-- [fluid.js](https://zushah.github.io/Chalkboard/examples/fluid.html)
-- [hyperbolics.js](https://zushah.github.io/Chalkboard/examples/hyperbolics.html)
-- [isomorphism.js](https://zushah.github.io/Chalkboard/examples/isomorphism.html)
-- [mandelbrot.js](https://zushah.github.io/Chalkboard/examples/mandelbrot.html)
-- [matr-donut.js](https://zushah.github.io/Chalkboard/examples/matr-donut.html)
-- [newton.js](https://zushah.github.io/Chalkboard/examples/newton.html)
-- [quat-donut.js](https://zushah.github.io/Chalkboard/examples/quat-donut.html)
+They can be found here:
+- [fluid.js](https://zushah.github.io/Chalkboard/examples/fluid.html) - Fluid flow
+- [hyperbolics.js](https://zushah.github.io/Chalkboard/examples/hyperbolics.html) - Hyperbolic functions
+- [isomorphism.js](https://zushah.github.io/Chalkboard/examples/isomorphism.html) - Isomorphism visualization
+- [mandala.js](https://zushah.github.io/Chalkboard/examples/mandala.html) - Modular multiplication mandala
+- [mandelbrot.js](https://zushah.github.io/Chalkboard/examples/mandelbrot.html) - Mandelbrot set
+- [matr-donut.js](https://zushah.github.io/Chalkboard/examples/matr-donut.html) - Matrix donut
+- [newton.js](https://zushah.github.io/Chalkboard/examples/newton.html) - Newton's method
+- [quat-donut.js](https://zushah.github.io/Chalkboard/examples/quat-donut.html) - Quaternion donut
+- [telemetry.js](https://zushah.github.io/Chalkboard/examples/telemetry.html) - Telemetry dashboard
+- [threebody.js](https://zushah.github.io/Chalkboard/examples/threebody.html) - Three-body problem
 
-The main webpage for the examples can be visited at the [Chalkboard website](https://zushah.github.io/Chalkboard/examples/).
+The main webpage for the examples can be found [here](https://zushah.github.io/Chalkboard/examples/).
