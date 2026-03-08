@@ -546,36 +546,31 @@ namespace Chalkboard {
          */
         export const fxdx = (func: ChalkboardFunction, inf: number, sup: number): number | ChalkboardVector => {
             if (func.field !== "real") throw new TypeError("Chalkboard.calc.fxdx: Property 'field' of 'func' must be 'real'.");
+            const integrate = (f: (x: number) => number, a: number, b: number, eps: number = 1e-6): number => {
+                const asq = (a: number, b: number, fa: number, fm: number, fb: number, whole: number, eps: number, depth: number): number => {
+                    const m = (a + b) / 2, h = (b - a) / 2;
+                    const lm = (a + m) / 2, rm = (m + b) / 2;
+                    const flm = f(lm), frm = f(rm);
+                    const left = (h / 6) * (fa + 4 * flm + fm);
+                    const right = (h / 6) * (fm + 4 * frm + fb);
+                    const delta = left + right - whole;
+                    if (depth >= 50 || Math.abs(delta) <= 15 * eps) return left + right + delta / 15;
+                    return asq(a, m, fa, flm, fm, left, eps / 2, depth + 1) + asq(m, b, fm, frm, fb, right, eps / 2, depth + 1);
+                };
+                const m = (a + b) / 2;
+                const fa = f(a), fm = f(m), fb = f(b);
+                const whole = ((b - a) / 6) * (fa + 4 * fm + fb);
+                return asq(a, b, fa, fm, fb, whole, eps, 0);
+            };
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
-                let fx = f(inf) + f(sup);
-                const dx = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f(inf + i * dx) : 4 * f(inf + i * dx);
-                }
-                return (fx * dx) / 3;
+                return integrate(f, inf, sup);
             } else if (func.type === "curve2d") {
                 const f = func.rule as ((t: number) => number)[];
-                let fx = f[0](inf) + f[0](sup);
-                let fy = f[1](inf) + f[1](sup);
-                const dt = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f[0](inf + i * dt) : 4 * f[0](inf + i * dt);
-                    fy += i % 2 === 0 ? 2 * f[1](inf + i * dt) : 4 * f[1](inf + i * dt);
-                }
-                return Chalkboard.vect.init((fx * dt) / 3, (fy * dt) / 3);
+                return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup));
             } else if (func.type === "curve3d") {
                 const f = func.rule as ((t: number) => number)[];
-                let fx = f[0](inf) + f[0](sup);
-                let fy = f[1](inf) + f[1](sup);
-                let fz = f[2](inf) + f[2](sup);
-                const dt = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f[0](inf + i * dt) : 4 * f[0](inf + i * dt);
-                    fy += i % 2 === 0 ? 2 * f[1](inf + i * dt) : 4 * f[1](inf + i * dt);
-                    fz += i % 2 === 0 ? 2 * f[2](inf + i * dt) : 4 * f[2](inf + i * dt);
-                }
-                return Chalkboard.vect.init((fx * dt) / 3, (fy * dt) / 3, (fz * dt) / 3);
+                return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup), integrate(f[2], inf, sup));
             }
             throw new TypeError("Chalkboard.calc.fxdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
         };
@@ -593,15 +588,24 @@ namespace Chalkboard {
             if (func.field !== "real") throw new TypeError("Chalkboard.calc.fxydxdy: Property 'field' of 'func' must be 'real'.");
             if (func.type === "scalar3d") {
                 const f = func.rule as (x: number, y: number) => number;
-                let result = 0;
-                const dx = (xsup - xinf) / 10000;
-                const dy = (ysup - yinf) / 10000;
-                for (let x = xinf; x <= xsup; x += dx) {
-                    for (let y = yinf; y <= ysup; y += dy) {
-                        result += f(x, y);
-                    }
-                }
-                return result * dx * dy;
+                const integrate = (g: (v: number) => number, a: number, b: number, eps: number): number => {
+                    const asq = (a: number, b: number, fa: number, fm: number, fb: number, whole: number, eps: number, depth: number): number => {
+                        const m = (a + b) / 2, h = (b - a) / 2;
+                        const lm = (a + m) / 2, rm = (m + b) / 2;
+                        const flm = g(lm), frm = g(rm);
+                        const left = (h / 6) * (fa + 4 * flm + fm);
+                        const right = (h / 6) * (fm + 4 * frm + fb);
+                        const delta = left + right - whole;
+                        if (depth >= 50 || Math.abs(delta) <= 15 * eps) return left + right + delta / 15;
+                        return asq(a, m, fa, flm, fm, left, eps / 2, depth + 1) + asq(m, b, fm, frm, fb, right, eps / 2, depth + 1);
+                    };
+                    const m = (a + b) / 2;
+                    const fa = g(a), fm = g(m), fb = g(b);
+                    const whole = ((b - a) / 6) * (fa + 4 * fm + fb);
+                    return asq(a, b, fa, fm, fb, whole, eps, 0);
+                };
+                const g = (x: number) => integrate((y: number) => f(x, y), yinf, ysup, 1e-5);
+                return integrate(g, xinf, xsup, 1e-5);
             }
             throw new TypeError("Chalkboard.calc.fxydxdy: Property 'type' of 'func' must be 'scalar3d'.");
         };
