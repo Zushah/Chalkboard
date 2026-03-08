@@ -74,7 +74,7 @@ namespace Chalkboard {
          */
         export const combination = (n: number, r: number): number => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error(`Chalkboard.numb.combination: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
-            return Chalkboard.numb.factorial(n) / (Chalkboard.numb.factorial(n - r) * Chalkboard.numb.factorial(r));
+            return Chalkboard.numb.binomial(n, r);
         };
 
         /**
@@ -89,8 +89,12 @@ namespace Chalkboard {
         export const compositeArr = (inf: number, sup: number): number[] => {
             if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.compositeArr: Parameters "inf" and "sup" must be integers.`);
             if (inf > sup) throw new Error(`Chalkboard.numb.compositeArr: Parameter "inf" must be less than or equal to "sup".`);
+            if (sup < 4) return [];
+            const sieve = new Uint8Array(sup + 1);
+            for (let p = 2; p * p <= sup; p++) if (sieve[p] === 0) for (let i = p * p; i <= sup; i += p) sieve[i] = 1;
             const result: number[] = [];
-            for (let i = inf; i <= sup; i++) if (i > 1 && !Chalkboard.numb.isPrime(i)) result.push(i);
+            const start = Math.max(4, inf);
+            for (let i = start; i <= sup; i++) if (sieve[i] === 1) result.push(i);
             return result;
         };
 
@@ -331,8 +335,14 @@ namespace Chalkboard {
         export const divisors = (num: number): number[] => {
             if (!Number.isInteger(num) || num <= 0) throw new Error(`Chalkboard.numb.divisors: Parameter "num" must be a positive integer.`);
             const result: number[] = [];
-            for (let i = 1; i <= num; i++) if (num % i === 0) result.push(i);
-            return result;
+            const upper = Math.floor(Math.sqrt(num));
+            for (let i = 1; i <= upper; i++) {
+                if (num % i === 0) {
+                    result.push(i);
+                    if (i !== num / i) result.push(num / i); 
+                }
+            }
+            return result.sort((a, b) => a - b);
         };
 
         /**
@@ -705,7 +715,9 @@ namespace Chalkboard {
          */
         export const permutation = (n: number, r: number): number => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n) throw new Error(`Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
-            return Chalkboard.numb.factorial(n) / Chalkboard.numb.factorial(n - r);
+            let result = 1;
+            for (let i = n; i > n - r; i--) result *= i;
+            return Math.round(result);
         };
 
         /**
@@ -759,8 +771,14 @@ namespace Chalkboard {
         export const primeArr = (inf: number, sup: number): number[] => {
             if (!Number.isInteger(inf) || !Number.isInteger(sup)) throw new Error(`Chalkboard.numb.primeArr: Parameters "inf" and "sup" must be integers.`);
             if (inf > sup) throw new Error(`Chalkboard.numb.primeArr: Parameter "inf" must be less than or equal to "sup".`);
+            if (sup < 2) return [];
+            const sieve = new Uint8Array(sup + 1);
+            sieve[0] = 1; 
+            sieve[1] = 1;
+            for (let p = 2; p * p <= sup; p++) if (sieve[p] === 0) for (let i = p * p; i <= sup; i += p) sieve[i] = 1;
             const result: number[] = [];
-            for (let i = inf; i <= sup; i++) if (Chalkboard.numb.isPrime(i)) result.push(i);
+            const start = Math.max(2, inf);
+            for (let i = start; i <= sup; i++) if (sieve[i] === 0) result.push(i);
             return result;
         };
 
