@@ -15,6 +15,32 @@ namespace Chalkboard {
      * @namespace
      */
     export namespace stat {
+        /** @ignore */
+        const $quickselect = (arr: number[], k: number): number => {
+            const select = (left: number, right: number, k: number): number => {
+                if (left === right) return arr[left];
+                let pivotIndex = Math.floor(Math.random() * (right - left + 1)) + left;
+                const pivotValue = arr[pivotIndex];
+                arr[pivotIndex] = arr[right];
+                arr[right] = pivotValue;
+                let storeIndex = left;
+                for (let i = left; i < right; i++) {
+                    if (arr[i] < pivotValue) {
+                        const temp = arr[storeIndex];
+                        arr[storeIndex] = arr[i];
+                        arr[i] = temp;
+                        storeIndex++;
+                    }
+                }
+                arr[right] = arr[storeIndex];
+                arr[storeIndex] = pivotValue;
+                if (k === storeIndex) return arr[k];
+                else if (k < storeIndex) return select(left, storeIndex - 1, k);
+                else return select(storeIndex + 1, right, k);
+            };
+            return select(0, arr.length - 1, k);
+        };
+
         /**
          * Calculates the absolute value of all the elements of an array.
          * @param {number[]} arr - The array
@@ -702,13 +728,13 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const median = (arr: number[]): number => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            if (temp.length % 2 === 1) {
-                return temp[Math.floor(temp.length / 2)];
+            if (arr.length === 0) return NaN;
+            const copy = arr.slice();
+            const mid = Math.floor(copy.length / 2);
+            if (copy.length % 2 === 1) {
+                return $quickselect(copy, mid);
             } else {
-                return (temp[temp.length / 2] + temp[temp.length / 2 - 1]) / 2;
+                return ($quickselect(copy, mid - 1) + $quickselect(copy, mid)) / 2.0;
             }
         };
 
@@ -733,29 +759,20 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mode = (arr: number[]): number => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            let bestStr = 1;
-            let currStr = 1;
-            let bestElm = temp[0];
-            let currElm = temp[0];
-            for (let i = 1; i < temp.length; i++) {
-                if (temp[i - 1] !== temp[i]) {
-                    if (currStr > bestStr) {
-                        bestStr = currStr;
-                        bestElm = currElm;
-                    }
-                    currStr = 0;
-                    currElm = temp[i];
+            if (arr.length === 0) return NaN;
+            const frequency = new Map<number, number>();
+            let maxFreq = 0;
+            let result = arr[0];
+            for (let i = 0; i < arr.length; i++) {
+                const val = arr[i];
+                const count = (frequency.get(val) || 0) + 1;
+                frequency.set(val, count);
+                if (count > maxFreq) {
+                    maxFreq = count;
+                    result = val;
                 }
-                currStr++;
             }
-            if (currStr > bestStr) {
-                return currElm;
-            } else {
-                return bestElm;
-            }
+            return result;
         };
 
         /**
@@ -921,17 +938,19 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const quartile = (arr: number[], type: "Q1" | "Q2" | "Q3"): number => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            const lo = temp.slice(0, Math.floor(temp.length / 2));
-            const hi = temp.slice(Math.ceil(temp.length / 2));
+            if (arr.length === 0) return NaN;
+            const copy = arr.slice();
+            if (type === "Q2") return Chalkboard.stat.median(copy);
+            const mid = Math.floor(copy.length / 2);
             if (type === "Q1") {
-                return Chalkboard.stat.median(lo);
-            } else if (type === "Q2") {
-                return Chalkboard.stat.median(arr);
+                const q1Mid = Math.floor(mid / 2);
+                if (mid % 2 === 1) return $quickselect(copy, q1Mid);
+                else return ($quickselect(copy, q1Mid - 1) + $quickselect(copy, q1Mid)) / 2.0;
             } else if (type === "Q3") {
-                return Chalkboard.stat.median(hi);
+                const offset = copy.length % 2 === 0 ? mid : mid + 1;
+                const q3Mid = offset + Math.floor(mid / 2);
+                if (mid % 2 === 1) return $quickselect(copy, q3Mid);
+                else return ($quickselect(copy, q3Mid - 1) + $quickselect(copy, q3Mid)) / 2.0;
             } else {
                 throw new TypeError('Parameter "type" must be "Q1", "Q2", or "Q3".');
             }
@@ -1299,6 +1318,9 @@ namespace Chalkboard {
          * @returns {T[]}
          */
         export const unique = <T>(arr: T[]): T[] => {
+            if (arr.length === 0) return [];
+            const firstType = typeof arr[0];
+            if (firstType === "number" || firstType === "string" || firstType === "boolean") return Array.from(new Set(arr));
             const stableStringify = (obj: any): string => {
                 const replacer = (key: string, value: any) => {
                     if (value !== null && typeof value === "object" && !Array.isArray(value)) {
@@ -1312,44 +1334,12 @@ namespace Chalkboard {
                 };
                 return JSON.stringify(obj, replacer);
             };
-            const getKey = (item: any): string => {
-                let typePrefix: string;
-                let valuePart: string;
-                if (item === null) {
-                    typePrefix = "null";
-                    valuePart = stableStringify(item);
-                } else if (Array.isArray(item)) {
-                    typePrefix = "array";
-                    valuePart = stableStringify(item);
-                } else if (typeof item === "object") {
-                    typePrefix = "object";
-                    valuePart = stableStringify(item);
-                } else if (typeof item === "number") {
-                    typePrefix = "number";
-                    if (Number.isNaN(item)) {
-                        valuePart = "NaN";
-                    } else if (item === Infinity) {
-                        valuePart = "Infinity";
-                    } else if (item === -Infinity) {
-                        valuePart = "-Infinity";
-                    } else {
-                        valuePart = JSON.stringify(item);
-                    }
-                } else if (typeof item === "undefined") {
-                    typePrefix = "undefined";
-                    valuePart = "";
-                } else {
-                    typePrefix = typeof item;
-                    valuePart = stableStringify(item);
-                }
-                return `${typePrefix}:${valuePart}`;
-            };
             const seen = new Map<string, T>();
             for (const item of arr) {
-                const key = getKey(item);
-                if (!seen.has(key)) {
-                    seen.set(key, item);
-                }
+                const typePrefix = item === null ? "null" : typeof item;
+                const valuePart = (typePrefix === "undefined" || Number.isNaN(item as any)) ? "" : stableStringify(item);
+                const key = `${typePrefix}:${valuePart}`;
+                if (!seen.has(key)) seen.set(key, item);
             }
             return Array.from(seen.values());
         };
