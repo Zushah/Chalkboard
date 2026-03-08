@@ -166,30 +166,22 @@ namespace Chalkboard {
          */
         export const arctan = (rad: number): number => {
             const series = (x: number): number => {
-                let sum = x;
-                let term = x;
-                const xx = x * x;
-                for (let n = 1; n < 20; n++) {
-                    term *= -xx;
-                    sum += term / (2 * n + 1);
-                }
-                return sum;
+                const x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2, x31 = x29 * x2, x33 = x31 * x2, x35 = x33 * x2, x37 = x35 * x2, x39 = x37 * x2;
+                return x - x3 / 3 + x5 / 5 - x7 / 7 + x9 / 9 - x11 / 11 + x13 / 13 - x15 / 15 + x17 / 17 - x19 / 19 + x21 / 21 - x23 / 23 + x25 / 25 - x27 / 27 + x29 / 29 - x31 / 31 + x33 / 33 - x35 / 35 + x37 / 37 - x39 / 39;
             };
-            if (rad === 0) {
-                return 0;
-            }
-            if (!Number.isFinite(rad)) {
-                return rad > 0 ? Chalkboard.PI(0.5) : Chalkboard.PI(-0.5);
-            }
+            if (rad === 0) return 0;
+            if (!Number.isFinite(rad)) return rad > 0 ? Chalkboard.PI(0.5) : Chalkboard.PI(-0.5);
             const sign = rad < 0 ? -1 : 1;
             const x = Math.abs(rad);
+            const SQRT2_MINUS_1 = Math.SQRT2 - 1, SQRT2_PLUS_1 = Math.SQRT2 + 1;
+            const PI_FOURTH = Math.PI * 0.25, PI_HALF = Math.PI * 0.5;
             let result: number;
-            if (x <= Chalkboard.real.sqrt(2) - 1) {
+            if (x <= SQRT2_MINUS_1) {
                 result = series(x);
-            } else if (x <= Chalkboard.real.sqrt(2) + 1) {
-                result = Chalkboard.PI(0.25) + series((x - 1) / (x + 1));
+            } else if (x <= SQRT2_PLUS_1) {
+                result = PI_FOURTH + series((x - 1) / (x + 1));
             } else {
-                result = Chalkboard.PI(0.5) - series(1 / x);
+                result = PI_HALF - series(1 / x);
             }
             return sign * result;
         };
