@@ -265,7 +265,13 @@ namespace Chalkboard {
      * const E = Chalkboard.E(); // returns 2.7182818284590446
      */
     export const E = (exponent: number = 1): number => {
-        return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
+        if (exponent === 0) return 1;
+        if (exponent === 1) return 2.718281828459045;
+        const LN2 = 0.6931471805599453, INV_LN2 = 1.4426950408889634;
+        const k = Math.round(exponent * INV_LN2);
+        const r = exponent - k * LN2, r2 = r * r, r3 = r2 * r, r4 = r3 * r, r5 = r4 * r, r6 = r5 * r, r7 = r6 * r, r8 = r7 * r, r9 = r8 * r, r10 = r9 * r;
+        const exp_r = 1 + r + r2 / 2 + r3 / 6 + r4 / 24 + r5 / 120 + r6 / 720 + r7 / 5040 + r8 / 40320 + r9 / 362880 + r10 / 3628800;
+        return exp_r * (2 ** k);
     };
 
     /**
@@ -295,7 +301,12 @@ namespace Chalkboard {
      * const TAU = Chalkboard.PI(2); // returns 6.283185307179587
      */
     export const PI = (coefficient: number = 1): number => {
-        return coefficient * 4 * (4 * Math.atan(1 / 5) - Math.atan(1 / 239));
+        let a = 1.0, b = Math.sqrt(0.5), t = 0.25, p = 1.0;
+        let aNext = (a + b) * 0.5, bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext; p *= 2.0;
+        aNext = (a + b) * 0.5; bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext; p *= 2.0;
+        aNext = (a + b) * 0.5; bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext; p *= 2.0;
+        aNext = (a + b) * 0.5; bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext;
+        return coefficient * (((a + b) * (a + b)) / (4.0 * t));
     };
 
     /**
