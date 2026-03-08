@@ -196,16 +196,16 @@ namespace Chalkboard {
          * @param {number} a - The leading coefficient
          * @param {number} b - The middle coefficient
          * @param {number} c - The last coefficient (the constant)
-         * @param {"stan" | "vert"} [form="stan"] - The form of the polynomial, which can be "stan" for standard form or "vert" for vertex form
+         * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {number}
          */
-        export const discriminant = (a: number, b: number, c: number, form: "stan" | "vert" = "stan"): number => {
-            if (form === "stan") {
+        export const discriminant = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): number => {
+            if (form === "standard") {
                 return b * b - 4 * a * c;
-            } else if (form === "vert") {
+            } else if (form === "vertex") {
                 return 2 * a * b * (2 * a * b) - 4 * a * c;
             } else {
-                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'standard' or 'vertex'.");
             }
         };
 
@@ -267,7 +267,7 @@ namespace Chalkboard {
             const a4 = -1.453152027;
             const a5 = 1.061405429;
             const t = 1 / (1 + p * x);
-            const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
+            const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Chalkboard.E(-x * x);
             return sign * y;
         };
 
@@ -277,7 +277,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Gamma = (num: number): number => {
-            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.gamma: Parameter 'num' must be a finite number.");
+            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.Gamma: Parameter 'num' must be a finite number.");
             if (Number.isInteger(num) && num <= 0) return NaN;
             const p0 = 0.99999999999980993;
             const p1 = 676.5203681218851;
@@ -288,7 +288,7 @@ namespace Chalkboard {
             const p6 = -0.13857109526572012;
             const p7 = 9.9843695780195716e-6;
             const p8 = 1.5056327351493116e-7;
-            if (num < 0.5) return Math.PI / (Math.sin(Math.PI * num) * Chalkboard.real.Gamma(1 - num));
+            if (num < 0.5) return Chalkboard.PI() / (Chalkboard.trig.sin(Chalkboard.PI(num)) * Chalkboard.real.Gamma(1 - num));
             const g = 7;
             let x = num - 1;
             let a = p0;
@@ -301,7 +301,7 @@ namespace Chalkboard {
             a += p7 / (x + 7);
             a += p8 / (x + 8);
             const t = x + g + 0.5;
-            return Math.sqrt(2 * Math.PI) * Math.pow(t, x + 0.5) * Math.exp(-t) * a;
+            return Chalkboard.real.sqrt(Chalkboard.PI(2)) * (Chalkboard.real.pow(t, x + 0.5) as number) * Chalkboard.E(-t) * a;
         };
 
         /**
@@ -365,7 +365,22 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const ln = (num: number): number => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define((x: number) => 1 / x), 1, num) as number;
+            if (num <= 0) return NaN;
+            if (num === 1) return 0;
+            if (num === Infinity) return Infinity;
+            const LN2 = 0.6931471805599453;
+            let E = 0, m = num;
+            while (m > 1.414213562373095) {
+                m *= 0.5;
+                E++;
+            }
+            while (m < 0.7071067811865475) {
+                m *= 2.0;
+                E--;
+            }
+            const y = (m - 1) / (m + 1), y2 = y * y, y3 = y2 * y, y5 = y3 * y2, y7 = y5 * y2, y9 = y7 * y2, y11 = y9 * y2, y13 = y11 * y2, y15 = y13 * y2, y17 = y15 * y2, y19 = y17 * y2;
+            const series = y + y3 / 3 + y5 / 5 + y7 / 7 + y9 / 9 + y11 / 11 + y13 / 13 + y15 / 15 + y17 / 17 + y19 / 19;
+            return 2 * series + E * LN2;
         };
 
         /**
@@ -1239,10 +1254,23 @@ namespace Chalkboard {
          */
         export const pow = (base: number | ChalkboardFunction, num: number): number | ChalkboardFunction => {
             if (typeof base === "number") {
-                if (base === 0 && num === 0) {
-                    return 1;
+                if (base === 0 && num === 0) return 1;
+                if (base === 0) return 0;
+                if (num === 0) return 1;
+                if (num === 1) return base;
+                if (Number.isInteger(num)) {
+                    let res = 1;
+                    let b = base;
+                    let n = Math.abs(num);
+                    while (n > 0) {
+                        if (n % 2 === 1) res *= b;
+                        b *= b;
+                        n = Math.floor(n / 2);
+                    }
+                    return num < 0 ? 1 / res : res;
                 } else {
-                    return Math.exp(num * Math.log(base));
+                    if (base < 0) return NaN;
+                    return Chalkboard.E(num * Chalkboard.real.ln(base));
                 }
             } else {
                 const func = base;
@@ -1303,16 +1331,16 @@ namespace Chalkboard {
          * @param {number} a - The leading coefficient
          * @param {number} b - The middle coefficient
          * @param {number} c - The last coefficient (the constant)
-         * @param {"stan" | "vert"} [form="stan"] - The form of the polynomial, which can be "stan" for standard form or "vert" for vertex form
+         * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {ChalkboardFunction}
          */
-        export const quadratic = (a: number, b: number, c: number, form: "stan" | "vert" = "stan"): ChalkboardFunction => {
-            if (form === "stan") {
+        export const quadratic = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): ChalkboardFunction => {
+            if (form === "standard") {
                 return Chalkboard.real.define((x: number) => a * x * x + b * x + c);
-            } else if (form === "vert") {
+            } else if (form === "vertex") {
                 return Chalkboard.real.define((x: number) => a * (x - b) * (x - b) + c);
             } else {
-                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'standard' or 'vertex'.");
             }
         };
 
@@ -1321,16 +1349,16 @@ namespace Chalkboard {
          * @param {number} a - The leading coefficient
          * @param {number} b - The middle coefficient
          * @param {number} c - The last coefficient (the constant)
-         * @param {"stan" | "vert"} [form="stan"] - The form of the polynomial, which can be "stan" for standard form or "vert" for vertex form
+         * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {number[]}
          */
-        export const quadraticFormula = (a: number, b: number, c: number, form: "stan" | "vert" = "stan"): [number, number] => {
-            if (form === "stan") {
-                return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "stan"))) / (2 * a), (-b - Math.sqrt(Chalkboard.real.discriminant(a, b, c, "stan"))) / (2 * a)];
-            } else if (form === "vert") {
+        export const quadraticFormula = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): [number, number] => {
+            if (form === "standard") {
+                return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a), (-b - Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a)];
+            } else if (form === "vertex") {
                 return [b + Chalkboard.real.sqrt(-c / a), b - Chalkboard.real.sqrt(-c / a)];
             } else {
-                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'standard' or 'vertex'.");
             }
         };
 
@@ -1415,11 +1443,16 @@ namespace Chalkboard {
         /**
          * Calculates the nth-root of a number.
          * @param {number} num - The number
-         * @param {number} index - The index to root by
+         * @param {number} [index=3] - The nth-root to take
          * @returns {number}
          */
         export const root = (num: number, index: number = 3): number => {
-            return Math.exp(Math.log(num) / index);
+            if (num === 0) return 0;
+            if (num < 0) {
+                if (Number.isInteger(index) && Math.abs(index) % 2 === 1) return -Chalkboard.E(Chalkboard.real.ln(-num) / index);
+                return NaN;
+            }
+            return Chalkboard.E(Chalkboard.real.ln(num) / index);
         };
 
         /**
@@ -1477,11 +1510,24 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const sqrt = (num: number): number => {
-            if (num >= 0) {
-                return Math.exp(Math.log(num) / 2);
-            } else {
-                return NaN;
+            if (num < 0) return NaN;
+            if (num === 0 || num === 1 || num === Infinity) return num;
+            let S = num, E = 0;
+            while (S >= 1.0) {
+                S *= 0.25;
+                E++;
             }
+            while (S < 0.25) {
+                S *= 4.0;
+                E--;
+            }
+            let x = (S + 1.0) * 0.5;
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            return x * (2 ** E);
         };
 
         /**
@@ -1529,15 +1575,19 @@ namespace Chalkboard {
         /**
          * Calculates the tetration of a number.
          * @param {number} base - The number
-         * @param {number} num - The tetratant
+         * @param {number} num - The tetratant, or the height of the power tower
          * @returns {number}
          */
         export const tetration = (base: number, num: number): number | undefined => {
-            if (num === 0) {
-                return 1;
-            } else if (num > 0) {
-                return Math.pow(base, Chalkboard.real.tetration(base, num - 1) as number);
+            if (!Number.isInteger(num) || num < 0) return NaN;
+            if (num === 0) return 1;
+            if (num === 1) return base;
+            let result = base;
+            for (let i = 1; i < num; i++) {
+                result = Chalkboard.real.pow(base, result) as number;
+                if (result === Infinity) return Infinity;
             }
+            return result;
         };
 
         /**
