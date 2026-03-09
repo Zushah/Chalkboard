@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Plotting Namespace
 */
@@ -55,7 +55,7 @@ cb.CONTEXT = "globalThis.__ChalkboardPlotContext";
     assert.deepStrictEqual(cb.plot.definition(cb.real.define((x) => 0), { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, domain: [-1, 1], res: 1, isInverse: false, isPolar: false, context: ctx }), [[-1, 0], [0, 0], [1, 0]]);
     assert.deepStrictEqual(cb.plot.dfdx(cb.real.define((x) => x*x), { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, domain: [2, 2], res: 1, isInverse: false, context: ctx }), [[ 2, 4.000000330961484 ] ])
     assert.deepStrictEqual(cb.plot.d2fdx2(cb.real.define((x) => x*x), { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, domain: [2, 2], res: 1, isInverse: false, context: ctx }), [[2, 2.0000001654807416]]);
-    assert.deepStrictEqual(cb.plot.fxdx(cb.real.define((x) => x*x), { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, domain: [1, 1], res: 1000, isInverse: false, context: ctx }), [[1, 0.33333333333333465]]);
+    assert.deepStrictEqual(cb.plot.fxdx(cb.real.define((x) => x*x), { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 2, domain: [1, 1], res: 1000, isInverse: false, context: ctx }), [[1, 0.3333333333333333]]);
 }
 
 // plot.Fourier, plot.Laplace, plot.Taylor

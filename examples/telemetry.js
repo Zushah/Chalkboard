@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Telemetry Dashboard
 */
@@ -44,7 +44,7 @@ let currentMin = cb.stat.min(data);
 let currentMax = cb.stat.max(data);
 let tickCounter = 0;
 
-function main() {
+const main = () => {
     // Update the data stream
     if (tickCounter % 3 === 0) {
         let step = (Math.random() - 0.5) * 5;
@@ -209,7 +209,7 @@ function main() {
     drawMetric("LATEST VALUE", latestValue.toFixed(3), 0);
     drawMetric("GLOBAL MEAN", mean.toFixed(3), 240);
     drawMetric("GLOBAL STANDARD DEVIATION", dev.toFixed(3), 480);
-    drawMetric("LOCAL MIN / MAX", `${currentMin.toFixed(1)} / ${currentMax.toFixed(1)}`, 720);
+    drawMetric("LOCAL MIN / MAX", `${(targetMin + 10).toFixed(1)} / ${(targetMax - 10).toFixed(1)}`, 720);
 
     // Borders
     ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
@@ -217,5 +217,5 @@ function main() {
     ctx.strokeRect(marginLeft, marginTop, plotWidth, plotHeight);
 
     window.requestAnimationFrame(main);
-}
+};
 main();

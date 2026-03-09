@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Three-Body Problem
 */
@@ -14,7 +14,7 @@ canvas.height = window.innerHeight;
 // Initialize Chalkboard
 const cb = Chalkboard;
 
-// Define a custom 12-dimensional ODE system for 3 mutually attracting bodies
+// Define a custom 12-dimensional ODE system for three mutually attracting bodies
 // State array structure: [x1, y1, x2, y2, x3, y3, vx1, vy1, vx2, vy2, vx3, vy3]
 const ode = cb.diff.init((t, y) => {
     const x1 = y[0], y1 = y[1], x2 = y[2], y2 = y[3], x3 = y[4], y3 = y[5];
@@ -51,8 +51,7 @@ const simulationSpeed = 0.25;
 const scale = Math.min(canvas.width, canvas.height) / 3;
 const colors = ["rgb(255, 100, 100)", "rgb(100, 255, 100)", "rgb(100, 100, 255)"];
 
-// Wraps the solving logic so it can be called repeatedly
-function simulate() {
+const simulate = () => {
     // Generate random initial conditions between -1 and 1
     const y0 = cb.stat.random(12, -1, 1);
 
@@ -79,12 +78,12 @@ function simulate() {
     frame = 0;
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
+};
 
 // Generate the first simulation
 simulate();
 
-function main() {
+const main = () => {
     ctx.fillStyle = "rgba(0, 0, 0, 0.08)";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -100,7 +99,7 @@ function main() {
     for (let i = 0; i < 3; i++) {
         let x = cx + state[i * 2] * scale, y = cy + state[i * 2 + 1] * scale;
 
-        // Wrap around the edges of the canvas to create a continuous effect
+        // Wrap around the edges of the canvas ("toroidal" canvas) to create a continuous effect
         x = ((x % canvas.width) + canvas.width) % canvas.width;
         y = ((y % canvas.height) + canvas.height) % canvas.height;
 
@@ -112,5 +111,5 @@ function main() {
 
     frame++;
     window.requestAnimationFrame(main);
-}
+};
 main();

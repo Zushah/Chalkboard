@@ -83,7 +83,15 @@ var Chalkboard;
     };
     Chalkboard.CONTEXT = typeof window !== "undefined" ? "ctx" : "0";
     Chalkboard.E = (exponent = 1) => {
-        return Math.pow(Math.pow(10, 1 / Math.log(10)), exponent);
+        if (exponent === 0)
+            return 1;
+        if (exponent === 1)
+            return 2.718281828459045;
+        const LN2 = 0.6931471805599453, INV_LN2 = 1.4426950408889634;
+        const k = Math.round(exponent * INV_LN2);
+        const r = exponent - k * LN2, r2 = r * r, r3 = r2 * r, r4 = r3 * r, r5 = r4 * r, r6 = r5 * r, r7 = r6 * r, r8 = r7 * r, r9 = r8 * r, r10 = r9 * r;
+        const exp_r = 1 + r + r2 / 2 + r3 / 6 + r4 / 24 + r5 / 120 + r6 / 720 + r7 / 5040 + r8 / 40320 + r9 / 362880 + r10 / 3628800;
+        return exp_r * (2 ** k);
     };
     Chalkboard.I = (exponent = 1) => {
         if (exponent % 4 === 0)
@@ -97,13 +105,36 @@ var Chalkboard;
         return Chalkboard.comp.init(0, 0);
     };
     Chalkboard.PI = (coefficient = 1) => {
-        return coefficient * 4 * (4 * Math.atan(1 / 5) - Math.atan(1 / 239));
+        let a = 1.0, b = Math.sqrt(0.5), t = 0.25, p = 1.0;
+        let aNext = (a + b) * 0.5, bNext = Math.sqrt(a * b);
+        t -= p * (a - aNext) * (a - aNext);
+        a = aNext;
+        b = bNext;
+        p *= 2.0;
+        aNext = (a + b) * 0.5;
+        bNext = Math.sqrt(a * b);
+        t -= p * (a - aNext) * (a - aNext);
+        a = aNext;
+        b = bNext;
+        p *= 2.0;
+        aNext = (a + b) * 0.5;
+        bNext = Math.sqrt(a * b);
+        t -= p * (a - aNext) * (a - aNext);
+        a = aNext;
+        b = bNext;
+        p *= 2.0;
+        aNext = (a + b) * 0.5;
+        bNext = Math.sqrt(a * b);
+        t -= p * (a - aNext) * (a - aNext);
+        a = aNext;
+        b = bNext;
+        return coefficient * (((a + b) * (a + b)) / (4.0 * t));
     };
     Chalkboard.REGISTER = (name, func) => {
         Chalkboard.REGISTRY[name] = func;
     };
     Chalkboard.REGISTRY = {};
-    Chalkboard.VERSION = "3.0.0";
+    Chalkboard.VERSION = "3.0.1";
     Chalkboard.VERSIONALIAS = "Euler";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined")
@@ -3057,38 +3088,34 @@ var Chalkboard;
         calc.fxdx = (func, inf, sup) => {
             if (func.field !== "real")
                 throw new TypeError("Chalkboard.calc.fxdx: Property 'field' of 'func' must be 'real'.");
+            const integrate = (f, a, b, eps = 1e-6) => {
+                const asq = (a, b, fa, fm, fb, whole, eps, depth) => {
+                    const m = (a + b) / 2, h = (b - a) / 2;
+                    const lm = (a + m) / 2, rm = (m + b) / 2;
+                    const flm = f(lm), frm = f(rm);
+                    const left = (h / 6) * (fa + 4 * flm + fm);
+                    const right = (h / 6) * (fm + 4 * frm + fb);
+                    const delta = left + right - whole;
+                    if (depth >= 50 || Math.abs(delta) <= 15 * eps)
+                        return left + right + delta / 15;
+                    return asq(a, m, fa, flm, fm, left, eps / 2, depth + 1) + asq(m, b, fm, frm, fb, right, eps / 2, depth + 1);
+                };
+                const m = (a + b) / 2;
+                const fa = f(a), fm = f(m), fb = f(b);
+                const whole = ((b - a) / 6) * (fa + 4 * fm + fb);
+                return asq(a, b, fa, fm, fb, whole, eps, 0);
+            };
             if (func.type === "scalar2d") {
                 const f = func.rule;
-                let fx = f(inf) + f(sup);
-                const dx = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f(inf + i * dx) : 4 * f(inf + i * dx);
-                }
-                return (fx * dx) / 3;
+                return integrate(f, inf, sup);
             }
             else if (func.type === "curve2d") {
                 const f = func.rule;
-                let fx = f[0](inf) + f[0](sup);
-                let fy = f[1](inf) + f[1](sup);
-                const dt = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f[0](inf + i * dt) : 4 * f[0](inf + i * dt);
-                    fy += i % 2 === 0 ? 2 * f[1](inf + i * dt) : 4 * f[1](inf + i * dt);
-                }
-                return Chalkboard.vect.init((fx * dt) / 3, (fy * dt) / 3);
+                return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup));
             }
             else if (func.type === "curve3d") {
                 const f = func.rule;
-                let fx = f[0](inf) + f[0](sup);
-                let fy = f[1](inf) + f[1](sup);
-                let fz = f[2](inf) + f[2](sup);
-                const dt = (sup - inf) / 1000000;
-                for (let i = 1; i < 1000000; i++) {
-                    fx += i % 2 === 0 ? 2 * f[0](inf + i * dt) : 4 * f[0](inf + i * dt);
-                    fy += i % 2 === 0 ? 2 * f[1](inf + i * dt) : 4 * f[1](inf + i * dt);
-                    fz += i % 2 === 0 ? 2 * f[2](inf + i * dt) : 4 * f[2](inf + i * dt);
-                }
-                return Chalkboard.vect.init((fx * dt) / 3, (fy * dt) / 3, (fz * dt) / 3);
+                return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup), integrate(f[2], inf, sup));
             }
             throw new TypeError("Chalkboard.calc.fxdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
         };
@@ -3097,15 +3124,25 @@ var Chalkboard;
                 throw new TypeError("Chalkboard.calc.fxydxdy: Property 'field' of 'func' must be 'real'.");
             if (func.type === "scalar3d") {
                 const f = func.rule;
-                let result = 0;
-                const dx = (xsup - xinf) / 10000;
-                const dy = (ysup - yinf) / 10000;
-                for (let x = xinf; x <= xsup; x += dx) {
-                    for (let y = yinf; y <= ysup; y += dy) {
-                        result += f(x, y);
-                    }
-                }
-                return result * dx * dy;
+                const integrate = (g, a, b, eps) => {
+                    const asq = (a, b, fa, fm, fb, whole, eps, depth) => {
+                        const m = (a + b) / 2, h = (b - a) / 2;
+                        const lm = (a + m) / 2, rm = (m + b) / 2;
+                        const flm = g(lm), frm = g(rm);
+                        const left = (h / 6) * (fa + 4 * flm + fm);
+                        const right = (h / 6) * (fm + 4 * frm + fb);
+                        const delta = left + right - whole;
+                        if (depth >= 50 || Math.abs(delta) <= 15 * eps)
+                            return left + right + delta / 15;
+                        return asq(a, m, fa, flm, fm, left, eps / 2, depth + 1) + asq(m, b, fm, frm, fb, right, eps / 2, depth + 1);
+                    };
+                    const m = (a + b) / 2;
+                    const fa = g(a), fm = g(m), fb = g(b);
+                    const whole = ((b - a) / 6) * (fa + 4 * fm + fb);
+                    return asq(a, b, fa, fm, fb, whole, eps, 0);
+                };
+                const g = (x) => integrate((y) => f(x, y), yinf, ysup, 1e-5);
+                return integrate(g, xinf, xsup, 1e-5);
             }
             throw new TypeError("Chalkboard.calc.fxydxdy: Property 'type' of 'func' must be 'scalar3d'.");
         };
@@ -7517,16 +7554,24 @@ var Chalkboard;
         numb.combination = (n, r) => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n)
                 throw new Error(`Chalkboard.numb.combination: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
-            return Chalkboard.numb.factorial(n) / (Chalkboard.numb.factorial(n - r) * Chalkboard.numb.factorial(r));
+            return Chalkboard.numb.binomial(n, r);
         };
         numb.compositeArr = (inf, sup) => {
             if (!Number.isInteger(inf) || !Number.isInteger(sup))
                 throw new Error(`Chalkboard.numb.compositeArr: Parameters "inf" and "sup" must be integers.`);
             if (inf > sup)
                 throw new Error(`Chalkboard.numb.compositeArr: Parameter "inf" must be less than or equal to "sup".`);
+            if (sup < 4)
+                return [];
+            const sieve = new Uint8Array(sup + 1);
+            for (let p = 2; p * p <= sup; p++)
+                if (sieve[p] === 0)
+                    for (let i = p * p; i <= sup; i += p)
+                        sieve[i] = 1;
             const result = [];
-            for (let i = inf; i <= sup; i++)
-                if (i > 1 && !Chalkboard.numb.isPrime(i))
+            const start = Math.max(4, inf);
+            for (let i = start; i <= sup; i++)
+                if (sieve[i] === 1)
                     result.push(i);
             return result;
         };
@@ -7741,10 +7786,15 @@ var Chalkboard;
             if (!Number.isInteger(num) || num <= 0)
                 throw new Error(`Chalkboard.numb.divisors: Parameter "num" must be a positive integer.`);
             const result = [];
-            for (let i = 1; i <= num; i++)
-                if (num % i === 0)
+            const upper = Math.floor(Math.sqrt(num));
+            for (let i = 1; i <= upper; i++) {
+                if (num % i === 0) {
                     result.push(i);
-            return result;
+                    if (i !== num / i)
+                        result.push(num / i);
+                }
+            }
+            return result.sort((a, b) => a - b);
         };
         numb.Euler = (num) => {
             if (!Number.isInteger(num) || num <= 0)
@@ -7985,7 +8035,10 @@ var Chalkboard;
         numb.permutation = (n, r) => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n)
                 throw new Error(`Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
-            return Chalkboard.numb.factorial(n) / Chalkboard.numb.factorial(n - r);
+            let result = 1;
+            for (let i = n; i > n - r; i--)
+                result *= i;
+            return Math.round(result);
         };
         numb.Poissonian = (l = 1) => {
             if (typeof l !== "number" || !Number.isFinite(l))
@@ -8019,9 +8072,19 @@ var Chalkboard;
                 throw new Error(`Chalkboard.numb.primeArr: Parameters "inf" and "sup" must be integers.`);
             if (inf > sup)
                 throw new Error(`Chalkboard.numb.primeArr: Parameter "inf" must be less than or equal to "sup".`);
+            if (sup < 2)
+                return [];
+            const sieve = new Uint8Array(sup + 1);
+            sieve[0] = 1;
+            sieve[1] = 1;
+            for (let p = 2; p * p <= sup; p++)
+                if (sieve[p] === 0)
+                    for (let i = p * p; i <= sup; i += p)
+                        sieve[i] = 1;
             const result = [];
-            for (let i = inf; i <= sup; i++)
-                if (Chalkboard.numb.isPrime(i))
+            const start = Math.max(2, inf);
+            for (let i = start; i <= sup; i++)
+                if (sieve[i] === 0)
                     result.push(i);
             return result;
         };
@@ -9240,15 +9303,15 @@ var Chalkboard;
                 return 0;
             }
         };
-        real.discriminant = (a, b, c, form = "stan") => {
-            if (form === "stan") {
+        real.discriminant = (a, b, c, form = "standard") => {
+            if (form === "standard") {
                 return b * b - 4 * a * c;
             }
-            else if (form === "vert") {
+            else if (form === "vertex") {
                 return 2 * a * b * (2 * a * b) - 4 * a * c;
             }
             else {
-                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'standard' or 'vertex'.");
             }
         };
         real.div = (func1, func2) => {
@@ -9303,12 +9366,12 @@ var Chalkboard;
             const a4 = -1.453152027;
             const a5 = 1.061405429;
             const t = 1 / (1 + p * x);
-            const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Math.exp(-x * x);
+            const y = 1 - (((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t) * Chalkboard.E(-x * x);
             return sign * y;
         };
         real.Gamma = (num) => {
             if (typeof num !== "number" || !Number.isFinite(num))
-                throw new TypeError("Chalkboard.real.gamma: Parameter 'num' must be a finite number.");
+                throw new TypeError("Chalkboard.real.Gamma: Parameter 'num' must be a finite number.");
             if (Number.isInteger(num) && num <= 0)
                 return NaN;
             const p0 = 0.99999999999980993;
@@ -9321,7 +9384,7 @@ var Chalkboard;
             const p7 = 9.9843695780195716e-6;
             const p8 = 1.5056327351493116e-7;
             if (num < 0.5)
-                return Math.PI / (Math.sin(Math.PI * num) * Chalkboard.real.Gamma(1 - num));
+                return Chalkboard.PI() / (Chalkboard.trig.sin(Chalkboard.PI(num)) * Chalkboard.real.Gamma(1 - num));
             const g = 7;
             let x = num - 1;
             let a = p0;
@@ -9334,7 +9397,7 @@ var Chalkboard;
             a += p7 / (x + 7);
             a += p8 / (x + 8);
             const t = x + g + 0.5;
-            return Math.sqrt(2 * Math.PI) * Math.pow(t, x + 0.5) * Math.exp(-t) * a;
+            return Chalkboard.real.sqrt(Chalkboard.PI(2)) * Chalkboard.real.pow(t, x + 0.5) * Chalkboard.E(-t) * a;
         };
         real.Heaviside = (num, edge = 0, scl = 1) => {
             if (num >= edge) {
@@ -9362,7 +9425,25 @@ var Chalkboard;
             }
         };
         real.ln = (num) => {
-            return Chalkboard.calc.fxdx(Chalkboard.real.define((x) => 1 / x), 1, num);
+            if (num <= 0)
+                return NaN;
+            if (num === 1)
+                return 0;
+            if (num === Infinity)
+                return Infinity;
+            const LN2 = 0.6931471805599453;
+            let E = 0, m = num;
+            while (m > 1.414213562373095) {
+                m *= 0.5;
+                E++;
+            }
+            while (m < 0.7071067811865475) {
+                m *= 2.0;
+                E--;
+            }
+            const y = (m - 1) / (m + 1), y2 = y * y, y3 = y2 * y, y5 = y3 * y2, y7 = y5 * y2, y9 = y7 * y2, y11 = y9 * y2, y13 = y11 * y2, y15 = y13 * y2, y17 = y15 * y2, y19 = y17 * y2;
+            const series = y + y3 / 3 + y5 / 5 + y7 / 7 + y9 / 9 + y11 / 11 + y13 / 13 + y15 / 15 + y17 / 17 + y19 / 19;
+            return 2 * series + E * LN2;
         };
         real.log = (base, num) => {
             return Chalkboard.real.ln(num) / Chalkboard.real.ln(base);
@@ -10293,11 +10374,30 @@ var Chalkboard;
         };
         real.pow = (base, num) => {
             if (typeof base === "number") {
-                if (base === 0 && num === 0) {
+                if (base === 0 && num === 0)
                     return 1;
+                if (base === 0)
+                    return 0;
+                if (num === 0)
+                    return 1;
+                if (num === 1)
+                    return base;
+                if (Number.isInteger(num)) {
+                    let res = 1;
+                    let b = base;
+                    let n = Math.abs(num);
+                    while (n > 0) {
+                        if (n % 2 === 1)
+                            res *= b;
+                        b *= b;
+                        n = Math.floor(n / 2);
+                    }
+                    return num < 0 ? 1 / res : res;
                 }
                 else {
-                    return Math.exp(num * Math.log(base));
+                    if (base < 0)
+                        return NaN;
+                    return Chalkboard.E(num * Chalkboard.real.ln(base));
                 }
             }
             else {
@@ -10346,26 +10446,26 @@ var Chalkboard;
                 (p3[1] * p1[0] * p2[0]) / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
             return a * t * t + b * t + c;
         };
-        real.quadratic = (a, b, c, form = "stan") => {
-            if (form === "stan") {
+        real.quadratic = (a, b, c, form = "standard") => {
+            if (form === "standard") {
                 return Chalkboard.real.define((x) => a * x * x + b * x + c);
             }
-            else if (form === "vert") {
+            else if (form === "vertex") {
                 return Chalkboard.real.define((x) => a * (x - b) * (x - b) + c);
             }
             else {
-                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'standard' or 'vertex'.");
             }
         };
-        real.quadraticFormula = (a, b, c, form = "stan") => {
-            if (form === "stan") {
-                return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "stan"))) / (2 * a), (-b - Math.sqrt(Chalkboard.real.discriminant(a, b, c, "stan"))) / (2 * a)];
+        real.quadraticFormula = (a, b, c, form = "standard") => {
+            if (form === "standard") {
+                return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a), (-b - Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a)];
             }
-            else if (form === "vert") {
+            else if (form === "vertex") {
                 return [b + Chalkboard.real.sqrt(-c / a), b - Chalkboard.real.sqrt(-c / a)];
             }
             else {
-                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'stan' or 'vert'.");
+                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'standard' or 'vertex'.");
             }
         };
         real.ramp = (num, edge = 0, scl = 1) => {
@@ -10422,7 +10522,14 @@ var Chalkboard;
             }
         };
         real.root = (num, index = 3) => {
-            return Math.exp(Math.log(num) / index);
+            if (num === 0)
+                return 0;
+            if (num < 0) {
+                if (Number.isInteger(index) && Math.abs(index) % 2 === 1)
+                    return -Chalkboard.E(Chalkboard.real.ln(-num) / index);
+                return NaN;
+            }
+            return Chalkboard.E(Chalkboard.real.ln(num) / index);
         };
         real.scl = (func, num) => {
             if (func.field !== "real")
@@ -10462,12 +10569,26 @@ var Chalkboard;
             return (y2 - y1) / (x2 - x1);
         };
         real.sqrt = (num) => {
-            if (num >= 0) {
-                return Math.exp(Math.log(num) / 2);
-            }
-            else {
+            if (num < 0)
                 return NaN;
+            if (num === 0 || num === 1 || num === Infinity)
+                return num;
+            let S = num, E = 0;
+            while (S >= 1.0) {
+                S *= 0.25;
+                E++;
             }
+            while (S < 0.25) {
+                S *= 4.0;
+                E--;
+            }
+            let x = (S + 1.0) * 0.5;
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            x = 0.5 * (x + S / x);
+            return x * (2 ** E);
         };
         real.sub = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
@@ -10510,12 +10631,19 @@ var Chalkboard;
             throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
         real.tetration = (base, num) => {
-            if (num === 0) {
+            if (!Number.isInteger(num) || num < 0)
+                return NaN;
+            if (num === 0)
                 return 1;
+            if (num === 1)
+                return base;
+            let result = base;
+            for (let i = 1; i < num; i++) {
+                result = Chalkboard.real.pow(base, result);
+                if (result === Infinity)
+                    return Infinity;
             }
-            else if (num > 0) {
-                return Math.pow(base, Chalkboard.real.tetration(base, num - 1));
-            }
+            return result;
         };
         real.translate = (func, h = 0, v = 0) => {
             if (func.field !== "real")
@@ -10621,6 +10749,34 @@ var Chalkboard;
 (function (Chalkboard) {
     let stat;
     (function (stat) {
+        const $quickselect = (arr, k) => {
+            const select = (left, right, k) => {
+                if (left === right)
+                    return arr[left];
+                let pivotIndex = Math.floor(Math.random() * (right - left + 1)) + left;
+                const pivotValue = arr[pivotIndex];
+                arr[pivotIndex] = arr[right];
+                arr[right] = pivotValue;
+                let storeIndex = left;
+                for (let i = left; i < right; i++) {
+                    if (arr[i] < pivotValue) {
+                        const temp = arr[storeIndex];
+                        arr[storeIndex] = arr[i];
+                        arr[i] = temp;
+                        storeIndex++;
+                    }
+                }
+                arr[right] = arr[storeIndex];
+                arr[storeIndex] = pivotValue;
+                if (k === storeIndex)
+                    return arr[k];
+                else if (k < storeIndex)
+                    return select(left, storeIndex - 1, k);
+                else
+                    return select(storeIndex + 1, right, k);
+            };
+            return select(0, arr.length - 1, k);
+        };
         stat.absolute = (arr) => {
             const result = [];
             for (let i = 0; i < arr.length; i++) {
@@ -11081,14 +11237,15 @@ var Chalkboard;
             return sum / weightSum;
         };
         stat.median = (arr) => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            if (temp.length % 2 === 1) {
-                return temp[Math.floor(temp.length / 2)];
+            if (arr.length === 0)
+                return NaN;
+            const copy = arr.slice();
+            const mid = Math.floor(copy.length / 2);
+            if (copy.length % 2 === 1) {
+                return $quickselect(copy, mid);
             }
             else {
-                return (temp[temp.length / 2] + temp[temp.length / 2 - 1]) / 2;
+                return ($quickselect(copy, mid - 1) + $quickselect(copy, mid)) / 2.0;
             }
         };
         stat.min = (arr) => {
@@ -11101,30 +11258,21 @@ var Chalkboard;
             return min;
         };
         stat.mode = (arr) => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            let bestStr = 1;
-            let currStr = 1;
-            let bestElm = temp[0];
-            let currElm = temp[0];
-            for (let i = 1; i < temp.length; i++) {
-                if (temp[i - 1] !== temp[i]) {
-                    if (currStr > bestStr) {
-                        bestStr = currStr;
-                        bestElm = currElm;
-                    }
-                    currStr = 0;
-                    currElm = temp[i];
+            if (arr.length === 0)
+                return NaN;
+            const frequency = new Map();
+            let maxFreq = 0;
+            let result = arr[0];
+            for (let i = 0; i < arr.length; i++) {
+                const val = arr[i];
+                const count = (frequency.get(val) || 0) + 1;
+                frequency.set(val, count);
+                if (count > maxFreq) {
+                    maxFreq = count;
+                    result = val;
                 }
-                currStr++;
             }
-            if (currStr > bestStr) {
-                return currElm;
-            }
-            else {
-                return bestElm;
-            }
+            return result;
         };
         stat.mul = (arr) => {
             let result = 1;
@@ -11231,19 +11379,26 @@ var Chalkboard;
             console.log(Chalkboard.stat.toString(arr));
         };
         stat.quartile = (arr, type) => {
-            const temp = arr.slice().sort(function (a, b) {
-                return a - b;
-            });
-            const lo = temp.slice(0, Math.floor(temp.length / 2));
-            const hi = temp.slice(Math.ceil(temp.length / 2));
+            if (arr.length === 0)
+                return NaN;
+            const copy = arr.slice();
+            if (type === "Q2")
+                return Chalkboard.stat.median(copy);
+            const mid = Math.floor(copy.length / 2);
             if (type === "Q1") {
-                return Chalkboard.stat.median(lo);
-            }
-            else if (type === "Q2") {
-                return Chalkboard.stat.median(arr);
+                const q1Mid = Math.floor(mid / 2);
+                if (mid % 2 === 1)
+                    return $quickselect(copy, q1Mid);
+                else
+                    return ($quickselect(copy, q1Mid - 1) + $quickselect(copy, q1Mid)) / 2.0;
             }
             else if (type === "Q3") {
-                return Chalkboard.stat.median(hi);
+                const offset = copy.length % 2 === 0 ? mid : mid + 1;
+                const q3Mid = offset + Math.floor(mid / 2);
+                if (mid % 2 === 1)
+                    return $quickselect(copy, q3Mid);
+                else
+                    return ($quickselect(copy, q3Mid - 1) + $quickselect(copy, q3Mid)) / 2.0;
             }
             else {
                 throw new TypeError('Parameter "type" must be "Q1", "Q2", or "Q3".');
@@ -11499,6 +11654,11 @@ var Chalkboard;
             }
         };
         stat.unique = (arr) => {
+            if (arr.length === 0)
+                return [];
+            const firstType = typeof arr[0];
+            if (firstType === "number" || firstType === "string" || firstType === "boolean")
+                return Array.from(new Set(arr));
             const stableStringify = (obj) => {
                 const replacer = (key, value) => {
                     if (value !== null && typeof value === "object" && !Array.isArray(value)) {
@@ -11512,52 +11672,13 @@ var Chalkboard;
                 };
                 return JSON.stringify(obj, replacer);
             };
-            const getKey = (item) => {
-                let typePrefix;
-                let valuePart;
-                if (item === null) {
-                    typePrefix = "null";
-                    valuePart = stableStringify(item);
-                }
-                else if (Array.isArray(item)) {
-                    typePrefix = "array";
-                    valuePart = stableStringify(item);
-                }
-                else if (typeof item === "object") {
-                    typePrefix = "object";
-                    valuePart = stableStringify(item);
-                }
-                else if (typeof item === "number") {
-                    typePrefix = "number";
-                    if (Number.isNaN(item)) {
-                        valuePart = "NaN";
-                    }
-                    else if (item === Infinity) {
-                        valuePart = "Infinity";
-                    }
-                    else if (item === -Infinity) {
-                        valuePart = "-Infinity";
-                    }
-                    else {
-                        valuePart = JSON.stringify(item);
-                    }
-                }
-                else if (typeof item === "undefined") {
-                    typePrefix = "undefined";
-                    valuePart = "";
-                }
-                else {
-                    typePrefix = typeof item;
-                    valuePart = stableStringify(item);
-                }
-                return `${typePrefix}:${valuePart}`;
-            };
             const seen = new Map();
             for (const item of arr) {
-                const key = getKey(item);
-                if (!seen.has(key)) {
+                const typePrefix = item === null ? "null" : typeof item;
+                const valuePart = (typePrefix === "undefined" || Number.isNaN(item)) ? "" : stableStringify(item);
+                const key = `${typePrefix}:${valuePart}`;
+                if (!seen.has(key))
                     seen.set(key, item);
-                }
             }
             return Array.from(seen.values());
         };
@@ -12175,32 +12296,26 @@ var Chalkboard;
         };
         trig.arctan = (rad) => {
             const series = (x) => {
-                let sum = x;
-                let term = x;
-                const xx = x * x;
-                for (let n = 1; n < 20; n++) {
-                    term *= -xx;
-                    sum += term / (2 * n + 1);
-                }
-                return sum;
+                const x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2, x31 = x29 * x2, x33 = x31 * x2, x35 = x33 * x2, x37 = x35 * x2, x39 = x37 * x2;
+                return x - x3 / 3 + x5 / 5 - x7 / 7 + x9 / 9 - x11 / 11 + x13 / 13 - x15 / 15 + x17 / 17 - x19 / 19 + x21 / 21 - x23 / 23 + x25 / 25 - x27 / 27 + x29 / 29 - x31 / 31 + x33 / 33 - x35 / 35 + x37 / 37 - x39 / 39;
             };
-            if (rad === 0) {
+            if (rad === 0)
                 return 0;
-            }
-            if (!Number.isFinite(rad)) {
+            if (!Number.isFinite(rad))
                 return rad > 0 ? Chalkboard.PI(0.5) : Chalkboard.PI(-0.5);
-            }
             const sign = rad < 0 ? -1 : 1;
             const x = Math.abs(rad);
+            const SQRT2_MINUS_1 = Math.SQRT2 - 1, SQRT2_PLUS_1 = Math.SQRT2 + 1;
+            const PI_FOURTH = Math.PI * 0.25, PI_HALF = Math.PI * 0.5;
             let result;
-            if (x <= Chalkboard.real.sqrt(2) - 1) {
+            if (x <= SQRT2_MINUS_1) {
                 result = series(x);
             }
-            else if (x <= Chalkboard.real.sqrt(2) + 1) {
-                result = Chalkboard.PI(0.25) + series((x - 1) / (x + 1));
+            else if (x <= SQRT2_PLUS_1) {
+                result = PI_FOURTH + series((x - 1) / (x + 1));
             }
             else {
-                result = Chalkboard.PI(0.5) - series(1 / x);
+                result = PI_HALF - series(1 / x);
             }
             return sign * result;
         };

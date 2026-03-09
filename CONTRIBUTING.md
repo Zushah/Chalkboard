@@ -2,7 +2,7 @@
 Thank you for considering to contribute to Chalkboard! This document provides guidelines and instructions for doing so.
 
 ## How to Ask Questions
-If you have a question about how to use Chalkboard, please first check the [`README.md`](https://www.github.com/Zushah/Chalkboard/blob/main/README.md), or the [`./examples/`](https://www.github.com/Zushah/Chalkboard/tree/main/examples), or above all, the [documentation](https://zushah.github.io/Chalkboard). If you still need help, feel free to open an [issue](https://www.github.com/Zushah/Chalkboard/issues) with the `question` label.
+If you have a question about how to use Chalkboard, please first check the [`README.md`](https://www.github.com/Zushah/Chalkboard/blob/main/README.md) file, or the [`./examples/`](https://www.github.com/Zushah/Chalkboard/tree/main/examples) folder, or above all, the [documentation](https://zushah.github.io/Chalkboard) website. If you still need help, feel free to open an [issue](https://www.github.com/Zushah/Chalkboard/issues) with the `question` label.
 
 ## How to Report Bugs
 If you find a bug in the source code, please open an [issue](https://www.github.com/Zushah/Chalkboard/issues). 
@@ -32,4 +32,4 @@ If you want to contribute to Chalkboard, you will need to set it up locally.
 7. In the pull request's description, thoroughly explain your contribution and, if applicable, link it to relevant open issues.
 
 ## License
-By contributing to Chalkboard, you agree that your contributions will be licensed under the [Mozzila Public License 2.0](https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
+By contributing to Chalkboard, you agree that your contributions will be licensed under the [Mozilla Public License 2.0](https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md).

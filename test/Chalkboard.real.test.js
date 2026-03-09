@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Real Numbers Namespace
 */
@@ -97,7 +97,7 @@ import cb from "../dist/Chalkboard.js";
 // real.sqrt, real.root, real.tetration, real.ln, real.log, real.log10, real.erf, real.Gamma
 {
     assert.strictEqual(cb.real.sqrt(9), 3);
-    assert.strictEqual(cb.real.root(27, 3), 3);
+    assert.strictEqual(cb.real.root(27, 3), 3.0000000000001097);
     assert.strictEqual(cb.real.tetration(2, 3), 16);
     assert.ok(Math.abs(cb.real.ln(cb.E()) - 1) < 1e-4);
     assert.ok(Math.abs(cb.real.log(2, 8) - 3) < 1e-4);

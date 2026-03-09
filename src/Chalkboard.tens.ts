@@ -1,7 +1,7 @@
 /*
     Chalkboard - Tensor Namespace
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
 */
 /*
     This Source Code Form is subject to the terms of the

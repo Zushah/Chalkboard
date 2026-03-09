@@ -1,6 +1,24 @@
 # Chalkboard changelog
 All notable changes of every update of Chalkboard are recorded in this file.
 
+## [v3.0.1 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.1) - 03/09/2026
+The sixteenth release of Chalkboard.
+Commits: [`v3.0.0...v3.0.1`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.0...v3.0.1)
+- Changed both `calc.fxdx` (5829.1ms → 0.7ms for a thousand calls) and `calc.fxydxdy` (495242.4ms → 2.1ms for a thousand calls) to be over 99.99% faster by using the adaptive-step Simpson's method instead of the fixed-step Simpson's/Riemann's method.
+- Changed `real.ln` to be about 99.91% faster (911.5ms → 0.8ms for a thousand calls) by using a Taylor series with range reduction.
+- Changed `numb.divisors` to be about 99.40% faster (1317.5ms → 7.9ms for a thousand calls of the divisors of one million) by using the trial division algorithm.
+- Changed `stat.unique` to be about 90.59% faster (99794.9ms → 9392.2ms for a thousand calls on a million-element array) by using a fast-path for arrays with primitive types.
+- Changed `stat.median` to be about 74.78% faster (31883.1ms → 8039.8ms for a thousand calls on a million-element array) and `stat.quartile` to be about 83.24% faster (43875.6ms → 7354.8ms for a thousand calls on a million-element array) by using the quickselect algorithm for sorting.
+- Changed `stat.mode` to be about 71.33% faster (27550.3ms → 7897.9ms for a thousand calls on a million-element array) by using a frequency map algorithm.
+- Changed `numb.primeArr` to be about 44.05% faster (672.4ms → 376.2ms for a hundred thousand calls of the primes among the first thousand numbers) and `numb.compositeArr` to be about 38.48% faster (1742.1ms → 1071.8ms for a hundred thousand calls of the composites among the first thousand numbers) by using the Sieve of Eratosthenes.
+- Changed `trig.arctan` to be about 21.20% faster (36.8ms → 29.0ms for a million calls) by manually unrolling the Maclaurin series.
+- Changed `E` to use a Maclaurin series and changed `PI` to use the Gauss-Legendre algorithm.
+- Changed `numb.combination` to use binomial coefficients instead of factorials and `numb.permutation` to use iterated multiplication instead of factorials.
+- Changed `real.pow` to use the binary exponentiation algorithm instead of native Math functions, `real.sqrt` to use the Newton-Raphson method instead of native Math functions, and `real.tetration` to use iterated exponentation instead of recursive calls.
+- Changed `real.discriminant`, `real.quadratic`, and `real.quadraticFormula` to use `"standard"` and `"vertex"` as the options for their `form` parameter rather than `"stan"` and `"vert"`.
+- Changed `real.erf` and `real.Gamma` to use Chalkboard functions instead of native Math functions.
+- Fixed `real.root` which was doing unnecessary calculations for 0 and not doing anything for odd roots of negative numbers.
+
 ## [v3.0.0 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.0) - 03/02/2026
 The fifteenth release of Chalkboard.
 Commits: [`v2.4.0...v3.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.4.0...v3.0.0)
@@ -266,7 +284,7 @@ Commits: [`v1.3.1...v1.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed `calc.frdt` to also work for three-dimensional (instead of only two-dimensional) vector fields and parametric curves.
 - Fixed `calc.dfrdt` which didn't work due to a slight misspelling in an `if()` statement.
 
-## [v1.3.1 Heaviside Patch](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) - 12/04/2023
+## [v1.3.1 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) - 12/04/2023
 The fifth release of Chalkboard.
 Commits: [`v1.3.0...v1.3.1`](https://www.github.com/Zushah/Chalkboard/compare/v1.3.0...v1.3.1)
 - Fixed `matr.translator` which was misspelled.

@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Quaternion Namespace
 */
@@ -35,7 +35,7 @@ import cb from "../dist/Chalkboard.js";
     const q = cb.quat.init(1, 2, 3, 4);
     const p = cb.quat.init(5, 6, 7, 8);
     assert.deepStrictEqual(cb.quat.constrain(q, [0, 1]), { a: 1, b: 1, c: 1, d: 1 });
-    assert.strictEqual(cb.quat.dist(q, p), 7.999999999999998);
+    assert.strictEqual(cb.quat.dist(q, p), 8);
     assert.strictEqual(cb.quat.distsq(q, p), 64);
     assert.strictEqual(cb.quat.mag(q), 5.477225575051661);
     assert.deepStrictEqual(cb.quat.magset(q, 10), { a: 1.8257418583505536, b: 3.651483716701107, c: 5.47722557505166, d: 7.302967433402214 });
@@ -59,9 +59,9 @@ import cb from "../dist/Chalkboard.js";
     const axis = cb.vect.init(0, 1, 0);
     const rad = cb.PI(1/2);
     const q = cb.quat.fromAxis(axis, rad);
-    assert.deepStrictEqual(q, { a: 0.7071067811865474, b: 0, c: 0.7071067811865475, d: 0 });
+    assert.deepStrictEqual(q, { a: 0.7071067811865474, b: 0, c: 0.7071067811865476, d: 0 });
     const v = cb.vect.init(1, 0, 1);
-    assert.deepStrictEqual(cb.quat.toRotation(q, v), { x: 0.9999999999999999, y: 0, z: -1.0000000000000002 });
+    assert.deepStrictEqual(cb.quat.toRotation(q, v), { x: 0.9999999999999997, y: 0, z: -1.0000000000000004 });
 }
 
 // quat.isApproxEqual, quat.isEqual, quat.isInverse, quat.isNormalized, quat.isZero

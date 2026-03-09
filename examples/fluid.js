@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Fluid Flow
 */
@@ -15,7 +15,7 @@ canvas.height = window.innerHeight;
 const cb = Chalkboard;
 
 // Vector field defined as F(x, y) = (y, -x/(1 + x^2)^2)
-// adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
+// adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://www.github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
 const F = cb.vect.field((x, y) => y, (x, y) => -x / ((1 + x*x) * (1 + x*x)));
 
 // Basic particle system to simulate the fluid flow
@@ -75,10 +75,10 @@ for (let i = 0; i < 500; i++) {
 // Draw everything
 ctx.fillStyle = "black";
 ctx.fillRect(0, 0, canvas.width, canvas.height);
-function main() {
+const main = () => {
     for (let i = 0; i < particles.length; i++) {
         particles[i].draw();
     }
     window.requestAnimationFrame(main);
-}
+};
 main();

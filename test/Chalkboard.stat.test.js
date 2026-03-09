@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Statistics Namespace
 */
@@ -62,7 +62,7 @@ import cb from "../dist/Chalkboard.js";
 // stat.mean, stat.meanMoving, stat.meanWeighted, stat.median, stat.mode, stat.variance, stat.deviation, stat.error, stat.mad, stat.zscored
 {
     assert.strictEqual(cb.stat.mean([1, 2, 3, 4, 5]), 3);
-    assert.strictEqual(cb.stat.mean([1, 2, 3, 4, 5], "geometric"), 2.6051710846973517);
+    assert.strictEqual(cb.stat.mean([1, 2, 3, 4, 5], "geometric"), 2.605171084697329);
     assert.strictEqual(cb.stat.mean([1, 2, 3, 4, 5], "harmonic"), 2.18978102189781);
     assert.deepStrictEqual(cb.stat.meanMoving([1, 2, 3, 4], 2), [1.5, 2.5, 3.5]);
     assert.strictEqual(cb.stat.meanWeighted([10, 20, 30], [1, 2, 3]), 23.333333333333332);
@@ -140,9 +140,9 @@ import cb from "../dist/Chalkboard.js";
 {
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 1], [1, 3], [2, 5]], "linear"), 2), 5);
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 0], [1, 1], [2, 4]], "polynomial", 2), 3), 9);
-    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 2], [2, 16], [3, 54]], "power"), 2), 15.999999999999998);
+    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 2], [2, 16], [3, 54]], "power"), 2), 16);
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 2], [1, 2*cb.E(0.5)], [2, 2*cb.E()]], "exponential"), 1), 3.2974425414002564);
-    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 1], [2, 1+2*cb.real.ln(2)], [4, 1+2*cb.real.ln(4)]], "logarithmic"), 2), 2.386294361119929);
+    assert.strictEqual(cb.real.val(cb.stat.regression([[1, 1], [2, 1+2*cb.real.ln(2)], [4, 1+2*cb.real.ln(4)]], "logarithmic"), 2), 2.386294361119891);
 }
 
 // stat.print, stat.toString, stat.toObject, stat.toMatrix, stat.toVector, stat.toTensor, stat.toSet

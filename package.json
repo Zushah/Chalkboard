@@ -1,6 +1,6 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "A library at the intersection of pure mathematics and web engineering.",
   "main": "./dist/Chalkboard.js",
   "types": "./dist/Chalkboard.d.ts",
@@ -34,7 +34,6 @@
     "complex",
     "diffeq",
     "geometry",
-    "khan-academy",
     "mathematics",
     "matrix",
     "number",

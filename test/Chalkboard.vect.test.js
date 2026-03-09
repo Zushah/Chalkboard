@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Vector Namespace
 */
@@ -29,7 +29,7 @@ import cb from "../dist/Chalkboard.js";
 {
     const v = cb.vect.init(3, -4);
     assert.deepStrictEqual(cb.vect.absolute(v), { x: 3, y: 4 });
-    assert.strictEqual(cb.vect.ang(v), -0.9272952180016123);
+    assert.strictEqual(cb.vect.ang(v), -0.9272952180016122);
     const vcopy = cb.vect.copy(v); assert.strictEqual(vcopy.x, 3); assert.strictEqual(vcopy.y, -4);
     assert.strictEqual(cb.vect.dimension(v), 2);
     assert.deepStrictEqual(cb.vect.empty(2), { x: null, y: null });
@@ -47,7 +47,7 @@ import cb from "../dist/Chalkboard.js";
     const w = cb.vect.init(1, 0);
     assert.strictEqual(cb.vect.angBetween(v, w), 0.9272952180016123);
     assert.deepStrictEqual(cb.vect.constrain(v, [0, 1]), { x: 1, y: 1 });
-    assert.strictEqual(cb.vect.dist(v, w), 4.472135954999579);
+    assert.strictEqual(cb.vect.dist(v, w), 4.47213595499958);
     assert.strictEqual(cb.vect.distsq(v, w), 20);
     assert.strictEqual(cb.vect.mag(v), 5);
     assert.deepStrictEqual(cb.vect.magset(v, 10), { x: 6, y: 8 });

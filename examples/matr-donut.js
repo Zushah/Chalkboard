@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Matrix Donut
 */
@@ -28,7 +28,7 @@ for (let u = 0; u < cb.PI(2); u += cb.PI(1/16)) {
 // Make the donut rotate with a rotation matrix
 const R = cb.matr.rotator(0.01, 0.01, 0.01);
 
-function main() {
+const main = () => {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.save();
@@ -47,5 +47,5 @@ function main() {
         points[i] = cb.matr.mulVector(R, points[i]); // Multiply the rotation matrix with the points' vectors
     }
     window.requestAnimationFrame(main);
-}
+};
 main();

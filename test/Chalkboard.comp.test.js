@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Complex Numbers Namespace
 */
@@ -20,7 +20,7 @@ import cb from "../dist/Chalkboard.js";
 {
     const z = cb.comp.init(1, -2);
     assert.deepStrictEqual(cb.comp.absolute(z), { a: 1, b: 2 });
-    assert.strictEqual(cb.comp.arg(z), -1.1071487177940906);
+    assert.strictEqual(cb.comp.arg(z), -1.1071487177940904);
     assert.deepStrictEqual(cb.comp.conjugate(z), { a: 1, b: 2 });
     assert.strictEqual(cb.comp.Im(z), -2);
     assert.deepStrictEqual(cb.comp.invert(z), { a: 0.2, b: 0.4 });
@@ -60,9 +60,9 @@ import cb from "../dist/Chalkboard.js";
 // comp.pow, comp.root, comp.rotate, comp.sq, comp.sqrt
 {
     const z = cb.comp.init(1, -2);
-    assert.deepStrictEqual(cb.comp.pow(z, 3), { a: -10.999999999999996, b: 2.000000000000008 });
-    assert.deepStrictEqual(cb.comp.root(z, 4), [{ a: 1.1763010734364077, b: -0.33416248421026523 }, { a: 0.33416248421026506, b: 1.1763010734364074 }, { a: -1.1763010734364077, b: 0.33416248421026484 }, { a: -0.33416248421014944, b: -1.1763010734363915 }]);
-    assert.deepStrictEqual(cb.comp.rotate(z, 1), { a: 2.2232442754839328, b: -0.23913362692838322 });
+    assert.deepStrictEqual(cb.comp.pow(z, 3), { a: -11, b: 2 });
+    assert.deepStrictEqual(cb.comp.root(z, 4), [{ a: 1.176301073436407, b: -0.334162484210265 }, { a: 0.3341624842102647, b: 1.1763010734364072 }, { a: -1.1763010734364077, b: 0.33416248421026384 }, { a: -0.3341624842101442, b: -1.1763010734363923 }]);
+    assert.deepStrictEqual(cb.comp.rotate(z, 1), { a: 2.2232442754839328, b: -0.23913362692838272 });
     assert.deepStrictEqual(cb.comp.sq(z), { a: -3, b: -4 });
     assert.deepStrictEqual(cb.comp.sqrt(z), { a: 1.272019649514069, b: -0.7861513777574234 });
 }
@@ -70,12 +70,12 @@ import cb from "../dist/Chalkboard.js";
 // comp.cos, comp.Euler, comp.exp, comp.ln, comp.sin, comp.tan
 {
     const z = cb.comp.init(1, -2);
-    assert.deepStrictEqual(cb.comp.cos(z), { a: 2.0327230070196642, b: 3.051897799151799 });
+    assert.deepStrictEqual(cb.comp.cos(z), { a: 2.032723007019665, b: 3.0518977991517997 });
     assert.deepStrictEqual(cb.comp.Euler(1), { a: 0.5403023058681397, b: 0.8414709848078965 });
     assert.deepStrictEqual(cb.comp.exp(z), { a: -1.1312043837568135, b: -2.4717266720048188 });
-    assert.deepStrictEqual(cb.comp.ln(z), { a: 0.8047189562170279, b: -1.1071487177940906 });
-    assert.deepStrictEqual(cb.comp.sin(z), { a: 3.1657785132161664, b: -1.9596010414216047 });
-    assert.deepStrictEqual(cb.comp.tan(z), { a: 0.033812826079896635, b: -1.0147936161466335 });
+    assert.deepStrictEqual(cb.comp.ln(z), { a: 0.8047189562170503, b: -1.1071487177940904 });
+    assert.deepStrictEqual(cb.comp.sin(z), { a: 3.1657785132161678, b: -1.9596010414216056 });
+    assert.deepStrictEqual(cb.comp.tan(z), { a: 0.03381282607989668, b: -1.0147936161466335 });
 }
 
 // comp.isApproxEqual, comp.isEqual, comp.isInverse, comp.isNormalized, comp.isZero
@@ -130,11 +130,11 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.comp.parse("(2x + 3y)^4", { returnAST: true }), { type: "pow", base: { type: "add", left: { type: "mul", left: { type: "num", value: 2 }, right: { type: "var", name: "x" } }, right: { type: "mul", left: { type: "num", value: 3 }, right: { type: "var", name: "y" } } }, exponent: { type: "num", value: 4 } });
     assert.deepStrictEqual(cb.comp.parse("(2x + 3y)^4", { values: { x: 4, y: 5 } }), { a: 279841, b: 0 });
 
-    assert.deepStrictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))"), { a: -23.063091995275588, b: 18.66119676638661 });
-    assert.strictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { returnLaTeX: true }), "-23.063091995275588 + 18.66119676638661i");
+    assert.deepStrictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))"), { a: -23.063091995275606, b: 18.661196766386624 });
+    assert.strictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { returnLaTeX: true }), "-23.063091995275606 + 18.661196766386624i");
     assert.strictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { returnJSON: true }), '{"type":"add","left":{"type":"add","left":{"type":"add","left":{"type":"complex","a":3,"b":0},"right":{"type":"func","name":"sin","args":[{"type":"complex","a":0,"b":4}]}},"right":{"type":"mul","left":{"type":"func","name":"exp","args":[{"type":"complex","a":0,"b":2}]},"right":{"type":"complex","a":3,"b":0}}},"right":{"type":"mul","left":{"type":"func","name":"exp","args":[{"type":"complex","a":0,"b":2}]},"right":{"type":"func","name":"sin","args":[{"type":"complex","a":0,"b":4}]}}}');
     assert.deepStrictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { returnAST: true }), { type: "add", left: { type: "add", left: { type: "add", left: { type: "complex", a: 3, b: 0 }, right: { type: "func", name: "sin", args: [ { type: "complex", a: 0, b: 4 } ] } }, right: { type: "mul", left: { type: "func", name: "exp", args: [ { type: "complex", a: 0, b: 2 } ] }, right: { type: "complex", a: 3, b: 0 } } }, right: { type: "mul", left: { type: "func", name: "exp", args: [ { type: "complex", a: 0, b: 2 } ] }, right: { type: "func", name: "sin", args: [ { type: "complex", a: 0, b: 4 } ] } } });
-    assert.deepStrictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { values: { z: cb.comp.init(1, 2) } }), { a: -23.063091995275588, b: 18.66119676638661 });
+    assert.deepStrictEqual(cb.comp.parse("(1 + exp(2i))(3 + sin(4i))", { values: { z: cb.comp.init(1, 2) } }), { a: -23.063091995275606, b: 18.661196766386624 });
 
     assert.deepStrictEqual(cb.comp.parse("5 * 2 + 3 * 4i + i + 6 - 7i"), { a: 16, b: 6 });
     assert.strictEqual(cb.comp.parse("5 * 2 + 3 * 4i + i + 6 - 7i", { returnLaTeX: true }), "16 + 6i");

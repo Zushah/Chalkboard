@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Mandelbrot Set
 */
@@ -18,7 +18,7 @@ const cb = Chalkboard;
 // The Mandelbrot set will be rendered using an ImageData object from the Canvas API
 const imageData = ctx.createImageData(canvas.width, canvas.height);
 const pixels = imageData.data;
-function main() {
+const main = () => {
     for (let x = 0; x < canvas.width; x++) {
         for (let y = 0; y < canvas.height; y++) {
             // The complex numbers from the Mandelbrot set's definition (see: lines 32-34), z and c
@@ -51,5 +51,5 @@ function main() {
         }
     }
     ctx.putImageData(imageData, 0, 0);
-}
+};
 main();

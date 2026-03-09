@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Modular Multiplication Mandala
 */
@@ -23,7 +23,7 @@ let multiplier = 0;
 const primeNodes = [];
 for (let i = 0; i < numPoints; i++) primeNodes[i] = cb.numb.isPrime(i);
 
-function main() {
+const main = () => {
     ctx.fillStyle = "white";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -77,5 +77,5 @@ function main() {
     }
 
     window.requestAnimationFrame(main);
-}
+};
 main();

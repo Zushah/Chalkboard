@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.0 Euler
-    Released March 2nd, 2026
+    Version 3.0.1 Euler
+    Released March 9th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Quaternion Donut
 */
@@ -25,7 +25,7 @@ for (let u = 0; u < cb.PI(2); u += cb.PI(1/16)) {
     }
 }
 let theta = 0;
-function main() {
+const main = () => {
     ctx.fillStyle = "black";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -48,5 +48,5 @@ function main() {
     }
     ctx.restore();
     window.requestAnimationFrame(main);
-}
+};
 main();

@@ -66,7 +66,7 @@ declare namespace Chalkboard {
     const PI: (coefficient?: number) => number;
     const REGISTER: (name: string, func: (...x: number[]) => number) => void;
     const REGISTRY: Record<string, (...x: number[]) => number>;
-    const VERSION: "3.0.0";
+    const VERSION: "3.0.1";
     const VERSIONALIAS: "Euler";
 }
 declare namespace Chalkboard {
@@ -830,7 +830,7 @@ declare namespace Chalkboard {
         const compose: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const define: (...rule: (((...x: number[]) => number) | ((...x: number[]) => number)[])[]) => ChalkboardFunction;
         const Dirac: (num: number, edge?: number, scl?: number) => number;
-        const discriminant: (a: number, b: number, c: number, form?: "stan" | "vert") => number;
+        const discriminant: (a: number, b: number, c: number, form?: "standard" | "vertex") => number;
         const div: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
         const erf: (num: number) => number;
         const Gamma: (num: number) => number;
@@ -857,8 +857,8 @@ declare namespace Chalkboard {
         const polynomial: (...coeffs: number[]) => ChalkboardFunction;
         const pow: (base: number | ChalkboardFunction, num: number) => number | ChalkboardFunction;
         const qerp: (p1: [number, number], p2: [number, number], p3: [number, number], t: number) => number;
-        const quadratic: (a: number, b: number, c: number, form?: "stan" | "vert") => ChalkboardFunction;
-        const quadraticFormula: (a: number, b: number, c: number, form?: "stan" | "vert") => [number, number];
+        const quadratic: (a: number, b: number, c: number, form?: "standard" | "vertex") => ChalkboardFunction;
+        const quadraticFormula: (a: number, b: number, c: number, form?: "standard" | "vertex") => [number, number];
         const ramp: (num: number, edge?: number, scl?: number) => number;
         const randomPolynomial: (degree: number, inf?: number, sup?: number) => ChalkboardFunction;
         const reciprocate: (func: ChalkboardFunction) => ChalkboardFunction;
