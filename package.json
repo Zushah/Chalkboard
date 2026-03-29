@@ -14,6 +14,8 @@
   "scripts": {
     "build": "tsc --project ./tsconfig.json && terser ./dist/Chalkboard.js --compress --mangle --output ./dist/Chalkboard.min.js",
     "test": "node --test ./test/*.test.js",
+    "dev": "npm run build && npm run test",
+    "restore": "git restore dist",
     "docs": "typedoc --options ./typedoc.json --favicon ./assets/favicon.png"
   },
   "devDependencies": {
