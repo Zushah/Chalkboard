@@ -604,14 +604,7 @@ const plotSeries = (normalized, origin, color, lineWidth) => {
 };
 
 const plotScatterSeries = (normalized, origin, color, pointRadius = 3) => {
-    const count = normalized.xUnits.length;
-    const xs = [];
-    const ys = [];
-    for (let i = 0; i < count; i++) {
-        xs.push(normalized.xUnits[i] + count / 2);
-        ys.push(normalized.yUnits[i] + count / 2);
-    }
-    cb.plot.scatterplot(xs, ys, {
+    cb.plot.scatterplot(normalized.xUnits, normalized.yUnits, {
         x: origin.x,
         y: origin.y,
         size: 100,

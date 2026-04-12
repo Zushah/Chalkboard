@@ -79,8 +79,8 @@ cb.CONTEXT = "globalThis.__ChalkboardPlotContext";
 
 // plot.barplot, plot.lineplot, plot.scatterplot
 {
-    assert.deepStrictEqual(cb.plot.barplot([1, 2, 2, 3, 4], [2, 3, 4], { x: 150, y: 100, size: 100, fillStyle: "white", strokeStyle: "black", lineWidth: 1, context: ctx }), [[1, 2, 2], [3], [4]]);
-    assert.deepStrictEqual(cb.plot.lineplot([1, 2, 2, 3, 4], [2, 3, 4], { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 1, context: ctx }), [[1, 2, 2], [3], [4]]);
+    assert.deepStrictEqual(cb.plot.barplot([1, 2, 2, 3, 4], [1, 2, 3, 4], { x: 150, y: 100, size: 100, fillStyle: "white", strokeStyle: "black", lineWidth: 1, context: ctx }), [[1, 2, 2], [3], [4]]);
+    assert.deepStrictEqual(cb.plot.lineplot([1, 2, 2, 3, 4], [1, 2, 3, 4], { x: 150, y: 100, size: 100, strokeStyle: "black", lineWidth: 1, context: ctx }), [[1, 2, 2], [3], [4]]);
     assert.deepStrictEqual(cb.plot.scatterplot([1, 2], [3, 4], { x: 150, y: 100, size: 100, fillStyle: "black", lineWidth: 2, context: ctx }), [[1, 3], [2, 4]]);
 }
 

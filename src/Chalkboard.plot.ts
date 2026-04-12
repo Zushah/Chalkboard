@@ -72,8 +72,16 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                _config.context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * _config.size) / _config.size);
+                const currentY = -Chalkboard.calc.autocorrelation(func, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                } else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
             }
             _config.context.stroke();
@@ -114,25 +122,19 @@ namespace Chalkboard {
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.fillStyle = _config.fillStyle;
             const bars = [];
-            for (let i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    bars.push(Chalkboard.stat.lt(arr, bins[0], true));
-                } else if (i === bins.length) {
-                    bars.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                } else {
-                    bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
+            for (let i = 1; i < bins.length; i++) {
+                bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], i === 1, true));
             }
             const counts = [];
             for (let i = 0; i < bars.length; i++) {
                 counts.push(bars[i].length);
             }
-            let x = 0;
-            const width = counts.length / (2 * _config.size);
             for (let i = 0; i < counts.length; i++) {
-                _config.context.fillRect(x - width, 0, 1 / _config.size, -counts[i] / _config.size);
-                _config.context.strokeRect(x - width, 0, 1 / _config.size, -counts[i] / _config.size);
-                x += 1 / _config.size;
+                const xStart = bins[i] / _config.size;
+                const xEnd = bins[i + 1] / _config.size;
+                const dynamicWidth = xEnd - xStart;
+                _config.context.fillRect(xStart, 0, dynamicWidth, -counts[i] / _config.size);
+                _config.context.strokeRect(xStart, 0, dynamicWidth, -counts[i] / _config.size);
             }
             _config.context.restore();
             return bars;
@@ -206,8 +208,16 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                _config.context.lineTo(i, -Chalkboard.calc.convolution(func1, func2, i * _config.size) / _config.size);
+                const currentY = -Chalkboard.calc.convolution(func1, func2, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                } else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.convolution(func1, func2, i)]);
             }
             _config.context.stroke();
@@ -250,8 +260,16 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                _config.context.lineTo(i, -Chalkboard.calc.correlation(func1, func2, i * _config.size) / _config.size);
+                const currentY = -Chalkboard.calc.correlation(func1, func2, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                } else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.correlation(func1, func2, i)]);
             }
             _config.context.stroke();
@@ -298,28 +316,58 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
+            let previousX: number | null = null;
             if (func.type === "scalar2d" && !_config.isInverse && !_config.isPolar) {
                 const f = func.rule as (x: number) => number;
                 for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo(i, -f(i * _config.size) / _config.size);
+                    const currentY = -f(i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, f(i)]);
                 }
             } else if (func.type === "scalar2d" && _config.isInverse && !_config.isPolar) {
                 const f = func.rule as (y: number) => number;
                 for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo(f(i * _config.size) / _config.size, -i);
+                    const currentX = f(i * _config.size) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([f(i), i]);
                 }
             } else if (func.type === "scalar2d" && !_config.isInverse && _config.isPolar) {
                 const r = func.rule as (theta: number) => number;
                 for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo((r(i * _config.size) / _config.size) * Chalkboard.trig.cos(i * _config.size), (-r(i * _config.size) / _config.size) * Chalkboard.trig.sin(i * _config.size));
+                    const currentX = (r(i * _config.size) / _config.size) * Chalkboard.trig.cos(i * _config.size);
+                    const currentY = (-r(i * _config.size) / _config.size) * Chalkboard.trig.sin(i * _config.size);
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, r(i)]);
                 }
             } else if (func.type === "curve2d") {
                 const f = func.rule as [(t: number) => number, (t: number) => number];
                 for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo(f[0](i * _config.size) / _config.size, -f[1](i * _config.size) / _config.size);
+                    const currentX = f[0](i * _config.size) / _config.size;
+                    const currentY = -f[1](i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousY = currentY;
                     data.push([f[0](i), f[1](i)]);
                 }
             } else if (func.field === "comp") {
@@ -381,12 +429,28 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
+            let previousX: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
                 if (func.type === "scalar2d" && !_config.isInverse) {
-                    _config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * _config.size) / _config.size);
+                    const currentY = -Chalkboard.calc.dfdx(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.dfdx(func, i) as number]);
                 } else if (func.type === "scalar2d" && _config.isInverse) {
-                    _config.context.lineTo((Chalkboard.calc.dfdx(func, i * _config.size) as number) / _config.size, -i);
+                    const currentX = (Chalkboard.calc.dfdx(func, i * _config.size) as number) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.dfdx(func, i) as number, i]);
                 }
             }
@@ -430,12 +494,28 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
+            let previousX: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
                 if (func.type === "scalar2d" && !_config.isInverse) {
-                    _config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * _config.size) / _config.size);
+                    const currentY = -Chalkboard.calc.d2fdx2(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.d2fdx2(func, i) as number]);
                 } else if (func.type === "scalar2d" && _config.isInverse) {
-                    _config.context.lineTo((Chalkboard.calc.d2fdx2(func, i * _config.size) as number) / _config.size, -i);
+                    const currentX = (Chalkboard.calc.d2fdx2(func, i * _config.size) as number) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.d2fdx2(func, i) as number, i]);
                 }
             }
@@ -523,8 +603,16 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                _config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * _config.size) / _config.size);
+                const currentY = -Chalkboard.calc.Fourier(func, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                } else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.Fourier(func, i)]);
             }
             _config.context.stroke();
@@ -567,12 +655,28 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
+            let previousX: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
                 if (func.type === "scalar2d" && !_config.isInverse) {
-                    _config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * _config.size) / _config.size);
+                    const currentY = -Chalkboard.calc.fxdx(func, 0, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.fxdx(func, 0, i) as number]);
                 } else if (func.type === "scalar2d" && _config.isInverse) {
-                    _config.context.lineTo((Chalkboard.calc.fxdx(func, 0, i * _config.size) as number) / _config.size, -i);
+                    const currentX = (Chalkboard.calc.fxdx(func, 0, i * _config.size) as number) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    } else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.fxdx(func, 0, i) as number, i]);
                 }
             }
@@ -614,14 +718,28 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             if (_config.domain[0] >= 0) {
                 for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size);
+                    const currentY = -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             } else {
                 for (let i = 0; i <= _config.domain[1] / _config.size; i += _config.res) {
-                    _config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size);
+                    const currentY = -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    } else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             }
@@ -660,23 +778,20 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             const verts = [];
-            for (let i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    verts.push(Chalkboard.stat.lt(arr, bins[0], true));
-                } else if (i === bins.length) {
-                    verts.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                } else {
-                    verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
+            for (let i = 1; i < bins.length; i++) {
+                verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], i === 1, true));
             }
             const counts = [];
             for (let i = 0; i < verts.length; i++) {
                 counts.push(verts[i].length);
             }
             _config.context.beginPath();
+            _config.context.moveTo(bins[0] / _config.size, 0);
             for (let i = 0; i < counts.length; i++) {
-                _config.context.lineTo(i / _config.size, -counts[i] / _config.size);
+                const midX = (bins[i] + bins[i + 1]) / 2 / _config.size;
+                _config.context.lineTo(midX, -counts[i] / _config.size);
             }
+            _config.context.lineTo(bins[bins.length - 1] / _config.size, 0);
             _config.context.stroke();
             _config.context.restore();
             return verts;
@@ -898,7 +1013,7 @@ namespace Chalkboard {
             if (arr1.length === arr2.length) {
                 for (let i = 0; i < arr1.length; i++) {
                     _config.context.beginPath();
-                    _config.context.ellipse(arr1[i] / _config.size - arr1.length / (2 * _config.size), -arr2[i] / _config.size + arr1.length / (2 * _config.size), _config.lineWidth, _config.lineWidth, 0, 0, Chalkboard.PI(2));
+                    _config.context.ellipse(arr1[i] / _config.size, -arr2[i] / _config.size, _config.lineWidth, _config.lineWidth, 0, 0, Chalkboard.PI(2));
                     _config.context.fill();
                     data.push([arr1[i], arr2[i]]);
                 }
@@ -944,8 +1059,16 @@ namespace Chalkboard {
             _config.context.lineWidth = _config.lineWidth;
             _config.context.strokeStyle = _config.strokeStyle;
             _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY: number | null = null;
             for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
-                _config.context.lineTo(i, -Chalkboard.calc.Taylor(func, i * _config.size, n, a) / _config.size);
+                const currentY = -Chalkboard.calc.Taylor(func, i * _config.size, n, a) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                } else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
             }
             _config.context.stroke();
