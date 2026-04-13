@@ -1,6 +1,6 @@
 # Chalkboard design
 
-This document describes the architectural design of Chalkboard as implemented in `./src/`, exercised by `./test/`, and demonstrated by `./examples/`. It complements `./README.md`, the generated API [website](https://zushah.github.io/Chalkboard/), and the JOSS `./paper/` by focusing on structure, public abstractions, subsystem boundaries, and maintainability tradeoffs.
+This document describes the architectural design of Chalkboard as implemented in `./src/`, exercised by `./test/`, and demonstrated by `./examples/`. It complements `./README.md`, the generated API [website](https://zushah.github.io/Chalkboard/), and the `./paper/` by focusing on structure, public abstractions, subsystem boundaries, and maintainability tradeoffs.
 
 ## Table of Contents
 1. [Overview](#1-overview)
@@ -94,7 +94,7 @@ The architectural layers of Chalkboard are summarized below.
 | Core contracts | Shared types and globals defined centrally in `./src/Chalkboard.ts` |
 | Computational layer | Algebraic, symbolic, numerical, statistical, geometric, and conversion functionality |
 | Visualization layer | `Canvas2D`-oriented plotting in `plot` and selected geometry rendering helpers |
-| Verification and communication | Tests, TypeDoc-generated documentation website, examples, and the JOSS paper |
+| Verification and communication | Tests, TypeDoc-generated documentation website, examples, and the JOSE paper |
 
 ### A. Namespace-Based Library Organization
 
@@ -238,7 +238,7 @@ Chalkboard's communication stack has four layers:
 - `./README.md` introduces the library and its major capabilities
 - TypeDoc-generated API documentation website provides function-level reference material
 - `./examples/` demonstrate end-to-end workflows
-- the JOSS `./paper/` explains the software's research motivation and positioning
+- the JOSE `./paper/` explains the software's broader academic motivation and positioning
 
 This `./DESIGN.md` file fills the gap between those materials by describing how the system is put together and what guarantees or limits a reviewer should infer from that design.
 
@@ -262,7 +262,7 @@ JSDoc comments in the source are used to generate the documentation website thro
 
 ### D. Example Coverage and Research Communication
 
-The examples in the `./examples/` folder provide demonstrable evidence that Chalkboard's namespaces work correctly across algebraic, numerical, statistical, and visual workflows. The JOSS paper then explains why these capabilities matter in a research and development context. Furthermore, there is also one concrete data-producing example for an ODE solver convergence study (`./examples/ode-study.js`), which shows how Chalkboard can be used for research-relevant analyses where the browser is a destination rather than a barrier.
+The examples in the `./examples/` folder provide demonstrable evidence that Chalkboard's namespaces work correctly across algebraic, numerical, statistical, and visual workflows. The JOSE paper then explains why these capabilities matter in a pedagogical and development context. Furthermore, there is also one concrete data-producing example for an ODE solver convergence study (`./examples/ode-study.js`), which shows how Chalkboard can be used for serious analyses where the browser is a destination rather than a barrier.
 
 ## 8. Maintainability Assessment
 
@@ -309,4 +309,4 @@ Future changes should preserve the architectural principles above:
 - add or update tests against the built distribution for public behavior changes
 - update JSDoc, examples, and this document when the public design meaningfully changes
 
-Following these rules keeps Chalkboard broad, but still reviewable and maintainable for research-facing utilization.
+Following these rules keeps Chalkboard broad, but still reviewable and maintainable for real-world utilization.

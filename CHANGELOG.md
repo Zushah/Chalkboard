@@ -1,6 +1,13 @@
 # Chalkboard changelog
 All notable changes of every update of Chalkboard are recorded in this file.
 
+## [v3.0.2 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.2) - 04/13/2026
+The seventeenth release of Chalkboard.
+Commits: [`v3.0.1...v3.0.2`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.1...v3.0.2)
+- Fixed `plot.autocorrelation`, `plot.convolution`, `plot.correlation`, `plot.definition`, `plot.dfdx`, `plot.d2fdx2`, `plot.Fourier`, `plot.fxdx`, `plot.Laplace`, and `plot.Taylor` which had no mechanism to properly handle discontinuities and singularities.
+- Fixed `plot.barplot` and `plot.lineplot` which were using a single fixed width for all of their bins.
+- Fixed `plot.scatterplot` which was offsetting points downwards and leftwards based on the number of points.
+
 ## [v3.0.1 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.1) - 03/09/2026
 The sixteenth release of Chalkboard.
 Commits: [`v3.0.0...v3.0.1`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.0...v3.0.1)

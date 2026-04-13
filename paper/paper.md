@@ -75,7 +75,7 @@ At present, Chalkboard has primarily been used to create self-contained interact
 
 # Availability
 
-The source code for Chalkboard is openly available at its [repository on GitHub](https://www.github.com/Zushah/Chalkboard) under the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
+Chalkboard is free and open-source at its [repository on GitHub](https://www.github.com/Zushah/Chalkboard) under the [Mozilla Public License 2.0](https://www.mozilla.org/en-US/MPL/2.0/).
 
 # Acknowledgements
 

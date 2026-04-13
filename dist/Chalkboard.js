@@ -1,3 +1,17 @@
+/*
+    Chalkboard
+    Version 3.0.2 Euler
+    Released April 13th, 2026
+    Authored by Zushah: https://www.github.com/Zushah
+    Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
+    Repository: https://www.github.com/Zushah/Chalkboard
+    Website: https://zushah.github.io/Chalkboard
+*/
+/*
+    This Source Code Form is subject to the terms of the
+    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
+    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
+*/
 "use strict";
 var Chalkboard;
 (function (Chalkboard) {
@@ -8258,205 +8272,218 @@ var Chalkboard;
                 throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
             }
         };
+        const $ = (config, defaults) => {
+            const ctx = (config?.context ?? defaults?.context ?? getContext());
+            const configMap = (config ?? {});
+            const defaultsMap = { x: ctx.canvas.width / 2, y: ctx.canvas.height / 2, size: 1, strokeStyle: "black", lineWidth: 2, context: ctx, ...(defaults ?? {}) };
+            const merged = {};
+            const keys = new Set([...Object.keys(defaultsMap), ...Object.keys(configMap)]);
+            for (const key of keys)
+                merged[key] = configMap[key] ?? defaultsMap[key];
+            merged.context = ctx;
+            merged.x = (merged.x ?? ctx.canvas.width / 2);
+            merged.y = (merged.y ?? ctx.canvas.height / 2);
+            merged.size = (merged.size ?? 1) / 100;
+            return merged;
+        };
         plot.autocorrelation = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.autocorrelation(func, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                const currentY = -Chalkboard.calc.autocorrelation(func, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                }
+                else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.autocorrelation(func, i)]);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.barplot = (arr, bins, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "white",
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || getContext()
-            }).size /= 100;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.fillStyle = config.fillStyle;
+            const _config = $(config, { fillStyle: "white" });
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.fillStyle = _config.fillStyle;
             const bars = [];
-            for (let i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    bars.push(Chalkboard.stat.lt(arr, bins[0], true));
-                }
-                else if (i === bins.length) {
-                    bars.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                }
-                else {
-                    bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
+            for (let i = 1; i < bins.length; i++) {
+                bars.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], i === 1, true));
             }
             const counts = [];
             for (let i = 0; i < bars.length; i++) {
                 counts.push(bars[i].length);
             }
-            let x = 0;
-            const width = counts.length / (2 * config.size);
             for (let i = 0; i < counts.length; i++) {
-                config.context.fillRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
-                config.context.strokeRect(x - width, 0, 1 / config.size, -counts[i] / config.size);
-                x += 1 / config.size;
+                const xStart = bins[i] / _config.size;
+                const xEnd = bins[i + 1] / _config.size;
+                const dynamicWidth = xEnd - xStart;
+                _config.context.fillRect(xStart, 0, dynamicWidth, -counts[i] / _config.size);
+                _config.context.strokeRect(xStart, 0, dynamicWidth, -counts[i] / _config.size);
             }
-            config.context.restore();
+            _config.context.restore();
             return bars;
         };
         plot.comp = (comp, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || getContext()
-            }).size /= 100;
-            config.context.fillStyle = config.fillStyle;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.beginPath();
-            config.context.ellipse(comp.a / config.size, -comp.b / config.size, config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
-            config.context.fill();
-            config.context.restore();
+            const _config = $(config, { fillStyle: "black", lineWidth: 5 });
+            _config.context.fillStyle = _config.fillStyle;
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.beginPath();
+            _config.context.ellipse(comp.a / _config.size, -comp.b / _config.size, _config.lineWidth, _config.lineWidth, 0, 0, Chalkboard.PI(2));
+            _config.context.fill();
+            _config.context.restore();
             return [[comp.a], [comp.b]];
         };
         plot.convolution = (func1, func2, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.convolution(func1, func2, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                const currentY = -Chalkboard.calc.convolution(func1, func2, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                }
+                else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.convolution(func1, func2, i)]);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.correlation = (func1, func2, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.correlation(func1, func2, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                const currentY = -Chalkboard.calc.correlation(func1, func2, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                }
+                else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.correlation(func1, func2, i)]);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.definition = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || (func.field === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]),
-                res: config.res || (func.field === "comp" ? 5 : 1),
-                isInverse: config.isInverse || false,
-                isPolar: config.isPolar || false,
-                context: config.context || getContext()
-            }).size /= 100;
-            const xdomain = config.domain;
-            const xydomain = config.domain;
+            const _config = $(config, { domain: (func.field === "comp" ? [[-10, 10], [-10, 10]] : [-10, 10]), res: (func.field === "comp" ? 5 : 1), isInverse: false, isPolar: false });
+            const xdomain = _config.domain;
+            const xydomain = _config.domain;
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            if (func.type === "scalar2d" && !config.isInverse && !config.isPolar) {
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            let previousX = null;
+            if (func.type === "scalar2d" && !_config.isInverse && !_config.isPolar) {
                 const f = func.rule;
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
-                    config.context.lineTo(i, -f(i * config.size) / config.size);
+                for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
+                    const currentY = -f(i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, f(i)]);
                 }
             }
-            else if (func.type === "scalar2d" && config.isInverse && !config.isPolar) {
+            else if (func.type === "scalar2d" && _config.isInverse && !_config.isPolar) {
                 const f = func.rule;
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
-                    config.context.lineTo(f(i * config.size) / config.size, -i);
+                for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
+                    const currentX = f(i * _config.size) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([f(i), i]);
                 }
             }
-            else if (func.type === "scalar2d" && !config.isInverse && config.isPolar) {
+            else if (func.type === "scalar2d" && !_config.isInverse && _config.isPolar) {
                 const r = func.rule;
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
-                    config.context.lineTo((r(i * config.size) / config.size) * Chalkboard.trig.cos(i * config.size), (-r(i * config.size) / config.size) * Chalkboard.trig.sin(i * config.size));
+                for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
+                    const currentX = (r(i * _config.size) / _config.size) * Chalkboard.trig.cos(i * _config.size);
+                    const currentY = (-r(i * _config.size) / _config.size) * Chalkboard.trig.sin(i * _config.size);
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, r(i)]);
                 }
             }
             else if (func.type === "curve2d") {
                 const f = func.rule;
-                for (let i = xdomain[0] / config.size; i <= xdomain[1] / config.size; i += config.res) {
-                    config.context.lineTo(f[0](i * config.size) / config.size, -f[1](i * config.size) / config.size);
+                for (let i = xdomain[0] / _config.size; i <= xdomain[1] / _config.size; i += _config.res) {
+                    const currentX = f[0](i * _config.size) / _config.size;
+                    const currentY = -f[1](i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousY = currentY;
                     data.push([f[0](i), f[1](i)]);
                 }
             }
             else if (func.field === "comp") {
                 const f = func.rule;
-                for (let i = xydomain[0][0] / config.size; i <= xydomain[0][1] / config.size; i += config.res) {
-                    for (let j = xydomain[1][0] / config.size; j <= xydomain[1][1] / config.size; j += config.res) {
-                        const z = Chalkboard.comp.init(f[0](i * config.size, j * config.size) / config.size, f[1](i * config.size, j * config.size) / config.size);
+                for (let i = xydomain[0][0] / _config.size; i <= xydomain[0][1] / _config.size; i += _config.res) {
+                    for (let j = xydomain[1][0] / _config.size; j <= xydomain[1][1] / _config.size; j += _config.res) {
+                        const z = Chalkboard.comp.init(f[0](i * _config.size, j * _config.size) / _config.size, f[1](i * _config.size, j * _config.size) / _config.size);
                         if (z.a === 0 && z.b === 0) {
-                            config.context.fillStyle = "rgb(0, 0, 0)";
+                            _config.context.fillStyle = "rgb(0, 0, 0)";
                         }
                         else if (z.a === Infinity && z.b === Infinity) {
-                            config.context.fillStyle = "rgb(255, 255, 255)";
+                            _config.context.fillStyle = "rgb(255, 255, 255)";
                         }
                         else {
-                            config.context.fillStyle =
-                                "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
+                            _config.context.fillStyle = "hsl(" + Chalkboard.trig.toDeg(Chalkboard.comp.arg(z)) + ", 100%, " + (Chalkboard.trig.tanh(Chalkboard.comp.mag(z) / Chalkboard.real.pow(10, 20)) + 0.5) * 100 + "%)";
                         }
-                        config.context.fillRect(i, j, 5, 5);
+                        _config.context.fillRect(i, j, 5, 5);
                         data.push([f[0](i, j), f[1](i, j)]);
                     }
                 }
@@ -8464,475 +8491,441 @@ var Chalkboard;
             else {
                 throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a property "type" of "expl", "inve", "pola", "curv", or "comp".');
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.dfdx = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                isInverse: config.isInverse || false,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "scalar2d" && !config.isInverse) {
-                    config.context.lineTo(i, -Chalkboard.calc.dfdx(func, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            let previousX = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                if (func.type === "scalar2d" && !_config.isInverse) {
+                    const currentY = -Chalkboard.calc.dfdx(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.dfdx(func, i)]);
                 }
-                else if (func.type === "scalar2d" && config.isInverse) {
-                    config.context.lineTo(Chalkboard.calc.dfdx(func, i * config.size) / config.size, -i);
+                else if (func.type === "scalar2d" && _config.isInverse) {
+                    const currentX = Chalkboard.calc.dfdx(func, i * _config.size) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.dfdx(func, i), i]);
                 }
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.d2fdx2 = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                isInverse: config.isInverse || false,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "scalar2d" && !config.isInverse) {
-                    config.context.lineTo(i, -Chalkboard.calc.d2fdx2(func, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            let previousX = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                if (func.type === "scalar2d" && !_config.isInverse) {
+                    const currentY = -Chalkboard.calc.d2fdx2(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.d2fdx2(func, i)]);
                 }
-                else if (func.type === "scalar2d" && config.isInverse) {
-                    config.context.lineTo(Chalkboard.calc.d2fdx2(func, i * config.size) / config.size, -i);
+                else if (func.type === "scalar2d" && _config.isInverse) {
+                    const currentX = Chalkboard.calc.d2fdx2(func, i * _config.size) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.d2fdx2(func, i), i]);
                 }
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.field = (vectfield, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [[-10, 10], [-10, 10]],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [[-10, 10], [-10, 10]], res: 25 });
             const data = [];
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            for (let i = config.domain[0][0] / config.size; i <= config.domain[0][1] / config.size; i += config.res) {
-                for (let j = config.domain[1][0] / config.size; j <= config.domain[1][1] / config.size; j += config.res) {
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            for (let i = _config.domain[0][0] / _config.size; i <= _config.domain[0][1] / _config.size; i += _config.res) {
+                for (let j = _config.domain[1][0] / _config.size; j <= _config.domain[1][1] / _config.size; j += _config.res) {
                     const v = Chalkboard.vect.fromField(vectfield, Chalkboard.vect.init(i, j));
-                    config.context.beginPath();
-                    config.context.moveTo(i, j);
-                    config.context.lineTo(i + v.x, j + v.y);
-                    config.context.stroke();
+                    _config.context.beginPath();
+                    _config.context.moveTo(i, j);
+                    _config.context.lineTo(i + v.x, j + v.y);
+                    _config.context.stroke();
                     data.push([i + v.x, j + v.y]);
                 }
             }
-            config.context.restore();
+            _config.context.restore();
             return data;
         };
         plot.Fourier = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.Fourier(func, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                const currentY = -Chalkboard.calc.Fourier(func, i * _config.size) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                }
+                else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.Fourier(func, i)]);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.fxdx = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                isInverse: config.isInverse || false,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                if (func.type === "scalar2d" && !config.isInverse) {
-                    config.context.lineTo(i, -Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            let previousX = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                if (func.type === "scalar2d" && !_config.isInverse) {
+                    const currentY = -Chalkboard.calc.fxdx(func, 0, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.fxdx(func, 0, i)]);
                 }
-                else if (func.type === "scalar2d" && config.isInverse) {
-                    config.context.lineTo(Chalkboard.calc.fxdx(func, 0, i * config.size) / config.size, -i);
+                else if (func.type === "scalar2d" && _config.isInverse) {
+                    const currentX = Chalkboard.calc.fxdx(func, 0, i * _config.size) / _config.size;
+                    const currentY = -i;
+                    if (previousX === null || Math.abs(currentX - previousX) > discontinuityThreshold) {
+                        _config.context.moveTo(currentX, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(currentX, currentY);
+                    }
+                    previousX = currentX;
                     data.push([Chalkboard.calc.fxdx(func, 0, i), i]);
                 }
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.Laplace = (func, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            if (config.domain[0] >= 0) {
-                for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            if (_config.domain[0] >= 0) {
+                for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                    const currentY = -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             }
             else {
-                for (let i = 0; i <= config.domain[1] / config.size; i += config.res) {
-                    config.context.lineTo(i, -Chalkboard.calc.Laplace(func, i * config.size) / config.size);
+                for (let i = 0; i <= _config.domain[1] / _config.size; i += _config.res) {
+                    const currentY = -Chalkboard.calc.Laplace(func, i * _config.size) / _config.size;
+                    if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                        _config.context.moveTo(i, currentY);
+                    }
+                    else {
+                        _config.context.lineTo(i, currentY);
+                    }
+                    previousY = currentY;
                     data.push([i, Chalkboard.calc.Laplace(func, i)]);
                 }
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.lineplot = (arr, bins, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || getContext()
-            }).size /= 100;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
+            const _config = $(config);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
             const verts = [];
-            for (let i = 0; i < bins.length; i++) {
-                if (i === 0) {
-                    verts.push(Chalkboard.stat.lt(arr, bins[0], true));
-                }
-                else if (i === bins.length) {
-                    verts.push(Chalkboard.stat.gt(arr, bins[bins.length - 1], true));
-                }
-                else {
-                    verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], false, true));
-                }
+            for (let i = 1; i < bins.length; i++) {
+                verts.push(Chalkboard.stat.ineq(arr, bins[i - 1], bins[i], i === 1, true));
             }
             const counts = [];
             for (let i = 0; i < verts.length; i++) {
                 counts.push(verts[i].length);
             }
-            config.context.beginPath();
+            _config.context.beginPath();
+            _config.context.moveTo(bins[0] / _config.size, 0);
             for (let i = 0; i < counts.length; i++) {
-                config.context.lineTo(i / config.size, -counts[i] / config.size);
+                const midX = (bins[i] + bins[i + 1]) / 2 / _config.size;
+                _config.context.lineTo(midX, -counts[i] / _config.size);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.lineTo(bins[bins.length - 1] / _config.size, 0);
+            _config.context.stroke();
+            _config.context.restore();
             return verts;
         };
         plot.matr = (matr, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                context: config.context || getContext()
-            }).size /= 100;
-            for (let i = config.domain[0]; i <= config.domain[1]; i++) {
+            const _config = $(config, { domain: [-10, 10] });
+            for (let i = _config.domain[0]; i <= _config.domain[1]; i++) {
                 Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
-                    x: config.x,
-                    y: config.y + (i / config.size) * matr[1][1],
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
+                    x: _config.x,
+                    y: _config.y + (i / _config.size) * matr[1][1],
+                    size: _config.size,
+                    strokeStyle: _config.strokeStyle,
+                    lineWidth: _config.lineWidth / 4,
+                    context: _config.context
                 });
                 Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), {
-                    x: config.x,
-                    y: config.y + (i / config.size) * matr[1][1],
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
+                    x: _config.x,
+                    y: _config.y + (i / _config.size) * matr[1][1],
+                    size: _config.size,
+                    strokeStyle: _config.strokeStyle,
+                    lineWidth: _config.lineWidth / 4,
+                    context: _config.context
                 });
                 Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), {
-                    x: config.x + (i / config.size) * matr[0][0],
-                    y: config.y,
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
+                    x: _config.x + (i / _config.size) * matr[0][0],
+                    y: _config.y,
+                    size: _config.size,
+                    strokeStyle: _config.strokeStyle,
+                    lineWidth: _config.lineWidth / 4,
+                    context: _config.context
                 });
                 Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), {
-                    x: config.x + (i / config.size) * matr[0][0],
-                    y: config.y,
-                    size: config.size,
-                    strokeStyle: config.strokeStyle,
-                    lineWidth: config.lineWidth / 4,
-                    context: config.context
+                    x: _config.x + (i / _config.size) * matr[0][0],
+                    y: _config.y,
+                    size: _config.size,
+                    strokeStyle: _config.strokeStyle,
+                    lineWidth: _config.lineWidth / 4,
+                    context: _config.context
                 });
             }
-            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), config);
-            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), _config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][0], -matr[1][0]), _config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][1], matr[1][1]), _config);
+            Chalkboard.plot.vect(Chalkboard.vect.init(-matr[0][1], -matr[1][1]), _config);
             return matr;
         };
         plot.ode = (sol, config = {}) => {
+            const _config = $(config, { phase: false, i: 0, j: 1 });
             if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y))
                 throw new Error(`Chalkboard.plot.ode: Parameter "sol" must have properties "t" and "y" as arrays.`);
             if (sol.t.length !== sol.y.length || sol.t.length === 0)
                 throw new Error(`Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
-            const ctx = config.context || getContext();
-            const x0 = (config.x ?? ctx.canvas.width / 2);
-            const y0 = (config.y ?? ctx.canvas.height / 2);
-            const strokeStyle = config.strokeStyle ?? "black";
-            const lineWidth = config.lineWidth ?? 2;
-            const size = ((config.size ?? 1) / 100);
-            const phase = config.phase ?? false;
-            const i = config.i ?? 0;
-            const j = config.j ?? 1;
             const dim = sol.y[0].length;
-            if (!Number.isInteger(i) || i < 0)
+            if (!Number.isInteger(_config.i) || _config.i < 0)
                 throw new Error(`Chalkboard.plot.ode: "i" must be an integer >= 0.`);
-            if (i >= dim)
+            if (_config.i >= dim)
                 throw new Error(`Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
-            if (phase) {
-                if (!Number.isInteger(j) || j < 0)
+            if (_config.phase) {
+                if (!Number.isInteger(_config.j) || _config.j < 0)
                     throw new Error(`Chalkboard.plot.ode: "j" must be an integer >= 0.`);
-                if (j >= dim)
+                if (_config.j >= dim)
                     throw new Error(`Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
-                if (i === j)
+                if (_config.i === _config.j)
                     throw new Error(`Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
             }
             const data = [];
-            ctx.save();
-            ctx.translate(x0, y0);
-            ctx.lineWidth = lineWidth;
-            ctx.strokeStyle = strokeStyle;
-            ctx.beginPath();
-            if (!phase) {
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            if (!_config.phase) {
                 for (let k = 0; k < sol.t.length; k++) {
-                    const X = sol.t[k] / size;
-                    const Y = -sol.y[k][i] / size;
+                    const X = sol.t[k] / _config.size;
+                    const Y = -sol.y[k][_config.i] / _config.size;
                     if (k === 0)
-                        ctx.moveTo(X, Y);
+                        _config.context.moveTo(X, Y);
                     else
-                        ctx.lineTo(X, Y);
-                    data.push([sol.t[k], sol.y[k][i]]);
+                        _config.context.lineTo(X, Y);
+                    data.push([sol.t[k], sol.y[k][_config.i]]);
                 }
             }
             else {
                 for (let k = 0; k < sol.y.length; k++) {
-                    const X = sol.y[k][i] / size;
-                    const Y = -sol.y[k][j] / size;
+                    const X = sol.y[k][_config.i] / _config.size;
+                    const Y = -sol.y[k][_config.j] / _config.size;
                     if (k === 0)
-                        ctx.moveTo(X, Y);
+                        _config.context.moveTo(X, Y);
                     else
-                        ctx.lineTo(X, Y);
-                    data.push([sol.y[k][i], sol.y[k][j]]);
+                        _config.context.lineTo(X, Y);
+                    data.push([sol.y[k][_config.i], sol.y[k][_config.j]]);
                 }
             }
-            ctx.stroke();
-            ctx.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.rOplane = (config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config);
             const cw = getContext().canvas.width;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth / 4;
-            config.context.beginPath();
-            for (let i = 0; i <= (config.size * cw) / 2; i++) {
-                config.context.ellipse(0, 0, i / config.size, i / config.size, 0, 0, Chalkboard.PI(2));
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.lineWidth = _config.lineWidth / 4;
+            _config.context.beginPath();
+            for (let i = 0; i <= (_config.size * cw) / 2; i++) {
+                _config.context.ellipse(0, 0, i / _config.size, i / _config.size, 0, 0, Chalkboard.PI(2));
             }
-            config.context.stroke();
-            config.context.lineWidth = config.lineWidth;
-            config.context.beginPath();
-            config.context.moveTo(-config.x, 0);
-            config.context.lineTo(cw - config.x, 0);
-            config.context.stroke();
-            config.context.beginPath();
-            config.context.moveTo(0, -config.y);
-            config.context.lineTo(0, cw - config.y);
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.beginPath();
+            _config.context.moveTo(-_config.x, 0);
+            _config.context.lineTo(cw - _config.x, 0);
+            _config.context.stroke();
+            _config.context.beginPath();
+            _config.context.moveTo(0, -_config.y);
+            _config.context.lineTo(0, cw - _config.y);
+            _config.context.stroke();
+            _config.context.restore();
         };
         plot.scatterplot = (arr1, arr2, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                fillStyle: config.fillStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { fillStyle: "black", lineWidth: 5 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.fillStyle = config.fillStyle;
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.fillStyle = _config.fillStyle;
             if (arr1.length === arr2.length) {
                 for (let i = 0; i < arr1.length; i++) {
-                    config.context.beginPath();
-                    config.context.ellipse(arr1[i] / config.size - arr1.length / (2 * config.size), -arr2[i] / config.size + arr1.length / (2 * config.size), config.lineWidth, config.lineWidth, 0, 0, Chalkboard.PI(2));
-                    config.context.fill();
+                    _config.context.beginPath();
+                    _config.context.ellipse(arr1[i] / _config.size, -arr2[i] / _config.size, _config.lineWidth, _config.lineWidth, 0, 0, Chalkboard.PI(2));
+                    _config.context.fill();
                     data.push([arr1[i], arr2[i]]);
                 }
             }
-            config.context.restore();
+            _config.context.restore();
             return data;
         };
         plot.Taylor = (func, n, a, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                domain: config.domain || [-10, 10],
-                res: config.res || 25,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.lineWidth = config.lineWidth;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.beginPath();
-            for (let i = config.domain[0] / config.size; i <= config.domain[1] / config.size; i += config.res) {
-                config.context.lineTo(i, -Chalkboard.calc.Taylor(func, i * config.size, n, a) / config.size);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.beginPath();
+            const discontinuityThreshold = (_config.context.canvas.height / _config.size) * 1.5;
+            let previousY = null;
+            for (let i = _config.domain[0] / _config.size; i <= _config.domain[1] / _config.size; i += _config.res) {
+                const currentY = -Chalkboard.calc.Taylor(func, i * _config.size, n, a) / _config.size;
+                if (previousY === null || Math.abs(currentY - previousY) > discontinuityThreshold) {
+                    _config.context.moveTo(i, currentY);
+                }
+                else {
+                    _config.context.lineTo(i, currentY);
+                }
+                previousY = currentY;
                 data.push([i, Chalkboard.calc.Taylor(func, i, n, a)]);
             }
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.restore();
             return data;
         };
         plot.vect = (vect, config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 5,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config, { lineWidth: 5 });
             vect = vect;
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.beginPath();
-            config.context.moveTo(0, 0);
-            config.context.lineTo(vect.x / config.size, -vect.y / config.size);
-            config.context.stroke();
-            config.context.restore();
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.beginPath();
+            _config.context.moveTo(0, 0);
+            _config.context.lineTo(vect.x / _config.size, -vect.y / _config.size);
+            _config.context.stroke();
+            _config.context.restore();
             return [[vect.x], [vect.y]];
         };
         plot.xyplane = (config) => {
-            (config = {
-                x: (config = config || {}).x || getContext().canvas.width / 2,
-                y: config.y || getContext().canvas.height / 2,
-                size: config.size || 1,
-                strokeStyle: config.strokeStyle || "black",
-                lineWidth: config.lineWidth || 2,
-                context: config.context || getContext()
-            }).size /= 100;
+            const _config = $(config);
             const cw = getContext().canvas.width;
-            config.context.save();
-            config.context.translate(config.x, config.y);
-            config.context.strokeStyle = config.strokeStyle;
-            config.context.lineWidth = config.lineWidth / 4;
-            config.context.beginPath();
-            for (let i = Math.floor(-config.x / config.size); i <= (cw - config.x) / config.size; i++) {
-                config.context.moveTo(i / config.size, -config.y);
-                config.context.lineTo(i / config.size, cw - config.y);
+            _config.context.save();
+            _config.context.translate(_config.x, _config.y);
+            _config.context.strokeStyle = _config.strokeStyle;
+            _config.context.lineWidth = _config.lineWidth / 4;
+            _config.context.beginPath();
+            for (let i = Math.floor(-_config.x / _config.size); i <= (cw - _config.x) / _config.size; i++) {
+                _config.context.moveTo(i / _config.size, -_config.y);
+                _config.context.lineTo(i / _config.size, cw - _config.y);
             }
-            config.context.stroke();
-            config.context.beginPath();
-            for (let i = Math.floor(-config.y / config.size); i <= (cw - config.y) / config.size; i++) {
-                config.context.moveTo(-config.x, i / config.size);
-                config.context.lineTo(cw - config.x, i / config.size);
+            _config.context.stroke();
+            _config.context.beginPath();
+            for (let i = Math.floor(-_config.y / _config.size); i <= (cw - _config.y) / _config.size; i++) {
+                _config.context.moveTo(-_config.x, i / _config.size);
+                _config.context.lineTo(cw - _config.x, i / _config.size);
             }
-            config.context.stroke();
-            config.context.lineWidth = config.lineWidth;
-            config.context.beginPath();
-            config.context.moveTo(-config.x, 0);
-            config.context.lineTo(cw - config.x, 0);
-            config.context.stroke();
-            config.context.beginPath();
-            config.context.moveTo(0, -config.y);
-            config.context.lineTo(0, cw - config.y);
-            config.context.stroke();
-            config.context.restore();
+            _config.context.stroke();
+            _config.context.lineWidth = _config.lineWidth;
+            _config.context.beginPath();
+            _config.context.moveTo(-_config.x, 0);
+            _config.context.lineTo(cw - _config.x, 0);
+            _config.context.stroke();
+            _config.context.beginPath();
+            _config.context.moveTo(0, -_config.y);
+            _config.context.lineTo(0, cw - _config.y);
+            _config.context.stroke();
+            _config.context.restore();
         };
     })(plot = Chalkboard.plot || (Chalkboard.plot = {}));
 })(Chalkboard || (Chalkboard = {}));

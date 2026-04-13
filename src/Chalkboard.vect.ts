@@ -1,7 +1,7 @@
 /*
     Chalkboard - Vector Namespace
-    Version 3.0.1 Euler
-    Released March 9th, 2026
+    Version 3.0.2 Euler
+    Released April 13th, 2026
 */
 /*
     This Source Code Form is subject to the terms of the
