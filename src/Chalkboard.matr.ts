@@ -155,8 +155,8 @@ namespace Chalkboard {
         export const addKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
                 return Chalkboard.matr.add(
-                    Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))),
-                    Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2)
+                    Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr2))),
+                    Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr1)), matr2)
                 );
             } else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" that are square.');
@@ -976,7 +976,7 @@ namespace Chalkboard {
             } else if (size === 3) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 1, 2 / 3], [1 / 3, 2 / 3, 1 / 1]);
             } else if (size === 4) {
-                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 1, 3 / 4, 1 / 1]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 2, 3 / 4, 1 / 1]);
             } else {
                 const result = Chalkboard.matr.init();
                 for (let i = 0; i < size; i++) {
