@@ -48,8 +48,11 @@ import cb from "../dist/Chalkboard.js";
 // numb.isApproxEqual, numb.isRational, numb.constrain, numb.change, numb.roundTo, numb.map, numb.convert, numb.toBinary, numb.toDecimal, numb.toFraction, numb.toHexadecimal, numb.toOctal, numb.Euler
 {
     assert.strictEqual(cb.numb.isApproxEqual(0.1 + 0.2, 0.3, 1e-12), true);
+    assert.strictEqual(cb.numb.isRational(0), true);
     assert.strictEqual(cb.numb.isRational(3 / 4), true);
+    assert.strictEqual(cb.numb.isRational(-1.25), true);
     assert.strictEqual(cb.numb.isRational(cb.PI()), false);
+    assert.strictEqual(cb.numb.isRational(Infinity), false);
     assert.strictEqual(cb.numb.constrain(5, [0, 10]), 5);
     assert.strictEqual(cb.numb.constrain(-1, [0, 10]), 0);
     assert.strictEqual(cb.numb.constrain(11, [0, 10]), 10);

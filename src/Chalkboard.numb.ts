@@ -562,43 +562,28 @@ namespace Chalkboard {
          * const no = Chalkboard.numb.isRational(Chalkboard.PI()); // Returns false
          */
         export const isRational = (num: number, tolerance: number = 1e-8): boolean => {
-            if (typeof num !== "number" || !Number.isFinite(num) || typeof tolerance !== "number" || !Number.isFinite(tolerance) || tolerance <= 0) return false;
-            const mult = num / Chalkboard.PI();
-            if (mult !== 0 && Math.abs(Math.round(mult) - mult) < tolerance) {
-                return false;
-            }
-            if (num > 0) {
-                const ln = Math.log(num);
-                if (ln !== 0 && Math.abs(Math.round(ln) - ln) < tolerance) {
-                    const pow = Chalkboard.E(Math.round(ln));
-                    if (Math.abs(num - pow) < tolerance) {
-                        return false;
-                    }
-                }
-            }
-            for (let d = 2; d <= 6; d++) {
-                const fract = Chalkboard.PI() / d;
-                for (let n = 1; n <= d * 4; n++) {
-                    if (n % d !== 0) {
-                        if (Math.abs(num - n * fract) < tolerance) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            const knownIrrationals = [Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.real.sqrt(Chalkboard.PI()), Chalkboard.E(), Chalkboard.PI(), Chalkboard.E(2)];
+            if (typeof num !== "number" || typeof tolerance !== "number" || !Number.isFinite(num) || !Number.isFinite(tolerance) || tolerance <= 0) return false;
+            if (num === 0 || Number.isInteger(num)) return true;
+            const isClose = (a: number, b: number): boolean => Math.abs(a - b) <= tolerance;
+            const isSquare = (n: number): boolean => Number.isInteger(Chalkboard.real.sqrt(n));
+            const knownIrrationals: number[] = [Chalkboard.PI(), Chalkboard.E(), Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.E(2), Chalkboard.real.sqrt(Chalkboard.PI())];
             for (let i = 2; i <= 100; i++) {
-                if (Number.isInteger(Math.sqrt(i))) continue;
-                knownIrrationals.push(Chalkboard.real.sqrt(i));
+                if (!isSquare(i)) knownIrrationals.push(Chalkboard.real.sqrt(i));
             }
-            for (const irr of knownIrrationals) {
-                if (Math.abs(num - irr) < tolerance) {
-                    return false;
+            for (const irrational of knownIrrationals) {
+                if (isClose(num, irrational)) return false;
+                if (irrational !== 0) {
+                    const ratio = num / irrational;
+                    for (let d = 1; d <= 32; d++) {
+                        const n = Math.round(ratio * d);
+                        if (n !== 0 && Math.abs(n) <= 256 && isClose(ratio, n / d)) return false;
+                    }
                 }
             }
             try {
                 const [n, d] = Chalkboard.numb.toFraction(num, tolerance);
-                return (Math.abs(num - n / d) < tolerance) && (Math.abs(d) <= 100000);
+                if (d === 0 || Math.abs(d) > 100000) return false;
+                return isClose(num, n / d);
             } catch {
                 return false;
             }
@@ -848,7 +833,14 @@ namespace Chalkboard {
         export const roundTo = (num: number, positionalIndex: number): number => {
             if (!Number.isFinite(num) || !Number.isFinite(positionalIndex)) throw new Error(`Chalkboard.numb.roundTo: Parameters must be finite numbers.`);
             if (positionalIndex === 0) throw new Error(`Chalkboard.numb.roundTo: Parameter "positionalIndex" must be non-zero.`);
-            return Math.round(num / positionalIndex) * positionalIndex;
+            const step = Math.abs(positionalIndex);
+            const quotient = num / step;
+            const epsilon = Number.EPSILON * Math.max(1, Math.abs(quotient));
+            const rounded = (quotient < 0 ? -Math.round(Math.abs(quotient) + epsilon) : Math.round(quotient + epsilon)) * step;
+            const str = step.toString().toLowerCase();
+            const decimalPlaces = str.includes("e") ? Math.max(0, ((str.split("e")[0].split(".")[1] || "").length) - Number(str.split("e")[1])) : Math.max(0, (str.split(".")[1] || "").length);
+            const result = Number(rounded.toFixed(Math.min(100, decimalPlaces)));
+            return Object.is(result, -0) ? 0 : result;
         };
 
         /**

@@ -112,6 +112,7 @@ import cb from "../dist/Chalkboard.js";
     assert.strictEqual(cb.real.parse("2+2"), "4");
     assert.strictEqual(cb.real.parse("x^2 + 2x + 1"), "x^2 + 2x + 1");
     assert.strictEqual(cb.real.parse("x^2 + 2x + 1", { values: { x: 3 } }), 16);
+    assert.strictEqual(cb.real.parse("x + 0.2", { values: { x: 0.1 }, roundTo: 0.1 }), 0.3);
     assert.strictEqual(cb.real.parse("x^2 + 2x + 1", { returnLaTeX: true }), "x^{2} + 2x + 1");
     assert.strictEqual(cb.real.parse("x^2 + 2x + 1", { returnJSON: true }), '{"type":"add","left":{"type":"add","left":{"type":"pow","base":{"type":"var","name":"x"},"exponent":{"type":"num","value":2}},"right":{"type":"mul","left":{"type":"num","value":2},"right":{"type":"var","name":"x"}}},"right":{"type":"num","value":1}}');
     assert.deepStrictEqual(cb.real.parse("x^2 + 2x + 1", { returnAST: true }), { type: "add", left: { type: "add", left: { type: "pow", base: { type: "var", name: "x" }, exponent: { type: "num", value: 2 } }, right: { type: "mul", left: { type: "num", value: 2 }, right: { type: "var", name: "x" } } }, right: { type: "num", value: 1 } });
