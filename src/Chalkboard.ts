@@ -285,10 +285,12 @@ namespace Chalkboard {
      * const i4 = Chalkboard.I(4); // returns the complex number 1
      */
     export const I = (exponent: number = 1): ChalkboardComplex => {
-        if (exponent % 4 === 0) return Chalkboard.comp.init(1, 0);
-        if (exponent % 4 === 1) return Chalkboard.comp.init(0, 1);
-        if (exponent % 4 === 2) return Chalkboard.comp.init(-1, 0);
-        if (exponent % 4 === 3) return Chalkboard.comp.init(0, -1);
+        if (!Number.isInteger(exponent)) throw new TypeError(`Chalkboard.I: Parameter "exponent" must be an integer.`);
+        const n = Chalkboard.numb.mod(exponent, 4);
+        if (n === 0) return Chalkboard.comp.init(1, 0);
+        if (n === 1) return Chalkboard.comp.init(0, 1);
+        if (n === 2) return Chalkboard.comp.init(-1, 0);
+        if (n === 3) return Chalkboard.comp.init(0, -1);
         return Chalkboard.comp.init(0, 0);
     };
 

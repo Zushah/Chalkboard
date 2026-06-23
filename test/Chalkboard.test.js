@@ -11,7 +11,7 @@ import cb from "../dist/Chalkboard.js";
 
 // VERSION, VERSIONALIAS
 {
-    assert.strictEqual(cb.VERSION, "3.0.1");
+    assert.strictEqual(cb.VERSION, "3.0.2");
     assert.strictEqual(cb.VERSIONALIAS, "Euler");
 }
 
@@ -32,6 +32,11 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.I(2), { a: -1, b: 0 });
     assert.deepStrictEqual(cb.I(3), { a: 0, b: -1 });
     assert.deepStrictEqual(cb.I(4), { a: 1, b: 0 });
+    assert.deepStrictEqual(cb.I(-1), { a: 0, b: -1 });
+    assert.deepStrictEqual(cb.I(-2), { a: -1, b: 0 });
+    assert.deepStrictEqual(cb.I(-3), { a: 0, b: 1 });
+    assert.deepStrictEqual(cb.I(-4), { a: 1, b: 0 });
+    assert.throws(() => cb.I(0.5));
 }
 
 // REGISTRY, REGISTER
