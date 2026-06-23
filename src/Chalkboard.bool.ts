@@ -367,7 +367,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the opposite of the conditional (non-implication) on two or more values. It works as a chain, i.e. it returns true only if every adjacent pair (p, q) satisfies ¬p ∨ q.
+         * Calculates the opposite of the conditional (non-implication) on two or more values.
          * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
@@ -375,17 +375,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.COND(true, false, true); // Returns true
          */
         export const NCOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            if (vals.length < 2) return $(false);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (!(xp && !xq)) return $(false);
-            }
-            return $(true);
+            const cond = COND(...vals);
+            return $(!(cond === true || cond === 1));
         };
 
         /**
-         * Calculates the opposite of the converse of the conditional on two or more values. It works as a chain, i.e. it returns true only if every adjacent pair (p, q) satisfies ¬q ∨ p.
+         * Calculates the opposite of the converse of the conditional on two or more values.
          * @param {...(boolean | 0 | 1)[]} vals - Two or more values
          * @returns {boolean | 0 | 1}
          * @example
@@ -393,13 +388,8 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.CONV(true, false, true); // Returns true
          */
         export const NCONV = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            if (vals.length < 2) return $(false);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (!(xq && !xp)) return $(false);
-            }
-            return $(true);
+            const conv = CONV(...vals);
+            return $(!(conv === true || conv === 1));
         };
 
         /**
@@ -495,6 +485,8 @@ namespace Chalkboard {
                     if ("!&|()".indexOf(ch) !== -1) {
                         tokens.push(ch);
                         i++;
+                    } else if (!/[a-zA-Z0-9_]/.test(ch)) {
+                        throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}"`);
                     } else {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
@@ -510,7 +502,7 @@ namespace Chalkboard {
                 const peek = (): string => tokens[pos];
                 const consume = (token?: string): string => {
                     if (token && tokens[pos] !== token) {
-                        throw new Error(`Expected token ${token} but found ${tokens[pos]}`);
+                        throw new Error(`Chalkboard.bool.parse: Expected token ${token} but found ${tokens[pos]}`);
                     }
                     return tokens[pos++];
                 };
@@ -558,7 +550,7 @@ namespace Chalkboard {
                     return { type: "var", name: token };
                 };
                 const ast = parseExpression();
-                if (pos < tokens.length) throw new Error("Unexpected tokens at end");
+                if (pos < tokens.length) throw new Error("Chalkboard.bool.parse: Unexpected tokens at end");
                 return ast;
             };
             const nodeEqual = (a: { type: string, [key: string]: any }, b: { type: string, [key: string]: any }): boolean => {
@@ -731,7 +723,7 @@ namespace Chalkboard {
                         return evaluateNode(node.left, values) || evaluateNode(node.right, values);
                     }
                 }
-                throw new Error(`Unknown node type: ${node.type}`);
+                throw new Error(`Chalkboard.bool.parse: Unknown node type: ${node.type}`);
             };
             try {
                 const tokens = tokenize(expr);
@@ -747,9 +739,9 @@ namespace Chalkboard {
                 return nodeToString(simplified);
             } catch (err) {
                 if (err instanceof Error) {
-                    throw new Error(`Error parsing expression: ${err.message}`);
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message}`);
                 } else {
-                    throw new Error(`Error parsing expression: ${String(err)}`);
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err)}`);
                 }
             }
         };
