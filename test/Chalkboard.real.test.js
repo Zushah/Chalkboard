@@ -46,10 +46,16 @@ import cb from "../dist/Chalkboard.js";
 
 // real.add, real.sub, real.mul, real.div, real.scl, real.negate, real.reciprocate, real.absolute, real.pow
 {
+    const f = cb.real.define((x) => x + 1);
+    const g = cb.real.define((x) => 2 * x);
+    const sum = cb.real.add(f, g);
+    assert.strictEqual(sum.type, "scalar2d");
+    assert.strictEqual(cb.real.val(sum, 3), 10);
     const c1 = cb.real.define([(t) => t, (t) => t * t]);
     const c2 = cb.real.define([(t) => 1, (t) => 2 * t]);
     assert.strictEqual(c1.type, "curve2d");
     assert.strictEqual(c2.type, "curve2d");
+    assert.strictEqual(cb.real.add(c1, c2).type, "curve2d");
     assert.deepStrictEqual(cb.real.val(cb.real.add(c1, c2), 2), { x: 3, y: 8 });
     assert.deepStrictEqual(cb.real.val(cb.real.sub(c1, c2), 2), { x: 1, y: 0 });
     assert.deepStrictEqual(cb.real.val(cb.real.mul(c1, c2), 2), { x: 2, y: 16 });
@@ -66,7 +72,9 @@ import cb from "../dist/Chalkboard.js";
 {
     const f = cb.real.define((x) => x + 1);
     const g = cb.real.define((x) => 2 * x);
-    assert.throws(() => cb.real.compose(f, g));
+    const h = cb.real.compose(f, g);
+    assert.strictEqual(h.type, "scalar2d");
+    assert.strictEqual(cb.real.val(h, 3), 7);
     const s = cb.real.define((x) => x * x);
     const t = cb.real.translate(s, 3);
     assert.strictEqual(t.type, "scalar2d");
