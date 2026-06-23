@@ -28,7 +28,9 @@ namespace Chalkboard {
             };
             const v = input as { x: number, y: number, z?: number, w?: number };
             if (v && typeof v.x === "number" && typeof v.y === "number") {
-                return input as ChalkboardVector;
+                if (typeof v.z === "number" && typeof v.w === "number") return $$(v.x, v.y, v.z, v.w);
+                if (typeof v.z === "number") return $$(v.x, v.y, v.z);
+                return $$(v.x, v.y);
             }
             if (Array.isArray(input)) {
                 if (input.length > 0 && Array.isArray(input[0])) {

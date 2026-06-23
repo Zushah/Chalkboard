@@ -20,6 +20,7 @@ import cb from "../dist/Chalkboard.js";
     const v = cb.real.define([(x, y) => x + y, (x, y) => x - y]);
     assert.strictEqual(v.type, "vector2d");
     assert.deepStrictEqual(cb.real.val(v, cb.vect.init(3, 1)), { x: 4, y: 2 });
+    assert.strictEqual(cb.real.val(cb.real.define((x, y, z) => x + y + z), [1, 2, 3]), 6);
 }
 
 // real.linear, real.slope, real.discriminant, real.quadratic, real.linearFormula, real.quadraticFormula, real.polynomial, real.randomPolynomial

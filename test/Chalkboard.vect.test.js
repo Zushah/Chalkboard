@@ -121,6 +121,9 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.vect.toTensor(cb.vect.init(1, 2, 3, 4), 2, 2), [[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.vect.toTypedArray(v, "float32"), new Float32Array([1, 2]));
     assert.deepStrictEqual(cb.vect.zero(2), { x: 0, y: 0 });
+    cb.vect.modeConfig("array");
+    assert.deepStrictEqual(cb.vect.add([1, 2], [3, 4]), [4, 6]);
+    cb.vect.modeConfig("vector");
 }
 
 // vect.field, vect.fromField

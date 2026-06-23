@@ -1621,24 +1621,24 @@ namespace Chalkboard {
                 return f(x);
             } else if (func.type === "scalar3d") {
                 const f = func.rule as (x: number, y: number) => number;
-                const v = val as ChalkboardVector as { x: number, y: number };
-                return f(v.x, v.y);
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return f(v[0], v[1]);
             } else if (func.type === "scalar4d") {
                 const f = func.rule as (x: number, y: number, z: number) => number;
-                const v = val as ChalkboardVector as { x: number, y: number, z: number };
-                return f(v.x, v.y, v.z);
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return f(v[0], v[1], v[2]!);
             } else if (func.type === "vector2d") {
                 const f = func.rule as [(x: number, y: number) => number, (x: number, y: number) => number];
-                const v = val as ChalkboardVector as { x: number, y: number };
-                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]));
             } else if (func.type === "vector3d") {
                 const f = func.rule as [(x: number, y: number, z: number) => number, (x: number, y: number, z: number) => number, (x: number, y: number, z: number) => number];
-                const v = val as ChalkboardVector as { x: number, y: number, z: number };
-                return Chalkboard.vect.init(f[0](v.x, v.y, v.z), f[1](v.x, v.y, v.z), f[2](v.x, v.y, v.z));
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return Chalkboard.vect.init(f[0](v[0], v[1], v[2]!), f[1](v[0], v[1], v[2]!), f[2](v[0], v[1], v[2]!));
             } else if (func.type === "vector4d") {
                 const f = func.rule as [(x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number, (x: number, y: number, z: number, w: number) => number];
-                const v = val as ChalkboardVector as { x: number, y: number, z: number, w: number };
-                return Chalkboard.vect.init(f[0](v.x, v.y, v.z, v.w), f[1](v.x, v.y, v.z, v.w), f[2](v.x, v.y, v.z, v.w), f[3](v.x, v.y, v.z, v.w));
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return Chalkboard.vect.init(f[0](v[0], v[1], v[2]!, v[3]!), f[1](v[0], v[1], v[2]!, v[3]!), f[2](v[0], v[1], v[2]!, v[3]!), f[3](v[0], v[1], v[2]!, v[3]!));
             } else if (func.type === "curve2d") {
                 const f = func.rule as [(t: number) => number, (t: number) => number];
                 const t = val as number;
@@ -1653,8 +1653,8 @@ namespace Chalkboard {
                 return Chalkboard.vect.init(f[0](t), f[1](t), f[2](t), f[3](t));
             } else if (func.type === "surface3d") {
                 const f = func.rule as [(s: number, t: number) => number, (s: number, t: number) => number, (s: number, t: number) => number];
-                const v = val as ChalkboardVector as { x: number, y: number };
-                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y), f[2](v.x, v.y));
+                const v = Chalkboard.vect.toArray(val as ChalkboardVector);
+                return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]), f[2](v[0], v[1]));
             }
             throw new TypeError("Chalkboard.real.val: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'");
         };

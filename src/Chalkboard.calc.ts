@@ -79,19 +79,19 @@ namespace Chalkboard {
         export const curl = (vectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector => {
             if (vectfield.field !== "real") throw new TypeError("Chalkboard.calc.curl: Property 'field' of 'vectfield' must be 'real'.");
             const f = vectfield.rule as ((...x: number[]) => number)[];
-            const v = vect as { x: number, y: number, z?: number, w?: number };
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
             if (vectfield.type === "vector2d") {
-                const dpdy = (f[0](v.x, v.y + h) - f[0](v.x, v.y)) / h;
-                const dqdx = (f[1](v.x + h, v.y) - f[1](v.x, v.y)) / h;
+                const dpdy = (f[0](v[0], v[1] + h) - f[0](v[0], v[1])) / h;
+                const dqdx = (f[1](v[0] + h, v[1]) - f[1](v[0], v[1])) / h;
                 return Chalkboard.vect.init(0, 0, dqdx - dpdy);
             } else if (vectfield.type === "vector3d") {
-                const dpdy = (f[0](v.x, v.y + h, v.z!) - f[0](v.x, v.y, v.z!)) / h;
-                const dpdz = (f[0](v.x, v.y, v.z! + h) - f[0](v.x, v.y, v.z!)) / h;
-                const dqdx = (f[1](v.x + h, v.y, v.z!) - f[1](v.x, v.y, v.z!)) / h;
-                const dqdz = (f[1](v.x, v.y, v.z! + h) - f[1](v.x, v.y, v.z!)) / h;
-                const drdx = (f[2](v.x + h, v.y, v.z!) - f[2](v.x, v.y, v.z!)) / h;
-                const drdy = (f[2](v.x, v.y + h, v.z!) - f[2](v.x, v.y, v.z!)) / h;
+                const dpdy = (f[0](v[0], v[1] + h, v[2]!) - f[0](v[0], v[1], v[2]!)) / h;
+                const dpdz = (f[0](v[0], v[1], v[2]! + h) - f[0](v[0], v[1], v[2]!)) / h;
+                const dqdx = (f[1](v[0] + h, v[1], v[2]!) - f[1](v[0], v[1], v[2]!)) / h;
+                const dqdz = (f[1](v[0], v[1], v[2]! + h) - f[1](v[0], v[1], v[2]!)) / h;
+                const drdx = (f[2](v[0] + h, v[1], v[2]!) - f[2](v[0], v[1], v[2]!)) / h;
+                const drdy = (f[2](v[0], v[1] + h, v[2]!) - f[2](v[0], v[1], v[2]!)) / h;
                 return Chalkboard.vect.init(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             }
             throw new TypeError("Chalkboard.real.curl: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d'.");
@@ -106,9 +106,9 @@ namespace Chalkboard {
         export const curvature = (func: ChalkboardFunction, val: number): number => {
             if (func.field !== "real") throw new TypeError("Chalkboard.calc.curvature: Property 'field' of 'func' must be 'real'.");
             if (func.type === "curve2d") {
-                const d = Chalkboard.calc.dfdx(func, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                const d2 = Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                return Math.abs(d.x * d2.y - d.y * d2.x) / Math.sqrt((d.x * d.x + d.y * d.y) * (d.x * d.x + d.y * d.y) * (d.x * d.x + d.y * d.y));
+                const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, val) as ChalkboardVector);
+                const d2 = Chalkboard.vect.toArray(Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector);
+                return Math.abs(d[0] * d2[1] - d[1] * d2[0]) / Math.sqrt((d[0] * d[0] + d[1] * d[1]) * (d[0] * d[0] + d[1] * d[1]) * (d[0] * d[0] + d[1] * d[1]));
             } else if (func.type === "curve3d") {
                 return Chalkboard.vect.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, val) as ChalkboardVector);
             }
@@ -226,12 +226,12 @@ namespace Chalkboard {
         export const dfrdt = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.calc.dfrdt: Properties 'field' of 'func1' and 'func2' must be 'real'.");
             if (func1.type !== "scalar3d") throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func1' must be 'scalar3d'.");
-            const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-            const d = Chalkboard.calc.dfdx(func2, val) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
+            const g = Chalkboard.vect.toArray(Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector);
+            const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, val) as ChalkboardVector);
             if (func2.type === "curve2d") {
-                return g.x * d.x + g.y * d.y;
+                return g[0] * d[0] + g[1] * d[1];
             } else if (func2.type === "curve3d") {
-                return g.x * d.x + g.y * d.y + g.z! * d.z!;
+                return g[0] * d[0] + g[1] * d[1] + g[2]! * d[2]!;
             }
             throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func2' must be 'curve2d' or 'curve3d'.");
         };
@@ -448,8 +448,8 @@ namespace Chalkboard {
             if (vectfield.type === "vector2d" && func.type === "curve2d") {
                 const dt = (tsup - tinf) / 10000;
                 for (let t = tinf; t <= tsup; t += dt) {
-                    drdt = Chalkboard.calc.dfdx(func, t) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                    result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t) as ChalkboardVector), Chalkboard.vect.init(-drdt.y, drdt.x)) * Chalkboard.vect.mag(drdt);
+                    drdt = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, t) as ChalkboardVector);
+                    result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t) as ChalkboardVector), Chalkboard.vect.init(-drdt[1], drdt[0])) * Chalkboard.vect.mag(drdt);
                 }
                 return result * dt;
             } else if (vectfield.type === "vector3d" && func.type === "curve3d") {
@@ -515,8 +515,8 @@ namespace Chalkboard {
                 const dt = (sup - inf) / 10000;
                 if (funcORvectfield.type === "scalar2d") {
                     for (let t = inf; t <= sup; t += dt) {
-                        const val = Chalkboard.real.val(func, t) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                        result += f(val.x, val.y) * Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, t) as ChalkboardVector);
+                        const val = Chalkboard.vect.toArray(Chalkboard.real.val(func, t) as ChalkboardVector);
+                        result += f(val[0], val[1]) * Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, t) as ChalkboardVector);
                     }
                     return result * dt;
                 } else if (funcORvectfield.type === "vector2d") {
@@ -625,8 +625,8 @@ namespace Chalkboard {
                 const dt = (sup - inf) / 10000;
                 for (let t = inf; t <= sup; t += dt) {
                     const fz = Chalkboard.comp.val(func1, Chalkboard.vect.toComplex(Chalkboard.real.val(func2, t) as ChalkboardVector));
-                    const rt = Chalkboard.calc.dfdx(func2, t) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
-                    result = Chalkboard.comp.add(result, Chalkboard.comp.init(fz.a * rt.x - fz.b * rt.y, fz.b * rt.x + fz.a * rt.y)) as ChalkboardComplex;
+                    const rt = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, t) as ChalkboardVector);
+                    result = Chalkboard.comp.add(result, Chalkboard.comp.init(fz.a * rt[0] - fz.b * rt[1], fz.b * rt[0] + fz.a * rt[1])) as ChalkboardComplex;
                 }
                 return Chalkboard.comp.scl(result, dt) as ChalkboardComplex;
             }
@@ -644,54 +644,54 @@ namespace Chalkboard {
             const f = funcORvectfield.rule as (x: number, y: number) => number;
             const r = funcORvectfield.rule as ((s: number, t: number) => number)[];
             const F = funcORvectfield.rule as ((...x: number[]) => number)[];
-            const v = vect as { x: number, y: number, z?: number, w?: number };
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
             if (funcORvectfield.type === "scalar3d") {
-                const dfdx = (f(v.x + h, v.y) - f(v.x, v.y)) / h;
-                const dfdy = (f(v.x, v.y + h) - f(v.x, v.y)) / h;
+                const dfdx = (f(v[0] + h, v[1]) - f(v[0], v[1])) / h;
+                const dfdy = (f(v[0], v[1] + h) - f(v[0], v[1])) / h;
                 return Chalkboard.vect.init(dfdx, dfdy);
             } else if (funcORvectfield.type === "surface3d") {
-                const dxds = (r[0](v.x + h, v.y) - r[0](v.x, v.y)) / h;
-                const dxdt = (r[0](v.x, v.y + h) - r[0](v.x, v.y)) / h;
-                const dyds = (r[1](v.x + h, v.y) - r[1](v.x, v.y)) / h;
-                const dydt = (r[1](v.x, v.y + h) - r[1](v.x, v.y)) / h;
-                const dzds = (r[2](v.x + h, v.y) - r[2](v.x, v.y)) / h;
-                const dzdt = (r[2](v.x, v.y + h) - r[2](v.x, v.y)) / h;
+                const dxds = (r[0](v[0] + h, v[1]) - r[0](v[0], v[1])) / h;
+                const dxdt = (r[0](v[0], v[1] + h) - r[0](v[0], v[1])) / h;
+                const dyds = (r[1](v[0] + h, v[1]) - r[1](v[0], v[1])) / h;
+                const dydt = (r[1](v[0], v[1] + h) - r[1](v[0], v[1])) / h;
+                const dzds = (r[2](v[0] + h, v[1]) - r[2](v[0], v[1])) / h;
+                const dzdt = (r[2](v[0], v[1] + h) - r[2](v[0], v[1])) / h;
                 return Chalkboard.matr.init([dxds, dxdt], [dyds, dydt], [dzds, dzdt]);
             } else if (funcORvectfield.type === "vector2d") {
-                const dpdx = (F[0](v.x + h, v.y) - F[0](v.x, v.y)) / h;
-                const dpdy = (F[0](v.x, v.y + h) - F[0](v.x, v.y)) / h;
-                const dqdx = (F[1](v.x + h, v.y) - F[1](v.x, v.y)) / h;
-                const dqdy = (F[1](v.x, v.y + h) - F[1](v.x, v.y)) / h;
+                const dpdx = (F[0](v[0] + h, v[1]) - F[0](v[0], v[1])) / h;
+                const dpdy = (F[0](v[0], v[1] + h) - F[0](v[0], v[1])) / h;
+                const dqdx = (F[1](v[0] + h, v[1]) - F[1](v[0], v[1])) / h;
+                const dqdy = (F[1](v[0], v[1] + h) - F[1](v[0], v[1])) / h;
                 return Chalkboard.matr.init([dpdx, dpdy], [dqdx, dqdy]);
             } else if (funcORvectfield.type === "vector3d") {
-                const dpdx = (F[0](v.x + h, v.y, v.z!) - F[0](v.x, v.y, v.z!)) / h;
-                const dpdy = (F[0](v.x, v.y + h, v.z!) - F[0](v.x, v.y, v.z!)) / h;
-                const dpdz = (F[0](v.x, v.y, v.z! + h) - F[0](v.x, v.y, v.z!)) / h;
-                const dqdx = (F[1](v.x + h, v.y, v.z!) - F[1](v.x, v.y, v.z!)) / h;
-                const dqdy = (F[1](v.x, v.y + h, v.z!) - F[1](v.x, v.y, v.z!)) / h;
-                const dqdz = (F[1](v.x, v.y, v.z! + h) - F[1](v.x, v.y, v.z!)) / h;
-                const drdx = (F[2](v.x + h, v.y, v.z!) - F[2](v.x, v.y, v.z!)) / h;
-                const drdy = (F[2](v.x, v.y + h, v.z!) - F[2](v.x, v.y, v.z!)) / h;
-                const drdz = (F[2](v.x, v.y, v.z! + h) - F[2](v.x, v.y, v.z!)) / h;
+                const dpdx = (F[0](v[0] + h, v[1], v[2]!) - F[0](v[0], v[1], v[2]!)) / h;
+                const dpdy = (F[0](v[0], v[1] + h, v[2]!) - F[0](v[0], v[1], v[2]!)) / h;
+                const dpdz = (F[0](v[0], v[1], v[2]! + h) - F[0](v[0], v[1], v[2]!)) / h;
+                const dqdx = (F[1](v[0] + h, v[1], v[2]!) - F[1](v[0], v[1], v[2]!)) / h;
+                const dqdy = (F[1](v[0], v[1] + h, v[2]!) - F[1](v[0], v[1], v[2]!)) / h;
+                const dqdz = (F[1](v[0], v[1], v[2]! + h) - F[1](v[0], v[1], v[2]!)) / h;
+                const drdx = (F[2](v[0] + h, v[1], v[2]!) - F[2](v[0], v[1], v[2]!)) / h;
+                const drdy = (F[2](v[0], v[1] + h, v[2]!) - F[2](v[0], v[1], v[2]!)) / h;
+                const drdz = (F[2](v[0], v[1], v[2]! + h) - F[2](v[0], v[1], v[2]!)) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz], [dqdx, dqdy, dqdz], [drdx, drdy, drdz]);
             } else if (funcORvectfield.type === "vector4d") {
-                const dpdx = (F[0](v.x + h, v.y, v.z!, v.w!) - F[0](v.x, v.y, v.z!, v.w!)) / h;
-                const dpdy = (F[0](v.x, v.y + h, v.z!, v.w!) - F[0](v.x, v.y, v.z!, v.w!)) / h;
-                const dpdz = (F[0](v.x, v.y, v.z! + h, v.w!) - F[0](v.x, v.y, v.z!, v.w!)) / h;
-                const dpdw = (F[0](v.x, v.y, v.z!, v.w! + h) - F[0](v.x, v.y, v.z!, v.w!)) / h;
-                const dqdx = (F[1](v.x + h, v.y, v.z!, v.w!) - F[1](v.x, v.y, v.z!, v.w!)) / h;
-                const dqdy = (F[1](v.x, v.y + h, v.z!, v.w!) - F[1](v.x, v.y, v.z!, v.w!)) / h;
-                const dqdz = (F[1](v.x, v.y, v.z! + h, v.w!) - F[1](v.x, v.y, v.z!, v.w!)) / h;
-                const dqdw = (F[1](v.x, v.y, v.z!, v.w! + h) - F[1](v.x, v.y, v.z!, v.w!)) / h;
-                const drdx = (F[2](v.x + h, v.y, v.z!, v.w!) - F[2](v.x, v.y, v.z!, v.w!)) / h;
-                const drdy = (F[2](v.x, v.y + h, v.z!, v.w!) - F[2](v.x, v.y, v.z!, v.w!)) / h;
-                const drdz = (F[2](v.x, v.y, v.z! + h, v.w!) - F[2](v.x, v.y, v.z!, v.w!)) / h;
-                const drdw = (F[2](v.x, v.y, v.z!, v.w! + h) - F[2](v.x, v.y, v.z!, v.w!)) / h;
-                const dsdx = (F[3](v.x + h, v.y, v.z!, v.w!) - F[3](v.x, v.y, v.z!, v.w!)) / h;
-                const dsdy = (F[3](v.x, v.y + h, v.z!, v.w!) - F[3](v.x, v.y, v.z!, v.w!)) / h;
-                const dsdz = (F[3](v.x, v.y, v.z! + h, v.w!) - F[3](v.x, v.y, v.z!, v.w!)) / h;
-                const dsdw = (F[3](v.x, v.y, v.z!, v.w! + h) - F[3](v.x, v.y, v.z!, v.w!)) / h;
+                const dpdx = (F[0](v[0] + h, v[1], v[2]!, v[3]!) - F[0](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dpdy = (F[0](v[0], v[1] + h, v[2]!, v[3]!) - F[0](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dpdz = (F[0](v[0], v[1], v[2]! + h, v[3]!) - F[0](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dpdw = (F[0](v[0], v[1], v[2]!, v[3]! + h) - F[0](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dqdx = (F[1](v[0] + h, v[1], v[2]!, v[3]!) - F[1](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dqdy = (F[1](v[0], v[1] + h, v[2]!, v[3]!) - F[1](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dqdz = (F[1](v[0], v[1], v[2]! + h, v[3]!) - F[1](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dqdw = (F[1](v[0], v[1], v[2]!, v[3]! + h) - F[1](v[0], v[1], v[2]!, v[3]!)) / h;
+                const drdx = (F[2](v[0] + h, v[1], v[2]!, v[3]!) - F[2](v[0], v[1], v[2]!, v[3]!)) / h;
+                const drdy = (F[2](v[0], v[1] + h, v[2]!, v[3]!) - F[2](v[0], v[1], v[2]!, v[3]!)) / h;
+                const drdz = (F[2](v[0], v[1], v[2]! + h, v[3]!) - F[2](v[0], v[1], v[2]!, v[3]!)) / h;
+                const drdw = (F[2](v[0], v[1], v[2]!, v[3]! + h) - F[2](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dsdx = (F[3](v[0] + h, v[1], v[2]!, v[3]!) - F[3](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dsdy = (F[3](v[0], v[1] + h, v[2]!, v[3]!) - F[3](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dsdz = (F[3](v[0], v[1], v[2]! + h, v[3]!) - F[3](v[0], v[1], v[2]!, v[3]!)) / h;
+                const dsdw = (F[3](v[0], v[1], v[2]!, v[3]! + h) - F[3](v[0], v[1], v[2]!, v[3]!)) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz, dpdw], [dqdx, dqdy, dqdz, dqdw], [drdx, drdy, drdz, drdw], [dsdx, dsdy, dsdz, dsdw]);
             }
             throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
@@ -708,56 +708,56 @@ namespace Chalkboard {
             const f = funcORvectfield.rule as (x: number, y: number) => number;
             const r = funcORvectfield.rule as ((s: number, t: number) => number)[];
             const F = funcORvectfield.rule as ((...x: number[]) => number)[];
-            const v = vect as { x: number, y: number, z?: number, w?: number };
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.00001;
             if (funcORvectfield.type === "scalar3d") {
-                const d2fdx2 = (f(v.x + h, v.y) - 2 * f(v.x, v.y) + f(v.x - h, v.y)) / (h * h);
-                const d2fdy2 = (f(v.x, v.y + h) - 2 * f(v.x, v.y) + f(v.x, v.y - h)) / (h * h);
-                const d2fdxdy = (f(v.x + h, v.y + h) - f(v.x + h, v.y) - f(v.x, v.y + h) + f(v.x, v.y)) / (h * h);
-                const d2fdydx = (f(v.x + h, v.y + h) - f(v.x, v.y + h) - f(v.x + h, v.y) + f(v.x, v.y)) / (h * h);
+                const d2fdx2 = (f(v[0] + h, v[1]) - 2 * f(v[0], v[1]) + f(v[0] - h, v[1])) / (h * h);
+                const d2fdy2 = (f(v[0], v[1] + h) - 2 * f(v[0], v[1]) + f(v[0], v[1] - h)) / (h * h);
+                const d2fdxdy = (f(v[0] + h, v[1] + h) - f(v[0] + h, v[1]) - f(v[0], v[1] + h) + f(v[0], v[1])) / (h * h);
+                const d2fdydx = (f(v[0] + h, v[1] + h) - f(v[0], v[1] + h) - f(v[0] + h, v[1]) + f(v[0], v[1])) / (h * h);
                 return Chalkboard.matr.init([d2fdx2, d2fdxdy], [d2fdydx, d2fdy2]);
             } else if (funcORvectfield.type === "surface3d") {
-                const d2xds2 = (r[0](v.x + h, v.y) - 2 * r[0](v.x, v.y) + r[0](v.x - h, v.y)) / (h * h);
-                const d2xdt2 = (r[0](v.x, v.y + h) - 2 * r[0](v.x, v.y) + r[0](v.x, v.y - h)) / (h * h);
-                const d2yds2 = (r[1](v.x + h, v.y) - 2 * r[1](v.x, v.y) + r[1](v.x - h, v.y)) / (h * h);
-                const d2ydt2 = (r[1](v.x, v.y + h) - 2 * r[1](v.x, v.y) + r[1](v.x, v.y - h)) / (h * h);
-                const d2zds2 = (r[2](v.x + h, v.y) - 2 * r[2](v.x, v.y) + r[2](v.x - h, v.y)) / (h * h);
-                const d2zdt2 = (r[2](v.x, v.y + h) - 2 * r[2](v.x, v.y) + r[2](v.x, v.y - h)) / (h * h);
+                const d2xds2 = (r[0](v[0] + h, v[1]) - 2 * r[0](v[0], v[1]) + r[0](v[0] - h, v[1])) / (h * h);
+                const d2xdt2 = (r[0](v[0], v[1] + h) - 2 * r[0](v[0], v[1]) + r[0](v[0], v[1] - h)) / (h * h);
+                const d2yds2 = (r[1](v[0] + h, v[1]) - 2 * r[1](v[0], v[1]) + r[1](v[0] - h, v[1])) / (h * h);
+                const d2ydt2 = (r[1](v[0], v[1] + h) - 2 * r[1](v[0], v[1]) + r[1](v[0], v[1] - h)) / (h * h);
+                const d2zds2 = (r[2](v[0] + h, v[1]) - 2 * r[2](v[0], v[1]) + r[2](v[0] - h, v[1])) / (h * h);
+                const d2zdt2 = (r[2](v[0], v[1] + h) - 2 * r[2](v[0], v[1]) + r[2](v[0], v[1] - h)) / (h * h);
                 return Chalkboard.matr.init([d2xds2, d2xdt2], [d2yds2, d2ydt2], [d2zds2, d2zdt2]);
             } else if (funcORvectfield.type === "vector2d") {
-                const d2pdx2 = (F[0](v.x + h, v.y) - 2 * F[0](v.x, v.y) + F[0](v.x - h, v.y)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h) - 2 * F[0](v.x, v.y) + F[0](v.x, v.y - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y) - 2 * F[1](v.x, v.y) + F[1](v.x - h, v.y)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h) - 2 * F[1](v.x, v.y) + F[1](v.x, v.y - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1]) - 2 * F[0](v[0], v[1]) + F[0](v[0] - h, v[1])) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h) - 2 * F[0](v[0], v[1]) + F[0](v[0], v[1] - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1]) - 2 * F[1](v[0], v[1]) + F[1](v[0] - h, v[1])) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h) - 2 * F[1](v[0], v[1]) + F[1](v[0], v[1] - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2], [d2qdx2, d2qdy2]);
             } else if (funcORvectfield.type === "vector3d") {
-                const d2pdx2 = (F[0](v.x + h, v.y, v.z!) - 2 * F[0](v.x, v.y, v.z!) + F[0](v.x - h, v.y, v.z!)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h, v.z!) - 2 * F[0](v.x, v.y, v.z!) + F[0](v.x, v.y - h, v.z!)) / (h * h);
-                const d2pdz2 = (F[0](v.x, v.y, v.z! + h) - 2 * F[0](v.x, v.y, v.z!) + F[0](v.x, v.y, v.z! - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y, v.z!) - 2 * F[1](v.x, v.y, v.z!) + F[1](v.x - h, v.y, v.z!)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h, v.z!) - 2 * F[1](v.x, v.y, v.z!) + F[1](v.x, v.y - h, v.z!)) / (h * h);
-                const d2qdz2 = (F[1](v.x, v.y, v.z! + h) - 2 * F[1](v.x, v.y, v.z!) + F[1](v.x, v.y, v.z! - h)) / (h * h);
-                const d2rdx2 = (F[2](v.x + h, v.y, v.z!) - 2 * F[2](v.x, v.y, v.z!) + F[2](v.x - h, v.y, v.z!)) / (h * h);
-                const d2rdy2 = (F[2](v.x, v.y + h, v.z!) - 2 * F[2](v.x, v.y, v.z!) + F[2](v.x, v.y - h, v.z!)) / (h * h);
-                const d2rdz2 = (F[2](v.x, v.y, v.z! + h) - 2 * F[2](v.x, v.y, v.z!) + F[2](v.x, v.y, v.z! - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1], v[2]!) - 2 * F[0](v[0], v[1], v[2]!) + F[0](v[0] - h, v[1], v[2]!)) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h, v[2]!) - 2 * F[0](v[0], v[1], v[2]!) + F[0](v[0], v[1] - h, v[2]!)) / (h * h);
+                const d2pdz2 = (F[0](v[0], v[1], v[2]! + h) - 2 * F[0](v[0], v[1], v[2]!) + F[0](v[0], v[1], v[2]! - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1], v[2]!) - 2 * F[1](v[0], v[1], v[2]!) + F[1](v[0] - h, v[1], v[2]!)) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h, v[2]!) - 2 * F[1](v[0], v[1], v[2]!) + F[1](v[0], v[1] - h, v[2]!)) / (h * h);
+                const d2qdz2 = (F[1](v[0], v[1], v[2]! + h) - 2 * F[1](v[0], v[1], v[2]!) + F[1](v[0], v[1], v[2]! - h)) / (h * h);
+                const d2rdx2 = (F[2](v[0] + h, v[1], v[2]!) - 2 * F[2](v[0], v[1], v[2]!) + F[2](v[0] - h, v[1], v[2]!)) / (h * h);
+                const d2rdy2 = (F[2](v[0], v[1] + h, v[2]!) - 2 * F[2](v[0], v[1], v[2]!) + F[2](v[0], v[1] - h, v[2]!)) / (h * h);
+                const d2rdz2 = (F[2](v[0], v[1], v[2]! + h) - 2 * F[2](v[0], v[1], v[2]!) + F[2](v[0], v[1], v[2]! - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2], [d2qdx2, d2qdy2, d2qdz2], [d2rdx2, d2rdy2, d2rdz2]);
             } else if (funcORvectfield.type === "vector4d") {
-                const d2pdx2 = (F[0](v.x + h, v.y, v.z!, v.w!) - 2 * F[0](v.x, v.y, v.z!, v.w!) + F[0](v.x - h, v.y, v.z!, v.w!)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h, v.z!, v.w!) - 2 * F[0](v.x, v.y, v.z!, v.w!) + F[0](v.x, v.y - h, v.z!, v.w!)) / (h * h);
-                const d2pdz2 = (F[0](v.x, v.y, v.z! + h, v.w!) - 2 * F[0](v.x, v.y, v.z!, v.w!) + F[0](v.x, v.y, v.z! - h, v.w!)) / (h * h);
-                const d2pdw2 = (F[0](v.x, v.y, v.z!, v.w! + h) - 2 * F[0](v.x, v.y, v.z!, v.w!) + F[0](v.x, v.y, v.z!, v.w! - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y, v.z!, v.w!) - 2 * F[1](v.x, v.y, v.z!, v.w!) + F[1](v.x - h, v.y, v.z!, v.w!)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h, v.z!, v.w!) - 2 * F[1](v.x, v.y, v.z!, v.w!) + F[1](v.x, v.y - h, v.z!, v.w!)) / (h * h);
-                const d2qdz2 = (F[1](v.x, v.y, v.z! + h, v.w!) - 2 * F[1](v.x, v.y, v.z!, v.w!) + F[1](v.x, v.y, v.z! - h, v.w!)) / (h * h);
-                const d2qdw2 = (F[1](v.x, v.y, v.z!, v.w! + h) - 2 * F[1](v.x, v.y, v.z!, v.w!) + F[1](v.x, v.y, v.z!, v.w! - h)) / (h * h);
-                const d2rdx2 = (F[2](v.x + h, v.y, v.z!, v.w!) - 2 * F[2](v.x, v.y, v.z!, v.w!) + F[2](v.x - h, v.y, v.z!, v.w!)) / (h * h);
-                const d2rdy2 = (F[2](v.x, v.y + h, v.z!, v.w!) - 2 * F[2](v.x, v.y, v.z!, v.w!) + F[2](v.x, v.y - h, v.z!, v.w!)) / (h * h);
-                const d2rdz2 = (F[2](v.x, v.y, v.z! + h, v.w!) - 2 * F[2](v.x, v.y, v.z!, v.w!) + F[2](v.x, v.y, v.z! - h, v.w!)) / (h * h);
-                const d2rdw2 = (F[2](v.x, v.y, v.z!, v.w! + h) - 2 * F[2](v.x, v.y, v.z!, v.w!) + F[2](v.x, v.y, v.z!, v.w! - h)) / (h * h);
-                const d2sdx2 = (F[3](v.x + h, v.y, v.z!, v.w!) - 2 * F[3](v.x, v.y, v.z!, v.w!) + F[3](v.x - h, v.y, v.z!, v.w!)) / (h * h);
-                const d2sdy2 = (F[3](v.x, v.y + h, v.z!, v.w!) - 2 * F[3](v.x, v.y, v.z!, v.w!) + F[3](v.x, v.y - h, v.z!, v.w!)) / (h * h);
-                const d2sdz2 = (F[3](v.x, v.y, v.z! + h, v.w!) - 2 * F[3](v.x, v.y, v.z!, v.w!) + F[3](v.x, v.y, v.z! - h, v.w!)) / (h * h);
-                const d2sdw2 = (F[3](v.x, v.y, v.z!, v.w! + h) - 2 * F[3](v.x, v.y, v.z!, v.w!) + F[3](v.x, v.y, v.z!, v.w! - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1], v[2]!, v[3]!) - 2 * F[0](v[0], v[1], v[2]!, v[3]!) + F[0](v[0] - h, v[1], v[2]!, v[3]!)) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h, v[2]!, v[3]!) - 2 * F[0](v[0], v[1], v[2]!, v[3]!) + F[0](v[0], v[1] - h, v[2]!, v[3]!)) / (h * h);
+                const d2pdz2 = (F[0](v[0], v[1], v[2]! + h, v[3]!) - 2 * F[0](v[0], v[1], v[2]!, v[3]!) + F[0](v[0], v[1], v[2]! - h, v[3]!)) / (h * h);
+                const d2pdw2 = (F[0](v[0], v[1], v[2]!, v[3]! + h) - 2 * F[0](v[0], v[1], v[2]!, v[3]!) + F[0](v[0], v[1], v[2]!, v[3]! - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1], v[2]!, v[3]!) - 2 * F[1](v[0], v[1], v[2]!, v[3]!) + F[1](v[0] - h, v[1], v[2]!, v[3]!)) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h, v[2]!, v[3]!) - 2 * F[1](v[0], v[1], v[2]!, v[3]!) + F[1](v[0], v[1] - h, v[2]!, v[3]!)) / (h * h);
+                const d2qdz2 = (F[1](v[0], v[1], v[2]! + h, v[3]!) - 2 * F[1](v[0], v[1], v[2]!, v[3]!) + F[1](v[0], v[1], v[2]! - h, v[3]!)) / (h * h);
+                const d2qdw2 = (F[1](v[0], v[1], v[2]!, v[3]! + h) - 2 * F[1](v[0], v[1], v[2]!, v[3]!) + F[1](v[0], v[1], v[2]!, v[3]! - h)) / (h * h);
+                const d2rdx2 = (F[2](v[0] + h, v[1], v[2]!, v[3]!) - 2 * F[2](v[0], v[1], v[2]!, v[3]!) + F[2](v[0] - h, v[1], v[2]!, v[3]!)) / (h * h);
+                const d2rdy2 = (F[2](v[0], v[1] + h, v[2]!, v[3]!) - 2 * F[2](v[0], v[1], v[2]!, v[3]!) + F[2](v[0], v[1] - h, v[2]!, v[3]!)) / (h * h);
+                const d2rdz2 = (F[2](v[0], v[1], v[2]! + h, v[3]!) - 2 * F[2](v[0], v[1], v[2]!, v[3]!) + F[2](v[0], v[1], v[2]! - h, v[3]!)) / (h * h);
+                const d2rdw2 = (F[2](v[0], v[1], v[2]!, v[3]! + h) - 2 * F[2](v[0], v[1], v[2]!, v[3]!) + F[2](v[0], v[1], v[2]!, v[3]! - h)) / (h * h);
+                const d2sdx2 = (F[3](v[0] + h, v[1], v[2]!, v[3]!) - 2 * F[3](v[0], v[1], v[2]!, v[3]!) + F[3](v[0] - h, v[1], v[2]!, v[3]!)) / (h * h);
+                const d2sdy2 = (F[3](v[0], v[1] + h, v[2]!, v[3]!) - 2 * F[3](v[0], v[1], v[2]!, v[3]!) + F[3](v[0], v[1] - h, v[2]!, v[3]!)) / (h * h);
+                const d2sdz2 = (F[3](v[0], v[1], v[2]! + h, v[3]!) - 2 * F[3](v[0], v[1], v[2]!, v[3]!) + F[3](v[0], v[1], v[2]! - h, v[3]!)) / (h * h);
+                const d2sdw2 = (F[3](v[0], v[1], v[2]!, v[3]! + h) - 2 * F[3](v[0], v[1], v[2]!, v[3]!) + F[3](v[0], v[1], v[2]!, v[3]! - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2, d2pdw2], [d2qdx2, d2qdy2, d2qdz2, d2qdw2], [d2rdx2, d2rdy2, d2rdz2, d2rdw2], [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
             }
             throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");

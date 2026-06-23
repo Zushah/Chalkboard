@@ -60,6 +60,9 @@ import cb from "../dist/Chalkboard.js";
     const rad = cb.PI(1/2);
     const q = cb.quat.fromAxis(axis, rad);
     assert.deepStrictEqual(q, { a: 0.7071067811865474, b: 0, c: 0.7071067811865476, d: 0 });
+    cb.vect.modeConfig("array");
+    assert.deepStrictEqual(cb.quat.fromAxis([0, 1, 0], rad), q);
+    cb.vect.modeConfig("vector");
     const v = cb.vect.init(1, 0, 1);
     assert.deepStrictEqual(cb.quat.toRotation(q, v), { x: 0.9999999999999997, y: 0, z: -1.0000000000000004 });
 }
