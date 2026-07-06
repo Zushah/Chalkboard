@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.2 Euler
-    Released April 13th, 2026
+    Version 3.0.3 Euler
+    Released July 6th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
     Repository: https://www.github.com/Zushah/Chalkboard
@@ -108,13 +108,16 @@ var Chalkboard;
         return exp_r * (2 ** k);
     };
     Chalkboard.I = (exponent = 1) => {
-        if (exponent % 4 === 0)
+        if (!Number.isInteger(exponent))
+            throw new TypeError(`Chalkboard.I: Parameter "exponent" must be an integer.`);
+        const n = Chalkboard.numb.mod(exponent, 4);
+        if (n === 0)
             return Chalkboard.comp.init(1, 0);
-        if (exponent % 4 === 1)
+        if (n === 1)
             return Chalkboard.comp.init(0, 1);
-        if (exponent % 4 === 2)
+        if (n === 2)
             return Chalkboard.comp.init(-1, 0);
-        if (exponent % 4 === 3)
+        if (n === 3)
             return Chalkboard.comp.init(0, -1);
         return Chalkboard.comp.init(0, 0);
     };
@@ -148,7 +151,7 @@ var Chalkboard;
         Chalkboard.REGISTRY[name] = func;
     };
     Chalkboard.REGISTRY = {};
-    Chalkboard.VERSION = "3.0.1";
+    Chalkboard.VERSION = "3.0.3";
     Chalkboard.VERSIONALIAS = "Euler";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined")
@@ -1997,26 +2000,12 @@ var Chalkboard;
             return $(!(bicondResult === true || bicondResult === 1));
         };
         bool.NCOND = (...vals) => {
-            if (vals.length < 2)
-                return $(false);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (!(xp && !xq))
-                    return $(false);
-            }
-            return $(true);
+            const cond = bool.COND(...vals);
+            return $(!(cond === true || cond === 1));
         };
         bool.NCONV = (...vals) => {
-            if (vals.length < 2)
-                return $(false);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (!(xq && !xp))
-                    return $(false);
-            }
-            return $(true);
+            const conv = bool.CONV(...vals);
+            return $(!(conv === true || conv === 1));
         };
         bool.NOR = (...vals) => {
             for (let i = 0; i < vals.length; i++) {
@@ -2061,6 +2050,9 @@ var Chalkboard;
                         tokens.push(ch);
                         i++;
                     }
+                    else if (!/[a-zA-Z0-9_]/.test(ch)) {
+                        throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}"`);
+                    }
                     else {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
@@ -2076,7 +2068,7 @@ var Chalkboard;
                 const peek = () => tokens[pos];
                 const consume = (token) => {
                     if (token && tokens[pos] !== token) {
-                        throw new Error(`Expected token ${token} but found ${tokens[pos]}`);
+                        throw new Error(`Chalkboard.bool.parse: Expected token ${token} but found ${tokens[pos]}`);
                     }
                     return tokens[pos++];
                 };
@@ -2125,7 +2117,7 @@ var Chalkboard;
                 };
                 const ast = parseExpression();
                 if (pos < tokens.length)
-                    throw new Error("Unexpected tokens at end");
+                    throw new Error("Chalkboard.bool.parse: Unexpected tokens at end");
                 return ast;
             };
             const nodeEqual = (a, b) => {
@@ -2320,7 +2312,7 @@ var Chalkboard;
                         return evaluateNode(node.left, values) || evaluateNode(node.right, values);
                     }
                 }
-                throw new Error(`Unknown node type: ${node.type}`);
+                throw new Error(`Chalkboard.bool.parse: Unknown node type: ${node.type}`);
             };
             try {
                 const tokens = tokenize(expr);
@@ -2341,10 +2333,10 @@ var Chalkboard;
             }
             catch (err) {
                 if (err instanceof Error) {
-                    throw new Error(`Error parsing expression: ${err.message}`);
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message}`);
                 }
                 else {
-                    throw new Error(`Error parsing expression: ${String(err)}`);
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err)}`);
                 }
             }
         };
@@ -2728,20 +2720,20 @@ var Chalkboard;
             if (vectfield.field !== "real")
                 throw new TypeError("Chalkboard.calc.curl: Property 'field' of 'vectfield' must be 'real'.");
             const f = vectfield.rule;
-            const v = vect;
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
             if (vectfield.type === "vector2d") {
-                const dpdy = (f[0](v.x, v.y + h) - f[0](v.x, v.y)) / h;
-                const dqdx = (f[1](v.x + h, v.y) - f[1](v.x, v.y)) / h;
+                const dpdy = (f[0](v[0], v[1] + h) - f[0](v[0], v[1])) / h;
+                const dqdx = (f[1](v[0] + h, v[1]) - f[1](v[0], v[1])) / h;
                 return Chalkboard.vect.init(0, 0, dqdx - dpdy);
             }
             else if (vectfield.type === "vector3d") {
-                const dpdy = (f[0](v.x, v.y + h, v.z) - f[0](v.x, v.y, v.z)) / h;
-                const dpdz = (f[0](v.x, v.y, v.z + h) - f[0](v.x, v.y, v.z)) / h;
-                const dqdx = (f[1](v.x + h, v.y, v.z) - f[1](v.x, v.y, v.z)) / h;
-                const dqdz = (f[1](v.x, v.y, v.z + h) - f[1](v.x, v.y, v.z)) / h;
-                const drdx = (f[2](v.x + h, v.y, v.z) - f[2](v.x, v.y, v.z)) / h;
-                const drdy = (f[2](v.x, v.y + h, v.z) - f[2](v.x, v.y, v.z)) / h;
+                const dpdy = (f[0](v[0], v[1] + h, v[2]) - f[0](v[0], v[1], v[2])) / h;
+                const dpdz = (f[0](v[0], v[1], v[2] + h) - f[0](v[0], v[1], v[2])) / h;
+                const dqdx = (f[1](v[0] + h, v[1], v[2]) - f[1](v[0], v[1], v[2])) / h;
+                const dqdz = (f[1](v[0], v[1], v[2] + h) - f[1](v[0], v[1], v[2])) / h;
+                const drdx = (f[2](v[0] + h, v[1], v[2]) - f[2](v[0], v[1], v[2])) / h;
+                const drdy = (f[2](v[0], v[1] + h, v[2]) - f[2](v[0], v[1], v[2])) / h;
                 return Chalkboard.vect.init(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             }
             throw new TypeError("Chalkboard.real.curl: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d'.");
@@ -2750,9 +2742,9 @@ var Chalkboard;
             if (func.field !== "real")
                 throw new TypeError("Chalkboard.calc.curvature: Property 'field' of 'func' must be 'real'.");
             if (func.type === "curve2d") {
-                const d = Chalkboard.calc.dfdx(func, val);
-                const d2 = Chalkboard.calc.d2fdx2(func, val);
-                return Math.abs(d.x * d2.y - d.y * d2.x) / Math.sqrt((d.x * d.x + d.y * d.y) * (d.x * d.x + d.y * d.y) * (d.x * d.x + d.y * d.y));
+                const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, val));
+                const d2 = Chalkboard.vect.toArray(Chalkboard.calc.d2fdx2(func, val));
+                return Math.abs(d[0] * d2[1] - d[1] * d2[0]) / Math.sqrt((d[0] * d[0] + d[1] * d[1]) * (d[0] * d[0] + d[1] * d[1]) * (d[0] * d[0] + d[1] * d[1]));
             }
             else if (func.type === "curve3d") {
                 return Chalkboard.vect.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, val));
@@ -2838,13 +2830,13 @@ var Chalkboard;
                 throw new TypeError("Chalkboard.calc.dfrdt: Properties 'field' of 'func1' and 'func2' must be 'real'.");
             if (func1.type !== "scalar3d")
                 throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func1' must be 'scalar3d'.");
-            const g = Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val));
-            const d = Chalkboard.calc.dfdx(func2, val);
+            const g = Chalkboard.vect.toArray(Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)));
+            const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, val));
             if (func2.type === "curve2d") {
-                return g.x * d.x + g.y * d.y;
+                return g[0] * d[0] + g[1] * d[1];
             }
             else if (func2.type === "curve3d") {
-                return g.x * d.x + g.y * d.y + g.z * d.z;
+                return g[0] * d[0] + g[1] * d[1] + g[2] * d[2];
             }
             throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func2' must be 'curve2d' or 'curve3d'.");
         };
@@ -3021,8 +3013,8 @@ var Chalkboard;
             if (vectfield.type === "vector2d" && func.type === "curve2d") {
                 const dt = (tsup - tinf) / 10000;
                 for (let t = tinf; t <= tsup; t += dt) {
-                    drdt = Chalkboard.calc.dfdx(func, t);
-                    result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t)), Chalkboard.vect.init(-drdt.y, drdt.x)) * Chalkboard.vect.mag(drdt);
+                    drdt = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, t));
+                    result += Chalkboard.vect.dot(Chalkboard.vect.fromField(vectfield, Chalkboard.real.val(func, t)), Chalkboard.vect.init(-drdt[1], drdt[0])) * Chalkboard.vect.mag(drdt);
                 }
                 return result * dt;
             }
@@ -3076,8 +3068,8 @@ var Chalkboard;
                 const dt = (sup - inf) / 10000;
                 if (funcORvectfield.type === "scalar2d") {
                     for (let t = inf; t <= sup; t += dt) {
-                        const val = Chalkboard.real.val(func, t);
-                        result += f(val.x, val.y) * Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, t));
+                        const val = Chalkboard.vect.toArray(Chalkboard.real.val(func, t));
+                        result += f(val[0], val[1]) * Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, t));
                     }
                     return result * dt;
                 }
@@ -3168,8 +3160,8 @@ var Chalkboard;
                 const dt = (sup - inf) / 10000;
                 for (let t = inf; t <= sup; t += dt) {
                     const fz = Chalkboard.comp.val(func1, Chalkboard.vect.toComplex(Chalkboard.real.val(func2, t)));
-                    const rt = Chalkboard.calc.dfdx(func2, t);
-                    result = Chalkboard.comp.add(result, Chalkboard.comp.init(fz.a * rt.x - fz.b * rt.y, fz.b * rt.x + fz.a * rt.y));
+                    const rt = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, t));
+                    result = Chalkboard.comp.add(result, Chalkboard.comp.init(fz.a * rt[0] - fz.b * rt[1], fz.b * rt[0] + fz.a * rt[1]));
                 }
                 return Chalkboard.comp.scl(result, dt);
             }
@@ -3181,58 +3173,58 @@ var Chalkboard;
             const f = funcORvectfield.rule;
             const r = funcORvectfield.rule;
             const F = funcORvectfield.rule;
-            const v = vect;
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
             if (funcORvectfield.type === "scalar3d") {
-                const dfdx = (f(v.x + h, v.y) - f(v.x, v.y)) / h;
-                const dfdy = (f(v.x, v.y + h) - f(v.x, v.y)) / h;
+                const dfdx = (f(v[0] + h, v[1]) - f(v[0], v[1])) / h;
+                const dfdy = (f(v[0], v[1] + h) - f(v[0], v[1])) / h;
                 return Chalkboard.vect.init(dfdx, dfdy);
             }
             else if (funcORvectfield.type === "surface3d") {
-                const dxds = (r[0](v.x + h, v.y) - r[0](v.x, v.y)) / h;
-                const dxdt = (r[0](v.x, v.y + h) - r[0](v.x, v.y)) / h;
-                const dyds = (r[1](v.x + h, v.y) - r[1](v.x, v.y)) / h;
-                const dydt = (r[1](v.x, v.y + h) - r[1](v.x, v.y)) / h;
-                const dzds = (r[2](v.x + h, v.y) - r[2](v.x, v.y)) / h;
-                const dzdt = (r[2](v.x, v.y + h) - r[2](v.x, v.y)) / h;
+                const dxds = (r[0](v[0] + h, v[1]) - r[0](v[0], v[1])) / h;
+                const dxdt = (r[0](v[0], v[1] + h) - r[0](v[0], v[1])) / h;
+                const dyds = (r[1](v[0] + h, v[1]) - r[1](v[0], v[1])) / h;
+                const dydt = (r[1](v[0], v[1] + h) - r[1](v[0], v[1])) / h;
+                const dzds = (r[2](v[0] + h, v[1]) - r[2](v[0], v[1])) / h;
+                const dzdt = (r[2](v[0], v[1] + h) - r[2](v[0], v[1])) / h;
                 return Chalkboard.matr.init([dxds, dxdt], [dyds, dydt], [dzds, dzdt]);
             }
             else if (funcORvectfield.type === "vector2d") {
-                const dpdx = (F[0](v.x + h, v.y) - F[0](v.x, v.y)) / h;
-                const dpdy = (F[0](v.x, v.y + h) - F[0](v.x, v.y)) / h;
-                const dqdx = (F[1](v.x + h, v.y) - F[1](v.x, v.y)) / h;
-                const dqdy = (F[1](v.x, v.y + h) - F[1](v.x, v.y)) / h;
+                const dpdx = (F[0](v[0] + h, v[1]) - F[0](v[0], v[1])) / h;
+                const dpdy = (F[0](v[0], v[1] + h) - F[0](v[0], v[1])) / h;
+                const dqdx = (F[1](v[0] + h, v[1]) - F[1](v[0], v[1])) / h;
+                const dqdy = (F[1](v[0], v[1] + h) - F[1](v[0], v[1])) / h;
                 return Chalkboard.matr.init([dpdx, dpdy], [dqdx, dqdy]);
             }
             else if (funcORvectfield.type === "vector3d") {
-                const dpdx = (F[0](v.x + h, v.y, v.z) - F[0](v.x, v.y, v.z)) / h;
-                const dpdy = (F[0](v.x, v.y + h, v.z) - F[0](v.x, v.y, v.z)) / h;
-                const dpdz = (F[0](v.x, v.y, v.z + h) - F[0](v.x, v.y, v.z)) / h;
-                const dqdx = (F[1](v.x + h, v.y, v.z) - F[1](v.x, v.y, v.z)) / h;
-                const dqdy = (F[1](v.x, v.y + h, v.z) - F[1](v.x, v.y, v.z)) / h;
-                const dqdz = (F[1](v.x, v.y, v.z + h) - F[1](v.x, v.y, v.z)) / h;
-                const drdx = (F[2](v.x + h, v.y, v.z) - F[2](v.x, v.y, v.z)) / h;
-                const drdy = (F[2](v.x, v.y + h, v.z) - F[2](v.x, v.y, v.z)) / h;
-                const drdz = (F[2](v.x, v.y, v.z + h) - F[2](v.x, v.y, v.z)) / h;
+                const dpdx = (F[0](v[0] + h, v[1], v[2]) - F[0](v[0], v[1], v[2])) / h;
+                const dpdy = (F[0](v[0], v[1] + h, v[2]) - F[0](v[0], v[1], v[2])) / h;
+                const dpdz = (F[0](v[0], v[1], v[2] + h) - F[0](v[0], v[1], v[2])) / h;
+                const dqdx = (F[1](v[0] + h, v[1], v[2]) - F[1](v[0], v[1], v[2])) / h;
+                const dqdy = (F[1](v[0], v[1] + h, v[2]) - F[1](v[0], v[1], v[2])) / h;
+                const dqdz = (F[1](v[0], v[1], v[2] + h) - F[1](v[0], v[1], v[2])) / h;
+                const drdx = (F[2](v[0] + h, v[1], v[2]) - F[2](v[0], v[1], v[2])) / h;
+                const drdy = (F[2](v[0], v[1] + h, v[2]) - F[2](v[0], v[1], v[2])) / h;
+                const drdz = (F[2](v[0], v[1], v[2] + h) - F[2](v[0], v[1], v[2])) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz], [dqdx, dqdy, dqdz], [drdx, drdy, drdz]);
             }
             else if (funcORvectfield.type === "vector4d") {
-                const dpdx = (F[0](v.x + h, v.y, v.z, v.w) - F[0](v.x, v.y, v.z, v.w)) / h;
-                const dpdy = (F[0](v.x, v.y + h, v.z, v.w) - F[0](v.x, v.y, v.z, v.w)) / h;
-                const dpdz = (F[0](v.x, v.y, v.z + h, v.w) - F[0](v.x, v.y, v.z, v.w)) / h;
-                const dpdw = (F[0](v.x, v.y, v.z, v.w + h) - F[0](v.x, v.y, v.z, v.w)) / h;
-                const dqdx = (F[1](v.x + h, v.y, v.z, v.w) - F[1](v.x, v.y, v.z, v.w)) / h;
-                const dqdy = (F[1](v.x, v.y + h, v.z, v.w) - F[1](v.x, v.y, v.z, v.w)) / h;
-                const dqdz = (F[1](v.x, v.y, v.z + h, v.w) - F[1](v.x, v.y, v.z, v.w)) / h;
-                const dqdw = (F[1](v.x, v.y, v.z, v.w + h) - F[1](v.x, v.y, v.z, v.w)) / h;
-                const drdx = (F[2](v.x + h, v.y, v.z, v.w) - F[2](v.x, v.y, v.z, v.w)) / h;
-                const drdy = (F[2](v.x, v.y + h, v.z, v.w) - F[2](v.x, v.y, v.z, v.w)) / h;
-                const drdz = (F[2](v.x, v.y, v.z + h, v.w) - F[2](v.x, v.y, v.z, v.w)) / h;
-                const drdw = (F[2](v.x, v.y, v.z, v.w + h) - F[2](v.x, v.y, v.z, v.w)) / h;
-                const dsdx = (F[3](v.x + h, v.y, v.z, v.w) - F[3](v.x, v.y, v.z, v.w)) / h;
-                const dsdy = (F[3](v.x, v.y + h, v.z, v.w) - F[3](v.x, v.y, v.z, v.w)) / h;
-                const dsdz = (F[3](v.x, v.y, v.z + h, v.w) - F[3](v.x, v.y, v.z, v.w)) / h;
-                const dsdw = (F[3](v.x, v.y, v.z, v.w + h) - F[3](v.x, v.y, v.z, v.w)) / h;
+                const dpdx = (F[0](v[0] + h, v[1], v[2], v[3]) - F[0](v[0], v[1], v[2], v[3])) / h;
+                const dpdy = (F[0](v[0], v[1] + h, v[2], v[3]) - F[0](v[0], v[1], v[2], v[3])) / h;
+                const dpdz = (F[0](v[0], v[1], v[2] + h, v[3]) - F[0](v[0], v[1], v[2], v[3])) / h;
+                const dpdw = (F[0](v[0], v[1], v[2], v[3] + h) - F[0](v[0], v[1], v[2], v[3])) / h;
+                const dqdx = (F[1](v[0] + h, v[1], v[2], v[3]) - F[1](v[0], v[1], v[2], v[3])) / h;
+                const dqdy = (F[1](v[0], v[1] + h, v[2], v[3]) - F[1](v[0], v[1], v[2], v[3])) / h;
+                const dqdz = (F[1](v[0], v[1], v[2] + h, v[3]) - F[1](v[0], v[1], v[2], v[3])) / h;
+                const dqdw = (F[1](v[0], v[1], v[2], v[3] + h) - F[1](v[0], v[1], v[2], v[3])) / h;
+                const drdx = (F[2](v[0] + h, v[1], v[2], v[3]) - F[2](v[0], v[1], v[2], v[3])) / h;
+                const drdy = (F[2](v[0], v[1] + h, v[2], v[3]) - F[2](v[0], v[1], v[2], v[3])) / h;
+                const drdz = (F[2](v[0], v[1], v[2] + h, v[3]) - F[2](v[0], v[1], v[2], v[3])) / h;
+                const drdw = (F[2](v[0], v[1], v[2], v[3] + h) - F[2](v[0], v[1], v[2], v[3])) / h;
+                const dsdx = (F[3](v[0] + h, v[1], v[2], v[3]) - F[3](v[0], v[1], v[2], v[3])) / h;
+                const dsdy = (F[3](v[0], v[1] + h, v[2], v[3]) - F[3](v[0], v[1], v[2], v[3])) / h;
+                const dsdz = (F[3](v[0], v[1], v[2] + h, v[3]) - F[3](v[0], v[1], v[2], v[3])) / h;
+                const dsdw = (F[3](v[0], v[1], v[2], v[3] + h) - F[3](v[0], v[1], v[2], v[3])) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz, dpdw], [dqdx, dqdy, dqdz, dqdw], [drdx, drdy, drdz, drdw], [dsdx, dsdy, dsdz, dsdw]);
             }
             throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
@@ -3243,60 +3235,60 @@ var Chalkboard;
             const f = funcORvectfield.rule;
             const r = funcORvectfield.rule;
             const F = funcORvectfield.rule;
-            const v = vect;
+            const v = Chalkboard.vect.toArray(vect);
             const h = 0.00001;
             if (funcORvectfield.type === "scalar3d") {
-                const d2fdx2 = (f(v.x + h, v.y) - 2 * f(v.x, v.y) + f(v.x - h, v.y)) / (h * h);
-                const d2fdy2 = (f(v.x, v.y + h) - 2 * f(v.x, v.y) + f(v.x, v.y - h)) / (h * h);
-                const d2fdxdy = (f(v.x + h, v.y + h) - f(v.x + h, v.y) - f(v.x, v.y + h) + f(v.x, v.y)) / (h * h);
-                const d2fdydx = (f(v.x + h, v.y + h) - f(v.x, v.y + h) - f(v.x + h, v.y) + f(v.x, v.y)) / (h * h);
+                const d2fdx2 = (f(v[0] + h, v[1]) - 2 * f(v[0], v[1]) + f(v[0] - h, v[1])) / (h * h);
+                const d2fdy2 = (f(v[0], v[1] + h) - 2 * f(v[0], v[1]) + f(v[0], v[1] - h)) / (h * h);
+                const d2fdxdy = (f(v[0] + h, v[1] + h) - f(v[0] + h, v[1]) - f(v[0], v[1] + h) + f(v[0], v[1])) / (h * h);
+                const d2fdydx = (f(v[0] + h, v[1] + h) - f(v[0], v[1] + h) - f(v[0] + h, v[1]) + f(v[0], v[1])) / (h * h);
                 return Chalkboard.matr.init([d2fdx2, d2fdxdy], [d2fdydx, d2fdy2]);
             }
             else if (funcORvectfield.type === "surface3d") {
-                const d2xds2 = (r[0](v.x + h, v.y) - 2 * r[0](v.x, v.y) + r[0](v.x - h, v.y)) / (h * h);
-                const d2xdt2 = (r[0](v.x, v.y + h) - 2 * r[0](v.x, v.y) + r[0](v.x, v.y - h)) / (h * h);
-                const d2yds2 = (r[1](v.x + h, v.y) - 2 * r[1](v.x, v.y) + r[1](v.x - h, v.y)) / (h * h);
-                const d2ydt2 = (r[1](v.x, v.y + h) - 2 * r[1](v.x, v.y) + r[1](v.x, v.y - h)) / (h * h);
-                const d2zds2 = (r[2](v.x + h, v.y) - 2 * r[2](v.x, v.y) + r[2](v.x - h, v.y)) / (h * h);
-                const d2zdt2 = (r[2](v.x, v.y + h) - 2 * r[2](v.x, v.y) + r[2](v.x, v.y - h)) / (h * h);
+                const d2xds2 = (r[0](v[0] + h, v[1]) - 2 * r[0](v[0], v[1]) + r[0](v[0] - h, v[1])) / (h * h);
+                const d2xdt2 = (r[0](v[0], v[1] + h) - 2 * r[0](v[0], v[1]) + r[0](v[0], v[1] - h)) / (h * h);
+                const d2yds2 = (r[1](v[0] + h, v[1]) - 2 * r[1](v[0], v[1]) + r[1](v[0] - h, v[1])) / (h * h);
+                const d2ydt2 = (r[1](v[0], v[1] + h) - 2 * r[1](v[0], v[1]) + r[1](v[0], v[1] - h)) / (h * h);
+                const d2zds2 = (r[2](v[0] + h, v[1]) - 2 * r[2](v[0], v[1]) + r[2](v[0] - h, v[1])) / (h * h);
+                const d2zdt2 = (r[2](v[0], v[1] + h) - 2 * r[2](v[0], v[1]) + r[2](v[0], v[1] - h)) / (h * h);
                 return Chalkboard.matr.init([d2xds2, d2xdt2], [d2yds2, d2ydt2], [d2zds2, d2zdt2]);
             }
             else if (funcORvectfield.type === "vector2d") {
-                const d2pdx2 = (F[0](v.x + h, v.y) - 2 * F[0](v.x, v.y) + F[0](v.x - h, v.y)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h) - 2 * F[0](v.x, v.y) + F[0](v.x, v.y - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y) - 2 * F[1](v.x, v.y) + F[1](v.x - h, v.y)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h) - 2 * F[1](v.x, v.y) + F[1](v.x, v.y - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1]) - 2 * F[0](v[0], v[1]) + F[0](v[0] - h, v[1])) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h) - 2 * F[0](v[0], v[1]) + F[0](v[0], v[1] - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1]) - 2 * F[1](v[0], v[1]) + F[1](v[0] - h, v[1])) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h) - 2 * F[1](v[0], v[1]) + F[1](v[0], v[1] - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2], [d2qdx2, d2qdy2]);
             }
             else if (funcORvectfield.type === "vector3d") {
-                const d2pdx2 = (F[0](v.x + h, v.y, v.z) - 2 * F[0](v.x, v.y, v.z) + F[0](v.x - h, v.y, v.z)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h, v.z) - 2 * F[0](v.x, v.y, v.z) + F[0](v.x, v.y - h, v.z)) / (h * h);
-                const d2pdz2 = (F[0](v.x, v.y, v.z + h) - 2 * F[0](v.x, v.y, v.z) + F[0](v.x, v.y, v.z - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y, v.z) - 2 * F[1](v.x, v.y, v.z) + F[1](v.x - h, v.y, v.z)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h, v.z) - 2 * F[1](v.x, v.y, v.z) + F[1](v.x, v.y - h, v.z)) / (h * h);
-                const d2qdz2 = (F[1](v.x, v.y, v.z + h) - 2 * F[1](v.x, v.y, v.z) + F[1](v.x, v.y, v.z - h)) / (h * h);
-                const d2rdx2 = (F[2](v.x + h, v.y, v.z) - 2 * F[2](v.x, v.y, v.z) + F[2](v.x - h, v.y, v.z)) / (h * h);
-                const d2rdy2 = (F[2](v.x, v.y + h, v.z) - 2 * F[2](v.x, v.y, v.z) + F[2](v.x, v.y - h, v.z)) / (h * h);
-                const d2rdz2 = (F[2](v.x, v.y, v.z + h) - 2 * F[2](v.x, v.y, v.z) + F[2](v.x, v.y, v.z - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1], v[2]) - 2 * F[0](v[0], v[1], v[2]) + F[0](v[0] - h, v[1], v[2])) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h, v[2]) - 2 * F[0](v[0], v[1], v[2]) + F[0](v[0], v[1] - h, v[2])) / (h * h);
+                const d2pdz2 = (F[0](v[0], v[1], v[2] + h) - 2 * F[0](v[0], v[1], v[2]) + F[0](v[0], v[1], v[2] - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1], v[2]) - 2 * F[1](v[0], v[1], v[2]) + F[1](v[0] - h, v[1], v[2])) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h, v[2]) - 2 * F[1](v[0], v[1], v[2]) + F[1](v[0], v[1] - h, v[2])) / (h * h);
+                const d2qdz2 = (F[1](v[0], v[1], v[2] + h) - 2 * F[1](v[0], v[1], v[2]) + F[1](v[0], v[1], v[2] - h)) / (h * h);
+                const d2rdx2 = (F[2](v[0] + h, v[1], v[2]) - 2 * F[2](v[0], v[1], v[2]) + F[2](v[0] - h, v[1], v[2])) / (h * h);
+                const d2rdy2 = (F[2](v[0], v[1] + h, v[2]) - 2 * F[2](v[0], v[1], v[2]) + F[2](v[0], v[1] - h, v[2])) / (h * h);
+                const d2rdz2 = (F[2](v[0], v[1], v[2] + h) - 2 * F[2](v[0], v[1], v[2]) + F[2](v[0], v[1], v[2] - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2], [d2qdx2, d2qdy2, d2qdz2], [d2rdx2, d2rdy2, d2rdz2]);
             }
             else if (funcORvectfield.type === "vector4d") {
-                const d2pdx2 = (F[0](v.x + h, v.y, v.z, v.w) - 2 * F[0](v.x, v.y, v.z, v.w) + F[0](v.x - h, v.y, v.z, v.w)) / (h * h);
-                const d2pdy2 = (F[0](v.x, v.y + h, v.z, v.w) - 2 * F[0](v.x, v.y, v.z, v.w) + F[0](v.x, v.y - h, v.z, v.w)) / (h * h);
-                const d2pdz2 = (F[0](v.x, v.y, v.z + h, v.w) - 2 * F[0](v.x, v.y, v.z, v.w) + F[0](v.x, v.y, v.z - h, v.w)) / (h * h);
-                const d2pdw2 = (F[0](v.x, v.y, v.z, v.w + h) - 2 * F[0](v.x, v.y, v.z, v.w) + F[0](v.x, v.y, v.z, v.w - h)) / (h * h);
-                const d2qdx2 = (F[1](v.x + h, v.y, v.z, v.w) - 2 * F[1](v.x, v.y, v.z, v.w) + F[1](v.x - h, v.y, v.z, v.w)) / (h * h);
-                const d2qdy2 = (F[1](v.x, v.y + h, v.z, v.w) - 2 * F[1](v.x, v.y, v.z, v.w) + F[1](v.x, v.y - h, v.z, v.w)) / (h * h);
-                const d2qdz2 = (F[1](v.x, v.y, v.z + h, v.w) - 2 * F[1](v.x, v.y, v.z, v.w) + F[1](v.x, v.y, v.z - h, v.w)) / (h * h);
-                const d2qdw2 = (F[1](v.x, v.y, v.z, v.w + h) - 2 * F[1](v.x, v.y, v.z, v.w) + F[1](v.x, v.y, v.z, v.w - h)) / (h * h);
-                const d2rdx2 = (F[2](v.x + h, v.y, v.z, v.w) - 2 * F[2](v.x, v.y, v.z, v.w) + F[2](v.x - h, v.y, v.z, v.w)) / (h * h);
-                const d2rdy2 = (F[2](v.x, v.y + h, v.z, v.w) - 2 * F[2](v.x, v.y, v.z, v.w) + F[2](v.x, v.y - h, v.z, v.w)) / (h * h);
-                const d2rdz2 = (F[2](v.x, v.y, v.z + h, v.w) - 2 * F[2](v.x, v.y, v.z, v.w) + F[2](v.x, v.y, v.z - h, v.w)) / (h * h);
-                const d2rdw2 = (F[2](v.x, v.y, v.z, v.w + h) - 2 * F[2](v.x, v.y, v.z, v.w) + F[2](v.x, v.y, v.z, v.w - h)) / (h * h);
-                const d2sdx2 = (F[3](v.x + h, v.y, v.z, v.w) - 2 * F[3](v.x, v.y, v.z, v.w) + F[3](v.x - h, v.y, v.z, v.w)) / (h * h);
-                const d2sdy2 = (F[3](v.x, v.y + h, v.z, v.w) - 2 * F[3](v.x, v.y, v.z, v.w) + F[3](v.x, v.y - h, v.z, v.w)) / (h * h);
-                const d2sdz2 = (F[3](v.x, v.y, v.z + h, v.w) - 2 * F[3](v.x, v.y, v.z, v.w) + F[3](v.x, v.y, v.z - h, v.w)) / (h * h);
-                const d2sdw2 = (F[3](v.x, v.y, v.z, v.w + h) - 2 * F[3](v.x, v.y, v.z, v.w) + F[3](v.x, v.y, v.z, v.w - h)) / (h * h);
+                const d2pdx2 = (F[0](v[0] + h, v[1], v[2], v[3]) - 2 * F[0](v[0], v[1], v[2], v[3]) + F[0](v[0] - h, v[1], v[2], v[3])) / (h * h);
+                const d2pdy2 = (F[0](v[0], v[1] + h, v[2], v[3]) - 2 * F[0](v[0], v[1], v[2], v[3]) + F[0](v[0], v[1] - h, v[2], v[3])) / (h * h);
+                const d2pdz2 = (F[0](v[0], v[1], v[2] + h, v[3]) - 2 * F[0](v[0], v[1], v[2], v[3]) + F[0](v[0], v[1], v[2] - h, v[3])) / (h * h);
+                const d2pdw2 = (F[0](v[0], v[1], v[2], v[3] + h) - 2 * F[0](v[0], v[1], v[2], v[3]) + F[0](v[0], v[1], v[2], v[3] - h)) / (h * h);
+                const d2qdx2 = (F[1](v[0] + h, v[1], v[2], v[3]) - 2 * F[1](v[0], v[1], v[2], v[3]) + F[1](v[0] - h, v[1], v[2], v[3])) / (h * h);
+                const d2qdy2 = (F[1](v[0], v[1] + h, v[2], v[3]) - 2 * F[1](v[0], v[1], v[2], v[3]) + F[1](v[0], v[1] - h, v[2], v[3])) / (h * h);
+                const d2qdz2 = (F[1](v[0], v[1], v[2] + h, v[3]) - 2 * F[1](v[0], v[1], v[2], v[3]) + F[1](v[0], v[1], v[2] - h, v[3])) / (h * h);
+                const d2qdw2 = (F[1](v[0], v[1], v[2], v[3] + h) - 2 * F[1](v[0], v[1], v[2], v[3]) + F[1](v[0], v[1], v[2], v[3] - h)) / (h * h);
+                const d2rdx2 = (F[2](v[0] + h, v[1], v[2], v[3]) - 2 * F[2](v[0], v[1], v[2], v[3]) + F[2](v[0] - h, v[1], v[2], v[3])) / (h * h);
+                const d2rdy2 = (F[2](v[0], v[1] + h, v[2], v[3]) - 2 * F[2](v[0], v[1], v[2], v[3]) + F[2](v[0], v[1] - h, v[2], v[3])) / (h * h);
+                const d2rdz2 = (F[2](v[0], v[1], v[2] + h, v[3]) - 2 * F[2](v[0], v[1], v[2], v[3]) + F[2](v[0], v[1], v[2] - h, v[3])) / (h * h);
+                const d2rdw2 = (F[2](v[0], v[1], v[2], v[3] + h) - 2 * F[2](v[0], v[1], v[2], v[3]) + F[2](v[0], v[1], v[2], v[3] - h)) / (h * h);
+                const d2sdx2 = (F[3](v[0] + h, v[1], v[2], v[3]) - 2 * F[3](v[0], v[1], v[2], v[3]) + F[3](v[0] - h, v[1], v[2], v[3])) / (h * h);
+                const d2sdy2 = (F[3](v[0], v[1] + h, v[2], v[3]) - 2 * F[3](v[0], v[1], v[2], v[3]) + F[3](v[0], v[1] - h, v[2], v[3])) / (h * h);
+                const d2sdz2 = (F[3](v[0], v[1], v[2] + h, v[3]) - 2 * F[3](v[0], v[1], v[2], v[3]) + F[3](v[0], v[1], v[2] - h, v[3])) / (h * h);
+                const d2sdw2 = (F[3](v[0], v[1], v[2], v[3] + h) - 2 * F[3](v[0], v[1], v[2], v[3]) + F[3](v[0], v[1], v[2], v[3] - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2, d2pdw2], [d2qdx2, d2qdy2, d2qdz2, d2qdw2], [d2rdx2, d2rdy2, d2rdz2, d2rdw2], [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
             }
             throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
@@ -5922,9 +5914,24 @@ var Chalkboard;
     let matr;
     (function (matr_1) {
         const $ = (input) => {
+            const $$ = (x, y, z, w) => {
+                if (z === undefined && w === undefined) {
+                    return { x: x, y: y };
+                }
+                else if (w === undefined) {
+                    return { x: x, y: y, z: z };
+                }
+                else {
+                    return { x: x, y: y, z: z, w: w };
+                }
+            };
             const v = input;
             if (v && typeof v.x === "number" && typeof v.y === "number") {
-                return input;
+                if (typeof v.z === "number" && typeof v.w === "number")
+                    return $$(v.x, v.y, v.z, v.w);
+                if (typeof v.z === "number")
+                    return $$(v.x, v.y, v.z);
+                return $$(v.x, v.y);
             }
             if (Array.isArray(input)) {
                 if (input.length > 0 && Array.isArray(input[0])) {
@@ -5933,45 +5940,45 @@ var Chalkboard;
                     const cols = Chalkboard.matr.cols(matr);
                     if (cols === 1) {
                         if (rows === 2)
-                            return Chalkboard.vect.init(matr[0][0], matr[1][0]);
+                            return $$(matr[0][0], matr[1][0]);
                         if (rows === 3)
-                            return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0]);
+                            return $$(matr[0][0], matr[1][0], matr[2][0]);
                         if (rows === 4)
-                            return Chalkboard.vect.init(matr[0][0], matr[1][0], matr[2][0], matr[3][0]);
+                            return $$(matr[0][0], matr[1][0], matr[2][0], matr[3][0]);
                     }
                     else if (rows === 1) {
                         if (cols === 2)
-                            return Chalkboard.vect.init(matr[0][0], matr[0][1]);
+                            return $$(matr[0][0], matr[0][1]);
                         if (cols === 3)
-                            return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2]);
+                            return $$(matr[0][0], matr[0][1], matr[0][2]);
                         if (cols === 4)
-                            return Chalkboard.vect.init(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
+                            return $$(matr[0][0], matr[0][1], matr[0][2], matr[0][3]);
                     }
                 }
                 else {
                     const arr = input;
                     if (arr.length === 2)
-                        return Chalkboard.vect.init(arr[0], arr[1]);
+                        return $$(arr[0], arr[1]);
                     if (arr.length === 3)
-                        return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                        return $$(arr[0], arr[1], arr[2]);
                     if (arr.length === 4)
-                        return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                        return $$(arr[0], arr[1], arr[2], arr[3]);
                 }
             }
             if (input instanceof Float32Array || input instanceof Float64Array) {
                 const arr = input;
                 if (arr.length === 2)
-                    return Chalkboard.vect.init(arr[0], arr[1]);
+                    return $$(arr[0], arr[1]);
                 if (arr.length === 3)
-                    return Chalkboard.vect.init(arr[0], arr[1], arr[2]);
+                    return $$(arr[0], arr[1], arr[2]);
                 if (arr.length === 4)
-                    return Chalkboard.vect.init(arr[0], arr[1], arr[2], arr[3]);
+                    return $$(arr[0], arr[1], arr[2], arr[3]);
             }
             if (typeof input === "string") {
                 try {
                     const parsed = JSON.parse(input);
                     if (parsed && typeof parsed === "object" && typeof parsed.x === "number" && typeof parsed.y === "number") {
-                        return Chalkboard.vect.init(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
+                        return $$(parsed.x, parsed.y, parsed.z !== undefined ? parsed.z : undefined, parsed.w !== undefined ? parsed.w : undefined);
                     }
                 }
                 catch (e) {
@@ -5981,11 +5988,11 @@ var Chalkboard;
                         const components = content.split(",").map(part => parseFloat(part.trim()));
                         if (components.length >= 2 && components.every(p => !isNaN(p))) {
                             if (components.length === 2)
-                                return Chalkboard.vect.init(components[0], components[1]);
+                                return $$(components[0], components[1]);
                             if (components.length === 3)
-                                return Chalkboard.vect.init(components[0], components[1], components[2]);
+                                return $$(components[0], components[1], components[2]);
                             if (components.length === 4)
-                                return Chalkboard.vect.init(components[0], components[1], components[2], components[3]);
+                                return $$(components[0], components[1], components[2], components[3]);
                         }
                     }
                 }
@@ -6041,7 +6048,7 @@ var Chalkboard;
         };
         matr_1.addKronecker = (matr1, matr2) => {
             if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
-                return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr1))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr2)), matr2));
+                return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr2))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr1)), matr2));
             }
             else {
                 throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" that are square.');
@@ -6630,7 +6637,7 @@ var Chalkboard;
                 return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3], [1 / 2, 1 / 1, 2 / 3], [1 / 3, 2 / 3, 1 / 1]);
             }
             else if (size === 4) {
-                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 1, 3 / 4, 1 / 1]);
+                return Chalkboard.matr.init([1 / 1, 1 / 2, 1 / 3, 1 / 4], [1 / 2, 1 / 1, 2 / 3, 1 / 2], [1 / 3, 2 / 3, 1 / 1, 3 / 4], [1 / 4, 1 / 2, 3 / 4, 1 / 1]);
             }
             else {
                 const result = Chalkboard.matr.init();
@@ -7943,45 +7950,34 @@ var Chalkboard;
             return true;
         };
         numb.isRational = (num, tolerance = 1e-8) => {
-            if (typeof num !== "number" || !Number.isFinite(num) || typeof tolerance !== "number" || !Number.isFinite(tolerance) || tolerance <= 0)
+            if (typeof num !== "number" || typeof tolerance !== "number" || !Number.isFinite(num) || !Number.isFinite(tolerance) || tolerance <= 0)
                 return false;
-            const mult = num / Chalkboard.PI();
-            if (mult !== 0 && Math.abs(Math.round(mult) - mult) < tolerance) {
-                return false;
-            }
-            if (num > 0) {
-                const ln = Math.log(num);
-                if (ln !== 0 && Math.abs(Math.round(ln) - ln) < tolerance) {
-                    const pow = Chalkboard.E(Math.round(ln));
-                    if (Math.abs(num - pow) < tolerance) {
-                        return false;
-                    }
-                }
-            }
-            for (let d = 2; d <= 6; d++) {
-                const fract = Chalkboard.PI() / d;
-                for (let n = 1; n <= d * 4; n++) {
-                    if (n % d !== 0) {
-                        if (Math.abs(num - n * fract) < tolerance) {
-                            return false;
-                        }
-                    }
-                }
-            }
-            const knownIrrationals = [Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.real.sqrt(Chalkboard.PI()), Chalkboard.E(), Chalkboard.PI(), Chalkboard.E(2)];
+            if (num === 0 || Number.isInteger(num))
+                return true;
+            const isClose = (a, b) => Math.abs(a - b) <= tolerance;
+            const isSquare = (n) => Number.isInteger(Chalkboard.real.sqrt(n));
+            const knownIrrationals = [Chalkboard.PI(), Chalkboard.E(), Chalkboard.E(-1), Chalkboard.E(0.5), Chalkboard.E(2), Chalkboard.real.sqrt(Chalkboard.PI())];
             for (let i = 2; i <= 100; i++) {
-                if (Number.isInteger(Math.sqrt(i)))
-                    continue;
-                knownIrrationals.push(Chalkboard.real.sqrt(i));
+                if (!isSquare(i))
+                    knownIrrationals.push(Chalkboard.real.sqrt(i));
             }
-            for (const irr of knownIrrationals) {
-                if (Math.abs(num - irr) < tolerance) {
+            for (const irrational of knownIrrationals) {
+                if (isClose(num, irrational))
                     return false;
+                if (irrational !== 0) {
+                    const ratio = num / irrational;
+                    for (let d = 1; d <= 32; d++) {
+                        const n = Math.round(ratio * d);
+                        if (n !== 0 && Math.abs(n) <= 256 && isClose(ratio, n / d))
+                            return false;
+                    }
                 }
             }
             try {
                 const [n, d] = Chalkboard.numb.toFraction(num, tolerance);
-                return (Math.abs(num - n / d) < tolerance) && (Math.abs(d) <= 100000);
+                if (d === 0 || Math.abs(d) > 100000)
+                    return false;
+                return isClose(num, n / d);
             }
             catch {
                 return false;
@@ -8139,7 +8135,14 @@ var Chalkboard;
                 throw new Error(`Chalkboard.numb.roundTo: Parameters must be finite numbers.`);
             if (positionalIndex === 0)
                 throw new Error(`Chalkboard.numb.roundTo: Parameter "positionalIndex" must be non-zero.`);
-            return Math.round(num / positionalIndex) * positionalIndex;
+            const step = Math.abs(positionalIndex);
+            const quotient = num / step;
+            const epsilon = Number.EPSILON * Math.max(1, Math.abs(quotient));
+            const rounded = (quotient < 0 ? -Math.round(Math.abs(quotient) + epsilon) : Math.round(quotient + epsilon)) * step;
+            const str = step.toString().toLowerCase();
+            const decimalPlaces = str.includes("e") ? Math.max(0, ((str.split("e")[0].split(".")[1] || "").length) - Number(str.split("e")[1])) : Math.max(0, (str.split(".")[1] || "").length);
+            const result = Number(rounded.toFixed(Math.min(100, decimalPlaces)));
+            return Object.is(result, -0) ? 0 : result;
         };
         numb.sgn = (num) => {
             if (Number.isNaN(num))
@@ -8974,9 +8977,9 @@ var Chalkboard;
             return Chalkboard.quat.init((quat1.a * quat2.a + quat1.b * quat2.b + quat1.c * quat2.c + quat1.d * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.b * quat2.a - quat1.a * quat2.b - quat1.d * quat2.c + quat1.c * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.c * quat2.a + quat1.d * quat2.b - quat1.a * quat2.c - quat1.b * quat2.d) / Chalkboard.quat.magsq(quat2), (quat1.d * quat2.a - quat1.c * quat2.b + quat1.b * quat2.c - quat1.a * quat2.d) / Chalkboard.quat.magsq(quat2));
         };
         quat_1.fromAxis = (vect, rad) => {
-            vect = vect;
-            if (typeof vect.z !== "undefined") {
-                return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), vect.x * Chalkboard.trig.sin(rad / 2), vect.y * Chalkboard.trig.sin(rad / 2), vect.z * Chalkboard.trig.sin(rad / 2));
+            const v = Chalkboard.vect.toArray(vect);
+            if (v.length === 3) {
+                return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), v[0] * Chalkboard.trig.sin(rad / 2), v[1] * Chalkboard.trig.sin(rad / 2), v[2] * Chalkboard.trig.sin(rad / 2));
             }
             else {
                 throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 3 dimensions.');
@@ -9132,7 +9135,7 @@ var Chalkboard;
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => Math.abs(f(...x));
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("vector")) {
                 const f = func.rule;
@@ -9140,7 +9143,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x) => Math.abs(f[i](...x)));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("curve")) {
                 const f = func.rule;
@@ -9148,7 +9151,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((t) => Math.abs(f[i](t)));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("surface")) {
                 const f = func.rule;
@@ -9156,7 +9159,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((s, t) => Math.abs(f[i](s, t)));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             throw new TypeError("Chalkboard.real.absolute: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -9169,7 +9172,7 @@ var Chalkboard;
                 const f1 = func1.rule;
                 const f2 = func2.rule;
                 const g = (...x) => f1(...x) + f2(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule;
@@ -9178,7 +9181,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x) => f1[i](...x) + f2[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule;
@@ -9187,7 +9190,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t) => f1[i](t) + f2[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule;
@@ -9196,7 +9199,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s, t) => f1[i](s, t) + f2[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -9209,7 +9212,7 @@ var Chalkboard;
                 const f1 = func1.rule;
                 const f2 = func2.rule;
                 const g = (...x) => f1(f2(...x));
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule;
@@ -9218,7 +9221,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x) => f1[i](f2[i](...x)));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', or 'vector4d'.");
         };
@@ -9316,7 +9319,7 @@ var Chalkboard;
                 const f1 = func1.rule;
                 const f2 = func2.rule;
                 const g = (...x) => f1(...x) / f2(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule;
@@ -9325,7 +9328,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x) => f1[i](...x) / f2[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule;
@@ -9334,7 +9337,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t) => f1[i](t) / f2[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule;
@@ -9343,7 +9346,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s, t) => f1[i](s, t) / f2[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -9453,7 +9456,7 @@ var Chalkboard;
                 const f1 = func1.rule;
                 const f2 = func2.rule;
                 const g = (...x) => f1(...x) * f2(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule;
@@ -9462,7 +9465,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x) => f1[i](...x) * f2[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule;
@@ -9471,7 +9474,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t) => f1[i](t) * f2[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule;
@@ -9480,7 +9483,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s, t) => f1[i](s, t) * f2[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -9490,7 +9493,7 @@ var Chalkboard;
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => -f(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("vector")) {
                 const f = func.rule;
@@ -9498,7 +9501,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x) => -f[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("curve")) {
                 const f = func.rule;
@@ -9506,7 +9509,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((t) => -f[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("surface")) {
                 const f = func.rule;
@@ -9514,7 +9517,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((s, t) => -f[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             throw new TypeError("Chalkboard.real.negate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -10400,7 +10403,7 @@ var Chalkboard;
                 if (func.type.startsWith("scalar")) {
                     const f = func.rule;
                     const g = (...x) => f(...x) ** num;
-                    return Chalkboard.real.define(g);
+                    return { rule: g, field: "real", type: func.type };
                 }
                 else if (func.type.startsWith("vector")) {
                     const f = func.rule;
@@ -10408,7 +10411,7 @@ var Chalkboard;
                     for (let i = 0; i < f.length; i++) {
                         g.push((...x) => f[i](...x) ** num);
                     }
-                    return Chalkboard.real.define(g);
+                    return { rule: g, field: "real", type: func.type };
                 }
                 else if (func.type.startsWith("curve")) {
                     const f = func.rule;
@@ -10416,7 +10419,7 @@ var Chalkboard;
                     for (let i = 0; i < f.length; i++) {
                         g.push((t) => f[i](t) ** num);
                     }
-                    return Chalkboard.real.define(g);
+                    return { rule: g, field: "real", type: func.type };
                 }
                 else if (func.type.startsWith("surface")) {
                     const f = func.rule;
@@ -10424,7 +10427,7 @@ var Chalkboard;
                     for (let i = 0; i < f.length; i++) {
                         g.push((s, t) => f[i](s, t) ** num);
                     }
-                    return Chalkboard.real.define(g);
+                    return { rule: g, field: "real", type: func.type };
                 }
                 throw new TypeError("Chalkboard.real.pow: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
             }
@@ -10478,7 +10481,7 @@ var Chalkboard;
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => 1 / f(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("vector")) {
                 const f = func.rule;
@@ -10486,7 +10489,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x) => 1 / f[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("curve")) {
                 const f = func.rule;
@@ -10494,7 +10497,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((t) => 1 / f[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("surface")) {
                 const f = func.rule;
@@ -10502,7 +10505,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((s, t) => 1 / f[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             throw new TypeError("Chalkboard.real.reciprocate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -10530,7 +10533,7 @@ var Chalkboard;
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => f(...x) * num;
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("vector")) {
                 const f = func.rule;
@@ -10538,7 +10541,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((...x) => f[i](...x) * num);
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("curve")) {
                 const f = func.rule;
@@ -10546,7 +10549,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((t) => f[i](t) * num);
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             else if (func.type.startsWith("surface")) {
                 const f = func.rule;
@@ -10554,7 +10557,7 @@ var Chalkboard;
                 for (let i = 0; i < f.length; i++) {
                     g.push((s, t) => f[i](s, t) * num);
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func.type };
             }
             throw new TypeError("Chalkboard.real.scl: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -10592,7 +10595,7 @@ var Chalkboard;
                 const f1 = func1.rule;
                 const f2 = func2.rule;
                 const g = (...x) => f1(...x) - f2(...x);
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("vector")) {
                 const f1 = func1.rule;
@@ -10601,7 +10604,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((...x) => f1[i](...x) - f2[i](...x));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("curve")) {
                 const f1 = func1.rule;
@@ -10610,7 +10613,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((t) => f1[i](t) - f2[i](t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             else if (func1.type.startsWith("surface")) {
                 const f1 = func1.rule;
@@ -10619,7 +10622,7 @@ var Chalkboard;
                 for (let i = 0; i < f1.length; i++) {
                     g.push((s, t) => f1[i](s, t) - f2[i](s, t));
                 }
-                return Chalkboard.real.define(g);
+                return { rule: g, field: "real", type: func1.type };
             }
             throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
         };
@@ -10658,28 +10661,28 @@ var Chalkboard;
             }
             else if (func.type === "scalar3d") {
                 const f = func.rule;
-                const v = val;
-                return f(v.x, v.y);
+                const v = Chalkboard.vect.toArray(val);
+                return f(v[0], v[1]);
             }
             else if (func.type === "scalar4d") {
                 const f = func.rule;
-                const v = val;
-                return f(v.x, v.y, v.z);
+                const v = Chalkboard.vect.toArray(val);
+                return f(v[0], v[1], v[2]);
             }
             else if (func.type === "vector2d") {
                 const f = func.rule;
-                const v = val;
-                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
+                const v = Chalkboard.vect.toArray(val);
+                return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]));
             }
             else if (func.type === "vector3d") {
                 const f = func.rule;
-                const v = val;
-                return Chalkboard.vect.init(f[0](v.x, v.y, v.z), f[1](v.x, v.y, v.z), f[2](v.x, v.y, v.z));
+                const v = Chalkboard.vect.toArray(val);
+                return Chalkboard.vect.init(f[0](v[0], v[1], v[2]), f[1](v[0], v[1], v[2]), f[2](v[0], v[1], v[2]));
             }
             else if (func.type === "vector4d") {
                 const f = func.rule;
-                const v = val;
-                return Chalkboard.vect.init(f[0](v.x, v.y, v.z, v.w), f[1](v.x, v.y, v.z, v.w), f[2](v.x, v.y, v.z, v.w), f[3](v.x, v.y, v.z, v.w));
+                const v = Chalkboard.vect.toArray(val);
+                return Chalkboard.vect.init(f[0](v[0], v[1], v[2], v[3]), f[1](v[0], v[1], v[2], v[3]), f[2](v[0], v[1], v[2], v[3]), f[3](v[0], v[1], v[2], v[3]));
             }
             else if (func.type === "curve2d") {
                 const f = func.rule;
@@ -10698,8 +10701,8 @@ var Chalkboard;
             }
             else if (func.type === "surface3d") {
                 const f = func.rule;
-                const v = val;
-                return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y), f[2](v.x, v.y));
+                const v = Chalkboard.vect.toArray(val);
+                return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]), f[2](v[0], v[1]));
             }
             throw new TypeError("Chalkboard.real.val: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'");
         };
@@ -12444,7 +12447,11 @@ var Chalkboard;
             };
             const v = input;
             if (v && typeof v.x === "number" && typeof v.y === "number") {
-                return input;
+                if (typeof v.z === "number" && typeof v.w === "number")
+                    return $$(v.x, v.y, v.z, v.w);
+                if (typeof v.z === "number")
+                    return $$(v.x, v.y, v.z);
+                return $$(v.x, v.y);
             }
             if (Array.isArray(input)) {
                 if (input.length > 0 && Array.isArray(input[0])) {

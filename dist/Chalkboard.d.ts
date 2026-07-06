@@ -66,7 +66,7 @@ declare namespace Chalkboard {
     const PI: (coefficient?: number) => number;
     const REGISTER: (name: string, func: (...x: number[]) => number) => void;
     const REGISTRY: Record<string, (...x: number[]) => number>;
-    const VERSION: "3.0.1";
+    const VERSION: "3.0.3";
     const VERSIONALIAS: "Euler";
 }
 declare namespace Chalkboard {

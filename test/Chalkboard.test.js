@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.2 Euler
-    Released April 13th, 2026
+    Version 3.0.3 Euler
+    Released July 6th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Test: Chalkboard Namespace
 */
@@ -11,7 +11,7 @@ import cb from "../dist/Chalkboard.js";
 
 // VERSION, VERSIONALIAS
 {
-    assert.strictEqual(cb.VERSION, "3.0.2");
+    assert.strictEqual(cb.VERSION, "3.0.3");
     assert.strictEqual(cb.VERSIONALIAS, "Euler");
 }
 

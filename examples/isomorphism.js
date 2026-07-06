@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.2 Euler
-    Released April 13th, 2026
+    Version 3.0.3 Euler
+    Released July 6th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Example Program: Isomorphism Visualization
 */

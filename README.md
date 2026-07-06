@@ -1,7 +1,7 @@
 <p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.2"><img src="https://img.shields.io/badge/release-v3.0.2_Euler-327dc8?logo=github&logoColor=white" alt="Latest release is v3.0.2 Euler"></a>
-    <a href="https://raw.githubusercontent.com/Zushah/Chalkboard/v3.0.2/dist/Chalkboard.js"><img src="https://img.shields.io/badge/minified-291.4_kB-327dc8?logo=javascript&logoColor=white" alt="291.4 kilobytes minified size"></a>
+    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.3"><img src="https://img.shields.io/badge/release-v3.0.3_Euler-327dc8?logo=github&logoColor=white" alt="Latest release is v3.0.3 Euler"></a>
+    <a href="https://raw.githubusercontent.com/Zushah/Chalkboard/v3.0.3/dist/Chalkboard.js"><img src="https://img.shields.io/badge/minified-294.0_kB-327dc8?logo=javascript&logoColor=white" alt="294.0 kilobytes minified bundle size"></a>
     <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?color=327dc8&logo=npm&logoColor=white" alt="npm downloads per month"></a>
     <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://img.shields.io/jsdelivr/gh/hm/Zushah/Chalkboard?color=327dc8&logo=jsdelivr&logoColor=white" alt="jsDelivr requests per month"></a>
     <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MPL--2.0-327dc8?logo=gitbook&logoColor=white" alt="Mozilla Public License 2.0"></a>
@@ -9,9 +9,8 @@
     <a href="https://zushah.github.io/Chalkboard">https://zushah.github.io/Chalkboard</a>
 </p><br>
 
-Chalkboard is a library at the intersection of pure mathematics and web interactivity.
+Chalkboard is a TypeScript library with hundreds of functions for the manifestation and manipulation of mathematical structures and systems, such as:
 
-It facilitates the construction and manipulation of computational structures and analytical systems in TypeScript, such as:
 - defining isomorphisms between algebraic structures,
 - computing the flux of vector fields over parameterized surfaces,
 - simulating systems of differential equations,
@@ -29,9 +28,9 @@ npm install @zushah/chalkboard
 ```
 or
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@3.0.2/dist/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@3.0.3/dist/Chalkboard.min.js"></script>
 ```
-or download the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.2).
+or download the bundle of the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.3).
 
 ## Documentation
 
@@ -83,9 +82,8 @@ After installing Chalkboard, you can straightforwardly get started with it, sinc
 ```js
 Chalkboard.namespace.function(parameters);
 ```
-Ten interesting examples of Chalkboard can be found [here](https://zushah.github.io/Chalkboard/examples/index.html) and their source code can be found [here](https://www.github.com/Zushah/Chalkboard/tree/main/examples).
 
-Here are snippets of code that show off only a few features of Chalkboard:
+Here are snippets of code that show off only a few features of Chalkboard, but you can find more interesting ones on the [website](https://zushah.github.io/Chalkboard/examples):
 ```js
 const cb = Chalkboard; // Initialize in a browser
 const cb = require("@zushah/chalkboard"); // Initialize in Node with CommonJS
@@ -183,7 +181,7 @@ const k = cb.numb.convert(98.6, "F", "K"); // Temperature conversion
 ```
 
 ## Contributing
-Contributions to Chalkboard are welcome! The contribution guidelines can be found [here](https://www.github.com/Zushah/Chalkboard/blob/main/CONTRIBUTING.md). Furthermore, the changelog can be found [here](https://www.github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md). Lastly, the design details can be found [here](https://www.github.com/Zushah/Chalkboard/blob/main/DESIGN.md).
+Contributions to Chalkboard are welcome! Make sure to check out the [contribution guidelines](https://www.github.com/Zushah/Chalkboard/blob/main/CONTRIBUTING.md), the [changelog](https://www.github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md), and the [design document](https://www.github.com/Zushah/Chalkboard/blob/main/DESIGN.md).
 
 ## Acknowledgments
 - Thanks to [@bhavjitChauhan](https://www.github.com/bhavjitChauhan) for his contribution ([`d3f0a82`](https://github.com/Zushah/Chalkboard/commit/d3f0a82f0c2b1351f391908ef2d6f78403881259)) of adding partial pivoting to matrix inversion in [v1.3.0 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).

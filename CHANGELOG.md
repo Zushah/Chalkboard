@@ -1,5 +1,15 @@
 # Chalkboard changelog
-All notable changes of every update of Chalkboard are recorded in this file.
+All notable changes for every update of Chalkboard are recorded in this file.
+
+## [v3.0.3 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.3) - 07/06/2026
+The eighteenth release of Chalkboard.
+Commits: [`v3.0.2...v3.0.3`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.2...v3.0.3)
+- Fixed `calc.curl`, `calc.curvature`, `calc.dfrdt`, `calc.fnds`, `calc.frds`, `calc.fzdz`, `calc.grad`, `calc.grad2`, `quat.fromAxis`, and `real.val` which had the possible danger of not returning the correct output type when the input was a vector in a non-object mode, such as an array, matrix, or typed array.
+- Fixed `real.absolute`, `real.add`, `real.compose`, `real.div`, `real.mul`, `real.negate`, `real.pow`, `real.reciprocate`, `real.scl`, and `real.sub` which were not preserving the original function's type.
+- Fixed `numb.roundTo` which was exhibiting floating-point imprecision and fixed `numb.isRational` which had poor rigor.
+- Fixed `bool.parse` which was not rejecting malformed input properly and fixed `bool.NCOND` and `bool.NCONV` which were not direct negations of `bool.COND` and `bool.CONV`, respectively.
+- Fixed `matr.addKronecker` which was using a slightly incorrect formula and fixed `matr.Lehmer` which had one incorrect entry in its 4x4 matrix.
+- Fixed `I` which was not able to handle negative exponents due to the `%` operator's behavior and thus had to use `numb.mod` instead.
 
 ## [v3.0.2 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.2) - 04/13/2026
 The seventeenth release of Chalkboard.
