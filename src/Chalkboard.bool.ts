@@ -29,11 +29,8 @@ namespace Chalkboard {
         export const AND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
             let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const current = vals[i] === true || vals[i] === 1;
-                if (!current) {
-                    result = false;
-                    break;
-                }
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.AND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (!(vals[i] === true || vals[i] === 1)) result = false;
             }
             return $(result);
         };
@@ -49,12 +46,13 @@ namespace Chalkboard {
          */
         export const BICOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
             if (vals.length === 0) return $(true);
-            const first = (vals[0] === true || vals[0] === 1);
-            for (let i = 1; i < vals.length; i++) {
-                const current = (vals[i] === true || vals[i] === 1);
-                if (first !== current) return $(false);
+            let first = true, result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.BICOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i === 0) first = vals[i] === true || vals[i] === 1;
+                else if (first !== (vals[i] === true || vals[i] === 1)) result = false;
             }
-            return $(true);
+            return $(result);
         };
 
         /**
@@ -66,13 +64,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.COND(true, false, true); // Returns false
          */
         export const COND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            if (vals.length < 2) return $(true);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (xp && !xq) return $(false);
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.COND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i - 1] === true || vals[i - 1] === 1) && !(vals[i] === true || vals[i] === 1)) result = false;
             }
-            return $(true);
+            return $(result);
         };
 
         /**
@@ -84,13 +81,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.CONV(true, false, true); // Returns false
          */
         export const CONV = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            if (vals.length < 2) return $(true);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (xq && !xp) return $(false);
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.CONV: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i] === true || vals[i] === 1) && !(vals[i - 1] === true || vals[i - 1] === 1)) result = false;
             }
-            return $(true);
+            return $(result);
         };
 
         /**
@@ -104,6 +100,8 @@ namespace Chalkboard {
          * const z = Chalkboard.bool.isEqual("x & (y | z)", "(x & y) | (x & z)"); // Returns true
          */
         export const isEqual = (expr1: string, expr2: string): boolean | 0 | 1 => {
+            if (typeof expr1 !== "string") throw new Error(`Chalkboard.bool.isEqual: Parameter "expr1" must be a string.`);
+            if (typeof expr2 !== "string") throw new Error(`Chalkboard.bool.isEqual: Parameter "expr2" must be a string.`);
             const variables: string[] = [];
             const varextract = (expr: string): void => {
                 const ast = Chalkboard.bool.parse(expr, { returnAST: true }) as { type: string, [key: string]: any };
@@ -146,10 +144,10 @@ namespace Chalkboard {
          * const kmap = Chalkboard.bool.Karnaugh("x & !y | z", ["x", "y", "z"]);
          */
         export const Karnaugh = (input: string, variables: string[]): (boolean | 0 | 1)[][] => {
+            if (typeof input !== "string") throw new Error(`Chalkboard.bool.Karnaugh: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string") throw new Error(`Chalkboard.bool.Karnaugh: Parameter "variables" must be an array of strings.`);
             const n = variables.length;
-            if(n !== 2 && n !== 3 && n !== 4) {
-                throw new Error("Chalkboard.bool.Karnaugh only supports 2, 3, or 4 variables.");
-            }
+            if (n !== 2 && n !== 3 && n !== 4) throw new Error(`Chalkboard.bool.Karnaugh: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             let rowvars: string[];
             let colvars: string[];
             let rows: string[];
@@ -217,24 +215,14 @@ namespace Chalkboard {
          * ]);
          */
         export const mapping = (inputs: (boolean | 0 | 1)[][], outputs: (boolean | 0 | 1)[][]): ((...args: (boolean | 0 | 1)[]) => (boolean | 0 | 1)[]) => {
-            if (inputs.length !== outputs.length) {
-                throw new Error('Parameter "inputs" and "outputs" must have the same length.');
-            }
-            if (inputs.length === 0) {
-                throw new Error('Parameter "inputs" and "outputs" cannot be empty.');
-            }
+            if (!Array.isArray(inputs) || !Array.isArray(outputs)) throw new Error(`Chalkboard.bool.mapping: Parameters "inputs" and "outputs" must be arrays.`);
+            if (inputs.length !== outputs.length) throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" and "outputs" must have the same length.`);
+            if (inputs.length === 0) throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" and "outputs" cannot be empty.`);
+            if (!Array.isArray(inputs[0]) || !Array.isArray(outputs[0]) || inputs.length > 1 && !Array.isArray(inputs[inputs.length - 1]) || outputs.length > 1 && !Array.isArray(outputs[outputs.length - 1])) throw new Error(`Chalkboard.bool.mapping: Parameters "inputs" and "outputs" must begin and end with arrays.`);
             const m = inputs[0].length;
             const n = outputs[0].length;
-            for (const row of inputs) {
-                if (row.length !== m) {
-                    throw new Error('Parameter "inputs" must have the same length for each row.');
-                }
-            }
-            for (const row of outputs) {
-                if (row.length !== n) {
-                    throw new Error('Parameter "outputs" must have the same length for each row.');
-                }
-            }
+            if (inputs.length > 1 && inputs[inputs.length - 1].length !== m) throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" must begin and end with rows of the same length.`);
+            if (outputs.length > 1 && outputs[outputs.length - 1].length !== n) throw new Error(`Chalkboard.bool.mapping: Parameter "outputs" must begin and end with rows of the same length.`);
             const variables = Array.from({length: m}, (_, i) => String.fromCharCode(97 + i));
             const expressions: string[] = [];
             for (let outCol = 0; outCol < n; outCol++) {
@@ -269,9 +257,8 @@ namespace Chalkboard {
                 }
             }
             return (...args: (boolean | 0 | 1)[]): (boolean | 0 | 1)[] => {
-                if (args.length !== m) {
-                    throw new Error(`Expected ${m} arguments, but got ${args.length}.`);
-                }
+                if (args.length !== m) throw new Error(`Chalkboard.bool.mapping: Expected ${m} arguments, but got ${args.length}.`);
+                if (args.length > 0 && args[0] !== true && args[0] !== false && args[0] !== 0 && args[0] !== 1 || args.length > 1 && args[args.length - 1] !== true && args[args.length - 1] !== false && args[args.length - 1] !== 0 && args[args.length - 1] !== 1) throw new Error(`Chalkboard.bool.mapping: Parameter "args" must begin and end with true, false, 0, or 1.`);
                 const values: Record<string, boolean | 0 | 1> = {};
                 for (let i = 0; i < m; i++) {
                     values[variables[i]] = args[i];
@@ -293,13 +280,13 @@ namespace Chalkboard {
          * const min = Chalkboard.bool.minimize("x & y | x & z", ["x", "y", "z"]); // Returns "x & (y | z)"
          */
         export const minimize = (input: string, variables: string[]): string => {
+            if (typeof input !== "string") throw new Error(`Chalkboard.bool.minimize: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string") throw new Error(`Chalkboard.bool.minimize: Parameter "variables" must be an array of strings.`);
             if (variables.length === 0) {
                 const result = Chalkboard.bool.parse(input);
                 return result ? "true" : "false";
             }
-            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
-                throw new Error("Chalkboard.bool.minimize only supports 2, 3, or 4 variables.");
-            }
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) throw new Error(`Chalkboard.bool.minimize: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             try {
                 const primes = Chalkboard.bool.primeImplicants(input, variables);
                 if (primes.length === 0) {
@@ -310,11 +297,8 @@ namespace Chalkboard {
                 }
                 return Chalkboard.bool.parse(primes.join(" | ")) as string;
             } catch (e) {
-                if (e instanceof Error) {
-                    throw new Error(`Error minimizing expression: ${e.message}`);
-                } else {
-                    throw new Error(`Error minimizing expression: ${String(e)}`);
-                }
+                if (e instanceof Error) throw new Error(`Chalkboard.bool.minimize: Error minimizing expression: ${e.message.replace(/\.*$/, "")}.`);
+                else throw new Error(`Chalkboard.bool.minimize: Error minimizing expression: ${String(e).replace(/\.*$/, "")}.`);
             }
         };
 
@@ -332,10 +316,9 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.AND(true, false); // Returns false in boolean mode
          */
         export const modeConfig = (config: "boolean" | "binary"): void => {
+            if (typeof config !== "string") throw new Error(`Chalkboard.bool.modeConfig: Parameter "config" must be a string.`);
             const _config = config.toLowerCase();
-            if (_config !== "boolean" && _config !== "binary") {
-                throw new Error('The mode must be either "boolean" or "binary".');
-            }
+            if (_config !== "boolean" && _config !== "binary") throw new Error(`Chalkboard.bool.modeConfig: Parameter "config" must be either "boolean" or "binary".`);
             mode = _config;
         };
 
@@ -348,8 +331,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.NAND(true, true, false); // Returns true
          */
         export const NAND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            const andResult = AND(...vals);
-            return $(!(andResult === true || andResult === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NAND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (!(vals[i] === true || vals[i] === 1)) result = false;
+            }
+            return $(!result);
         };
 
         /**
@@ -362,8 +349,14 @@ namespace Chalkboard {
          * const z = Chalkboard.bool.BICOND(false, false, false); // Returns false
          */
         export const NBICOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            const bicondResult = BICOND(...vals);
-            return $(!(bicondResult === true || bicondResult === 1));
+            if (vals.length === 0) return $(false);
+            let first = true, result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NBICOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i === 0) first = vals[i] === true || vals[i] === 1;
+                else if (first !== (vals[i] === true || vals[i] === 1)) result = false;
+            }
+            return $(!result);
         };
 
         /**
@@ -375,8 +368,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.COND(true, false, true); // Returns true
          */
         export const NCOND = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            const cond = COND(...vals);
-            return $(!(cond === true || cond === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NCOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i - 1] === true || vals[i - 1] === 1) && !(vals[i] === true || vals[i] === 1)) result = false;
+            }
+            return $(!result);
         };
 
         /**
@@ -388,8 +385,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.CONV(true, false, true); // Returns true
          */
         export const NCONV = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
-            const conv = CONV(...vals);
-            return $(!(conv === true || conv === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NCONV: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i] === true || vals[i] === 1) && !(vals[i - 1] === true || vals[i - 1] === 1)) result = false;
+            }
+            return $(!result);
         };
 
         /**
@@ -401,11 +402,12 @@ namespace Chalkboard {
          * const y = Chalkboard.bool.NOR(true, false, false); // Returns false
          */
         export const NOR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
+            let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x) return $(false);
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NOR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1) result = false;
             }
-            return $(true);
+            return $(result);
         };
 
         /**
@@ -421,8 +423,8 @@ namespace Chalkboard {
             if (vals.length === 0) return $(true);
             let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                result = result && !x;
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.NOT: Parameter "vals" must contain only true, false, 0, or 1.`);
+                result = result && !(vals[i] === true || vals[i] === 1);
             }
             return $(result);
         };
@@ -438,8 +440,8 @@ namespace Chalkboard {
         export const OR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
             let result = false;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x) { result = true; break; }
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.OR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1) result = true;
             }
             return $(result);
         };
@@ -485,9 +487,7 @@ namespace Chalkboard {
                     if ("!&|()".indexOf(ch) !== -1) {
                         tokens.push(ch);
                         i++;
-                    } else if (!/[a-zA-Z0-9_]/.test(ch)) {
-                        throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}"`);
-                    } else {
+                    } else if (!/[a-zA-Z0-9_]/.test(ch)) throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}".`); else {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
                             name += input[i++];
@@ -501,9 +501,7 @@ namespace Chalkboard {
                 let pos = 0;
                 const peek = (): string => tokens[pos];
                 const consume = (token?: string): string => {
-                    if (token && tokens[pos] !== token) {
-                        throw new Error(`Chalkboard.bool.parse: Expected token ${token} but found ${tokens[pos]}`);
-                    }
+                    if (token && tokens[pos] !== token) throw new Error(`Chalkboard.bool.parse: Expected token "${token}" but found "${tokens[pos]}".`);
                     return tokens[pos++];
                 };
                 const parseExpression = (): { type: string, [key: string]: any } => parseOr();
@@ -550,7 +548,7 @@ namespace Chalkboard {
                     return { type: "var", name: token };
                 };
                 const ast = parseExpression();
-                if (pos < tokens.length) throw new Error("Chalkboard.bool.parse: Unexpected tokens at end");
+                if (pos < tokens.length) throw new Error(`Chalkboard.bool.parse: Unexpected tokens at end.`);
                 return ast;
             };
             const nodeEqual = (a: { type: string, [key: string]: any }, b: { type: string, [key: string]: any }): boolean => {
@@ -620,7 +618,7 @@ namespace Chalkboard {
                         return `${left} \\lor ${right}`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.bool.parse: Unknown node type ${node.type}`);
+                        throw new Error(`Chalkboard.bool.parse: Unknown node type "${node.type}".`);
                     }
                 }
             };
@@ -709,7 +707,7 @@ namespace Chalkboard {
                     }
                     case "var": {
                         const varname = node.name;
-                        if (!(varname in values)) throw new Error(`Variable "${varname}" not defined in values`);
+                        if (!(varname in values)) throw new Error(`Chalkboard.bool.parse: Variable "${varname}" is not defined in "config.values".`);
                         const value = values[varname];
                         return value === true || value === 1;
                     }
@@ -723,7 +721,7 @@ namespace Chalkboard {
                         return evaluateNode(node.left, values) || evaluateNode(node.right, values);
                     }
                 }
-                throw new Error(`Chalkboard.bool.parse: Unknown node type: ${node.type}`);
+                throw new Error(`Chalkboard.bool.parse: Unknown node type "${node.type}".`);
             };
             try {
                 const tokens = tokenize(expr);
@@ -738,10 +736,8 @@ namespace Chalkboard {
                 if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
-                if (err instanceof Error) {
-                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message}`);
-                } else {
-                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err)}`);
+                if (err instanceof Error) throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message.replace(/\.*$/, "")}.`); else {
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err).replace(/\.*$/, "")}.`);
                 }
             }
         };
@@ -755,9 +751,9 @@ namespace Chalkboard {
          * const primes = Chalkboard.bool.primeImplicants("x & y | x & z", ["x", "y", "z"]); // Returns ["x & y", "x & z"]
          */
         export const primeImplicants = (input: string, variables: string[]): string[] => {
-            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
-                throw new Error("Chalkboard.bool.primeImplicants only supports 2, 3, or 4 variables.");
-            }
+            if (typeof input !== "string") throw new Error(`Chalkboard.bool.primeImplicants: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string") throw new Error(`Chalkboard.bool.primeImplicants: Parameter "variables" must be an array of strings.`);
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) throw new Error(`Chalkboard.bool.primeImplicants: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             const kmap = Chalkboard.bool.Karnaugh(input, variables);
             const grayCodes = (bits: number): string[] => {
                 if (bits === 0) return [""];
@@ -919,6 +915,7 @@ namespace Chalkboard {
          * const cnf = Chalkboard.bool.toCNF("x & (y | z)"); // Returns "(x) & (y | z)"
          */
         export const toCNF = (input: string): string => {
+            if (typeof input !== "string") throw new Error(`Chalkboard.bool.toCNF: Parameter "input" must be a string.`);
             const simplified = Chalkboard.bool.parse(input) as string;
             if (simplified.includes(" & ") && !simplified.includes(" | ")) {
                 return simplified;
@@ -1001,6 +998,7 @@ namespace Chalkboard {
          * const dnf = Chalkboard.bool.toDNF("x & (y | z)"); // Returns "(x & y) | (x & z)"
          */
         export const toDNF = (input: string): string => {
+            if (typeof input !== "string") throw new Error(`Chalkboard.bool.toDNF: Parameter "input" must be a string.`);
             const simplified = Chalkboard.bool.parse(input) as string;
             if (simplified.includes(" | ") && !simplified.includes(" & ")) {
                 return simplified;
@@ -1092,6 +1090,7 @@ namespace Chalkboard {
          * // ]
          */
         export const truthTable = (...operations: ((p: boolean | 0 | 1, q: boolean | 0 | 1) => boolean | 0 | 1)[]): (boolean | 0 | 1)[][] => {
+            if (operations.length > 0 && typeof operations[0] !== "function" || operations.length > 1 && typeof operations[operations.length - 1] !== "function") throw new Error(`Chalkboard.bool.truthTable: Parameter "operations" must begin and end with functions.`);
             const result: (boolean | 0 | 1)[][] = [];
             const inputs: (boolean | 0 | 1)[] = [false, true];
             for (let p of inputs) {
@@ -1118,8 +1117,8 @@ namespace Chalkboard {
         export const XOR = (...vals: (boolean | 0 | 1)[]): boolean | 0 | 1 => {
             let count = 0;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x) count++;
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1) throw new Error(`Chalkboard.bool.XOR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1) count++;
             }
             return $(count % 2 === 1);
         };

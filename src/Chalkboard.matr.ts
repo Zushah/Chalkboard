@@ -16,8 +16,9 @@ namespace Chalkboard {
      */
     export namespace matr {
         /** @ignore */
-        const $ = (input: ChalkboardVector): ChalkboardVector => {
+        const $ = (input: ChalkboardVector, caller: string): ChalkboardVector => {
             const $$ = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
+                if (!Number.isFinite(x) || !Number.isFinite(y) || z !== undefined && !Number.isFinite(z) || w !== undefined && !Number.isFinite(w)) throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (z === undefined && w === undefined) {
                     return { x: x, y: y };
                 } else if (w === undefined) {
@@ -28,6 +29,7 @@ namespace Chalkboard {
             };
             const v = input as { x: number, y: number, z?: number, w?: number };
             if (v && typeof v.x === "number" && typeof v.y === "number") {
+                if (v.z !== undefined && typeof v.z !== "number" || v.w !== undefined && (typeof v.z !== "number" || typeof v.w !== "number")) throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (typeof v.z === "number" && typeof v.w === "number") return $$(v.x, v.y, v.z, v.w);
                 if (typeof v.z === "number") return $$(v.x, v.y, v.z);
                 return $$(v.x, v.y);
@@ -69,16 +71,14 @@ namespace Chalkboard {
                     const str = (input as string).trim();
                     if (str.startsWith("(") && str.endsWith(")")) {
                         const content = str.substring(1, str.length - 1);
-                        const components = content.split(",").map(part => parseFloat(part.trim()));
-                        if (components.length >= 2 && components.every(p => !isNaN(p))) {
-                            if (components.length === 2) return $$(components[0], components[1]);
-                            if (components.length === 3) return $$(components[0], components[1], components[2]);
-                            if (components.length === 4) return $$(components[0], components[1], components[2], components[3]);
-                        }
+                        const components = content.split(",").map((part) => part.trim() === "" ? NaN : Number(part.trim()));
+                        if (components.length === 2 && !Number.isNaN(components[0]) && !Number.isNaN(components[1])) return $$(components[0], components[1]);
+                        if (components.length === 3 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2])) return $$(components[0], components[1], components[2]);
+                        if (components.length === 4 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]) && !Number.isNaN(components[3])) return $$(components[0], components[1], components[2], components[3]);
                     }
                 }
             }
-            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
+            throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
         };
 
         /**
@@ -87,6 +87,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.absolute: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -142,7 +143,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
+                throw new Error(`Chalkboard.matr.add: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows and columns.`);
             }
         };
 
@@ -159,7 +160,7 @@ namespace Chalkboard {
                     Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr1)), matr2)
                 );
             } else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" that are square.');
+                throw new Error(`Chalkboard.matr.addKronecker: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix that are square.`);
             }
         };
 
@@ -171,6 +172,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.adjugate: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(row) || row < 0 || row >= matr.length) throw new Error(`Chalkboard.matr.adjugate: Parameter "row" must be an integer within the matrix bounds.`);
+            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.adjugate: Parameter "col" must be an integer within the matrix bounds.`);
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         };
 
@@ -180,8 +184,8 @@ namespace Chalkboard {
          * @returns {{ L: ChalkboardMatrix, U: ChalkboardMatrix }}
          */
         export const Cholesky = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
-            if (!Chalkboard.matr.isSquare(matr)) throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.');
-            if (!Chalkboard.matr.isSymmetric(matr)) throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.');
+            if (!Chalkboard.matr.isSquare(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.`);
+            if (!Chalkboard.matr.isSymmetric(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.`);
             const n = Chalkboard.matr.rows(matr);
             const L = Chalkboard.matr.fill(0, n);
             for (let i = 0; i < n; i++) {
@@ -191,7 +195,7 @@ namespace Chalkboard {
                         sum -= L[i][k] * L[j][k];
                     }
                     if (i === j) {
-                        if (sum <= 0) throw new RangeError('Chalkboard.matr.Cholesky: Matrix is not positive definite.');
+                        if (sum <= 0) throw new Error(`Chalkboard.matr.Cholesky: Matrix is not positive definite.`);
                         L[i][j] = Chalkboard.real.sqrt(sum);
                     } else {
                         L[i][j] = sum / L[j][j];
@@ -209,6 +213,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const cofactor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cofactor: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(row) || row < 0 || row >= matr.length) throw new Error(`Chalkboard.matr.cofactor: Parameter "row" must be an integer within the matrix bounds.`);
+            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.cofactor: Parameter "col" must be an integer within the matrix bounds.`);
             return matr.slice(0, row).concat(matr.slice(row + 1)).map((row) => row.slice(0, col).concat(row.slice(col + 1)));
         };
 
@@ -218,6 +225,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const cols = (matr: ChalkboardMatrix): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cols: Parameter "matr" must be a matrix.`);
             return matr[0].length;
         };
 
@@ -227,6 +235,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const colspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.colspace: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         };
 
@@ -269,7 +278,7 @@ namespace Chalkboard {
                         return Chalkboard.matr.init(matr1.concat(matr2));
                     }
                 } else {
-                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of columns.');
+                    throw new Error(`Chalkboard.matr.concat: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of columns.`);
                 }
             } else if (axis === 1) {
                 if (Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2)) {
@@ -299,10 +308,10 @@ namespace Chalkboard {
                         return result;
                     }
                 } else {
-                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
+                    throw new Error(`Chalkboard.matr.concat: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows.`);
                 }
             } else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.concat: Parameter "axis" must be 0 or 1.`);
             }
         };
 
@@ -313,6 +322,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.constrain: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init(
                     [Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)],
@@ -349,6 +359,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.copy: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1]], [matr[1][0], matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -391,7 +402,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.det: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -402,6 +413,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const diagonal = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.diagonal: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1])) throw new Error(`Chalkboard.matr.diagonal: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, 0], [0, elements[1] || 0]);
             } else if (size === 3) {
@@ -426,6 +439,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const eigenvalue = (matr: ChalkboardMatrix, maxIterations: number = 100): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.eigenvalue: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(maxIterations) || maxIterations < 1) throw new Error(`Chalkboard.matr.eigenvalue: Parameter "maxIterations" must be a positive integer.`);
             let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
@@ -456,6 +471,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const eigenvector = (matr: ChalkboardMatrix, maxIterations: number = 100): number[] => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.eigenvector: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(maxIterations) || maxIterations < 1) throw new Error(`Chalkboard.matr.eigenvector: Parameter "maxIterations" must be a positive integer.`);
             let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
@@ -473,6 +490,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.empty: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.empty: Parameter "cols" must be a non-negative integer.`);
             const _null = null as unknown as number;
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([_null, _null], [_null, _null]);
@@ -498,6 +517,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const exchange = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.exchange: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [1, 0]);
             } else if (size === 3) {
@@ -525,6 +545,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (!Number.isFinite(element)) throw new Error(`Chalkboard.matr.fill: Parameter "element" must be a finite number.`);
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.fill: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.fill: Parameter "cols" must be a non-negative integer.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([element, element], [element, element]);
             } else if (rows === 3 && cols === 3) {
@@ -549,6 +572,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const Gaussian = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.Gaussian: Parameter "matr" must be a matrix.`);
             let lead = 0;
             for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
                 if (lead >= Chalkboard.matr.cols(matr)) {
@@ -591,6 +615,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const Hilbert = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.Hilbert: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 3]);
             } else if (size === 3) {
@@ -615,6 +640,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const identity = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.identity: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [0, 1]);
             } else if (size === 3) {
@@ -645,6 +671,7 @@ namespace Chalkboard {
          *                               [7, 8, 9]]);
          */
         export const init = (...matrix: number[][] | number[][][]): ChalkboardMatrix => {
+            if (matrix.length > 0 && !Array.isArray(matrix[0])) throw new Error(`Chalkboard.matr.init: Parameter "matrix" must contain only matrix rows.`);
             if (matrix.length === 0) {
                 return [];
             } else if (Array.isArray(matrix[0]) && Array.isArray(matrix[0][0])) {
@@ -733,7 +760,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square and has a non-zero determinant.');
+                throw new Error(`Chalkboard.matr.invert: Parameter "matr" must be of type ChalkboardMatrix that is square and has a non-zero determinant.`);
             }
         };
 
@@ -745,6 +772,9 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, precision: number = 0.000001): boolean => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0])) throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "matr2" must be a matrix.`);
+            if (precision !== undefined && (!Number.isFinite(precision))) throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                     for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
@@ -765,6 +795,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isDiagonal = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isDiagonal: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.numb.isApproxEqual(matr[0][1], 0) && Chalkboard.numb.isApproxEqual(matr[1][0], 0);
@@ -792,6 +823,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0])) throw new Error(`Chalkboard.matr.isEqual: Parameter "matr2" must be a matrix.`);
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
@@ -818,6 +851,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isIdentity = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isIdentity: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isDiagonal(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(2));
@@ -839,6 +873,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isInvertible = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isInvertible: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
         };
 
@@ -848,6 +883,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isLowerTriangular = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isLowerTriangular: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], 0], [matr[1][0], matr[1][1]]));
@@ -875,6 +911,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isOrthogonal = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isOrthogonal: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isInvertible(matr)) {
                 return Chalkboard.matr.isApproxEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
             } else {
@@ -889,6 +926,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSizeEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isSizeEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0])) throw new Error(`Chalkboard.matr.isSizeEqual: Parameter "matr2" must be a matrix.`);
             return Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2);
         };
 
@@ -899,6 +938,9 @@ namespace Chalkboard {
          * @param {number} [cols=rows] - The number of columns
          */
         export const isSizeOf = (matr: ChalkboardMatrix, rows: number, cols: number = rows): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSizeOf: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.isSizeOf: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.isSizeOf: Parameter "cols" must be a non-negative integer.`);
             return Chalkboard.matr.rows(matr) === rows && Chalkboard.matr.cols(matr) === cols;
         };
 
@@ -908,6 +950,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSkewSymmetric = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSkewSymmetric: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.negate(matr));
         };
 
@@ -917,6 +960,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSquare = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSquare: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr);
         };
 
@@ -926,6 +970,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSymmetric = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSymmetric: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
         };
 
@@ -935,6 +980,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isUpperTriangular = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isUpperTriangular: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], matr[0][1]], [0, matr[1][1]]));
@@ -962,6 +1008,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isZero = (matr: ChalkboardMatrix): boolean => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isZero: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
 
@@ -971,6 +1018,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const Lehmer = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.Lehmer: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 1]);
             } else if (size === 3) {
@@ -995,6 +1043,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const lowerBinomial = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [1, 1]);
             } else if (size === 3) {
@@ -1019,6 +1068,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const lowerShift = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerShift: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 0], [1, 0]);
             } else if (size === 3) {
@@ -1044,6 +1094,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const lowerTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerTriangular: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1])) throw new Error(`Chalkboard.matr.lowerTriangular: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, 0], [elements[1] || 0, elements[2] || 0]);
             } else if (size === 3) {
@@ -1096,7 +1148,7 @@ namespace Chalkboard {
                 }
                 return { L: L, U: U };
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.LUdecomp: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -1158,7 +1210,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
+                throw new Error(`Chalkboard.matr.mul: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".`);
             }
         };
 
@@ -1169,6 +1221,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0])) throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr2" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
                 return Chalkboard.matr.init(
                     [matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]],
@@ -1232,7 +1286,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix | ChalkboardVector}
          */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.matr.mulVector") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -1252,7 +1306,7 @@ namespace Chalkboard {
                     return Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect));
                 }
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.mulVector: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1262,6 +1316,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.negate: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1]], [-matr[1][0], -matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -1288,6 +1343,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const norm = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.norm: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0) throw new Error(`Chalkboard.matr.norm: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0) throw new Error(`Chalkboard.matr.norm: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
                 return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
@@ -1315,6 +1373,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const normalize = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.normalize: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0) throw new Error(`Chalkboard.matr.normalize: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0) throw new Error(`Chalkboard.matr.normalize: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init(
                     [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)],
@@ -1353,6 +1414,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const normsq = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.normsq: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0) throw new Error(`Chalkboard.matr.normsq: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0) throw new Error(`Chalkboard.matr.normsq: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
                 return matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1];
             } else if (Chalkboard.matr.isSizeOf(matr, 3) && p === 2 && q === 2) {
@@ -1378,6 +1442,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const nullspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.nullspace: Parameter "matr" must be a matrix.`);
             const augmented = matr.map((row) => row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
             const rowEchelonForm = Chalkboard.matr.Gaussian(augmented);
             return rowEchelonForm.filter((row: number[]) => row.slice(0, Chalkboard.matr.rows(matr)).every((element) => element === 0)).map((row: number[]) => row.slice(Chalkboard.matr.rows(matr)));
@@ -1407,7 +1472,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.perm: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -1418,6 +1483,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const pow = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
+            if (!Number.isInteger(num) || num < 0) throw new Error(`Chalkboard.matr.pow: Parameter "num" must be a non-negative integer.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (num === 0) {
                     return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
@@ -1429,7 +1495,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.pow: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -1439,6 +1505,7 @@ namespace Chalkboard {
          * @returns {void}
          */
         export const print = (matr: ChalkboardMatrix): void => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.print: Parameter "matr" must be a matrix.`);
             console.log(Chalkboard.matr.toString(matr));
         };
 
@@ -1450,6 +1517,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const pull = (matr: ChalkboardMatrix, index: number, axis: 0 | 1): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.pull: Parameter "matr" must be a matrix.`);
+            if (axis !== 0 && axis !== 1) throw new Error(`Chalkboard.matr.pull: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && index >= Chalkboard.matr.rows(matr) || axis === 1 && index >= Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.pull: Parameter "index" must be an integer within the selected axis bounds.`);
             if (axis === 0) {
                 matr.splice(index, 1);
                 return matr;
@@ -1459,7 +1529,7 @@ namespace Chalkboard {
                 }
                 return matr;
             } else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.pull: Parameter "axis" must be 0 or 1.`);
             }
         };
 
@@ -1472,6 +1542,11 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const push = (matr: ChalkboardMatrix, index: number, axis: 0 | 1, elements: number[]): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.push: Parameter "matr" must be a matrix.`);
+            if (axis !== 0 && axis !== 1) throw new Error(`Chalkboard.matr.push: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && index > Chalkboard.matr.rows(matr) || axis === 1 && index > Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.push: Parameter "index" must be an integer within the selected axis insertion bounds.`);
+            if (!Array.isArray(elements)) throw new Error(`Chalkboard.matr.push: Parameter "elements" must be an array.`);
+            if (axis === 0 && elements.length !== Chalkboard.matr.cols(matr) || axis === 1 && elements.length !== Chalkboard.matr.rows(matr)) throw new Error(`Chalkboard.matr.push: Parameter "elements" must have the same length as the unselected matrix axis.`);
             if (axis === 0) {
                 matr.splice(index, 0, elements);
                 return matr;
@@ -1481,7 +1556,7 @@ namespace Chalkboard {
                 }
                 return matr;
             } else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.push: Parameter "axis" must be 0 or 1.`);
             }
         };
 
@@ -1491,6 +1566,7 @@ namespace Chalkboard {
          * @returns {{Q: ChalkboardMatrix, R: ChalkboardMatrix}}
          */
         export const QRdecomp = (matr: ChalkboardMatrix): { Q: ChalkboardMatrix; R: ChalkboardMatrix } => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.QRdecomp: Parameter "matr" must be a matrix.`);
             const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
                 R = Chalkboard.matr.copy(matr);
             for (let j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
@@ -1547,6 +1623,10 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const random = (rows: number, cols: number = rows, inf: number = 0, sup: number = 1): ChalkboardMatrix => {
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.random: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.random: Parameter "cols" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf))) throw new Error(`Chalkboard.matr.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup))) throw new Error(`Chalkboard.matr.random: Parameter "sup" must be a finite number.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
             } else if (rows === 3 && cols === 3) {
@@ -1571,6 +1651,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const rank = (matr: ChalkboardMatrix): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rank: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.Gaussian(matr).filter((row: number[]) => row.some((element) => element !== 0)).length;
         };
 
@@ -1580,6 +1661,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.reciprocate: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]], [1 / matr[1][0], 1 / matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -1606,6 +1688,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const resize = (matr: ChalkboardMatrix, rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.resize: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.resize: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.resize: Parameter "cols" must be a non-negative integer.`);
             const result = Chalkboard.matr.init();
             const matrrows = Chalkboard.matr.rows(matr);
             const matrcols = Chalkboard.matr.cols(matr);
@@ -1626,6 +1711,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const rotator = (radx: number, rady?: number, radz?: number): ChalkboardMatrix => {
+            if (!Number.isFinite(radx)) throw new Error(`Chalkboard.matr.rotator: Parameter "radx" must be a finite number.`);
+            if (rady !== undefined && (!Number.isFinite(rady))) throw new Error(`Chalkboard.matr.rotator: Parameter "rady" must be a finite number.`);
+            if (radz !== undefined && (!Number.isFinite(radz))) throw new Error(`Chalkboard.matr.rotator: Parameter "radz" must be a finite number.`);
             if (rady === undefined && radz === undefined) {
                 return Chalkboard.matr.init([Math.cos(radx), -Math.sin(radx)], [Math.sin(radx), Math.cos(radx)]);
             } else {
@@ -1642,6 +1730,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.round: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])], [Math.round(matr[1][0]), Math.round(matr[1][1])]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -1666,6 +1755,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const rows = (matr: ChalkboardMatrix): number => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rows: Parameter "matr" must be a matrix.`);
             return matr.length;
         };
 
@@ -1675,6 +1765,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const rowspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rowspace: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.Gaussian(matr).filter((row: number[]) => row.some((element: number) => element !== 0));
         };
 
@@ -1684,7 +1775,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.matr.scaler") as { x: number, y: number, z?: number, w?: number };
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
@@ -1692,7 +1783,7 @@ namespace Chalkboard {
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 return Chalkboard.matr.init([vect.x, 0, 0, 0], [0, vect.y, 0, 0], [0, 0, vect.z, 0], [0, 0, 0, vect.w]);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.scaler: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1703,6 +1794,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.scl: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.matr.scl: Parameter "num" must be a finite number.`);
             if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num]);
             } else if (Chalkboard.matr.isSizeOf(matr, 2)) {
@@ -1739,13 +1832,13 @@ namespace Chalkboard {
                     if (Chalkboard.matr.det(matrA) !== 0) {
                         return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     } else {
-                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that has a non-zero determinant.');
+                        throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that has a non-zero determinant.`);
                     }
                 } else {
-                    throw new TypeError('Parameters "matrA" and "matrB" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
+                    throw new Error(`Chalkboard.matr.solve: Parameters "matrA" and "matrB" must be of type ChalkboardMatrix with equivalent numbers of rows.`);
                 }
             } else {
-                throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -1786,7 +1879,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
+                throw new Error(`Chalkboard.matr.sub: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows and columns.`);
             }
         };
 
@@ -1796,6 +1889,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const symmetricBinomial = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.symmetricBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [1, 2]);
             } else if (size === 3) {
@@ -1813,6 +1907,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const toArray = (matr: ChalkboardMatrix): number[] => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toArray: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -1836,6 +1931,7 @@ namespace Chalkboard {
          * @returns {object}
          */
         export const toObject = (matr: ChalkboardMatrix): object => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toObject: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1] },
@@ -1872,6 +1968,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<number>}
          */
         export const toSet = (matr: ChalkboardMatrix): ChalkboardSet<number> => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toSet: Parameter "matr" must be a matrix.`);
             return Chalkboard.abal.set(Chalkboard.matr.toArray(matr));
         };
 
@@ -1881,6 +1978,7 @@ namespace Chalkboard {
          * @returns {string}
          */
         export const toString = (matr: ChalkboardMatrix): string => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toString: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return (
                     "[ " + matr[0][0].toString() + " " + matr[0][1].toString() +
@@ -1919,7 +2017,9 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const toTensor = (matr: ChalkboardMatrix, ...size: number[]): ChalkboardTensor => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toTensor: Parameter "matr" must be a matrix.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0)) throw new Error(`Chalkboard.matr.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(matr, ...size);
         };
 
@@ -1944,7 +2044,7 @@ namespace Chalkboard {
             } else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.matr.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
 
         /**
@@ -1956,13 +2056,17 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index: number = 0, axis: 0 | 1 = 0): ChalkboardVector => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toVector: Parameter "matr" must be a matrix.`);
+            if (dimension !== 2 && dimension !== 3 && dimension !== 4) throw new Error(`Chalkboard.matr.toVector: Parameter "dimension" must be 2, 3, or 4.`);
+            if (axis !== 0 && axis !== 1) throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && (index >= Chalkboard.matr.cols(matr) || dimension > Chalkboard.matr.rows(matr)) || axis === 1 && (index >= Chalkboard.matr.rows(matr) || dimension > Chalkboard.matr.cols(matr))) throw new Error(`Chalkboard.matr.toVector: Parameter "index" and parameter "dimension" must fit within the selected matrix axis.`);
             if (dimension === 2) {
                 if (axis === 0) {
                     return Chalkboard.vect.init(matr[0][index], matr[1][index]);
                 } else if (axis === 1) {
                     return Chalkboard.vect.init(matr[index][0], matr[index][1]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             } else if (dimension === 3) {
                 if (axis === 0) {
@@ -1970,7 +2074,7 @@ namespace Chalkboard {
                 } else if (axis === 1) {
                     return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             } else if (dimension === 4) {
                 if (axis === 0) {
@@ -1978,10 +2082,10 @@ namespace Chalkboard {
                 } else if (axis === 1) {
                     return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2], matr[index][3]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             } else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.matr.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -2006,7 +2110,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.trace: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
 
@@ -2016,6 +2120,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.transpose: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
             } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
@@ -2040,7 +2145,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.matr.translator") as { x: number, y: number, z?: number, w?: number };
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "undefined") {
@@ -2048,7 +2153,7 @@ namespace Chalkboard {
             } else if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "number" && typeof vect.w === "number") {
                 return Chalkboard.matr.init([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.translator: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -2058,6 +2163,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const upperBinomial = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [0, 1]);
             } else if (size === 3) {
@@ -2082,6 +2188,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const upperShift = (size: number): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperShift: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [0, 0]);
             } else if (size === 3) {
@@ -2107,6 +2214,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const upperTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
+            if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperTriangular: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1])) throw new Error(`Chalkboard.matr.upperTriangular: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0], [0, elements[2] || 0]);
             } else if (size === 3) {
@@ -2134,6 +2243,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const zero = (rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.zero: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.matr.zero: Parameter "cols" must be a non-negative integer.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([0, 0], [0, 0]);
             } else if (rows === 3 && cols === 3) {

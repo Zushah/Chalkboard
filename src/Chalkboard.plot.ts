@@ -20,7 +20,7 @@ namespace Chalkboard {
             try {
                 return Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')() as CanvasRenderingContext2D;
             } catch (e) {
-                throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
+                throw new Error(`Chalkboard.plot.getContext: Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.`);
             }
         };
 
@@ -65,6 +65,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.autocorrelation: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.autocorrelation: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -115,6 +117,9 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.plot.barplot: Parameter "arr" must be an array of finite numbers.`);
+            if (!Array.isArray(bins)) throw new Error(`Chalkboard.plot.barplot: Parameter "bins" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.barplot: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "white" });
             _config.context.save();
             _config.context.translate(_config.x, _config.y);
@@ -162,6 +167,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (comp === null || typeof comp !== "object" || typeof (comp as any).a !== "number" || !Number.isFinite((comp as any).a) || typeof (comp as any).b !== "number" || !Number.isFinite((comp as any).b)) throw new Error(`Chalkboard.plot.comp: Parameter "comp" must be a complex number.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.comp: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "black", lineWidth: 5 });
             _config.context.fillStyle = _config.fillStyle;
             _config.context.save();
@@ -201,6 +208,9 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func1 === null || typeof func1 !== "object" || (typeof (func1 as any).rule !== "function" && !Array.isArray((func1 as any).rule)) || typeof (func1 as any).field !== "string" || typeof (func1 as any).type !== "string") throw new Error(`Chalkboard.plot.convolution: Parameter "func1" must be a mathematical function object.`);
+            if (func2 === null || typeof func2 !== "object" || (typeof (func2 as any).rule !== "function" && !Array.isArray((func2 as any).rule)) || typeof (func2 as any).field !== "string" || typeof (func2 as any).type !== "string") throw new Error(`Chalkboard.plot.convolution: Parameter "func2" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.convolution: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -253,6 +263,9 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func1 === null || typeof func1 !== "object" || (typeof (func1 as any).rule !== "function" && !Array.isArray((func1 as any).rule)) || typeof (func1 as any).field !== "string" || typeof (func1 as any).type !== "string") throw new Error(`Chalkboard.plot.correlation: Parameter "func1" must be a mathematical function object.`);
+            if (func2 === null || typeof func2 !== "object" || (typeof (func2 as any).rule !== "function" && !Array.isArray((func2 as any).rule)) || typeof (func2 as any).field !== "string" || typeof (func2 as any).type !== "string") throw new Error(`Chalkboard.plot.correlation: Parameter "func2" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.correlation: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -387,7 +400,7 @@ namespace Chalkboard {
                     }
                 }
             } else {
-                throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a property "type" of "expl", "inve", "pola", "curv", or "comp".');
+                throw new Error(`Chalkboard.plot.definition: Parameter "func" must be of type ChalkboardFunction with a property "type" of expl, inve, pola, curv, or comp.`);
             }
             _config.context.stroke();
             _config.context.restore();
@@ -422,6 +435,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.dfdx: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.dfdx: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -487,6 +502,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.d2fdx2: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.d2fdx2: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -550,6 +567,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (vectfield === null || typeof vectfield !== "object" || (typeof (vectfield as any).rule !== "function" && !Array.isArray((vectfield as any).rule)) || typeof (vectfield as any).field !== "string" || typeof (vectfield as any).type !== "string") throw new Error(`Chalkboard.plot.field: Parameter "vectfield" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.field: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [[-10, 10], [-10, 10]], res: 25 });
             const data = [];
             _config.context.strokeStyle = _config.strokeStyle;
@@ -596,6 +615,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.Fourier: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.Fourier: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -648,6 +669,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.fxdx: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.fxdx: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -711,6 +734,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.Laplace: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.Laplace: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -772,6 +797,9 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.plot.lineplot: Parameter "arr" must be an array of finite numbers.`);
+            if (!Array.isArray(bins)) throw new Error(`Chalkboard.plot.lineplot: Parameter "bins" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.lineplot: Parameter "config" must be an object.`);
             const _config = $(config);
             _config.context.save();
             _config.context.translate(_config.x, _config.y);
@@ -821,6 +849,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.plot.matr: Parameter "matr" must be a matrix.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.matr: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10] });
             for (let i = _config.domain[0]; i <= _config.domain[1]; i++) {
                 Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
@@ -905,12 +935,12 @@ namespace Chalkboard {
             if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y)) throw new Error(`Chalkboard.plot.ode: Parameter "sol" must have properties "t" and "y" as arrays.`);
             if (sol.t.length !== sol.y.length || sol.t.length === 0) throw new Error(`Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
             const dim = sol.y[0].length;
-            if (!Number.isInteger(_config.i) || _config.i < 0) throw new Error(`Chalkboard.plot.ode: "i" must be an integer >= 0.`);
-            if (_config.i >= dim) throw new Error(`Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
+            if (!Number.isInteger(_config.i) || _config.i < 0) throw new Error(`Chalkboard.plot.ode: Parameter "config.i" must be a non-negative integer.`);
+            if (_config.i >= dim) throw new Error(`Chalkboard.plot.ode: Property "config.i" must be within the solution dimension.`);
             if (_config.phase) {
-                if (!Number.isInteger(_config.j) || _config.j < 0) throw new Error(`Chalkboard.plot.ode: "j" must be an integer >= 0.`);
-                if (_config.j >= dim) throw new Error(`Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
-                if (_config.i === _config.j) throw new Error(`Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
+                if (!Number.isInteger(_config.j) || _config.j < 0) throw new Error(`Chalkboard.plot.ode: Property "config.j" must be a non-negative integer.`);
+                if (_config.j >= dim) throw new Error(`Chalkboard.plot.ode: Property "config.j" must be within the solution dimension.`);
+                if (_config.i === _config.j) throw new Error(`Chalkboard.plot.ode: Properties "config.i" and "config.j" must be different for phase plots.`);
             }
             const data: number[][] = [];
             _config.context.save();
@@ -958,6 +988,7 @@ namespace Chalkboard {
             lineWidth: number;
             context: CanvasRenderingContext2D;
         }): void => {
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.rOplane: Parameter "config" must be an object.`);
             const _config = $(config);
             const cw = getContext().canvas.width;
             _config.context.save();
@@ -1005,6 +1036,9 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (!Array.isArray(arr1)) throw new Error(`Chalkboard.plot.scatterplot: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2)) throw new Error(`Chalkboard.plot.scatterplot: Parameter "arr2" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.scatterplot: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "black", lineWidth: 5 });
             const data = [];
             _config.context.save();
@@ -1052,6 +1086,10 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (func === null || typeof func !== "object" || (typeof (func as any).rule !== "function" && !Array.isArray((func as any).rule)) || typeof (func as any).field !== "string" || typeof (func as any).type !== "string") throw new Error(`Chalkboard.plot.Taylor: Parameter "func" must be a mathematical function object.`);
+            if (!Number.isFinite(n)) throw new Error(`Chalkboard.plot.Taylor: Parameter "n" must be a finite number.`);
+            if (!Number.isFinite(a)) throw new Error(`Chalkboard.plot.Taylor: Parameter "a" must be a finite number.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.Taylor: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -1098,6 +1136,8 @@ namespace Chalkboard {
                 context: CanvasRenderingContext2D;
             }
         ): number[][] => {
+            if (vect === null || (vect !== undefined && typeof vect !== "string" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && typeof vect !== "object")) throw new Error(`Chalkboard.plot.vect: Parameter "vect" must be a vector.`);
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.vect: Parameter "config" must be an object.`);
             const _config = $(config, { lineWidth: 5 });
             vect = vect as { x: number, y: number, z?: number, w?: number }
             _config.context.strokeStyle = _config.strokeStyle;
@@ -1130,6 +1170,7 @@ namespace Chalkboard {
             lineWidth: number;
             context: CanvasRenderingContext2D;
         }): void => {
+            if (config === null || typeof config !== "object") throw new Error(`Chalkboard.plot.xyplane: Parameter "config" must be an object.`);
             const _config = $(config);
             const cw = getContext().canvas.width;
             _config.context.save();

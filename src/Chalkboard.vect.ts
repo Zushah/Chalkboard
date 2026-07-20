@@ -16,8 +16,9 @@ namespace Chalkboard {
      */
     export namespace vect {
         /** @ignore */
-        const $ = (input: ChalkboardVector): ChalkboardVector => {
+        const $ = (input: ChalkboardVector, caller: string): ChalkboardVector => {
             const $$ = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
+                if (!Number.isFinite(x) || !Number.isFinite(y) || z !== undefined && !Number.isFinite(z) || w !== undefined && !Number.isFinite(w)) throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (z === undefined && w === undefined) {
                     return { x: x, y: y };
                 } else if (w === undefined) {
@@ -28,6 +29,7 @@ namespace Chalkboard {
             };
             const v = input as { x: number, y: number, z?: number, w?: number };
             if (v && typeof v.x === "number" && typeof v.y === "number") {
+                if (v.z !== undefined && typeof v.z !== "number" || v.w !== undefined && (typeof v.z !== "number" || typeof v.w !== "number")) throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (typeof v.z === "number" && typeof v.w === "number") return $$(v.x, v.y, v.z, v.w);
                 if (typeof v.z === "number") return $$(v.x, v.y, v.z);
                 return $$(v.x, v.y);
@@ -69,16 +71,14 @@ namespace Chalkboard {
                     const str = (input as string).trim();
                     if (str.startsWith("(") && str.endsWith(")")) {
                         const content = str.substring(1, str.length - 1);
-                        const components = content.split(",").map(part => parseFloat(part.trim()));
-                        if (components.length >= 2 && components.every(p => !isNaN(p))) {
-                            if (components.length === 2) return $$(components[0], components[1]);
-                            if (components.length === 3) return $$(components[0], components[1], components[2]);
-                            if (components.length === 4) return $$(components[0], components[1], components[2], components[3]);
-                        }
+                        const components = content.split(",").map((part) => part.trim() === "" ? NaN : Number(part.trim()));
+                        if (components.length === 2 && !Number.isNaN(components[0]) && !Number.isNaN(components[1])) return $$(components[0], components[1]);
+                        if (components.length === 3 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2])) return $$(components[0], components[1], components[2]);
+                        if (components.length === 4 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]) && !Number.isNaN(components[3])) return $$(components[0], components[1], components[2], components[3]);
                     }
                 }
             }
-            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
+            throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
         };
 
         /**
@@ -90,7 +90,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.absolute(Chalkboard.vect.init(-1, -2, 3));
          */
         export const absolute = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.absolute") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -98,7 +98,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z!), Math.abs(vect.w!));
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.absolute: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -112,8 +112,8 @@ namespace Chalkboard {
          * const sum = Chalkboard.vect.add(Chalkboard.vect.init(2, 3, 4), Chalkboard.vect.init(3, 4, 5));
          */
         export const add = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.add") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.add") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y);
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
@@ -121,7 +121,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y, vect1.z! + vect2.z!, vect1.w! + vect2.w!);
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.add: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -134,7 +134,7 @@ namespace Chalkboard {
          * const angle = Chalkboard.vect.ang(Chalkboard.vect.init(1, 1));
          */
         export const ang = (vect: ChalkboardVector): number | number[] => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.ang") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.trig.arctan2(vect.y, vect.x);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -144,7 +144,7 @@ namespace Chalkboard {
                 const m = Chalkboard.vect.mag(vect);
                 return [Math.acos(vect.x / m), Math.acos(vect.y / m), Math.acos(vect.z! / m), Math.acos(vect.w! / m)];
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.ang: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -158,6 +158,8 @@ namespace Chalkboard {
          * const angle = Chalkboard.vect.angBetween(Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0.866, 0.5));
          */
         export const angBetween = (vect1: ChalkboardVector, vect2: ChalkboardVector): number => {
+            vect1 = $(vect1, "Chalkboard.vect.angBetween");
+            vect2 = $(vect2, "Chalkboard.vect.angBetween");
             return Math.acos(Chalkboard.vect.dot(vect1, vect2) / (Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2)));
         };
 
@@ -171,7 +173,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.constrain(Chalkboard.vect.init(1.5, 2, 0.7), [0, 1]);
          */
         export const constrain = (vect: ChalkboardVector, range: [number, number] = [0, 1]): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.constrain") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -179,7 +181,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z!, range), Chalkboard.numb.constrain(vect.w!, range));
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.constrain: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -192,7 +194,7 @@ namespace Chalkboard {
          * const v2 = Chalkboard.vect.copy(Chalkboard.vect.init(2, 3, 4));
          */
         export const copy = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.copy") as { x: number, y: number, z?: number, w?: number };
             const _vect = Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
             if (mode === "vector") return _vect;
             if (mode === "array") return Chalkboard.vect.toArray(_vect);
@@ -214,14 +216,14 @@ namespace Chalkboard {
          * const c = Chalkboard.vect.cross(Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0, 1));
          */
         export const cross = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.cross") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.cross") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(0, 0, vect1.x * vect2.y - vect1.y * vect2.x);
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
                 return Chalkboard.vect.init(vect1.y * vect2.z! - vect1.z! * vect2.y, vect1.z! * vect2.x - vect1.x * vect2.z!, vect1.x * vect2.y - vect1.y * vect2.x);
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2 or 3 dimensions.');
+                throw new Error(`Chalkboard.vect.cross: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2 or 3 dimensions.`);
             }
         };
 
@@ -235,7 +237,7 @@ namespace Chalkboard {
          */
         export const dimension = (vectORvectfield: ChalkboardVector | ChalkboardFunction): 2 | 3 | 4 => {
             try {
-                const v = $(vectORvectfield as ChalkboardVector) as { x: number, y: number, z?: number, w?: number };
+                const v = $(vectORvectfield as ChalkboardVector, "Chalkboard.vect.dimension") as { x: number, y: number, z?: number, w?: number };
                 if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "undefined" && typeof v.w === "undefined") {
                     return 2;
                 } else if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "number" && typeof v.w === "undefined") {
@@ -253,7 +255,7 @@ namespace Chalkboard {
                     return 4;
                 }
             }
-            throw new TypeError('Parameter "vectORvectfield" must be a vector or vector field with 2, 3, or 4 dimensions.');
+            throw new Error(`Chalkboard.vect.dimension: Parameter "vectORvectfield" must be a vector or vector field with 2, 3, or 4 dimensions.`);
         };
 
         /**
@@ -266,8 +268,8 @@ namespace Chalkboard {
          * const d = Chalkboard.vect.dist(Chalkboard.vect.init(0, 0), Chalkboard.vect.init(3, 4));
          */
         export const dist = (vect1: ChalkboardVector, vect2: ChalkboardVector): number => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.dist") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.dist") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y));
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
@@ -275,7 +277,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) + (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!));
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.dist: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -289,8 +291,8 @@ namespace Chalkboard {
          * const d2 = Chalkboard.vect.distsq(Chalkboard.vect.init(0, 0), Chalkboard.vect.init(3, 4));
          */
         export const distsq = (vect1: ChalkboardVector, vect2: ChalkboardVector): number => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.distsq") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.distsq") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y);
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
@@ -298,7 +300,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return ((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z! - vect1.z!) * (vect2.z! - vect1.z!) + (vect2.w! - vect1.w!) * (vect2.w! - vect1.w!));
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.distsq: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -312,8 +314,8 @@ namespace Chalkboard {
          * const dot = Chalkboard.vect.dot(Chalkboard.vect.init(2, 3, 4), Chalkboard.vect.init(3, 4, 5));
          */
         export const dot = (vect1: ChalkboardVector, vect2: ChalkboardVector): number => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.dot") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.dot") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y;
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
@@ -321,7 +323,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y + vect1.z! * vect2.z! + vect1.w! * vect2.w!;
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.dot: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -336,13 +338,13 @@ namespace Chalkboard {
         export const empty = (dimension: 2 | 3 | 4): ChalkboardVector => {
             const _null = null as unknown as number;
             if (dimension === 2) {
-                return Chalkboard.vect.init(_null, _null);
+                return { x: _null, y: _null };
             } else if (dimension === 3) {
-                return Chalkboard.vect.init(_null, _null, _null);
+                return { x: _null, y: _null, z: _null };
             } else if (dimension === 4) {
-                return Chalkboard.vect.init(_null, _null, _null, _null);
+                return { x: _null, y: _null, z: _null, w: _null };
             } else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.empty: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -366,6 +368,10 @@ namespace Chalkboard {
             r?: (...x: number[]) => number,
             s?: (...x: number[]) => number
         ): ChalkboardFunction => {
+            if (typeof p !== "function") throw new Error(`Chalkboard.vect.field: Parameter "p" must be a function.`);
+            if (typeof q !== "function") throw new Error(`Chalkboard.vect.field: Parameter "q" must be a function.`);
+            if (r !== undefined && (typeof r !== "function")) throw new Error(`Chalkboard.vect.field: Parameter "r" must be a function.`);
+            if (s !== undefined && (typeof s !== "function")) throw new Error(`Chalkboard.vect.field: Parameter "s" must be a function.`);
             if (r === undefined && s === undefined) {
                 return { rule: [p, q], field: "real", type: "vector2d" } as ChalkboardFunction;
             } else if (s === undefined) {
@@ -392,7 +398,7 @@ namespace Chalkboard {
             } else if (dimension === 4) {
                 return Chalkboard.vect.init(num, num, num, num);
             } else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.fill: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -406,7 +412,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.fromAlternateToCartesian(Chalkboard.vect.init(1, 0), "polar");
          */
         export const fromAlternateToCartesian = (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical"): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.fromAlternateToCartesian") as { x: number, y: number, z?: number, w?: number };
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             } else if (type === "bipolar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
@@ -416,7 +422,7 @@ namespace Chalkboard {
             } else if (type === "spherical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.sin(vect.z!) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z!) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z!));
             } else {
-                throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
+                throw new Error(`Chalkboard.vect.fromAlternateToCartesian: Parameter "type" must be polar, bipolar, cylindrical, or spherical.`);
             }
         };
 
@@ -430,6 +436,8 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.fromAngle(0);
          */
         export const fromAngle = (rad1: number, rad2?: number): ChalkboardVector => {
+            if (!Number.isFinite(rad1)) throw new Error(`Chalkboard.vect.fromAngle: Parameter "rad1" must be a finite number.`);
+            if (rad2 !== undefined && (!Number.isFinite(rad2))) throw new Error(`Chalkboard.vect.fromAngle: Parameter "rad2" must be a finite number.`);
             if (typeof rad2 === "undefined") {
                 return Chalkboard.vect.init(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
             } else {
@@ -447,7 +455,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.fromCartesianToAlternate(Chalkboard.vect.init(1, 0), "polar");
          */
         export const fromCartesianToAlternate = (vect: ChalkboardVector, type: "polar" | "bipolar" | "cylindrical" | "spherical"): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.fromCartesianToAlternate") as { x: number, y: number, z?: number, w?: number };
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect) as number);
             } else if (type === "bipolar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
@@ -457,7 +465,7 @@ namespace Chalkboard {
             } else if (type === "spherical" && Chalkboard.vect.isDimensionOf(vect, 3)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)) as number, (Chalkboard.vect.ang(vect) as number[])[2]);
             } else {
-                throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
+                throw new Error(`Chalkboard.vect.fromCartesianToAlternate: Parameter "type" must be polar, bipolar, cylindrical, or spherical.`);
             }
         };
 
@@ -476,7 +484,7 @@ namespace Chalkboard {
          */
         export const fromField = (vectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector => {
             const f = vectfield.rule as ((...x: number[]) => number)[];
-            const v = vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            const v = vect = $(vect, "Chalkboard.vect.fromField") as { x: number, y: number, z?: number, w?: number };
             if (vectfield.type === "vector2d") {
                 return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
             } else if (vectfield.type === "vector3d") {
@@ -484,7 +492,7 @@ namespace Chalkboard {
             } else if (vectfield.type === "vector4d") {
                 return Chalkboard.vect.init(f[0](v.x, v.y, v.z!, v.w!), f[1](v.x, v.y, v.z!, v.w!), f[2](v.x, v.y, v.z!, v.w!), f[3](v.x, v.y, v.z!, v.w!));
             }
-            throw new TypeError("Chalkboard.vect.fromField: Property 'type' of 'vectfield' must be 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.vect.fromField: Property "vectfield.type" must be vector2d, vector3d, or vector4d.`);
         };
 
         /**
@@ -496,7 +504,7 @@ namespace Chalkboard {
          * const v3d = Chalkboard.vect.fromVector(Chalkboard.vect.init(2, 3));
          */
         export const fromVector = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.fromVector") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x, vect.y, 0);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -504,7 +512,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x, vect.y);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.fromVector: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -520,6 +528,10 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.init(2, 3, 4);
          */
         export const init = (x: number, y: number, z?: number, w?: number): ChalkboardVector => {
+            if (!Number.isFinite(x)) throw new Error(`Chalkboard.vect.init: Parameter "x" must be a finite number.`);
+            if (!Number.isFinite(y)) throw new Error(`Chalkboard.vect.init: Parameter "y" must be a finite number.`);
+            if (z !== undefined && (!Number.isFinite(z))) throw new Error(`Chalkboard.vect.init: Parameter "z" must be a finite number.`);
+            if (w !== undefined && (!Number.isFinite(w))) throw new Error(`Chalkboard.vect.init: Parameter "w" must be a finite number.`);
             let v: ChalkboardVector;
             if (z === undefined && w === undefined) {
                 v = { x: x, y: y };
@@ -551,7 +563,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.interpolate(Chalkboard.vect.init(1, 2, 4), 2, 3, 1);
          */
         export const interpolate = (vect: ChalkboardVector, a: number, b: number, c?: number, d?: number): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.interpolate") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2) && typeof c === "undefined" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y) / (a + b), (a * vect.x + b * vect.y) / (a + b));
             } else if (Chalkboard.vect.isDimensionOf(vect, 3) && typeof c === "number" && typeof d === "undefined") {
@@ -568,7 +580,7 @@ namespace Chalkboard {
                     (a * vect.x + b * vect.y + c * vect.z! + d * vect.w!) / (a + b + c + d)
                 );
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.interpolate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -586,8 +598,8 @@ namespace Chalkboard {
          * const notApprox = Chalkboard.vect.isApproxEqual(Chalkboard.vect.init(1, 2, 3), Chalkboard.vect.init(1, 2, 3.1));
          */
         export const isApproxEqual = (vect1: ChalkboardVector, vect2: ChalkboardVector, precision: number = 0.000001): boolean => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.isApproxEqual") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.isApproxEqual") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision);
@@ -596,7 +608,7 @@ namespace Chalkboard {
                 } else if (Chalkboard.vect.isDimensionOf(vect1, 4)) {
                     return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision) && Chalkboard.numb.isApproxEqual(vect1.z!, vect2.z!, precision) && Chalkboard.numb.isApproxEqual(vect1.w!, vect2.w!, precision);
                 } else {
-                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                    throw new Error(`Chalkboard.vect.isApproxEqual: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
                 }
             } else {
                 return false;
@@ -627,7 +639,7 @@ namespace Chalkboard {
          */
         export const isDimensionOf = (vectORvectfield: ChalkboardVector | ChalkboardFunction, dimension: 2 | 3 | 4): boolean => {
             try {
-                const vect = $(vectORvectfield as ChalkboardVector) as { x: number, y: number, z?: number, w?: number };
+                const vect = $(vectORvectfield as ChalkboardVector, "Chalkboard.vect.isDimensionOf") as { x: number, y: number, z?: number, w?: number };
                 if (dimension === 2) {
                     return Chalkboard.vect.dimension(vect) === 2;
                 } else if (dimension === 3) {
@@ -645,7 +657,7 @@ namespace Chalkboard {
                     return Chalkboard.vect.dimension(vectfield) === 4;
                 }
             }
-            throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+            throw new Error(`Chalkboard.vect.isDimensionOf: Parameter "dimension" must be 2, 3, or 4.`);
         };
 
         /**
@@ -658,8 +670,8 @@ namespace Chalkboard {
          * const equal = Chalkboard.vect.isEqual(Chalkboard.vect.init(1, 2, 3), Chalkboard.vect.init(1, 2, 3));
          */
         export const isEqual = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.isEqual") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.isEqual") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return vect1.x === vect2.x && vect1.y === vect2.y;
@@ -668,7 +680,7 @@ namespace Chalkboard {
                 } else if (Chalkboard.vect.isDimensionOf(vect1, 4)) {
                     return vect1.x === vect2.x && vect1.y === vect2.y && vect1.z === vect2.z && vect1.w === vect2.w;
                 } else {
-                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                    throw new Error(`Chalkboard.vect.isEqual: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
                 }
             } else {
                 return false;
@@ -684,6 +696,7 @@ namespace Chalkboard {
          * const normalized = Chalkboard.vect.isNormalized(Chalkboard.vect.init(0.6, 0.8));
          */
         export const isNormalized = (vect: ChalkboardVector): boolean => {
+            vect = $(vect, "Chalkboard.vect.isNormalized");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.magsq(vect), 1);
         };
 
@@ -697,6 +710,8 @@ namespace Chalkboard {
          * const orthogonal = Chalkboard.vect.isOrthogonal(Chalkboard.vect.init(1, 0), Chalkboard.vect.init(0, 1));
          */
         export const isOrthogonal = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
+            vect1 = $(vect1, "Chalkboard.vect.isOrthogonal");
+            vect2 = $(vect2, "Chalkboard.vect.isOrthogonal");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), 0);
         };
 
@@ -710,6 +725,8 @@ namespace Chalkboard {
          * const parallel = Chalkboard.vect.isParallel(Chalkboard.vect.init(2, 0), Chalkboard.vect.init(4, 0));
          */
         export const isParallel = (vect1: ChalkboardVector, vect2: ChalkboardVector): boolean => {
+            vect1 = $(vect1, "Chalkboard.vect.isParallel");
+            vect2 = $(vect2, "Chalkboard.vect.isParallel");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2));
         };
 
@@ -722,6 +739,7 @@ namespace Chalkboard {
          * const zero = Chalkboard.vect.isZero(Chalkboard.vect.init(0, 0));
          */
         export const isZero = (vect: ChalkboardVector): boolean => {
+            vect = $(vect, "Chalkboard.vect.isZero");
             return Chalkboard.vect.isApproxEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
         };
 
@@ -734,7 +752,7 @@ namespace Chalkboard {
          * const r = Chalkboard.vect.mag(Chalkboard.vect.init(3, 4));
          */
         export const mag = (vect: ChalkboardVector): number => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.mag") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -742,7 +760,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z! + vect.w! * vect.w!);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.mag: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -756,6 +774,8 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.magset(Chalkboard.vect.init(3, 4), 10);
          */
         export const magset = (vect: ChalkboardVector, num: number): ChalkboardVector => {
+            vect = $(vect, "Chalkboard.vect.magset");
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.vect.magset: Parameter "num" must be a finite number.`);
             return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
         };
 
@@ -768,7 +788,7 @@ namespace Chalkboard {
          * const r2 = Chalkboard.vect.magsq(Chalkboard.vect.init(3, 4));
          */
         export const magsq = (vect: ChalkboardVector): number => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.magsq") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -776,7 +796,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z! + vect.w! * vect.w!;
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.magsq: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -796,10 +816,9 @@ namespace Chalkboard {
          * const v3 = Chalkboard.vect.init(1, 2); // Returns "(1, 2)"
          */
         export const modeConfig = (config: "vector" | "array" | "float32array" | "float64array" | "matrix" | "string" | "json"): void => {
+            if (typeof config !== "string") throw new Error(`Chalkboard.vect.modeConfig: Parameter "config" must be a string.`);
             const _config = config.toLowerCase() as "vector" | "array" | "float32array" | "float64array" | "matrix" | "string" | "json";
-            if (["vector", "array", "float32array", "float64array", "matrix", "string", "json"].indexOf(_config) === -1) {
-                throw new Error('The mode must be "vector", "array", "float32array", "float64array", "matrix", "string", or "json".');
-            }
+            if (["vector", "array", "float32array", "float64array", "matrix", "string", "json"].indexOf(_config) === -1) throw new Error(`Chalkboard.vect.modeConfig: The mode must be vector, array, float32array, float64array, matrix, string, or json.`);
             mode = _config;
         };
 
@@ -812,7 +831,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.negate(Chalkboard.vect.init(1, 2, 3));
          */
         export const negate = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.negate") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -820,7 +839,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z!, -vect.w!);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.negate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -833,7 +852,7 @@ namespace Chalkboard {
          * const unit = Chalkboard.vect.normalize(Chalkboard.vect.init(3, 4));
          */
         export const normalize = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.normalize") as { x: number, y: number, z?: number, w?: number };
             const m = Chalkboard.vect.mag(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x / m, vect.y / m);
@@ -842,7 +861,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x / m, vect.y / m, vect.z! / m, vect.w! / m);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.normalize: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -856,6 +875,8 @@ namespace Chalkboard {
          * const rejection = Chalkboard.vect.oproj(Chalkboard.vect.init(1, 1), Chalkboard.vect.init(0.8, -0.6));
          */
         export const oproj = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
+            vect1 = $(vect1, "Chalkboard.vect.oproj");
+            vect2 = $(vect2, "Chalkboard.vect.oproj");
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.proj(vect1, vect2));
         };
 
@@ -868,6 +889,7 @@ namespace Chalkboard {
          * Chalkboard.vect.print(Chalkboard.vect.init(1, 2, 3));
          */
         export const print = (vect: ChalkboardVector): void => {
+            vect = $(vect, "Chalkboard.vect.print");
             console.log(Chalkboard.vect.toString(vect));
         };
 
@@ -881,6 +903,8 @@ namespace Chalkboard {
          * const projection = Chalkboard.vect.proj(Chalkboard.vect.init(3, 4), Chalkboard.vect.init(4, 3));
          */
         export const proj = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
+            vect1 = $(vect1, "Chalkboard.vect.proj");
+            vect2 = $(vect2, "Chalkboard.vect.proj");
             return Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2) / Chalkboard.vect.dot(vect2, vect2));
         };
 
@@ -902,7 +926,7 @@ namespace Chalkboard {
             } else if (dimension === 4) {
                 return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             } else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.random: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -915,7 +939,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.reciprocate(Chalkboard.vect.init(2, 2, 4));
          */
         export const reciprocate = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.reciprocate") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -923,7 +947,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z!, 1 / vect.w!);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.reciprocate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -937,6 +961,8 @@ namespace Chalkboard {
          * const reflected = Chalkboard.vect.reflect(Chalkboard.vect.init(0.6, 0.8), Chalkboard.vect.init(0, 1));
          */
         export const reflect = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
+            vect1 = $(vect1, "Chalkboard.vect.reflect");
+            vect2 = $(vect2, "Chalkboard.vect.reflect");
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, 2 * Chalkboard.vect.dot(vect1, vect2)));
         };
 
@@ -956,7 +982,7 @@ namespace Chalkboard {
                 const parr = Chalkboard.vect.scl(vect2, -Chalkboard.real.sqrt(1 - refractiveIndex * refractiveIndex * (1 - Chalkboard.vect.dot(vect1, vect2) * Chalkboard.vect.dot(vect1, vect2))));
                 return Chalkboard.vect.add(perp, parr);
             } else {
-                throw new RangeError('Parameter "refractiveIndex" must be of type "number" greater than 0.');
+                throw new Error(`Chalkboard.vect.refract: Parameter "refractiveIndex" must be of type number greater than 0.`);
             }
         };
 
@@ -969,7 +995,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.round(Chalkboard.vect.init(1.6, 3.2, 3.8));
          */
         export const round = (vect: ChalkboardVector): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.round") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -977,7 +1003,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z!), Math.round(vect.w!));
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.round: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -998,6 +1024,10 @@ namespace Chalkboard {
          * );
          */
         export const scalarQuadruple = (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector, vect4: ChalkboardVector): number => {
+            vect1 = $(vect1, "Chalkboard.vect.scalarQuadruple");
+            vect2 = $(vect2, "Chalkboard.vect.scalarQuadruple");
+            vect3 = $(vect3, "Chalkboard.vect.scalarQuadruple");
+            vect4 = $(vect4, "Chalkboard.vect.scalarQuadruple");
             return Chalkboard.vect.dot(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
 
@@ -1016,6 +1046,9 @@ namespace Chalkboard {
          * );
          */
         export const scalarTriple = (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector): number => {
+            vect1 = $(vect1, "Chalkboard.vect.scalarTriple");
+            vect2 = $(vect2, "Chalkboard.vect.scalarTriple");
+            vect3 = $(vect3, "Chalkboard.vect.scalarTriple");
             return Chalkboard.vect.dot(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
 
@@ -1029,7 +1062,7 @@ namespace Chalkboard {
          * const v = Chalkboard.vect.scl(Chalkboard.vect.init(1, 2, 3), 3);
          */
         export const scl = (vect: ChalkboardVector, num: number): ChalkboardVector => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.scl") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -1037,7 +1070,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z! * num, vect.w! * num);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.scl: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1050,7 +1083,7 @@ namespace Chalkboard {
          * const m = Chalkboard.vect.slope(Chalkboard.vect.init(2, 3));
          */
         export const slope = (vect: ChalkboardVector): number => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.slope") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.y / vect.x;
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -1058,7 +1091,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return vect.w! / Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z! * vect.z!);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.slope: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1072,8 +1105,8 @@ namespace Chalkboard {
          * const difference = Chalkboard.vect.sub(Chalkboard.vect.init(2, 3, 4), Chalkboard.vect.init(3, 4, 5));
          */
         export const sub = (vect1: ChalkboardVector, vect2: ChalkboardVector): ChalkboardVector => {
-            vect1 = $(vect1) as { x: number, y: number, z?: number, w?: number };
-            vect2 = $(vect2) as { x: number, y: number, z?: number, w?: number };
+            vect1 = $(vect1, "Chalkboard.vect.sub") as { x: number, y: number, z?: number, w?: number };
+            vect2 = $(vect2, "Chalkboard.vect.sub") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y);
             } else if (Chalkboard.vect.isDimensionOf(vect1, 3) && Chalkboard.vect.isDimensionOf(vect2, 3)) {
@@ -1081,7 +1114,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect1, 4) && Chalkboard.vect.isDimensionOf(vect2, 4)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y, vect1.z! - vect2.z!, vect1.w! - vect2.w!);
             } else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.sub: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1094,7 +1127,7 @@ namespace Chalkboard {
          * const a = Chalkboard.vect.toArray(Chalkboard.vect.init(2, 3, 4));
          */
         export const toArray = (vect: ChalkboardVector): [number, number] | [number, number, number] | [number, number, number, number] => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toArray") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return [vect.x, vect.y];
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -1102,7 +1135,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return [vect.x, vect.y, vect.z!, vect.w!];
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toArray: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1115,7 +1148,7 @@ namespace Chalkboard {
          * const z = Chalkboard.vect.toComplex(Chalkboard.vect.init(2, 3));
          */
         export const toComplex = (vect: ChalkboardVector): ChalkboardComplex => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toComplex") as { x: number, y: number, z?: number, w?: number };
             return Chalkboard.comp.init(vect.x, vect.y);
         };
 
@@ -1129,14 +1162,14 @@ namespace Chalkboard {
          * const m = Chalkboard.vect.toMatrix(Chalkboard.vect.init(2, 3, 4));
          */
         export const toMatrix = (vect: ChalkboardVector, axis: 0 | 1 = 0): ChalkboardMatrix => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toMatrix") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y]);
                 } else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
                 if (axis === 0) {
@@ -1144,7 +1177,7 @@ namespace Chalkboard {
                 } else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z!]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 if (axis === 0) {
@@ -1152,10 +1185,10 @@ namespace Chalkboard {
                 } else if (axis === 1) {
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z!, vect.w!]);
                 } else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toMatrix: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1168,7 +1201,7 @@ namespace Chalkboard {
          * const q = Chalkboard.vect.toQuaternion(Chalkboard.vect.init(2, 3, 4));
          */
         export const toQuaternion = (vect: ChalkboardVector): ChalkboardQuaternion => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toQuaternion") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -1176,7 +1209,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return Chalkboard.quat.init(vect.x, vect.y, vect.z!, vect.w!);
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toQuaternion: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1189,7 +1222,7 @@ namespace Chalkboard {
          * const s = Chalkboard.vect.toString(Chalkboard.vect.init(2, 3, 4));
          */
         export const toString = (vect: ChalkboardVector): string => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toString") as { x: number, y: number, z?: number, w?: number };
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             } else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -1197,7 +1230,7 @@ namespace Chalkboard {
             } else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z!.toString() + ", " + vect.w!.toString() + ")";
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toString: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
 
@@ -1211,10 +1244,11 @@ namespace Chalkboard {
          * const t = Chalkboard.vect.toTensor(Chalkboard.vect.init(1, 2, 3, 4), 2, 2);
          */
         export const toTensor = (vect: ChalkboardVector, ...size: number[]): ChalkboardTensor => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toTensor") as { x: number, y: number, z?: number, w?: number };
             if (Array.isArray(size[0])) {
                 size = size[0];
             }
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0)) throw new Error(`Chalkboard.vect.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), ...size);
         };
 
@@ -1229,7 +1263,7 @@ namespace Chalkboard {
          * const vf32 = Chalkboard.vect.toTypedArray(v);
          */
         export const toTypedArray = (vect: ChalkboardVector, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
-            vect = $(vect) as { x: number, y: number, z?: number, w?: number };
+            vect = $(vect, "Chalkboard.vect.toTypedArray") as { x: number, y: number, z?: number, w?: number };
             const arr = Chalkboard.vect.toArray(vect);
             if (type === "int8") {
                 return new Int8Array(arr);
@@ -1244,7 +1278,7 @@ namespace Chalkboard {
             } else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.vect.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
 
         /**
@@ -1264,6 +1298,10 @@ namespace Chalkboard {
          * );
          */
         export const vectorQuadruple = (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector, vect4: ChalkboardVector): ChalkboardVector => {
+            vect1 = $(vect1, "Chalkboard.vect.vectorQuadruple");
+            vect2 = $(vect2, "Chalkboard.vect.vectorQuadruple");
+            vect3 = $(vect3, "Chalkboard.vect.vectorQuadruple");
+            vect4 = $(vect4, "Chalkboard.vect.vectorQuadruple");
             return Chalkboard.vect.cross(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
 
@@ -1282,6 +1320,9 @@ namespace Chalkboard {
          * );
          */
         export const vectorTriple = (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector): ChalkboardVector => {
+            vect1 = $(vect1, "Chalkboard.vect.vectorTriple");
+            vect2 = $(vect2, "Chalkboard.vect.vectorTriple");
+            vect3 = $(vect3, "Chalkboard.vect.vectorTriple");
             return Chalkboard.vect.cross(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
 
@@ -1301,7 +1342,7 @@ namespace Chalkboard {
             } else if (dimension === 4) {
                 return Chalkboard.vect.init(0, 0, 0, 0);
             } else {
-                throw new TypeError('Parameter "dimension" must be either 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.zero: Parameter "dimension" must be either 2, 3, or 4.`);
             }
         };
     }

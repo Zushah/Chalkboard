@@ -170,6 +170,7 @@ namespace Chalkboard {
         object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>,
         callback: (x: any) => any
     ): ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T> => {
+        if (typeof callback !== "function") throw new Error(`Chalkboard.APPLY: Parameter "callback" must be a function.`);
         if (object && typeof (object as any).a === "number" && typeof (object as any).b === "number" && typeof (object as any).c === "undefined") {
             const comp = object as ChalkboardComplex;
             return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
@@ -227,7 +228,7 @@ namespace Chalkboard {
                 }
                 return result;
             } else {
-                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardSet".');
+                throw new Error(`Chalkboard.APPLY: Parameter "object" cannot be an infinite ChalkboardSet.`);
             }
         }
         if (object && typeof (object as any).set?.contains === "function") {
@@ -239,10 +240,10 @@ namespace Chalkboard {
                 }
                 return result;
             } else {
-                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardStructure".');
+                throw new Error(`Chalkboard.APPLY: Parameter "object" cannot be an infinite ChalkboardStructure.`);
             }
         }
-        throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
+        throw new Error(`Chalkboard.APPLY: Parameter "object" must be a ChalkboardComplex, ChalkboardMatrix, ChalkboardQuaternion, ChalkboardTensor, ChalkboardVector, ChalkboardSet, or ChalkboardStructure.`);
     };
 
     /**
@@ -265,6 +266,9 @@ namespace Chalkboard {
      * const E = Chalkboard.E(); // returns 2.7182818284590446
      */
     export const E = (exponent: number = 1): number => {
+        if (typeof exponent !== "number" || Number.isNaN(exponent)) throw new Error(`Chalkboard.E: Parameter "exponent" must be a number that is not NaN.`);
+        if (exponent === Infinity) return Infinity;
+        if (exponent === -Infinity) return 0;
         if (exponent === 0) return 1;
         if (exponent === 1) return 2.718281828459045;
         const LN2 = 0.6931471805599453, INV_LN2 = 1.4426950408889634;
@@ -285,7 +289,7 @@ namespace Chalkboard {
      * const i4 = Chalkboard.I(4); // returns the complex number 1
      */
     export const I = (exponent: number = 1): ChalkboardComplex => {
-        if (!Number.isInteger(exponent)) throw new TypeError(`Chalkboard.I: Parameter "exponent" must be an integer.`);
+        if (!Number.isInteger(exponent)) throw new Error(`Chalkboard.I: Parameter "exponent" must be an integer.`);
         const n = Chalkboard.numb.mod(exponent, 4);
         if (n === 0) return Chalkboard.comp.init(1, 0);
         if (n === 1) return Chalkboard.comp.init(0, 1);
@@ -303,6 +307,7 @@ namespace Chalkboard {
      * const TAU = Chalkboard.PI(2); // returns 6.283185307179587
      */
     export const PI = (coefficient: number = 1): number => {
+        if (typeof coefficient !== "number" || Number.isNaN(coefficient)) throw new Error(`Chalkboard.PI: Parameter "coefficient" must be a number that is not NaN.`);
         let a = 1.0, b = Math.sqrt(0.5), t = 0.25, p = 1.0;
         let aNext = (a + b) * 0.5, bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext; p *= 2.0;
         aNext = (a + b) * 0.5; bNext = Math.sqrt(a * b); t -= p * (a - aNext) * (a - aNext); a = aNext; b = bNext; p *= 2.0;
@@ -328,6 +333,8 @@ namespace Chalkboard {
      * const twentyfour = Chalkboard.real.parse("factorial(4)");
      */
     export const REGISTER = (name: string, func: (...x: number[]) => number): void => {
+        if (typeof name !== "string") throw new Error(`Chalkboard.REGISTER: Parameter "name" must be a string.`);
+        if (typeof func !== "function") throw new Error(`Chalkboard.REGISTER: Parameter "func" must be a function.`);
         Chalkboard.REGISTRY[name] = func;
     };
     

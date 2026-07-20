@@ -22,7 +22,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const autocorrelation = (func: ChalkboardFunction, val: number): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.autocorrelation: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.autocorrelation: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             return Chalkboard.calc.correlation(func, func, val);
         };
 
@@ -33,11 +33,11 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const binormal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.binormal: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.binormal: Property "func.field" must be real.`);
             if (func.type.startsWith("curve")) {
                 return Chalkboard.vect.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
             }
-            throw new TypeError("Chalkboard.real.binormal: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.binormal: Property "func.type" must be curve2d or curve3d.`);
         };
 
         /**
@@ -48,7 +48,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
-            if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new TypeError("Chalkboard.calc.convolution: Properties 'field' of 'func1' and 'func2' must be 'real' and properties 'type' of 'func1' and 'func2' must be 'scalar2d'.");
+            if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new Error(`Chalkboard.calc.convolution: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
             const f1 = func1.rule as (x: number) => number;
             const f2 = func2.rule as (x: number) => number;
             const g = (x: number): number => f1(x) * f2(val - x);
@@ -63,7 +63,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
-            if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new TypeError("Chalkboard.calc.correlation: Properties 'field' of 'func1' and 'func2' must be 'real' and properties 'type' of 'func1' and 'func2' must be 'scalar2d'.");
+            if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new Error(`Chalkboard.calc.correlation: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
             const f1 = func1.rule as (x: number) => number; 
             const f2 = func2.rule as (x: number) => number;
             const g = (x: number): number => f1(x) * f2(val + x);
@@ -77,7 +77,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const curl = (vectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector => {
-            if (vectfield.field !== "real") throw new TypeError("Chalkboard.calc.curl: Property 'field' of 'vectfield' must be 'real'.");
+            if (vectfield.field !== "real") throw new Error(`Chalkboard.calc.curl: Property "vectfield.field" must be real.`);
             const f = vectfield.rule as ((...x: number[]) => number)[];
             const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
@@ -94,7 +94,7 @@ namespace Chalkboard {
                 const drdy = (f[2](v[0], v[1] + h, v[2]!) - f[2](v[0], v[1], v[2]!)) / h;
                 return Chalkboard.vect.init(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             }
-            throw new TypeError("Chalkboard.real.curl: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d'.");
+            throw new Error(`Chalkboard.calc.curl: Property "vectfield.type" must be vector2d or vector3d.`);
         };
 
         /**
@@ -104,7 +104,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const curvature = (func: ChalkboardFunction, val: number): number => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.curvature: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.curvature: Property "func.field" must be real.`);
             if (func.type === "curve2d") {
                 const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, val) as ChalkboardVector);
                 const d2 = Chalkboard.vect.toArray(Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector);
@@ -112,7 +112,7 @@ namespace Chalkboard {
             } else if (func.type === "curve3d") {
                 return Chalkboard.vect.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, val) as ChalkboardVector);
             }
-            throw new TypeError("Chalkboard.real.curvature: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.curvature: Property "func.type" must be curve2d or curve3d.`);
         };
 
         /**
@@ -123,13 +123,13 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const dfdv = (func: ChalkboardFunction, vectpos: ChalkboardVector, vectdir: ChalkboardVector): number => {
-            if (func.field !== "real") throw new TypeError('Chalkboard.calc.dfdv: Property "field" of "func" must be "real".');
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.dfdv: Property "func.field" must be real.`);
             if (func.type === "scalar3d") {
                 const grad = Chalkboard.calc.grad(func, vectpos) as ChalkboardVector as { x: number, y: number, z?: number, w?: number };
                 const dir = Chalkboard.vect.normalize(vectdir);
                 return Chalkboard.vect.dot(grad, dir);
             }
-            throw new TypeError("Chalkboard.real.dfdv: Property 'type' of 'func' must be 'scalar3d'.");
+            throw new Error(`Chalkboard.calc.dfdv: Property "func.type" must be scalar3d.`);
         };
 
         /**
@@ -139,7 +139,7 @@ namespace Chalkboard {
          * @returns {number | ChalkboardVector}
          */
         export const dfdx = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.dfdx: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.dfdx: Property "func.field" must be real.`);
             const h = 0.000000001;
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
@@ -151,7 +151,7 @@ namespace Chalkboard {
                 const f = func.rule as ((t: number) => number)[];
                 return Chalkboard.vect.init((f[0](val + h) - f[0](val)) / h, (f[1](val + h) - f[1](val)) / h, (f[2](val + h) - f[2](val)) / h);
             }
-            throw new TypeError("Chalkboard.real.dfdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.dfdx: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
 
         /**
@@ -161,7 +161,7 @@ namespace Chalkboard {
          * @returns {number | ChalkboardVector}
          */
         export const d2fdx2 = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.d2fdx2: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.d2fdx2: Property "func.field" must be real.`);
             const h = 0.00001;
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
@@ -173,7 +173,7 @@ namespace Chalkboard {
                 const f = func.rule as ((t: number) => number)[];
                 return Chalkboard.vect.init((f[0](val + h) - 2 * f[0](val) + f[0](val - h)) / (h * h), (f[1](val + h) - 2 * f[1](val) + f[1](val - h)) / (h * h), (f[2](val + h) - 2 * f[2](val) + f[2](val - h)) / (h * h));
             }
-            throw new TypeError("Chalkboard.real.d2fdx2: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.d2fdx2: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
 
         /**
@@ -183,7 +183,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const dfdz = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
-            if (func.field !== "comp") throw new TypeError("Chalkboard.calc.dfdz: Property 'field' of 'func' must be 'comp'.");
+            if (func.field !== "comp") throw new Error(`Chalkboard.calc.dfdz: Property "func.field" must be comp.`);
             const h = 0.000000001;
             if (func.type === "vector2d") {
                 const f = func.rule as [(a: number, b: number) => number, (a: number, b: number) => number];
@@ -193,7 +193,7 @@ namespace Chalkboard {
                 const dvdb = (f[1](comp.a, comp.b + h) - f[1](comp.a, comp.b)) / h;
                 return [Chalkboard.comp.init(duda, dvda), Chalkboard.comp.init(dudb, dvdb)];
             }
-            throw new TypeError("Chalkboard.real.dfdz: Property 'type' of 'func' must be 'vector2d'.");
+            throw new Error(`Chalkboard.calc.dfdz: Property "func.type" must be vector2d.`);
         };
 
         /**
@@ -203,7 +203,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const d2fdz2 = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
-            if (func.field !== "comp") throw new TypeError("Chalkboard.calc.d2fdz2: Property 'field' of 'func' must be 'comp'.");
+            if (func.field !== "comp") throw new Error(`Chalkboard.calc.d2fdz2: Property "func.field" must be comp.`);
             const h = 0.00001;
             if (func.type === "vector2d") {
                 const f = func.rule as [(a: number, b: number) => number, (a: number, b: number) => number];
@@ -213,7 +213,7 @@ namespace Chalkboard {
                 const d2vdb2 = (f[1](comp.a, comp.b + h) - 2 * f[1](comp.a, comp.b) + f[1](comp.a, comp.b - h)) / (h * h);
                 return [Chalkboard.comp.init(d2uda2, d2vda2), Chalkboard.comp.init(d2udb2, d2vdb2)];
             }
-            throw new TypeError("Chalkboard.real.d2fdz2: Property 'type' of 'func' must be 'vector2d'.");
+            throw new Error(`Chalkboard.calc.d2fdz2: Property "func.type" must be vector2d.`);
         };
 
         /**
@@ -224,8 +224,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const dfrdt = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.calc.dfrdt: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== "scalar3d") throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func1' must be 'scalar3d'.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.calc.dfrdt: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== "scalar3d") throw new Error(`Chalkboard.calc.dfrdt: Property "func1.type" must be scalar3d.`);
             const g = Chalkboard.vect.toArray(Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val) as ChalkboardVector) as ChalkboardVector);
             const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, val) as ChalkboardVector);
             if (func2.type === "curve2d") {
@@ -233,7 +233,7 @@ namespace Chalkboard {
             } else if (func2.type === "curve3d") {
                 return g[0] * d[0] + g[1] * d[1] + g[2]! * d[2]!;
             }
-            throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func2' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.dfrdt: Property "func2.type" must be curve2d or curve3d.`);
         };
 
         /**
@@ -242,7 +242,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const dft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.dft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.dft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             const out: ChalkboardComplex[] = new Array(N);
             for (let k = 0; k < N; k++) {
@@ -270,11 +270,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const div = (vectfield: ChalkboardFunction, vect: ChalkboardVector): number => {
-            if (vectfield.field !== "real") throw new TypeError("Chalkboard.calc.div: Property 'field' of 'vectfield' must be 'real'.");
+            if (vectfield.field !== "real") throw new Error(`Chalkboard.calc.div: Property "vectfield.field" must be real.`);
             if (vectfield.type === "vector2d" || vectfield.type === "vector3d" || vectfield.type === "vector4d") {
                 return Chalkboard.matr.trace(Chalkboard.calc.grad(vectfield, vect) as ChalkboardMatrix);
             }
-            throw new TypeError("Chalkboard.calc.div: Property 'type' of 'vectfield' must be 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.div: Property "vectfield.type" must be vector2d, vector3d, or vector4d.`);
         };
 
         /**
@@ -284,7 +284,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const extrema = (func: ChalkboardFunction, domain: [number, number]): number[] => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.extrema: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.extrema: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const result = [];
             for (let i = domain[0]; i <= domain[1]; i++) {
                 if (Math.round(Chalkboard.calc.dfdx(func, i) as number) === 0) {
@@ -304,7 +304,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const fds = (func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.fds: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.fds: Property "func.field" must be real.`);
             let result = 0;
             let drdt, drds;
             if (func.type === "curve2d" || func.type === "curve3d") {
@@ -326,7 +326,7 @@ namespace Chalkboard {
                 }
                 return result * ds * dt;
             }
-            throw new TypeError("Chalkboard.calc.fds: Property 'type' of 'func' must be 'curve2d', 'curve3d', or 'surface3d'.");
+            throw new Error(`Chalkboard.calc.fds: Property "func.type" must be curve2d, curve3d, or surface3d.`);
         };
 
         /**
@@ -335,10 +335,10 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const fft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.fft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.fft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
-            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.fft: Input length must be a positive integer.");
-            if ((N & (N - 1)) !== 0) throw new TypeError("Chalkboard.calc.fft: Input length must be a power of two.");
+            if (!Number.isInteger(N) || N <= 0) throw new Error(`Chalkboard.calc.fft: Input length must be a positive integer.`);
+            if ((N & (N - 1)) !== 0) throw new Error(`Chalkboard.calc.fft: Input length must be a power of two.`);
             const re: number[] = new Array(N);
             const im: number[] = new Array(N);
             for (let i = 0; i < N; i++) {
@@ -398,8 +398,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const fftfreq = (n: number, d: number = 1): number[] => {
-            if (!Number.isInteger(n) || n <= 0) throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'n' must be a positive integer.");
-            if (typeof d !== "number" || !Number.isFinite(d) || d <= 0) throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'd' must be a positive finite number.");
+            if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.calc.fftfreq: Parameter "n" must be a positive integer.`);
+            if (!Number.isFinite(d) || d <= 0) throw new Error(`Chalkboard.calc.fftfreq: Parameter "d" must be a positive finite number.`);
             const result: number[] = new Array(n);
             const scale = 1 / (n * d);
             if (n % 2 === 0) {
@@ -424,7 +424,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const fftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.fftshift: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.fftshift: Parameter "arr" must be an array of complex numbers.`);
             const N = arr.length;
             if (N === 0) return [];
             const shift = Math.floor((N + 1) / 2);
@@ -442,7 +442,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const fnds = (vectfield: ChalkboardFunction, func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
-            if (vectfield.field !== "real" || func.field !== "real") throw new TypeError("Chalkboard.calc.fnds: Properties 'field' of 'vectfield' and 'func' must be 'real'.");
+            if (vectfield.field !== "real" || func.field !== "real") throw new Error(`Chalkboard.calc.fnds: Properties "vectfield.field" and "func.field" must be real.`);
             let result = 0;
             let drdt, drds;
             if (vectfield.type === "vector2d" && func.type === "curve2d") {
@@ -471,7 +471,7 @@ namespace Chalkboard {
                 }
                 return result * ds * dt;
             }
-            throw new TypeError("Chalkboard.calc.fnds: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d' and property 'type' of 'func' must be 'curve2d', 'curve3d', or 'surface3d'.");
+            throw new Error(`Chalkboard.calc.fnds: Property "vectfield.type" must be vector2d or vector3d and property "func.type" must be curve2d, curve3d, or surface3d.`);
         };
 
         /**
@@ -484,10 +484,10 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Fourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.Fourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Fourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule as (x: number) => number;
-            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps)) throw new TypeError("Chalkboard.calc.Fourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
-            if (steps <= 0 || !Number.isInteger(steps)) throw new TypeError("Chalkboard.calc.Fourier: Parameter 'steps' must be a positive integer.");
+            if (!Number.isFinite(inf) || !Number.isFinite(sup)) throw new Error(`Chalkboard.calc.Fourier: Parameters "inf" and "sup" must be finite numbers.`);
+            if (steps <= 0 || !Number.isInteger(steps)) throw new Error(`Chalkboard.calc.Fourier: Parameter "steps" must be a positive integer.`);
             if (sup === inf) return 0;
             const dx = (sup - inf) / steps;
             let sum = 0;
@@ -508,7 +508,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const frds = (funcORvectfield: ChalkboardFunction, func: ChalkboardFunction, inf: number, sup: number): number => {
-            if (funcORvectfield.field !== "real" || func.field !== "real") throw new TypeError("Chalkboard.calc.frds: Properties 'field' of 'funcORvectfield' and 'func' must be 'real'.");
+            if (funcORvectfield.field !== "real" || func.field !== "real") throw new Error(`Chalkboard.calc.frds: Properties "funcORvectfield.field" and "func.field" must be real.`);
             const f = funcORvectfield.rule as (x: number, y: number) => number;
             if (func.type === "curve2d" || func.type === "curve3d") {
                 let result = 0;
@@ -532,9 +532,9 @@ namespace Chalkboard {
                     }
                     return result * dt;
                 }
-                throw new TypeError("Chalkboard.calc.frds: Property 'type' of 'funcORvectfield' must be 'scalar2d', 'vector2d', or 'vector3d'.");
+                throw new Error(`Chalkboard.calc.frds: Property "funcORvectfield.type" must be scalar2d, vector2d, or vector3d.`);
             }
-            throw new TypeError("Chalkboard.calc.frds: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.frds: Property "func.type" must be curve2d or curve3d.`);
         };
 
         /**
@@ -545,7 +545,7 @@ namespace Chalkboard {
          * @returns {number | ChalkboardVector}
          */
         export const fxdx = (func: ChalkboardFunction, inf: number, sup: number): number | ChalkboardVector => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.fxdx: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.fxdx: Property "func.field" must be real.`);
             const integrate = (f: (x: number) => number, a: number, b: number, eps: number = 1e-6): number => {
                 const asq = (a: number, b: number, fa: number, fm: number, fb: number, whole: number, eps: number, depth: number): number => {
                     const m = (a + b) / 2, h = (b - a) / 2;
@@ -572,7 +572,7 @@ namespace Chalkboard {
                 const f = func.rule as ((t: number) => number)[];
                 return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup), integrate(f[2], inf, sup));
             }
-            throw new TypeError("Chalkboard.calc.fxdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.fxdx: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
 
         /**
@@ -585,7 +585,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const fxydxdy = (func: ChalkboardFunction, xinf: number, xsup: number, yinf: number, ysup: number): number => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.calc.fxydxdy: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.calc.fxydxdy: Property "func.field" must be real.`);
             if (func.type === "scalar3d") {
                 const f = func.rule as (x: number, y: number) => number;
                 const integrate = (g: (v: number) => number, a: number, b: number, eps: number): number => {
@@ -607,7 +607,7 @@ namespace Chalkboard {
                 const g = (x: number) => integrate((y: number) => f(x, y), yinf, ysup, 1e-5);
                 return integrate(g, xinf, xsup, 1e-5);
             }
-            throw new TypeError("Chalkboard.calc.fxydxdy: Property 'type' of 'func' must be 'scalar3d'.");
+            throw new Error(`Chalkboard.calc.fxydxdy: Property "func.type" must be scalar3d.`);
         };
 
         /**
@@ -619,7 +619,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex}
          */
         export const fzdz = (func1: ChalkboardFunction, func2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
-            if (func1.field !== "comp" || func2.field !== "real") throw new TypeError("Chalkboard.calc.fzdz: Property 'field' of 'func1' must be 'comp' and property 'field' of 'func2' must be 'real'.");
+            if (func1.field !== "comp" || func2.field !== "real") throw new Error(`Chalkboard.calc.fzdz: Property "func1.field" must be comp and property "func2.field" must be real.`);
             if (func1.type === "vector2d" && func2.type === "curve2d") {
                 let result = Chalkboard.comp.init(0, 0);
                 const dt = (sup - inf) / 10000;
@@ -630,7 +630,7 @@ namespace Chalkboard {
                 }
                 return Chalkboard.comp.scl(result, dt) as ChalkboardComplex;
             }
-            throw new TypeError("Chalkboard.calc.fzdz: Property 'type' of 'func1' must be 'vector2d' and property 'type' of 'func2' must be 'curve2d'.");
+            throw new Error(`Chalkboard.calc.fzdz: Property "func1.type" must be vector2d and property "func2.type" must be curve2d.`);
         };
 
         /**
@@ -640,7 +640,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector | ChalkboardMatrix}
          */
         export const grad = (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector | ChalkboardMatrix => {
-            if (funcORvectfield.field !== "real") throw new TypeError("Chalkboard.calc.grad: Property 'field' of 'funcORvectfield' must be 'real'.");
+            if (funcORvectfield.field !== "real") throw new Error(`Chalkboard.calc.grad: Property "funcORvectfield.field" must be real.`);
             const f = funcORvectfield.rule as (x: number, y: number) => number;
             const r = funcORvectfield.rule as ((s: number, t: number) => number)[];
             const F = funcORvectfield.rule as ((...x: number[]) => number)[];
@@ -694,7 +694,7 @@ namespace Chalkboard {
                 const dsdw = (F[3](v[0], v[1], v[2]!, v[3]! + h) - F[3](v[0], v[1], v[2]!, v[3]!)) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz, dpdw], [dqdx, dqdy, dqdz, dqdw], [drdx, drdy, drdz, drdw], [dsdx, dsdy, dsdz, dsdw]);
             }
-            throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.grad: Property "funcORvectfield.type" must be scalar3d, surface3d, vector2d, vector3d, or vector4d.`);
         };
 
         /**
@@ -704,7 +704,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const grad2 = (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardMatrix => {
-            if (funcORvectfield.field !== "real") throw new TypeError("Chalkboard.calc.grad2: Property 'field' of 'funcORvectfield' must be 'real'.");
+            if (funcORvectfield.field !== "real") throw new Error(`Chalkboard.calc.grad2: Property "funcORvectfield.field" must be real.`);
             const f = funcORvectfield.rule as (x: number, y: number) => number;
             const r = funcORvectfield.rule as ((s: number, t: number) => number)[];
             const F = funcORvectfield.rule as ((...x: number[]) => number)[];
@@ -760,7 +760,7 @@ namespace Chalkboard {
                 const d2sdw2 = (F[3](v[0], v[1], v[2]!, v[3]! + h) - 2 * F[3](v[0], v[1], v[2]!, v[3]!) + F[3](v[0], v[1], v[2]!, v[3]! - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2, d2pdw2], [d2qdx2, d2qdy2, d2qdz2, d2qdw2], [d2rdx2, d2rdy2, d2rdz2, d2rdw2], [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
             }
-            throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.grad2: Property "funcORvectfield.type" must be scalar3d, surface3d, vector2d, vector3d, or vector4d.`);
         };
 
         /**
@@ -769,7 +769,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const idft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.idft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.idft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             const out: ChalkboardComplex[] = new Array(N);
             for (let n = 0; n < N; n++) {
@@ -796,10 +796,10 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const ifft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.ifft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.ifft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
-            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.ifft: Input length must be a positive integer.");
-            if ((N & (N - 1)) !== 0) throw new TypeError("Chalkboard.calc.ifft: Input length must be a power of two.");
+            if (!Number.isInteger(N) || N <= 0) throw new Error(`Chalkboard.calc.ifft: Input length must be a positive integer.`);
+            if ((N & (N - 1)) !== 0) throw new Error(`Chalkboard.calc.ifft: Input length must be a power of two.`);
             const conjIn: ChalkboardComplex[] = new Array(N);
             for (let i = 0; i < N; i++) {
                 const v = arr[i];
@@ -819,7 +819,7 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const ifftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.ifftshift: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.ifftshift: Parameter "arr" must be an array of complex numbers.`);
             const N = arr.length;
             if (N === 0) return [];
             const shift = Math.floor(N / 2);
@@ -836,10 +836,10 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const iFourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.iFourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.iFourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const F = func.rule as (w: number) => number;
-            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps)) throw new TypeError("Chalkboard.calc.iFourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
-            if (steps <= 0 || !Number.isInteger(steps)) throw new TypeError("Chalkboard.calc.iFourier: Parameter 'steps' must be a positive integer.");
+            if (!Number.isFinite(inf) || !Number.isFinite(sup)) throw new Error(`Chalkboard.calc.iFourier: Parameters "inf" and "sup" must be finite numbers.`);
+            if (steps <= 0 || !Number.isInteger(steps)) throw new Error(`Chalkboard.calc.iFourier: Parameter "steps" must be a positive integer.`);
             if (sup === inf) return 0;
             const dw = (sup - inf) / steps;
             let sum = 0;
@@ -858,12 +858,12 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const irfft = (arr: (number | ChalkboardComplex)[], n?: number): number[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.irfft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.irfft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             if (arr.length === 0) return [];
             const N = typeof n === "number" ? n : 2 * (arr.length - 1);
-            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.irfft: Parameter 'n' must be a positive integer.");
+            if (!Number.isInteger(N) || N <= 0) throw new Error(`Chalkboard.calc.irfft: Parameter "n" must be a positive integer.`);
             const expected = Math.floor(N / 2) + 1;
-            if (arr.length !== expected) throw new RangeError("Chalkboard.calc.irfft: Input spectrum length must be floor(n/2)+1.");
+            if (arr.length !== expected) throw new Error(`Chalkboard.calc.irfft: Input spectrum length must be floor(n/2)+1.`);
             const full: ChalkboardComplex[] = new Array(N);
             {
                 const v = arr[0];
@@ -894,13 +894,13 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Laplace = (func: ChalkboardFunction, val: number): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.Laplace: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Laplace: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             if (val > 0) {
                 const f = func.rule as (x: number) => number;
                 const g = (x: number): number => f(x) * Math.exp(-val * x);
                 return Chalkboard.calc.fxdx(Chalkboard.real.define(g), 0, 10) as number;
             }
-            throw new RangeError("Chalkboard.calc.Laplace: 'val' must be greater than 0.");
+            throw new Error(`Chalkboard.calc.Laplace: "val" must be greater than 0.`);
         };
 
         /**
@@ -910,7 +910,7 @@ namespace Chalkboard {
          * @returns {number | undefined}
          */
         export const lim = (func: ChalkboardFunction, val: number): number | undefined => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.lim: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.lim: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule as (x: number) => number;
             if (val === Infinity) {
                 if (f(101) > f(100)) {
@@ -949,7 +949,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mean = (func: ChalkboardFunction, inf: number, sup: number): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.mean: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.mean: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             return (Chalkboard.calc.fxdx(func, inf, sup) as number) / (sup - inf);
         };
 
@@ -960,7 +960,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Newton = (func: ChalkboardFunction, domain: [number, number] = [-1, 1]): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.Newton: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Newton: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule as (x: number) => number;
             let x = Chalkboard.numb.random(domain[0], domain[1]);
             for (let i = 0; i < 10; i++) {
@@ -976,7 +976,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const normal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
-            if (func.field !== "real" || !func.type.startsWith("curve")) throw new TypeError("Chalkboard.calc.normal: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            if (func.field !== "real" || !func.type.startsWith("curve")) throw new Error(`Chalkboard.calc.normal: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
             return Chalkboard.vect.normalize(Chalkboard.calc.d2fdx2(func, val) as ChalkboardVector);
         };
 
@@ -986,9 +986,9 @@ namespace Chalkboard {
          * @returns {ChalkboardComplex[]}
          */
         export const rfft = (arr: number[]): ChalkboardComplex[] => {
-            if (!Array.isArray(arr)) throw new TypeError("Chalkboard.calc.rfft: Parameter 'arr' must be an array.");
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.rfft: Parameter "arr" must be an array of finite numbers.`);
             const N = arr.length;
-            if (!Number.isInteger(N) || N <= 0) throw new TypeError("Chalkboard.calc.rfft: Input length must be a positive integer.");
+            if (!Number.isInteger(N) || N <= 0) throw new Error(`Chalkboard.calc.rfft: Input length must be a positive integer.`);
             const X = ((N & (N - 1)) === 0) ? Chalkboard.calc.fft(arr) : Chalkboard.calc.dft(arr);
             return X.slice(0, Math.floor(N / 2) + 1);
         };
@@ -1000,7 +1000,7 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const tangent = (func: ChalkboardFunction, val: number): ChalkboardVector => {
-            if (func.field !== "real" || !func.type.startsWith("curve")) throw new TypeError("Chalkboard.calc.tangent: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            if (func.field !== "real" || !func.type.startsWith("curve")) throw new Error(`Chalkboard.calc.tangent: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
             return Chalkboard.vect.normalize(Chalkboard.calc.dfdx(func, val) as ChalkboardVector);
         };
 
@@ -1013,7 +1013,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Taylor = (func: ChalkboardFunction, val: number, n: 0 | 1 | 2, a: number): number => {
-            if (func.field !== "real" || func.type !== "scalar2d") throw new TypeError("Chalkboard.calc.Taylor: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+            if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Taylor: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule as (x: number) => number;
             const x = val;
             if (n === 0) {
@@ -1023,7 +1023,7 @@ namespace Chalkboard {
             } else if (n === 2) {
                 return f(x) + (Chalkboard.calc.dfdx(func, a) as number) * (x - a) + ((Chalkboard.calc.d2fdx2(func, a) as number) * (x - a) * (x - a)) / 2;
             }
-            throw new RangeError("Chalkboard.calc.Taylor: 'n' must be 0, 1, or 2.");
+            throw new Error(`Chalkboard.calc.Taylor: "n" must be 0, 1, or 2.`);
         };
     }
 }

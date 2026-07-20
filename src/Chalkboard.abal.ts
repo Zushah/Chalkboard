@@ -24,9 +24,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<number[]>}
          */
         export const A = (n: number): ChalkboardSet<number[]> => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.A: Parameter "n" must be a positive integer.`);
             const Sn = Chalkboard.abal.S(n);
             const isEvenPermutation = (perm: number[]): boolean => {
                 let inversions = 0;
@@ -54,12 +52,8 @@ namespace Chalkboard {
          */
         export const automorphism = <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an automorphism.");
-            }
-            if (!Chalkboard.abal.isBijective(morphism)) {
-                throw new Error("The mapping is not bijective, so it cannot be an automorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism)) throw new Error(`Chalkboard.abal.automorphism: The mapping is not a homomorphism, so it cannot be an automorphism.`);
+            if (!Chalkboard.abal.isBijective(morphism)) throw new Error(`Chalkboard.abal.automorphism: The mapping is not bijective, so it cannot be an automorphism.`);
             return morphism;
         };
 
@@ -77,9 +71,7 @@ namespace Chalkboard {
                     id: "C"
                 };
             } else {
-                if (!Number.isInteger(n) || n <= 0) {
-                    throw new Error('The parameter "n" must be a positive integer.');
-                }
+                if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.C: Parameter "n" must be a positive integer.`);
                 const elements: ChalkboardComplex[] = [];
                 for (let k = 0; k < n; k++) {
                     const t = (2 * Math.PI * k) / n;
@@ -112,7 +104,7 @@ namespace Chalkboard {
             if ("set" in struc && struc.set.elements) {
                 return struc.set.elements.length;
             }
-            throw new Error("The inputted structure does not have a finite cardinality or is missing elements.");
+            throw new Error(`Chalkboard.abal.cardinality: The inputted structure does not have a finite cardinality or is missing elements.`);
         };
 
         /**
@@ -123,6 +115,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<[T, U]>}
          */
         export const Cartesian = <T, U>(set1: ChalkboardSet<T>, set2: ChalkboardSet<U>): ChalkboardSet<[T, U]> => {
+            if (set1 === null || typeof set1 !== "object" || typeof (set1 as any).contains !== "function") throw new Error(`Chalkboard.abal.Cartesian: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof (set2 as any).contains !== "function") throw new Error(`Chalkboard.abal.Cartesian: Parameter "set2" must be a set.`);
             const result: [T, U][] = [];
             for (const a of set1.elements || []) {
                 for (const b of set2.elements || []) {
@@ -138,9 +132,7 @@ namespace Chalkboard {
          * @param {"add" | "mul"} [type="add"] - The type of operation to calculate the Cayley table for ("add" for additive operations, "mul" for multiplicative operations, defaults to "add")
          */
         export const Cayley = (struc: ChalkboardStructure<number>, type: "add" | "mul" = "add"): ChalkboardMatrix => {
-            if (!struc.set.elements) {
-                throw new Error("The structure must have a finite set of elements.");
-            }
+            if (!struc.set.elements) throw new Error(`Chalkboard.abal.Cayley: The structure must have a finite set of elements.`);
             const elements = struc.set.elements;
             if ("operation" in struc && struc.operation) {
                 if (type === "add") {
@@ -152,7 +144,7 @@ namespace Chalkboard {
                     }
                     return result;
                 }
-                throw new Error('The "type" parameter for groups should remain as the default "add" since there is no distinction between their additive and multiplicative Cayley tables.');
+                throw new Error(`Chalkboard.abal.Cayley: The "type" parameter for groups should remain as the default add since there is no distinction between their additive and multiplicative Cayley tables.`);
             }
             if ("add" in struc && struc.add && "mul" in struc && struc.mul) {
                 if (type === "add") {
@@ -172,7 +164,7 @@ namespace Chalkboard {
                 }
                 return result;
             }
-            throw new Error("Invalid algebraic structure for Cayley table.");
+            throw new Error(`Chalkboard.abal.Cayley: Invalid algebraic structure for Cayley table.`);
         };
 
         /**
@@ -182,6 +174,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const center = <T>(group: ChalkboardStructure<T>): ChalkboardSet<T> => {
+            if (group === null || typeof group !== "object" || (group as any).set === null || typeof (group as any).set !== "object" || typeof ((group as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.center: Parameter "group" must be an algebraic structure.`);
             const { set, operation } = group;
             if (!set.elements || !operation) {
                 return Chalkboard.abal.set<T>([]);
@@ -200,6 +193,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const complement = <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>): ChalkboardSet<T> => {
+            if (set === null || typeof set !== "object" || typeof (set as any).contains !== "function") throw new Error(`Chalkboard.abal.complement: Parameter "set" must be a set.`);
+            if (superset === null || typeof superset !== "object" || typeof (superset as any).contains !== "function") throw new Error(`Chalkboard.abal.complement: Parameter "superset" must be a set.`);
             return Chalkboard.abal.set((superset.elements || []).filter((element) => !set.contains(element)));
         };
 
@@ -210,12 +205,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMorphism<T, V>}
          */
         export const compose = <T, U, V>(morph1: ChalkboardMorphism<T, U>, morph2: ChalkboardMorphism<U, V>): ChalkboardMorphism<T, V> => {
-            if (!Chalkboard.abal.isHomomorphism(morph1) || !Chalkboard.abal.isHomomorphism(morph2)) {
-                throw new Error("Both morphisms of the morphism composition must be homomorphisms.");
-            }
-            if (!Chalkboard.abal.isEqual(morph1.struc2, morph2.struc1)) {
-                throw new Error("The codomain of the first morphism and the domain of the second morphism must be equal to calculate the composition morphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morph1) || !Chalkboard.abal.isHomomorphism(morph2)) throw new Error(`Chalkboard.abal.compose: Both morphisms of the morphism composition must be homomorphisms.`);
+            if (!Chalkboard.abal.isEqual(morph1.struc2, morph2.struc1)) throw new Error(`Chalkboard.abal.compose: The codomain of the first morphism and the domain of the second morphism must be equal to calculate the composition morphism.`);
             return Chalkboard.abal.homomorphism(morph1.struc1, morph2.struc2, (x) => morph2.mapping(morph1.mapping(x)));
         };
 
@@ -278,7 +269,7 @@ namespace Chalkboard {
                 };
                 return copiedMorphism;
             }
-            throw new Error('The "struc" must be a set, structure, structure extension, or morphism.');
+            throw new Error(`Chalkboard.abal.copy: The "struc" must be a set, structure, structure extension, or morphism.`);
         };
 
         /**
@@ -289,11 +280,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<ChalkboardSet<T>>}
          */
         export const coset = <T>(struc: ChalkboardStructure<T>, substruc: ChalkboardStructure<T>): ChalkboardSet<ChalkboardSet<T>> => {
-            if ("operation" in struc && !Chalkboard.abal.isSubgroup(struc, substruc.set)) {
-                throw new Error('The "substruc" must be a subgroup of the "struc".');
-            } else if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
-                throw new Error('The "substruc" must be an ideal of the "struc".');
-            }
+            if ("operation" in struc && !Chalkboard.abal.isSubgroup(struc, substruc.set)) throw new Error(`Chalkboard.abal.coset: The "substruc" must be a subgroup of the "struc".`); else if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) throw new Error(`Chalkboard.abal.coset: The "substruc" must be an ideal of the "struc".`);
             const elements = Chalkboard.abal.toArray(struc.set);
             const subElements = Chalkboard.abal.toArray(substruc.set);
             const cosets = new Map<string, ChalkboardSet<T>>();
@@ -326,9 +313,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const cyclicSubgroup = <T>(group: ChalkboardStructure<T>, element: T): ChalkboardSet<T> => {
-            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
-                throw new Error('The "group" must be finite.');
-            }
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) throw new Error(`Chalkboard.abal.cyclicSubgroup: The "group" must be finite.`);
             const result: T[] = [];
             let current = element;
             if (!group.operation) {
@@ -347,9 +332,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<string>}
          */
         export const D = (n: number): ChalkboardSet<string> => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.D: Parameter "n" must be a positive integer.`);
             const elements: string[] = [];
             for (let i = 0; i < n; i++) {
                 elements.push(`r${i}`);
@@ -372,6 +355,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const difference = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
+            if (set1 === null || typeof set1 !== "object" || typeof (set1 as any).contains !== "function") throw new Error(`Chalkboard.abal.difference: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof (set2 as any).contains !== "function") throw new Error(`Chalkboard.abal.difference: Parameter "set2" must be a set.`);
             const result = (set1.elements || []).filter((element) => !set2.contains(element));
             return Chalkboard.abal.set(result);
         };
@@ -422,36 +407,28 @@ namespace Chalkboard {
                         (struc2.inverter as (x: U) => U)(a[1])
                     ];
                     if (type === "sum") {
-                        if (!struc1.set.elements || !struc2.set.elements) {
-                            throw new Error("Direct sum is only defined for finite groups.");
-                        }
+                        if (!struc1.set.elements || !struc2.set.elements) throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite groups.`);
                     }
                     return Chalkboard.abal.group(set, operation, identity, inverter);
                 }
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite structures.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements) throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite structures.`);
                 }
                 return Chalkboard.abal.monoid(set, operation, identity);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite rings.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements) throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite rings.`);
                 }
                 return Chalkboard.abal.ring(set, add, mul, addIdentity, mulIdentity, addInverter);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && "mulInverter" in struc1 && "mulInverter" in struc2) {
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite fields.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements) throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite fields.`);
                 }
                 return Chalkboard.abal.field(set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter);
             }
-            throw new Error("Invalid algebraic structures for direct product or sum.");
+            throw new Error(`Chalkboard.abal.direct: Invalid algebraic structures for direct product or sum.`);
         };
 
         /**
@@ -463,9 +440,7 @@ namespace Chalkboard {
          */
         export const endomorphism = <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T): ChalkboardMorphism<T, T> => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an endomorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism)) throw new Error(`Chalkboard.abal.endomorphism: The mapping is not a homomorphism, so it cannot be an endomorphism.`);
             return morphism;
         };
 
@@ -483,9 +458,7 @@ namespace Chalkboard {
          */
         export const field = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T, mulInverter?: (a: T) => T): ChalkboardStructure<T> => {
             const autoconfig = (): { addIdentity: T; mulIdentity: T; addInverter: (a: T) => T; mulInverter: (a: T) => T } => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.');
-                }
+                if (!set.id) throw new Error(`Chalkboard.abal.field: The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.`);
                 if (set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0 as T,
@@ -501,14 +474,12 @@ namespace Chalkboard {
                         mulInverter: (a: T) => Chalkboard.comp.invert(a as unknown as ChalkboardComplex) as T
                     };
                 }
-                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.field: Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".`);
             };
             
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter, mulInverter };
             const field: ChalkboardStructure<T> = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
-            if (!Chalkboard.abal.isField(field)) {
-                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.');
-            }
+            if (!Chalkboard.abal.isField(field)) throw new Error(`Chalkboard.abal.field: The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.`);
             return field;
         };
 
@@ -525,13 +496,9 @@ namespace Chalkboard {
          * @returns {ChalkboardStructureExtension<T, U>}
          */
         export const fieldExtension = <T, U extends T>(base: ChalkboardStructure<T>, extension: ChalkboardStructure<U>, degree: number, basis: ChalkboardVector[], isFinite: boolean, isSimple: boolean, isAlgebraic: boolean): ChalkboardStructureExtension<T, U> => {
-            if (!Chalkboard.abal.isSubfield(base as ChalkboardStructure<unknown>, extension.set as ChalkboardSet<unknown>)) {
-                throw new Error('The "base" must be a subfield of the "extension".');
-            }
+            if (!Chalkboard.abal.isSubfield(base as ChalkboardStructure<unknown>, extension.set as ChalkboardSet<unknown>)) throw new Error(`Chalkboard.abal.fieldExtension: The "base" must be a subfield of the "extension".`);
             const autoconfig = (): { degree: number; basis: ChalkboardVector[]; isFinite: boolean; isSimple: boolean; isAlgebraic: boolean } => {
-                if (!base.set.id) {
-                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
-                }
+                if (!base.set.id) throw new Error(`Chalkboard.abal.fieldExtension: The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.`);
                 if (base.set.id === "Q" && extension.set.id === "R") {
                     return {
                         degree: Infinity,
@@ -549,7 +516,7 @@ namespace Chalkboard {
                         isAlgebraic: true
                     };
                 }
-                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+                throw new Error(`Chalkboard.abal.fieldExtension: Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".`);
             };
             const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
@@ -560,12 +527,15 @@ namespace Chalkboard {
          * @param {number} n - The number of rows/columns
          * @returns {ChalkboardSet<ChalkboardMatrix>}
          */
-        export const GL = (n: number): ChalkboardSet<ChalkboardMatrix> => ({
-            contains: (element: ChalkboardMatrix) => {
-                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
-            },
-            id: `GL${n}`
-        });
+        export const GL = (n: number): ChalkboardSet<ChalkboardMatrix> => {
+            if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.GL: Parameter "n" must be a positive integer.`);
+            return {
+                contains: (element: ChalkboardMatrix) => {
+                    return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
+                },
+                id: `GL${n}`
+            };
+        };
 
         /**
          * Defines an algebraic structure known as a group.
@@ -578,9 +548,7 @@ namespace Chalkboard {
          */
         export const group = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T, inverter?: (a: T) => T): ChalkboardStructure<T> => {
             const autoconfig = (): { identity: T; inverter: (a: T) => T } => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.');
-                }
+                if (!set.id) throw new Error(`Chalkboard.abal.group: The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         identity: 0 as T,
@@ -627,13 +595,11 @@ namespace Chalkboard {
                         }
                     };
                 }
-                throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.group: Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".`);
             };
             const configured = typeof identity === "undefined" || typeof inverter === "undefined" ? autoconfig() : { identity, inverter: inverter };
             const group: ChalkboardStructure<T> = { set, operation, identity: configured.identity, inverter: configured.inverter };
-            if (!Chalkboard.abal.isGroup(group)) {
-                throw new Error('The inputted "set", "operation", "identity", and "inverter" do not form a group.');
-            }
+            if (!Chalkboard.abal.isGroup(group)) throw new Error(`Chalkboard.abal.group: The inputted "set", "operation", "identity", and "inverter" do not form a group.`);
             return group;
         };
 
@@ -647,9 +613,7 @@ namespace Chalkboard {
          */
         export const homomorphism = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
             const morphism: ChalkboardMorphism<T, U> = { struc1, struc2, mapping };
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error('The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.');
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism)) throw new Error(`Chalkboard.abal.homomorphism: The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.`);
             return morphism;
         };
 
@@ -660,6 +624,7 @@ namespace Chalkboard {
          * @returns {ChalkboardMorphism<T, T>}
          */
         export const idmorphism = <T>(struc: ChalkboardStructure<T>): ChalkboardMorphism<T, T> => {
+            if (struc === null || typeof struc !== "object" || (struc as any).set === null || typeof (struc as any).set !== "object" || typeof ((struc as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.idmorphism: Parameter "struc" must be an algebraic structure.`);
             return Chalkboard.abal.automorphism(struc, (x) => x);
         };
 
@@ -672,13 +637,9 @@ namespace Chalkboard {
          */
         export const image = <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<T>): ChalkboardSet<U> => {
             const { struc1, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the image.');
-            }
+            if (!struc1.set.elements) throw new Error(`Chalkboard.abal.image: The domain of the "morph" must have a finite set of elements to calculate the image.`);
             const _subset = subset || struc1.set;
-            if (!_subset.elements) {
-                throw new Error('The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.');
-            }
+            if (!_subset.elements) throw new Error(`Chalkboard.abal.image: The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.`);
             const mapped = _subset.elements.map(mapping);
             const result = Array.from(new Set(mapped.map((e) => $(e)))).map((e) => JSON.parse(e));
             return Chalkboard.abal.set(result);
@@ -692,6 +653,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const intersection = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
+            if (set1 === null || typeof set1 !== "object" || typeof (set1 as any).contains !== "function") throw new Error(`Chalkboard.abal.intersection: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof (set2 as any).contains !== "function") throw new Error(`Chalkboard.abal.intersection: Parameter "set2" must be a set.`);
             const result = (set1.elements || []).filter((element) => set2.contains(element));
             return Chalkboard.abal.set(result);
         };
@@ -703,12 +666,8 @@ namespace Chalkboard {
          * @returns {ChalkboardMorphism<T, T>}
          */
         export const invmorphism = <T, U>(morph: ChalkboardMorphism<T, U>): ChalkboardMorphism<U, T> => {
-            if (morph.struc1.set.id && ["Z", "Q", "R", "C"].includes(morph.struc1.set.id)) {
-                throw new Error('Inverse morphisms cannot be defined for morphisms with infinite domains.');
-            }
-            if (!Chalkboard.abal.isIsomorphism(morph)) {
-                throw new Error("The morphism is not an isomorphism, so it does not have an inverse.");
-            }
+            if (morph.struc1.set.id && ["Z", "Q", "R", "C"].includes(morph.struc1.set.id)) throw new Error(`Chalkboard.abal.invmorphism: Inverse morphisms cannot be defined for morphisms with infinite domains.`);
+            if (!Chalkboard.abal.isIsomorphism(morph)) throw new Error(`Chalkboard.abal.invmorphism: The morphism is not an isomorphism, so it does not have an inverse.`);
             return Chalkboard.abal.homomorphism(morph.struc2, morph.struc1, (y: U) => {
                 const domain = morph.struc1.set.elements || [];
                 for (const x of domain) {
@@ -716,7 +675,7 @@ namespace Chalkboard {
                         return x;
                     }
                 }
-                throw new Error(`The inverse morphism failed to be defined because no element in the domain maps to the element "${$(y)}" in the codomain.`);
+                throw new Error(`Chalkboard.abal.invmorphism: The inverse morphism failed to be defined because no element in the domain maps to the element "${$(y)}" in the codomain.`);
             });
         };
 
@@ -727,6 +686,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isAutomorphism = <T>(morph: ChalkboardMorphism<T, T>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isAutomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEndomorphism(morph) && Chalkboard.abal.isIsomorphism(morph);
         };
 
@@ -737,6 +697,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isBijective = <T, U>(morph: ChalkboardMorphism<T, U>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isBijective: Parameter "morph" must be an algebraic morphism.`);
             if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
                 return morph.struc1.set.id === morph.struc2.set.id;
             }
@@ -751,6 +712,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isClosed = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T): boolean => {
+            if (set === null || typeof set !== "object" || typeof (set as any).contains !== "function") throw new Error(`Chalkboard.abal.isClosed: Parameter "set" must be a set.`);
+            if (typeof operation !== "function") throw new Error(`Chalkboard.abal.isClosed: Parameter "operation" must be a function.`);
             if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
                 return true;
             }
@@ -793,6 +756,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isCommutative = <T>(struc: ChalkboardStructure<T>): boolean => {
+            if (struc === null || typeof struc !== "object" || (struc as any).set === null || typeof (struc as any).set !== "object" || typeof ((struc as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isCommutative: Parameter "struc" must be an algebraic structure.`);
             const { set } = struc;
             if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
                 return true;
@@ -842,6 +806,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isCyclicSubgroup = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
+            if (group === null || typeof group !== "object" || (group as any).set === null || typeof (group as any).set !== "object" || typeof ((group as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isCyclicSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subgroup === null || typeof subgroup !== "object" || typeof (subgroup as any).contains !== "function") throw new Error(`Chalkboard.abal.isCyclicSubgroup: Parameter "subgroup" must be a set.`);
             if (!Chalkboard.abal.isSubgroup(group, subgroup) || !group.operation) {
                 return false;
             }
@@ -868,6 +834,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isEmpty = <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>): boolean => {
+            if (struc === null || typeof struc !== "object" || (typeof (struc as any).contains !== "function" && (((struc as any).set === null || typeof (struc as any).set !== "object") || typeof ((struc as any).set as any).contains !== "function"))) throw new Error(`Chalkboard.abal.isEmpty: Parameter "struc" must be a set or algebraic structure.`);
             const id = "set" in struc && struc.set ? struc.set.id : ("id" in struc ? struc.id : undefined);
             if (id === "Z" || id === "Q" || id === "R" || id === "C" || id?.startsWith("M(")) {
                 return false;
@@ -888,6 +855,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isEndomorphism = <T>(morph: ChalkboardMorphism<T, T>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isEndomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEqual(morph.struc1, morph.struc2);
         };
 
@@ -1007,6 +975,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isExact = <T, U, V>(morph1: ChalkboardMorphism<T, U>, morph2: ChalkboardMorphism<U, V>): boolean => {
+            if (morph1 === null || typeof morph1 !== "object" || (morph1 as any).struc1 === null || typeof (morph1 as any).struc1 !== "object" || (morph1 as any).struc2 === null || typeof (morph1 as any).struc2 !== "object" || typeof (morph1 as any).mapping !== "function") throw new Error(`Chalkboard.abal.isExact: Parameter "morph1" must be an algebraic morphism.`);
+            if (morph2 === null || typeof morph2 !== "object" || (morph2 as any).struc1 === null || typeof (morph2 as any).struc1 !== "object" || (morph2 as any).struc2 === null || typeof (morph2 as any).struc2 !== "object" || typeof (morph2 as any).mapping !== "function") throw new Error(`Chalkboard.abal.isExact: Parameter "morph2" must be an algebraic morphism.`);
             return Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.kernel(morph2));
         };
 
@@ -1017,6 +987,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isField = <T>(field: ChalkboardStructure<T>): boolean => {
+            if (field === null || typeof field !== "object" || (field as any).set === null || typeof (field as any).set !== "object" || typeof ((field as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isField: Parameter "field" must be an algebraic structure.`);
             const { set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
             if (set.id === "Q" || set.id === "R" || set.id === "C") {
                 return true;
@@ -1067,6 +1038,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isGroup = <T>(group: ChalkboardStructure<T>): boolean => {
+            if (group === null || typeof group !== "object" || (group as any).set === null || typeof (group as any).set !== "object" || typeof ((group as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isGroup: Parameter "group" must be an algebraic structure.`);
             const { set, operation, identity, inverter } = group;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
                 return true;
@@ -1137,7 +1109,7 @@ namespace Chalkboard {
                 }
                 return true;
             }
-            throw new Error("The algebraic structures of the homomorphism may have missing operations or incompatible types.");
+            throw new Error(`Chalkboard.abal.isHomomorphism: The algebraic structures of the homomorphism may have missing operations or incompatible types.`);
         };
 
         /**
@@ -1148,6 +1120,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isIdeal = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            if (ring === null || typeof ring !== "object" || (ring as any).set === null || typeof (ring as any).set !== "object" || typeof ((ring as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isIdeal: Parameter "ring" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isIdeal: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, addInverter } = ring;
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
                 return false;
@@ -1182,6 +1156,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isIdentity = <T>(struc: ChalkboardStructure<T>, element: T, type: "add" | "mul" = "add"): boolean => {
+            if (struc === null || typeof struc !== "object" || (struc as any).set === null || typeof (struc as any).set !== "object" || typeof ((struc as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isIdentity: Parameter "struc" must be an algebraic structure.`);
+            if (type !== undefined && (typeof type !== "string")) throw new Error(`Chalkboard.abal.isIdentity: Parameter "type" must be a string.`);
             if (type === "add" && struc.add && struc.addIdentity) {
                 return (
                     "add" in struc &&
@@ -1205,6 +1181,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isInjective = <T, U>(morph: ChalkboardMorphism<T, U>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isInjective: Parameter "morph" must be an algebraic morphism.`);
             if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
                 return morph.struc1.set.id === morph.struc2.set.id;
             }
@@ -1224,6 +1201,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isInverse = <T>(struc: ChalkboardStructure<T>, element1: T, element2: T, type: "add" | "mul" = "add"): boolean => {
+            if (struc === null || typeof struc !== "object" || (struc as any).set === null || typeof (struc as any).set !== "object" || typeof ((struc as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isInverse: Parameter "struc" must be an algebraic structure.`);
+            if (type !== undefined && (typeof type !== "string")) throw new Error(`Chalkboard.abal.isInverse: Parameter "type" must be a string.`);
             if (type === "add") {
                 return (
                     "add" in struc &&
@@ -1246,6 +1225,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isIsomorphism = <T, U>(morph: ChalkboardMorphism<T, U>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isIsomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isBijective(morph);
         };
 
@@ -1256,6 +1236,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isMonoid = <T>(monoid: ChalkboardStructure<T>): boolean => {
+            if (monoid === null || typeof monoid !== "object" || (monoid as any).set === null || typeof (monoid as any).set !== "object" || typeof ((monoid as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isMonoid: Parameter "monoid" must be an algebraic structure.`);
             const { set, operation, identity } = monoid;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
                 return true;
@@ -1294,6 +1275,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isNormalSubgroup = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
+            if (group === null || typeof group !== "object" || (group as any).set === null || typeof (group as any).set !== "object" || typeof ((group as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isNormalSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subgroup === null || typeof subgroup !== "object" || typeof (subgroup as any).contains !== "function") throw new Error(`Chalkboard.abal.isNormalSubgroup: Parameter "subgroup" must be a set.`);
             const { set, operation, inverter } = group;
             if (!operation || !inverter) {
                 return false;
@@ -1322,12 +1305,8 @@ namespace Chalkboard {
          */
         export const isomorphism = <T, U>(struc1: ChalkboardStructure<T>, struc2: ChalkboardStructure<U>, mapping: (element: T) => U): ChalkboardMorphism<T, U> => {
             const morphism = Chalkboard.abal.homomorphism(struc1, struc2, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an isomorphism.");
-            }
-            if (!Chalkboard.abal.isBijective(morphism)) {
-                throw new Error("The mapping is not bijective, so it cannot be an isomorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism)) throw new Error(`Chalkboard.abal.isomorphism: The mapping is not a homomorphism, so it cannot be an isomorphism.`);
+            if (!Chalkboard.abal.isBijective(morphism)) throw new Error(`Chalkboard.abal.isomorphism: The mapping is not bijective, so it cannot be an isomorphism.`);
             return morphism;
         };
 
@@ -1339,6 +1318,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isPrincipalIdeal = <T>(ring: ChalkboardStructure<T>, ideal: ChalkboardSet<T>): boolean => {
+            if (ring === null || typeof ring !== "object" || (ring as any).set === null || typeof (ring as any).set !== "object" || typeof ((ring as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isPrincipalIdeal: Parameter "ring" must be an algebraic structure.`);
+            if (ideal === null || typeof ideal !== "object" || typeof (ideal as any).contains !== "function") throw new Error(`Chalkboard.abal.isPrincipalIdeal: Parameter "ideal" must be a set.`);
             for (const generator of ideal.elements || []) {
                 const principalIdeal = Chalkboard.abal.principalIdeal(ring, generator);
                 if (Chalkboard.abal.isSubset(ideal, principalIdeal) && Chalkboard.abal.isSubset(principalIdeal, ideal)) {
@@ -1355,6 +1336,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isRing = <T>(ring: ChalkboardStructure<T>): boolean => {
+            if (ring === null || typeof ring !== "object" || (ring as any).set === null || typeof (ring as any).set !== "object" || typeof ((ring as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isRing: Parameter "ring" must be an algebraic structure.`);
             const { set, add, mul, addIdentity, addInverter } = ring;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C") {
                 return true;
@@ -1389,6 +1371,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubfield = <T>(field: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            if (field === null || typeof field !== "object" || (field as any).set === null || typeof (field as any).set !== "object" || typeof ((field as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubfield: Parameter "field" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubfield: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
             if (field.set.id && subset.id) {
                 if (subset.id === field.set.id && ["Q", "R", "C"].includes(subset.id)) {
@@ -1434,6 +1418,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubgroup = <T>(group: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            if (group === null || typeof group !== "object" || (group as any).set === null || typeof (group as any).set !== "object" || typeof ((group as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubgroup: Parameter "subset" must be a set.`);
             const { operation, identity, inverter } = group;
             if (group.set.id && subset.id) {
                 if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(group.set.id)) {
@@ -1484,6 +1470,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubmonoid = <T>(monoid: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            if (monoid === null || typeof monoid !== "object" || (monoid as any).set === null || typeof (monoid as any).set !== "object" || typeof ((monoid as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubmonoid: Parameter "monoid" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubmonoid: Parameter "subset" must be a set.`);
             const { operation, identity } = monoid;
             if (monoid.set.id && subset.id) {
                 if (subset.id === monoid.set.id) {
@@ -1519,6 +1507,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubring = <T>(ring: ChalkboardStructure<T>, subset: ChalkboardSet<T>): boolean => {
+            if (ring === null || typeof ring !== "object" || (ring as any).set === null || typeof (ring as any).set !== "object" || typeof ((ring as any).set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubring: Parameter "ring" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubring: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, addInverter } = ring;
             if (ring.set.id && subset.id) {
                 if (subset.id === ring.set.id) {
@@ -1566,6 +1556,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSubset = <T>(set: ChalkboardSet<T>, superset: ChalkboardSet<T>): boolean => {
+            if (set === null || typeof set !== "object" || typeof (set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubset: Parameter "set" must be a set.`);
+            if (superset === null || typeof superset !== "object" || typeof (superset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSubset: Parameter "superset" must be a set.`);
             if (set.id && superset.id) {
                 if (set.id === superset.id) {
                     return true;
@@ -1601,6 +1593,8 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSuperset = <T>(set: ChalkboardSet<T>, subset: ChalkboardSet<T>): boolean => {
+            if (set === null || typeof set !== "object" || typeof (set as any).contains !== "function") throw new Error(`Chalkboard.abal.isSuperset: Parameter "set" must be a set.`);
+            if (subset === null || typeof subset !== "object" || typeof (subset as any).contains !== "function") throw new Error(`Chalkboard.abal.isSuperset: Parameter "subset" must be a set.`);
             return Chalkboard.abal.isSubset(subset, set);
         };
 
@@ -1611,6 +1605,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const isSurjective = <T, U>(morph: ChalkboardMorphism<T, U>): boolean => {
+            if (morph === null || typeof morph !== "object" || (morph as any).struc1 === null || typeof (morph as any).struc1 !== "object" || (morph as any).struc2 === null || typeof (morph as any).struc2 !== "object" || typeof (morph as any).mapping !== "function") throw new Error(`Chalkboard.abal.isSurjective: Parameter "morph" must be an algebraic morphism.`);
             const { struc1, struc2, mapping } = morph;
             if (["Z", "Q", "R", "C", "P"].includes(struc2.set.id || "")) {
                 if (struc2.set.id === "C" && ["R", "C"].includes(struc1.set.id || "")) return true;
@@ -1633,9 +1628,7 @@ namespace Chalkboard {
          */
         export const kernel = <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<T>): ChalkboardSet<T> => {
             const { struc1, struc2, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the kernel.');
-            }
+            if (!struc1.set.elements) throw new Error(`Chalkboard.abal.kernel: The domain of the "morph" must have a finite set of elements to calculate the kernel.`);
             const _subset = subset?.elements || struc1.set.elements;
             let identity: U | undefined;
             if ("identity" in struc2) {
@@ -1643,7 +1636,7 @@ namespace Chalkboard {
             } else if ("addIdentity" in struc2) {
                 identity = (struc2 as ChalkboardStructure<U> | ChalkboardStructure<U>).addIdentity;
             } else {
-                throw new Error('The codomain of the "morph" must have an identity element to calculate the kernel.');
+                throw new Error(`Chalkboard.abal.kernel: The codomain of the "morph" must have an identity element to calculate the kernel.`);
             }
             const result = _subset.filter((element) => $(mapping(element)) === $(identity));
             return Chalkboard.abal.set(result);
@@ -1657,9 +1650,7 @@ namespace Chalkboard {
          * @returns {boolean}
          */
         export const Lagrange = <T>(group: ChalkboardStructure<T>, subgroup: ChalkboardSet<T>): boolean => {
-            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
-                throw new Error("Lagrange's Theorem only applies to finite groups");
-            }
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) throw new Error(`Chalkboard.abal.Lagrange: Lagrange theorem only applies to finite groups.`);
             return Chalkboard.abal.cardinality(group) % Chalkboard.abal.cardinality(subgroup) === 0;
         };
 
@@ -1669,12 +1660,16 @@ namespace Chalkboard {
          * @param {number} [cols=rows] - The number of columns (optional, defaults to the number of rows)
          * @returns {ChalkboardSet<ChalkboardMatrix>}
          */
-        export const M = (rows: number, cols: number = rows): ChalkboardSet<ChalkboardMatrix> => ({
-            contains: (element: ChalkboardMatrix) => {
-                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
-            },
-            id: `M(${rows}, ${cols})`
-        });
+        export const M = (rows: number, cols: number = rows): ChalkboardSet<ChalkboardMatrix> => {
+            if (!Number.isInteger(rows) || rows <= 0) throw new Error(`Chalkboard.abal.M: Parameter "rows" must be a positive integer.`);
+            if (!Number.isInteger(cols) || cols <= 0) throw new Error(`Chalkboard.abal.M: Parameter "cols" must be a positive integer.`);
+            return {
+                contains: (element: ChalkboardMatrix) => {
+                    return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
+                },
+                id: `M(${rows}, ${cols})`
+            };
+        };
 
         /**
          * Defines an algebraic structure known as a monoid.
@@ -1686,9 +1681,7 @@ namespace Chalkboard {
          */
         export const monoid = <T>(set: ChalkboardSet<T>, operation: (a: T, b: T) => T, identity?: T): ChalkboardStructure<T> => {
             const autoconfig = (): { identity: T } => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" explicitly.');
-                }
+                if (!set.id) throw new Error(`Chalkboard.abal.monoid: The "set" must have a valid "id" property, or you must input "identity" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return { identity: 0 as T };
                 } else if (set.id === "C") {
@@ -1708,13 +1701,11 @@ namespace Chalkboard {
                     const n = parseInt(set.id.slice(1), 10);
                     return { identity: Array.from({length: n}, (_, i) => i) as T };
                 }
-                throw new Error('Automatic configuration of the "identity" property is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.monoid: Automatic configuration of the "identity" property is not available for the inputted "set".`);
             };
             const configured = typeof identity === "undefined" ? autoconfig() : { identity };
             const monoid: ChalkboardStructure<T> = { set, operation, identity: configured.identity };
-            if (!Chalkboard.abal.isMonoid(monoid)) {
-                throw new Error('The inputted "set", "operation", and "identity" do not form a monoid.');
-            }
+            if (!Chalkboard.abal.isMonoid(monoid)) throw new Error(`Chalkboard.abal.monoid: The inputted "set", "operation", and "identity" do not form a monoid.`);
             return monoid;
         };
 
@@ -1735,17 +1726,13 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const order = <T>(group: ChalkboardStructure<T>, element: T): number => {
-            if (!group.operation) {
-                throw new Error('The "group" must have an "operation" property to calculate the order of an element.');
-            }
+            if (!group.operation) throw new Error(`Chalkboard.abal.order: The "group" must have an "operation" property to calculate the order of an element.`);
             let result = 1;
             let current = element;
             while ($(current) !== $(group.identity)) {
                 current = group.operation(current, element);
                 result++;
-                if (result > (group.set.elements?.length || Infinity)) {
-                    throw new Error('The "group" might not be finite because an infinite loop was detected.');
-                }
+                if (result > (group.set.elements?.length || Infinity)) throw new Error(`Chalkboard.abal.order: The "group" might not be finite because an infinite loop was detected.`);
             }
             return result;
         };
@@ -1766,6 +1753,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<ChalkboardSet<T>>}
          */
         export const powerSet = <T>(set: ChalkboardSet<T>): ChalkboardSet<ChalkboardSet<T>> => {
+            if (set === null || typeof set !== "object" || typeof (set as any).contains !== "function") throw new Error(`Chalkboard.abal.powerSet: Parameter "set" must be a set.`);
             const result: ChalkboardSet<T>[] = [];
             const elements = set.elements || [];
             const totalSubsets = 1 << elements.length;
@@ -1790,13 +1778,9 @@ namespace Chalkboard {
          */
         export const preimage = <T, U>(morph: ChalkboardMorphism<T, U>, subset?: ChalkboardSet<U>): ChalkboardSet<T> => {
             const { struc1, struc2, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the preimage.');
-            }
+            if (!struc1.set.elements) throw new Error(`Chalkboard.abal.preimage: The domain of the "morph" must have a finite set of elements to calculate the preimage.`);
             const _subset = subset || struc2.set;
-            if (!_subset.elements) {
-                throw new Error('The codomain of the "morph" or the subset of it must have a finite set of elements to calculate the preimage.');
-            }
+            if (!_subset.elements) throw new Error(`Chalkboard.abal.preimage: The codomain of the "morph" or the subset of it must have a finite set of elements to calculate the preimage.`);
             const result = struc1.set.elements.filter((element) => _subset.contains(mapping(element)));
             return Chalkboard.abal.set(result);
         };
@@ -1809,14 +1793,10 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const principalIdeal = <T>(ring: ChalkboardStructure<T>, element: T): ChalkboardSet<T> => {
-            if (ring.set.id && ["Z", "Q", "R", "C"].includes(ring.set.id)) {
-                throw new Error('The "ring" must be finite.');
-            }
+            if (ring.set.id && ["Z", "Q", "R", "C"].includes(ring.set.id)) throw new Error(`Chalkboard.abal.principalIdeal: The "ring" must be finite.`);
             const result: T[] = [];
             const { mul, add } = ring;
-            if (!add || !mul) {
-                throw new Error('The "ring" must have "mul" and "add" properties to generate a principal ideal.');
-            }
+            if (!add || !mul) throw new Error(`Chalkboard.abal.principalIdeal: The "ring" must have "mul" and "add" properties to generate a principal ideal.`);
             for (const r of ring.set.elements || []) {
                 const leftProduct = mul(element, r);
                 const rightProduct = mul(r, element);
@@ -1844,6 +1824,7 @@ namespace Chalkboard {
          * @returns {void} 
          */
         export const print = (struc: ChalkboardSet<number> | ChalkboardStructure<number>): void => {
+            if (struc === null || typeof struc !== "object" || (typeof (struc as any).contains !== "function" && (((struc as any).set === null || typeof (struc as any).set !== "object") || typeof ((struc as any).set as any).contains !== "function"))) throw new Error(`Chalkboard.abal.print: Parameter "struc" must be a set or algebraic structure.`);
             console.log(Chalkboard.abal.toString(struc));
         };
 
@@ -1864,12 +1845,8 @@ namespace Chalkboard {
          * @returns {ChalkboardStructure<ChalkboardSet<T>>}
          */
         export const quotient = <T>(struc: ChalkboardStructure<T>, substruc: ChalkboardStructure<T>): ChalkboardStructure<ChalkboardSet<T>> => {
-            if ("operation" in struc && !Chalkboard.abal.isNormalSubgroup(struc, substruc.set)) {
-                throw new Error('The "substruc" must be a normal subgroup of the "struc".');
-            }
-            if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
-                throw new Error('The "substruc" must be an ideal of the "struc".');
-            }
+            if ("operation" in struc && !Chalkboard.abal.isNormalSubgroup(struc, substruc.set)) throw new Error(`Chalkboard.abal.quotient: The "substruc" must be a normal subgroup of the "struc".`);
+            if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) throw new Error(`Chalkboard.abal.quotient: The "substruc" must be an ideal of the "struc".`);
             const cosets = Chalkboard.abal.coset(struc, substruc);
             const operationConfig = (a: ChalkboardSet<T>, b: ChalkboardSet<T>, operation: Function) => {
                 const repA = a.elements![0];
@@ -1914,9 +1891,7 @@ namespace Chalkboard {
          */
         export const ring = <T>(set: ChalkboardSet<T>, add: (a: T, b: T) => T, mul: (a: T, b: T) => T, addIdentity?: T, mulIdentity?: T, addInverter?: (a: T) => T): ChalkboardStructure<T> => {
             const autoconfig = (): { addIdentity: T; mulIdentity: T; addInverter: (a: T) => T } => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.');
-                }
+                if (!set.id) throw new Error(`Chalkboard.abal.ring: The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0 as T,
@@ -1931,9 +1906,7 @@ namespace Chalkboard {
                     };
                 } else if (set.id.startsWith("Z") && set.id.length > 1) {
                     const n = parseInt(set.id.slice(1), 10);
-                    if (isNaN(n) || n <= 0) {
-                        throw new Error(`Invalid modulus in set "${set.id}".`);
-                    }
+                    if (isNaN(n) || n <= 0) throw new Error(`Chalkboard.abal.ring: Invalid modulus in set "${set.id}".`);
                     return {
                         addIdentity: 0 as T,
                         mulIdentity: 1 as T,
@@ -1942,22 +1915,18 @@ namespace Chalkboard {
                 } else if (set.id.startsWith("M(")) {
                     const rows = (set as any).rows;
                     const cols = (set as any).cols;
-                    if (rows !== cols) {
-                        throw new Error("Only square matrices can form a ring.");
-                    }
+                    if (rows !== cols) throw new Error(`Chalkboard.abal.ring: Only square matrices can form a ring.`);
                     return {
                         addIdentity: Chalkboard.matr.fill(0, rows, cols) as T,
                         mulIdentity: Chalkboard.matr.identity(rows) as T,
                         addInverter: (a: T) => Chalkboard.matr.negate(a as unknown as ChalkboardMatrix) as T
                     };
                 }
-                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.ring: Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".`);
             };
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter };
             const ring: ChalkboardStructure<T> = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter};
-            if (!Chalkboard.abal.isRing(ring)) {
-                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.');
-            }
+            if (!Chalkboard.abal.isRing(ring)) throw new Error(`Chalkboard.abal.ring: The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.`);
             return ring;
         };
 
@@ -1974,13 +1943,9 @@ namespace Chalkboard {
          * @returns {ChalkboardStructureExtension<T, U>}
          */
         export const ringExtension = <T, U extends T>(base: ChalkboardStructure<T>, extension: ChalkboardStructure<U>, degree: number, basis: ChalkboardVector[], isFinite: boolean, isSimple: boolean, isAlgebraic: boolean): ChalkboardStructureExtension<T, U> => {
-            if (!Chalkboard.abal.isSubring(base as ChalkboardStructure<unknown>, extension.set as ChalkboardSet<unknown>)) {
-                throw new Error('The "base" must be a subring of the "extension".');
-            }
+            if (!Chalkboard.abal.isSubring(base as ChalkboardStructure<unknown>, extension.set as ChalkboardSet<unknown>)) throw new Error(`Chalkboard.abal.ringExtension: The "base" must be a subring of the "extension".`);
             const autoconfig = (): { degree: number; basis: ChalkboardVector[]; isFinite: boolean; isSimple: boolean; isAlgebraic: boolean } => {
-                if (!base.set.id) {
-                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
-                }
+                if (!base.set.id) throw new Error(`Chalkboard.abal.ringExtension: The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.`);
                 if (base.set.id === "Z" && extension.set.id === "Q") {
                     return {
                         degree: Infinity,
@@ -2006,7 +1971,7 @@ namespace Chalkboard {
                         isAlgebraic: true
                     };
                 }
-                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+                throw new Error(`Chalkboard.abal.ringExtension: Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".`);
             };
             const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
@@ -2018,9 +1983,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<number[]>}
          */
         export const S = (n: number): ChalkboardSet<number[]> => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.S: Parameter "n" must be a positive integer.`);
             const generatePermutations = (arr: number[]): number[][] => {
                 if (arr.length === 0) return [[]];
                 const result: number[][] = [];
@@ -2047,6 +2010,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const set = <T>(set: T[]): ChalkboardSet<T> => {
+            if (!Array.isArray(set)) throw new Error(`Chalkboard.abal.set: Parameter "set" must be an array.`);
             const elements = Chalkboard.stat.unique(set);
             return {
                 contains: (element: T) => elements.some((x) => $(x) === $(element)),
@@ -2062,6 +2026,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const symmetricDifference = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
+            if (set1 === null || typeof set1 !== "object" || typeof (set1 as any).contains !== "function") throw new Error(`Chalkboard.abal.symmetricDifference: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof (set2 as any).contains !== "function") throw new Error(`Chalkboard.abal.symmetricDifference: Parameter "set2" must be a set.`);
             const diffA = Chalkboard.abal.difference(set1, set2).elements || [];
             const diffB = Chalkboard.abal.difference(set2, set1).elements || [];
             return Chalkboard.abal.set([...diffA, ...diffB]);
@@ -2075,9 +2041,7 @@ namespace Chalkboard {
          */
         export const toArray = <T>(struc: ChalkboardSet<T> | ChalkboardStructure<T>): T[] => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to array.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toArray: Cannot convert infinite set to array.`);
             return [...result.elements];
         };
 
@@ -2090,9 +2054,7 @@ namespace Chalkboard {
          */
         export const toMatrix = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, rows: number, cols: number = rows): ChalkboardMatrix => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to matrix.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toMatrix: Cannot convert infinite set to matrix.`);
             return Chalkboard.stat.toMatrix(result.elements, rows, cols);
         };
 
@@ -2103,9 +2065,7 @@ namespace Chalkboard {
          */
         export const toObject = (struc: ChalkboardSet<number> | ChalkboardStructure<number>): object => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to object.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toObject: Cannot convert infinite set to object.`);
             return Chalkboard.stat.toObject(result.elements);
         };
 
@@ -2116,9 +2076,7 @@ namespace Chalkboard {
          */
         export const toString = (struc: ChalkboardSet<number> | ChalkboardStructure<number>): string => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to string.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toString: Cannot convert infinite set to string.`);
             return Chalkboard.stat.toString(result.elements);
         };
 
@@ -2130,9 +2088,7 @@ namespace Chalkboard {
          */
         export const toTensor = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...size: number[]): ChalkboardTensor => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to tensor.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toTensor: Cannot convert infinite set to tensor.`);
             if (Array.isArray(size[0])) size = size[0];
             return Chalkboard.tens.resize(result.elements, ...size);
         };
@@ -2145,9 +2101,7 @@ namespace Chalkboard {
          */
         export const toTypedArray = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to typed array.");
-            }
+            if (!result.elements) throw new Error(`Chalkboard.abal.toTypedArray: Cannot convert infinite set to typed array.`);
             const arr = Chalkboard.abal.toArray(result);
             if (type === "int8") {
                 return new Int8Array(arr);
@@ -2162,7 +2116,7 @@ namespace Chalkboard {
             } else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.abal.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
 
         /**
@@ -2174,9 +2128,7 @@ namespace Chalkboard {
          */
         export const toVector = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, dimension: 2 | 3 | 4, index: number = 0): ChalkboardVector => {
             const elements = "set" in struc ? struc.set.elements : struc.elements;
-            if (!elements) {
-                throw new Error("Cannot convert infinite set to vector.");
-            }
+            if (!elements) throw new Error(`Chalkboard.abal.toVector: Cannot convert infinite set to vector.`);
             if (dimension === 2) {
                 return Chalkboard.vect.init(elements[index], elements[index + 1]);
             } else if (dimension === 3) {
@@ -2184,7 +2136,7 @@ namespace Chalkboard {
             } else if (dimension === 4) {
                 return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2], elements[index + 3]);
             } else {
-                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.abal.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -2196,6 +2148,8 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<T>}
          */
         export const union = <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>): ChalkboardSet<T> => {
+            if (set1 === null || typeof set1 !== "object" || typeof (set1 as any).contains !== "function") throw new Error(`Chalkboard.abal.union: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof (set2 as any).contains !== "function") throw new Error(`Chalkboard.abal.union: Parameter "set2" must be a set.`);
             const result = Array.from(new Set([...(set1.elements || []), ...(set2.elements || [])]));
             return Chalkboard.abal.set(result);
         };
@@ -2212,9 +2166,7 @@ namespace Chalkboard {
                     id: "Z"
                 };
             } else {
-                if (!Number.isInteger(n) || n <= 0) {
-                    throw new Error('The modulus "n" must be a positive integer.');
-                }
+                if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.abal.Z: The modulus "n" must be a positive integer.`);
                 return {
                     contains: (element: number) => Number.isInteger(element) && element >= 0 && element < n,
                     elements: Array.from({ length: n }, (_, i) => i),

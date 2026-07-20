@@ -47,6 +47,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const absolute = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.absolute: Parameter "arr" must be an array of finite numbers.`);
             const result: number[] = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(Math.abs(arr[i]));
@@ -61,9 +62,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const add = (arr1: number[], arr2: number[]): number[] => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.add: Parameters "arr1" and "arr2" must have the same length.`);
             const result: number[] = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(arr1[i] + arr2[i]);
@@ -79,6 +78,9 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const array = (inf: number, sup: number, length: number = sup - inf + 1): number[] => {
+            if (!Number.isFinite(inf)) throw new Error(`Chalkboard.stat.array: Parameter "inf" must be a finite number.`);
+            if (!Number.isFinite(sup)) throw new Error(`Chalkboard.stat.array: Parameter "sup" must be a finite number.`);
+            if (!Number.isInteger(length) || length < 2) throw new Error(`Chalkboard.stat.array: Parameter "length" must be an integer greater than or equal to 2.`);
             const result = [];
             const step = (sup - inf) / (length - 1);
             for (let i = 0; i < length; i++) {
@@ -93,6 +95,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const autocorrelation = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.autocorrelation: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.correlation(arr, arr);
         };
 
@@ -104,9 +107,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Bayes = (pA: number, pGivenA: number, pGivenNotA: number): number => {
-            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1) {
-                throw new RangeError('All probabilities must be between 0 and 1.');
-            }
+            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1) throw new Error(`Chalkboard.stat.Bayes: All probabilities must be between 0 and 1.`);
             return (pGivenA * pA) / (pGivenA * pA + pGivenNotA * (1 - pA));
         };
 
@@ -117,9 +118,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const change = (arr1: number[], arr2: number[]): number[] => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.change: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
@@ -134,9 +133,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const chiSquared = (arr1: number[], arr2: number[]): number[] => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.chiSquared: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
@@ -150,9 +147,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const confidenceInterval = (arr: number[], confidence: number = 0.95): [number, number] => {
-            if (confidence <= 0 || confidence >= 1) {
-                throw new RangeError('Parameter "confidence" must be between 0 and 1 (exclusive).');
-            }
+            if (confidence <= 0 || confidence >= 1) throw new Error(`Chalkboard.stat.confidenceInterval: Parameter "confidence" must be between 0 and 1 (exclusive).`);
             const z = Chalkboard.stat.inormal(1 - (1 - confidence) / 2);
             const mean = Chalkboard.stat.mean(arr);
             const standardError = Chalkboard.stat.error(arr);
@@ -166,6 +161,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const constrain = (arr: number[], range: [number, number] = [0, 1]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.constrain: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(Chalkboard.numb.constrain(arr[i], range));
@@ -180,6 +176,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const convolution = (arr1: number[], arr2: number[]): number[] => {
+            if (!Array.isArray(arr1)) throw new Error(`Chalkboard.stat.convolution: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2)) throw new Error(`Chalkboard.stat.convolution: Parameter "arr2" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
@@ -198,6 +196,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const correlation = (arr1: number[], arr2: number[]): number[] => {
+            if (!Array.isArray(arr1)) throw new Error(`Chalkboard.stat.correlation: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2)) throw new Error(`Chalkboard.stat.correlation: Parameter "arr2" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
@@ -216,6 +216,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const correlationCoefficient = (arr1: number[], arr2: number[]): number => {
+            if (!Array.isArray(arr1)) throw new Error(`Chalkboard.stat.correlationCoefficient: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2)) throw new Error(`Chalkboard.stat.correlationCoefficient: Parameter "arr2" must be an array of finite numbers.`);
             return Chalkboard.stat.covariance(arr1, arr2) / (Chalkboard.stat.deviation(arr1) * Chalkboard.stat.deviation(arr2));
         };
 
@@ -226,9 +228,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const covariance = (arr1: number[], arr2: number[]): number => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.covariance: Parameters "arr1" and "arr2" must have the same length.`);
             const mean1 = Chalkboard.stat.mean(arr1);
             const mean2 = Chalkboard.stat.mean(arr2);
             let sum = 0;
@@ -244,6 +244,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const cummax = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.cummax: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let max = -Infinity;
             for (const value of arr) {
@@ -259,6 +260,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const cummin = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.cummin: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let min = Infinity;
             for (const value of arr) {
@@ -274,6 +276,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const cummul = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.cummul: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let mul = 1;
             for (let i = 0; i < arr.length; i++) {
@@ -289,6 +292,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const cumsum = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.cumsum: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let sum = 0;
             for (let i = 0; i < arr.length; i++) {
@@ -304,6 +308,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const deviation = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.deviation: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
@@ -318,9 +323,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const dot = (arr1: number[], arr2: number[]): number => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.dot: Parameters "arr1" and "arr2" must have the same length.`);
             let result = 0;
             for (let i = 0; i < arr1.length; i++) {
                 result += arr1[i] * arr2[i];
@@ -334,6 +337,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const error = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.error: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length);
         };
 
@@ -344,6 +348,9 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const eq = (arr: number[], arrORnum: number | number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.eq: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum)) throw new Error(`Chalkboard.stat.eq: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length) throw new Error(`Chalkboard.stat.eq: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -370,12 +377,12 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const expected = (arr: number[], probabilities?: number[]): number => {
+            if (!Array.isArray(arr) || arr.length === 0) throw new Error(`Chalkboard.stat.expected: Parameter "arr" must be a non-empty array.`);
+            if (probabilities !== undefined && !Array.isArray(probabilities)) throw new Error(`Chalkboard.stat.expected: Parameter "probabilities" must be an array.`);
             if (!probabilities) {
                 probabilities = Array(arr.length).fill(1 / arr.length);
             }
-            if (arr.length !== probabilities.length) {
-                throw new RangeError('Parameters "values" and "probabilities" must have the same length.');
-            }
+            if (arr.length !== probabilities.length) throw new Error(`Chalkboard.stat.expected: Parameters "arr" and "probabilities" must have the same length.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += arr[i] * probabilities[i];
@@ -391,6 +398,9 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const Gaussian = (height: number, mean: number, deviation: number): ChalkboardFunction => {
+            if (!Number.isFinite(height)) throw new Error(`Chalkboard.stat.Gaussian: Parameter "height" must be a finite number.`);
+            if (!Number.isFinite(mean)) throw new Error(`Chalkboard.stat.Gaussian: Parameter "mean" must be a finite number.`);
+            if (!Number.isFinite(deviation) || deviation <= 0) throw new Error(`Chalkboard.stat.Gaussian: Parameter "deviation" must be a positive finite number.`);
             return Chalkboard.real.define((x) => height * Math.exp(-((x - mean) * (x - mean)) / (2 * deviation * deviation)));
         };
 
@@ -402,6 +412,10 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const gt = (arr: number[], arrORnum: number | number[], includeEnd: boolean = false): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.gt: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum)) throw new Error(`Chalkboard.stat.gt: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length) throw new Error(`Chalkboard.stat.gt: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
+            if (includeEnd !== undefined && (typeof includeEnd !== "boolean")) throw new Error(`Chalkboard.stat.gt: Parameter "includeEnd" must be a boolean.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -442,7 +456,14 @@ namespace Chalkboard {
          * @param {boolean} [includeSup=false] - Whether the check is "greater than" (false) or "greater than or equal to" (true)
          * @returns {number[]}
          */
-        export const ineq = (arr: number[], inf: number, sup: number, includeInf: boolean = false, includeSup: boolean = false): number[] => {
+        export const ineq = (arr: number[], inf: number | number[], sup: number | number[], includeInf: boolean = false, includeSup: boolean = false): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.ineq: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof inf !== "number" || Number.isNaN(inf)) && !Array.isArray(inf)) throw new Error(`Chalkboard.stat.ineq: Parameter "inf" must be a number or an array.`);
+            if ((typeof sup !== "number" || Number.isNaN(sup)) && !Array.isArray(sup)) throw new Error(`Chalkboard.stat.ineq: Parameter "sup" must be a number or an array.`);
+            if (Array.isArray(inf) !== Array.isArray(sup)) throw new Error(`Chalkboard.stat.ineq: Parameters "inf" and "sup" must either both be numbers or both be arrays.`);
+            if (Array.isArray(inf) && Array.isArray(sup) && (arr.length !== inf.length || arr.length !== sup.length)) throw new Error(`Chalkboard.stat.ineq: Parameters "arr", "inf", and "sup" must have the same length when "inf" and "sup" are arrays.`);
+            if (includeInf !== undefined && (typeof includeInf !== "boolean")) throw new Error(`Chalkboard.stat.ineq: Parameter "includeInf" must be a boolean.`);
+            if (includeSup !== undefined && (typeof includeSup !== "boolean")) throw new Error(`Chalkboard.stat.ineq: Parameter "includeSup" must be a boolean.`);
             const result = [];
             if (Array.isArray(inf) && Array.isArray(sup)) {
                 if (arr.length === inf.length && arr.length === sup.length) {
@@ -471,24 +492,26 @@ namespace Chalkboard {
                     }
                 }
             } else {
+                const infNum = inf as number;
+                const supNum = sup as number;
                 for (let i = 0; i < arr.length; i++) {
                     if (includeInf) {
                         if (includeSup) {
-                            if (arr[i] >= inf && arr[i] <= sup) {
+                            if (arr[i] >= infNum && arr[i] <= supNum) {
                                 result.push(arr[i]);
                             }
                         } else {
-                            if (arr[i] >= inf && arr[i] < sup) {
+                            if (arr[i] >= infNum && arr[i] < supNum) {
                                 result.push(arr[i]);
                             }
                         }
                     } else {
                         if (includeSup) {
-                            if (arr[i] > inf && arr[i] <= sup) {
+                            if (arr[i] > infNum && arr[i] <= supNum) {
                                 result.push(arr[i]);
                             }
                         } else {
-                            if (arr[i] > inf && arr[i] < sup) {
+                            if (arr[i] > infNum && arr[i] < supNum) {
                                 result.push(arr[i]);
                             }
                         }
@@ -504,9 +527,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const inormal = (p: number): number => {
-            if (p <= 0 || p >= 1) {
-                throw new RangeError('Parameter "p" must be between 0 and 1 (exclusive).');
-            }
+            if (!Number.isFinite(p) || p <= 0 || p >= 1) throw new Error(`Chalkboard.stat.inormal: Parameter "p" must be a finite number strictly between 0 and 1.`);
             const a = [2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637];
             const b = [-8.4735109309, 23.08336743743, -21.06224101826, 3.13082909833];
             const c = [0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
@@ -535,6 +556,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const interpolate = (arr: (number | null | undefined)[], type: "linear" | "quadratic" = "linear"): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.interpolate: Parameter "arr" must be an array.`);
+            if (type !== undefined && (typeof type !== "string")) throw new Error(`Chalkboard.stat.interpolate: Parameter "type" must be a string.`);
             const result = arr.slice();
             for (let i = 0; i < result.length; i++) {
                 if (result[i] == null) {
@@ -572,6 +595,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const interquartileRange = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.interquartileRange: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.quartile(arr, "Q3") - Chalkboard.stat.quartile(arr, "Q1");
         };
 
@@ -581,6 +605,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const kurtosis = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.kurtosis: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
@@ -598,6 +623,10 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const lt = (arr: number[], arrORnum: number | number[], includeEnd: boolean = false): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.lt: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum)) throw new Error(`Chalkboard.stat.lt: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length) throw new Error(`Chalkboard.stat.lt: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
+            if (includeEnd !== undefined && (typeof includeEnd !== "boolean")) throw new Error(`Chalkboard.stat.lt: Parameter "includeEnd" must be a boolean.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -635,6 +664,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mad = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.mad: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += Math.abs(arr[i] - Chalkboard.stat.mean(arr));
@@ -648,6 +678,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const max = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.max: Parameter "arr" must be an array of finite numbers.`);
             let max = arr[0];
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] > max) {
@@ -682,7 +713,7 @@ namespace Chalkboard {
                 }
                 return arr.length / result;
             } else {
-                throw new TypeError('Parameter "type" must be "arithmetic", "geometric", or "harmonic".');
+                throw new Error(`Chalkboard.stat.mean: Parameter "type" must be arithmetic, geometric, or harmonic.`);
             }
         };
 
@@ -693,9 +724,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const meanMoving = (arr: number[], windowSize: number): number[] => {
-            if (windowSize <= 0 || windowSize > arr.length) {
-                throw new RangeError('Parameter "windowSize" must be greater than 0 and less than or equal to the array length.');
-            }
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.meanMoving: Parameter "arr" must be an array.`);
+            if (!Number.isInteger(windowSize) || windowSize < 1 || windowSize > arr.length) throw new Error(`Chalkboard.stat.meanMoving: Parameter "windowSize" must be a positive integer less than or equal to the array length.`);
             const result = [];
             for (let i = 0; i <= arr.length - windowSize; i++) {
                 const windowArr = arr.slice(i, i + windowSize);
@@ -711,9 +741,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const meanWeighted = (arr: number[], weights: number[]): number => {
-            if (arr.length !== weights.length) {
-                throw new RangeError('Parameters "values" and "weights" must have the same length.');
-            }
+            if (arr.length !== weights.length) throw new Error(`Chalkboard.stat.meanWeighted: Parameters "values" and "weights" must have the same length.`);
             let sum = 0, weightSum = 0;
             for (let i = 0; i < arr.length; i++) {
                 sum += arr[i] * weights[i];
@@ -728,6 +756,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const median = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.median: Parameter "arr" must be an array of finite numbers.`);
             if (arr.length === 0) return NaN;
             const copy = arr.slice();
             const mid = Math.floor(copy.length / 2);
@@ -744,6 +773,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const min = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.min: Parameter "arr" must be an array of finite numbers.`);
             let min = arr[0];
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] < min) {
@@ -759,6 +789,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mode = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.mode: Parameter "arr" must be an array of finite numbers.`);
             if (arr.length === 0) return NaN;
             const frequency = new Map<number, number>();
             let maxFreq = 0;
@@ -781,6 +812,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const mul = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.mul: Parameter "arr" must be an array of finite numbers.`);
             let result = 1;
             for (let i = 0; i < arr.length; i++) {
                 result *= arr[i];
@@ -794,6 +826,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const negate = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.negate: Parameter "arr" must be an array of finite numbers.`);
             const result: number[] = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(-arr[i]);
@@ -829,7 +862,7 @@ namespace Chalkboard {
             } else if (type === "LInfinity") {
                 return Math.abs(Chalkboard.stat.max(arr));
             } else {
-                throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
+                throw new Error(`Chalkboard.stat.norm: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
         };
 
@@ -839,6 +872,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const normal = (x: number): number => {
+            if (typeof x !== "number" || Number.isNaN(x)) throw new Error(`Chalkboard.stat.normal: Parameter "x" must be a number that is not NaN.`);
+            if (!Number.isFinite(x)) return 0;
             const standardNormal = Chalkboard.real.define((x) => 1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x));
             const f = standardNormal.rule as (x: number) => number;
             return f(x);
@@ -851,6 +886,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const normalize = (arr: number[], type: "L0" | "L1" | "L2" | "LInfinity" = "L2"): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.normalize: Parameter "arr" must be an array of finite numbers.`);
+            if (type !== undefined && (typeof type !== "string")) throw new Error(`Chalkboard.stat.normalize: Parameter "type" must be a string.`);
             const result = [];
             const norm = Chalkboard.stat.norm(arr, type);
             for (let i = 0; i < arr.length; i++) {
@@ -887,7 +924,7 @@ namespace Chalkboard {
             } else if (type === "LInfinity") {
                 return Math.abs(Chalkboard.stat.max(arr)) * Math.abs(Chalkboard.stat.max(arr));
             } else {
-                throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
+                throw new Error(`Chalkboard.stat.normsq: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
         };
 
@@ -899,6 +936,9 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const pad = (arr: number[], length: number, num: number = 0): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.pad: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isInteger(length) || length < 0) throw new Error(`Chalkboard.stat.pad: Parameter "length" must be a non-negative integer.`);
+            if (num !== undefined && (!Number.isFinite(num))) throw new Error(`Chalkboard.stat.pad: Parameter "num" must be a finite number.`);
             const result = arr.slice();
             while (result.length < length) {
                 result.push(num);
@@ -913,6 +953,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const percentile = (arr: number[], num: number): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.percentile: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.stat.percentile: Parameter "num" must be a finite number.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 if (num >= arr[i]) {
@@ -928,6 +970,7 @@ namespace Chalkboard {
          * @returns {void}
          */
         export const print = (arr: number[]): void => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.print: Parameter "arr" must be an array of finite numbers.`);
             console.log(Chalkboard.stat.toString(arr));
         };
 
@@ -952,7 +995,7 @@ namespace Chalkboard {
                 if (mid % 2 === 1) return $quickselect(copy, q3Mid);
                 else return ($quickselect(copy, q3Mid - 1) + $quickselect(copy, q3Mid)) / 2.0;
             } else {
-                throw new TypeError('Parameter "type" must be "Q1", "Q2", or "Q3".');
+                throw new Error(`Chalkboard.stat.quartile: Parameter "type" must be Q1, Q2, or Q3.`);
             }
         };
 
@@ -964,6 +1007,9 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const random = (length: number, inf: number = 0, sup: number = 1): number[] => {
+            if (!Number.isInteger(length) || length < 0) throw new Error(`Chalkboard.stat.random: Parameter "length" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf))) throw new Error(`Chalkboard.stat.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup))) throw new Error(`Chalkboard.stat.random: Parameter "sup" must be a finite number.`);
             const result = [];
             for (let i = 0; i < length; i++) {
                 result.push(Chalkboard.numb.random(inf, sup));
@@ -977,6 +1023,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const range = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.range: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.max(arr) - Chalkboard.stat.min(arr);
         };
 
@@ -988,6 +1035,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const regression = (data: number[][], type: "linear" | "polynomial" | "power" | "exponential" | "logarithmic" = "linear", degree: number = 2): ChalkboardFunction => {
+            if (!Array.isArray(data) || data.length === 0 || !Array.isArray(data[0]) || data[0].length < 2) throw new Error(`Chalkboard.stat.regression: Parameter "data" must be a non-empty array of coordinate pairs.`);
+            if (!Number.isInteger(degree) || degree < 0) throw new Error(`Chalkboard.stat.regression: Parameter "degree" must be a non-negative integer.`);
             if (type === "linear") {
                 let x = 0,
                     y = 0;
@@ -1066,7 +1115,7 @@ namespace Chalkboard {
                 const b = (data.length * arr[1] - arr[2] * arr[0]) / (data.length * arr[3] - arr[0] * arr[0]);
                 return Chalkboard.real.define((x) => a + b * Math.log(x));
             } else {
-                throw new TypeError('Parameter "type" must be "linear", "polynomial", "power", "exponential", or "logarithmic".');
+                throw new Error(`Chalkboard.stat.regression: Parameter "type" must be linear, polynomial, power, exponential, or logarithmic.`);
             }
         };
 
@@ -1078,6 +1127,7 @@ namespace Chalkboard {
          * @returns {number[][]}
          */
         export const resampling = (arr: number[], samples?: number, type: "bootstrap" | "jackknife" = "bootstrap"): number[][] => {
+            if (samples !== undefined && (!Number.isInteger(samples) || samples < 1)) throw new Error(`Chalkboard.stat.resampling: Parameter "samples" must be a positive integer.`);
             if (type === "bootstrap") {
                 const numSamples = samples ?? 100;
                 const result = [];
@@ -1109,7 +1159,7 @@ namespace Chalkboard {
                 }
                 return allJackknifeSamples;
             } else {
-                throw new TypeError('Parameter "type" must be "bootstrap" or "jackknife".');
+                throw new Error(`Chalkboard.stat.resampling: Parameter "type" must be bootstrap or jackknife.`);
             }
         };
 
@@ -1119,6 +1169,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const reverse = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.reverse: Parameter "arr" must be an array of finite numbers.`);
             const result: number[] = [];
             for (let i = arr.length - 1; i >= 0; i--) {
                 result.push(arr[i]);
@@ -1133,6 +1184,8 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const scl = (arr: number[], num: number): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.scl: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.stat.scl: Parameter "num" must be a finite number.`);
             const result: number[] = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(arr[i] * num);
@@ -1146,6 +1199,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const shuffle = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.shuffle: Parameter "arr" must be an array of finite numbers.`);
             let index, temp, rindex;
             for (index = arr.length - 1; index > 0; index--) {
                 rindex = Math.floor(Chalkboard.numb.random(0, index + 1));
@@ -1162,6 +1216,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const skewness = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.skewness: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
@@ -1178,9 +1233,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const sub = (arr1: number[], arr2: number[]): number[] => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length) throw new Error(`Chalkboard.stat.sub: Parameters "arr1" and "arr2" must have the same length.`);
             const result: number[] = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(arr1[i] - arr2[i]);
@@ -1194,6 +1247,7 @@ namespace Chalkboard {
          * @returns {number[][]}
          */
         export const subsets = (arr: number[]): number[][] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.subsets: Parameter "arr" must be an array of finite numbers.`);
             let result: number[][] = [[]];
             arr.sort();
             for (let i = 0; i < arr.length; i++) {
@@ -1217,6 +1271,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const sum = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.sum: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += arr[i];
@@ -1232,6 +1287,9 @@ namespace Chalkboard {
          * @returns {ChalkboardMatrix}
          */
         export const toMatrix = (arr: number[], rows: number, cols: number = rows): ChalkboardMatrix => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toMatrix: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.stat.toMatrix: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0) throw new Error(`Chalkboard.stat.toMatrix: Parameter "cols" must be a non-negative integer.`);
             const result = Chalkboard.matr.init();
             let index = 0;
             for (let i = 0; i < rows; i++) {
@@ -1254,6 +1312,7 @@ namespace Chalkboard {
          * @returns {object}
          */
         export const toObject = (arr: number[]): object => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toObject: Parameter "arr" must be an array of finite numbers.`);
             const result: { [key: string]: number } = {};
             for (let i = 0; i < arr.length; i++) {
                 result["_" + i.toString()] = arr[i];
@@ -1267,6 +1326,7 @@ namespace Chalkboard {
          * @returns {ChalkboardSet<number>}
          */
         export const toSet = (arr: number[]): ChalkboardSet<number> => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toSet: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.abal.set(arr);
         };
 
@@ -1276,6 +1336,7 @@ namespace Chalkboard {
          * @returns {string}
          */
         export const toString = (arr: number[]): string => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toString: Parameter "arr" must be an array.`);
             return "[" + arr.join(", ") + "]";
         };
 
@@ -1286,9 +1347,11 @@ namespace Chalkboard {
          * @returns {ChalkboardTensor}
          */
         export const toTensor = (arr: number[], ...size: number[]): ChalkboardTensor => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toTensor: Parameter "arr" must be an array of finite numbers.`);
             if (Array.isArray(size[0])) {
                 size = size[0];
             }
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0)) throw new Error(`Chalkboard.stat.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(arr, ...size);
         };
 
@@ -1300,6 +1363,9 @@ namespace Chalkboard {
          * @returns {ChalkboardVector}
          */
         export const toVector = (arr: number[], dimension: 2 | 3 | 4, index: number = 0): ChalkboardVector => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toVector: Parameter "arr" must be an array.`);
+            if (dimension !== 2 && dimension !== 3 && dimension !== 4) throw new Error(`Chalkboard.stat.toVector: Parameter "dimension" must be 2, 3, or 4.`);
+            if (!Number.isInteger(index) || index < 0 || index + dimension > arr.length) throw new Error(`Chalkboard.stat.toVector: Parameter "index" and parameter "dimension" must fit within the array bounds.`);
             if (dimension === 2) {
                 return Chalkboard.vect.init(arr[index], arr[index + 1]);
             } else if (dimension === 3) {
@@ -1307,7 +1373,7 @@ namespace Chalkboard {
             } else if (dimension === 4) {
                 return Chalkboard.vect.init(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             } else {
-                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.stat.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
 
@@ -1318,6 +1384,7 @@ namespace Chalkboard {
          * @returns {T[]}
          */
         export const unique = <T>(arr: T[]): T[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.unique: Parameter "arr" must be an array.`);
             if (arr.length === 0) return [];
             const firstType = typeof arr[0];
             if (firstType === "number" || firstType === "string" || firstType === "boolean") return Array.from(new Set(arr));
@@ -1350,6 +1417,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const variance = (arr: number[]): number => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.variance: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
@@ -1363,6 +1431,7 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const zscored = (arr: number[]): number[] => {
+            if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.zscored: Parameter "arr" must be an array of finite numbers.`);
             let result: number[] = [];
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);

@@ -24,6 +24,7 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.circleA(5);
          */
         export const circleA = (r: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.circleA: Parameter "r" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * r;
         };
 
@@ -36,6 +37,7 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.circleP(5);
          */
         export const circleP = (r: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.circleP: Parameter "r" must be a non-negative finite number.`);
             return 2 * Chalkboard.PI() * r;
         };
 
@@ -49,6 +51,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.coneA(5, 10);
          */
         export const coneA = (r: number, h: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.coneA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.coneA: Parameter "h" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * (r + Chalkboard.real.sqrt(h * h + r * r));
         };
 
@@ -62,6 +66,8 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.coneV(5, 10);
          */
         export const coneV = (r: number, h: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.coneV: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.coneV: Parameter "h" must be a non-negative finite number.`);
             return (Chalkboard.PI() * r * r * h) / 3;
         };
 
@@ -74,6 +80,7 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.cubeA(1);
          */
         export const cubeA = (s: number): number => {
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.cubeA: Parameter "s" must be a non-negative finite number.`);
             return 6 * s * s;
         };
 
@@ -86,6 +93,7 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.cubeV(1);
          */
         export const cubeV = (s: number): number => {
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.cubeV: Parameter "s" must be a non-negative finite number.`);
             return s * s * s;
         };
 
@@ -99,6 +107,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.cylinderA(5, 10);
          */
         export const cylinderA = (r: number, h: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.cylinderA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.cylinderA: Parameter "h" must be a non-negative finite number.`);
             return 2 * Chalkboard.PI() * r * r + 2 * Chalkboard.PI() * r * h;
         };
 
@@ -112,6 +122,8 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.cylinderV(5, 10);
          */
         export const cylinderV = (r: number, h: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.cylinderV: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.cylinderV: Parameter "h" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * r * h;
         };
 
@@ -132,7 +144,7 @@ namespace Chalkboard {
                 }
                 return Chalkboard.real.sqrt(result);
             } else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.dist: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
 
@@ -153,7 +165,7 @@ namespace Chalkboard {
                 }
                 return result;
             } else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.distsq: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
 
@@ -167,6 +179,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.ellipseA(5, 6);
          */
         export const ellipseA = (a: number, b: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.ellipseA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.ellipseA: Parameter "b" must be a non-negative finite number.`);
             return Chalkboard.PI() * a * b;
         };
 
@@ -180,6 +194,9 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.ellipseP(5, 6);
          */
         export const ellipseP = (a: number, b: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.ellipseP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.ellipseP: Parameter "b" must be a non-negative finite number.`);
+            if (a === 0 && b === 0) return 0;
             const h = ((a - b) * (a - b)) / ((a + b) * (a + b));
             return Chalkboard.PI() * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
         };
@@ -195,6 +212,9 @@ namespace Chalkboard {
          * const euler = Chalkboard.geom.Euler(8, 12, 6);
          */
         export const Euler = (v: number, e: number, f: number): number => {
+            if (!Number.isInteger(v) || v < 0) throw new Error(`Chalkboard.geom.Euler: Parameter "v" must be a non-negative integer.`);
+            if (!Number.isInteger(e) || e < 0) throw new Error(`Chalkboard.geom.Euler: Parameter "e" must be a non-negative integer.`);
+            if (!Number.isInteger(f) || f < 0) throw new Error(`Chalkboard.geom.Euler: Parameter "f" must be a non-negative integer.`);
             return v - e + f;
         };
 
@@ -222,6 +242,12 @@ namespace Chalkboard {
             z2: number,
             context: CanvasRenderingContext2D = Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')() as CanvasRenderingContext2D
         ): void => {
+            if (!Number.isFinite(x1)) throw new Error(`Chalkboard.geom.line3D: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1)) throw new Error(`Chalkboard.geom.line3D: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(z1)) throw new Error(`Chalkboard.geom.line3D: Parameter "z1" must be a finite number.`);
+            if (!Number.isFinite(x2)) throw new Error(`Chalkboard.geom.line3D: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2)) throw new Error(`Chalkboard.geom.line3D: Parameter "y2" must be a finite number.`);
+            if (!Number.isFinite(z2)) throw new Error(`Chalkboard.geom.line3D: Parameter "z2" must be a finite number.`);
             context.beginPath();
             context.moveTo(x1 / (z1 * 0.0025 + 1), y1 / (z1 * 0.0025 + 1));
             context.lineTo(x2 / (z2 * 0.0025 + 1), y2 / (z2 * 0.0025 + 1));
@@ -245,7 +271,7 @@ namespace Chalkboard {
                 }
                 return result;
             } else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.mid: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
 
@@ -259,6 +285,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.parallelogramA(50, 10);
          */
         export const parallelogramA = (l: number, w: number): number => {
+            if (!Number.isFinite(l) || l < 0) throw new Error(`Chalkboard.geom.parallelogramA: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.geom.parallelogramA: Parameter "w" must be a non-negative finite number.`);
             return l * w;
         };
 
@@ -272,6 +300,8 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.parallelogramP(50, 10);
          */
         export const parallelogramP = (l: number, w: number): number => {
+            if (!Number.isFinite(l) || l < 0) throw new Error(`Chalkboard.geom.parallelogramP: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.geom.parallelogramP: Parameter "w" must be a non-negative finite number.`);
             return 2 * (l + w);
         };
 
@@ -286,6 +316,9 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.polygonA(4, 10, 5);
          */
         export const polygonA = (n: number, s: number, a: number): number => {
+            if (!Number.isInteger(n) || n < 3) throw new Error(`Chalkboard.geom.polygonA: Parameter "n" must be an integer greater than or equal to 3.`);
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.polygonA: Parameter "s" must be a non-negative finite number.`);
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.polygonA: Parameter "a" must be a non-negative finite number.`);
             return (n * s * a) / 2;
         };
 
@@ -299,6 +332,8 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.polygonP(4, 10);
          */
         export const polygonP = (n: number, s: number): number => {
+            if (!Number.isInteger(n) || n < 3) throw new Error(`Chalkboard.geom.polygonP: Parameter "n" must be an integer greater than or equal to 3.`);
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.polygonP: Parameter "s" must be a non-negative finite number.`);
             return n * s;
         };
 
@@ -316,6 +351,10 @@ namespace Chalkboard {
          * const hyp = Chalkboard.geom.Pythagorean(3, 4, "hyp");
          */
         export const Pythagorean = (a: number, b: number, type: "hyp" | "leg" = "hyp"): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.Pythagorean: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.Pythagorean: Parameter "b" must be a non-negative finite number.`);
+            if (type !== "hyp" && type !== "leg") throw new Error(`Chalkboard.geom.Pythagorean: Parameter "type" must be either hyp or leg.`);
+            if (type === "leg" && a > b) throw new Error(`Chalkboard.geom.Pythagorean: Parameter "a" must be less than or equal to parameter "b" when parameter "type" is leg.`);
             if (type === "hyp") {
                 return Math.sqrt(a * a + b * b);
             } else {
@@ -333,6 +372,8 @@ namespace Chalkboard {
          * const tri = Chalkboard.geom.PythagoreanTriple(1, 10);
          */
         export const PythagoreanTriple = (inf: number, sup: number): [number, number, number] => {
+            if (!Number.isFinite(inf) || inf < 1) throw new Error(`Chalkboard.geom.PythagoreanTriple: Parameter "inf" must be a finite number greater than or equal to 1.`);
+            if (!Number.isFinite(sup) || sup < inf) throw new Error(`Chalkboard.geom.PythagoreanTriple: Parameter "sup" must be a finite number greater than or equal to parameter "inf".`);
             const a = 2 * Math.round(Chalkboard.numb.random(inf, sup)) - 1,
                 b = (a * a) / 2 - 0.5,
                 c = (a * a) / 2 + 0.5;
@@ -350,6 +391,9 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.rectangularprismA(5, 4, 10);
          */
         export const rectangularprismA = (l: number, w: number, h: number): number => {
+            if (!Number.isFinite(l) || l < 0) throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "w" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "h" must be a non-negative finite number.`);
             return 2 * (l * h + l * w + w * h);
         };
 
@@ -364,6 +408,9 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.rectangularprismV(5, 4, 10);
          */
         export const rectangularprismV = (l: number, w: number, h: number): number => {
+            if (!Number.isFinite(l) || l < 0) throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "w" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "h" must be a non-negative finite number.`);
             return l * w * h;
         };
 
@@ -377,6 +424,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.sectorA(5, Chalkboard.PI());
          */
         export const sectorA = (r: number, rad: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.sectorA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(rad) || rad < 0 || rad > Chalkboard.PI(2)) throw new Error(`Chalkboard.geom.sectorA: Parameter "rad" must be between 0 and 2π.`);
             return (r * r * rad) / 2;
         };
 
@@ -390,6 +439,8 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.sectorP(5, Chalkboard.PI());
          */
         export const sectorP = (r: number, rad: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.sectorP: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(rad) || rad < 0 || rad > Chalkboard.PI(2)) throw new Error(`Chalkboard.geom.sectorP: Parameter "rad" must be between 0 and 2π.`);
             return r * rad;
         };
 
@@ -402,6 +453,7 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.sphereA(5);
          */
         export const sphereA = (r: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.sphereA: Parameter "r" must be a non-negative finite number.`);
             return 4 * Chalkboard.PI() * r * r;
         };
 
@@ -414,6 +466,7 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.sphereV(5);
          */
         export const sphereV = (r: number): number => {
+            if (!Number.isFinite(r) || r < 0) throw new Error(`Chalkboard.geom.sphereV: Parameter "r" must be a non-negative finite number.`);
             return (4 * Chalkboard.PI() * r * r * r) / 3;
         };
 
@@ -426,6 +479,7 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.squareA(3);
          */
         export const squareA = (s: number): number => {
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.squareA: Parameter "s" must be a non-negative finite number.`);
             return s * s;
         };
 
@@ -438,6 +492,7 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.squareP(3);
          */
         export const squareP = (s: number): number => {
+            if (!Number.isFinite(s) || s < 0) throw new Error(`Chalkboard.geom.squareP: Parameter "s" must be a non-negative finite number.`);
             return 4 * s;
         };
 
@@ -452,6 +507,9 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.trapezoidA(10, 7, 5);
          */
         export const trapezoidA = (b1: number, b2: number, h: number): number => {
+            if (!Number.isFinite(b1) || b1 < 0) throw new Error(`Chalkboard.geom.trapezoidA: Parameter "b1" must be a non-negative finite number.`);
+            if (!Number.isFinite(b2) || b2 < 0) throw new Error(`Chalkboard.geom.trapezoidA: Parameter "b2" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.trapezoidA: Parameter "h" must be a non-negative finite number.`);
             return ((b1 + b2) / 2) * h;
         };
 
@@ -467,6 +525,10 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.trapezoidP(10, 7, 5, 2);
          */
         export const trapezoidP = (a: number, b: number, c: number, d: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.trapezoidP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.trapezoidP: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.geom.trapezoidP: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(d) || d < 0) throw new Error(`Chalkboard.geom.trapezoidP: Parameter "d" must be a non-negative finite number.`);
             return a + b + c + d;
         };
 
@@ -480,6 +542,8 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.triangleA(5, 7);
          */
         export const triangleA = (b: number, h: number): number => {
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.triangleA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.triangleA: Parameter "h" must be a non-negative finite number.`);
             return (b * h) / 2;
         };
 
@@ -494,6 +558,10 @@ namespace Chalkboard {
          * const perimeter = Chalkboard.geom.triangleP(10, 7, 5);
          */
         export const triangleP = (a: number, b: number, c: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.triangleP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.triangleP: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.geom.triangleP: Parameter "c" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a) throw new Error(`Chalkboard.geom.triangleP: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             return a + b + c;
         };
 
@@ -508,6 +576,10 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.trianglesidesA(9, 7, 12);
          */
         export const trianglesidesA = (a: number, b: number, c: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "c" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a) throw new Error(`Chalkboard.geom.trianglesidesA: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             const s = (a + b + c) / 2;
             return Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c)));
         };
@@ -524,6 +596,11 @@ namespace Chalkboard {
          * const area = Chalkboard.geom.triangularprismA(9, 7, 12, 10);
          */
         export const triangularprismA = (a: number, b: number, c: number, h: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.triangularprismA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.triangularprismA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.geom.triangularprismA: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.triangularprismA: Parameter "h" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a) throw new Error(`Chalkboard.geom.triangularprismA: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             const s = (a + b + c) / 2;
             return 2 * Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c))) + h * (a + b + c);
         };
@@ -540,6 +617,11 @@ namespace Chalkboard {
          * const volume = Chalkboard.geom.triangularprismV(9, 7, 12, 10);
          */
         export const triangularprismV = (a: number, b: number, c: number, h: number): number => {
+            if (!Number.isFinite(a) || a < 0) throw new Error(`Chalkboard.geom.triangularprismV: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.geom.triangularprismV: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.geom.triangularprismV: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0) throw new Error(`Chalkboard.geom.triangularprismV: Parameter "h" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a) throw new Error(`Chalkboard.geom.triangularprismV: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             return (h * Chalkboard.real.sqrt(-(a * a * a * a) + 2 * (a * b) * (a * b) + 2 * (a * c) * (a * c) - b * b * b * b + 2 * (b * c) * (b * c) - c * c * c * c)) / 4;
         };
     }

@@ -21,7 +21,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const absolute = (func: ChalkboardFunction): ChalkboardFunction => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.absolute: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.absolute: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => Math.abs(f(...x));
@@ -48,7 +48,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.absolute: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.absolute: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -58,8 +58,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const add = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.real.add: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== func2.type) throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be the same.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.add: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== func2.type) throw new Error(`Chalkboard.real.add: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
@@ -90,7 +90,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func1.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.add: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -100,8 +100,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const compose = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.real.compose: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== func2.type) throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be the same.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.compose: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== func2.type) throw new Error(`Chalkboard.real.compose: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
@@ -116,7 +116,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func1.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.real.compose: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, or vector4d.`);
         };
 
         /**
@@ -125,6 +125,9 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const define = (...rule: (((...x: number[]) => number) | ((...x: number[]) => number)[])[]): ChalkboardFunction => {
+            if (rule.length === 0) throw new Error(`Chalkboard.real.define: Parameter "rule" must contain at least one function.`);
+            if (Array.isArray(rule[0]) && (rule[0].length === 0 || typeof rule[0][0] !== "function" || rule[0].length > 1 && typeof rule[0][rule[0].length - 1] !== "function")) throw new Error(`Chalkboard.real.define: Parameter "rule" must begin and end with functions.`);
+            if (!Array.isArray(rule[0]) && (typeof rule[0] !== "function" || rule.length > 1 && typeof rule[rule.length - 1] !== "function")) throw new Error(`Chalkboard.real.define: Parameter "rule" must begin and end with functions.`);
             let f: ((...x: number[]) => number) | ((...x: number[]) => number)[];
             let type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d";
             if (rule.length === 1 && Array.isArray(rule[0])) {
@@ -141,7 +144,7 @@ namespace Chalkboard {
                     } else if (f[0].length === 2) {
                         type = "vector2d";
                     } else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or two variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve or two variables to define a vector field.`);
                     }
                 } else if (f.length === 3) {
                     if (f[0].length === 1) {
@@ -151,7 +154,7 @@ namespace Chalkboard {
                     } else if (f[0].length === 3) {
                         type = "vector3d";
                     } else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.`);
                     }
                 } else if (f.length === 4) {
                     if (f[0].length === 1) {
@@ -159,7 +162,7 @@ namespace Chalkboard {
                     } else if (f[0].length === 4) {
                         type = "vector4d";
                     } else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or four variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve or four variables to define a vector field.`);
                     }
                 }
             } else {
@@ -170,7 +173,7 @@ namespace Chalkboard {
                 } else if (f.length === 3) {
                     type = "scalar4d";
                 } else {
-                    throw new TypeError("Chalkboard.real.define: Function 'rule' must have one, two, or three variables to define a scalar function.");
+                    throw new Error(`Chalkboard.real.define: Function "rule" must have one, two, or three variables to define a scalar function.`);
                 }
             }
             return { rule: f, field: "real", type } as ChalkboardFunction;
@@ -184,6 +187,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Dirac = (num: number, edge: number = 0, scl: number = 1): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Dirac: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge))) throw new Error(`Chalkboard.real.Dirac: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl))) throw new Error(`Chalkboard.real.Dirac: Parameter "scl" must be a finite number.`);
             if (num === edge) {
                 return scl;
             } else {
@@ -200,12 +206,15 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const discriminant = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): number => {
+            if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.discriminant: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b)) throw new Error(`Chalkboard.real.discriminant: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c)) throw new Error(`Chalkboard.real.discriminant: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return b * b - 4 * a * c;
             } else if (form === "vertex") {
                 return 2 * a * b * (2 * a * b) - 4 * a * c;
             } else {
-                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.discriminant: Parameter "form" must be standard or vertex.`);
             }
         };
 
@@ -216,8 +225,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const div = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.real.div: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== func2.type) throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be the same.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.div: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== func2.type) throw new Error(`Chalkboard.real.div: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
@@ -248,7 +257,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func1.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.div: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -257,7 +266,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const erf = (num: number): number => {
-            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.erf: Parameter 'num' must be a finite number.");
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.erf: Parameter "num" must be a number that is not NaN.`);
+            if (num === Infinity) return 1;
+            if (num === -Infinity) return -1;
             const sign = num < 0 ? -1 : 1;
             const x = Math.abs(num);
             const p = 0.3275911;
@@ -277,7 +288,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Gamma = (num: number): number => {
-            if (typeof num !== "number" || !Number.isFinite(num)) throw new TypeError("Chalkboard.real.Gamma: Parameter 'num' must be a finite number.");
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Gamma: Parameter "num" must be a number that is not NaN.`);
+            if (num === Infinity) return Infinity;
+            if (num === -Infinity) return NaN;
             if (Number.isInteger(num) && num <= 0) return NaN;
             const p0 = 0.99999999999980993;
             const p1 = 676.5203681218851;
@@ -312,6 +325,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const Heaviside = (num: number, edge: number = 0, scl: number = 1): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Heaviside: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge))) throw new Error(`Chalkboard.real.Heaviside: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl))) throw new Error(`Chalkboard.real.Heaviside: Parameter "scl" must be a finite number.`);
             if (num >= edge) {
                 return scl;
             } else {
@@ -326,6 +342,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const lerp = (p: [number, number], t: number): number => {
+            if (!Number.isFinite(t)) throw new Error(`Chalkboard.real.lerp: Parameter "t" must be a finite number.`);
             return (p[1] - p[0]) * t + p[0];
         };
 
@@ -338,6 +355,11 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const linear = (x1: number, y1: number, x2: number, y2: number): ChalkboardFunction => {
+            if (!Number.isFinite(x1)) throw new Error(`Chalkboard.real.linear: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1)) throw new Error(`Chalkboard.real.linear: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(x2)) throw new Error(`Chalkboard.real.linear: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2)) throw new Error(`Chalkboard.real.linear: Parameter "y2" must be a finite number.`);
+            if (x1 === x2) throw new Error(`Chalkboard.real.linear: Parameters "x1" and "x2" must be different.`);
             return Chalkboard.real.define((x: number) => Chalkboard.real.slope(x1, y1, x2, y2) * (x - x2) + y2);
         };
 
@@ -350,6 +372,10 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const linearFormula = (a: number, b: number, c?: number, d?: number): number => {
+            if (!Number.isFinite(a)) throw new Error(`Chalkboard.real.linearFormula: Parameter "a" must be a finite number.`);
+            if (!Number.isFinite(b)) throw new Error(`Chalkboard.real.linearFormula: Parameter "b" must be a finite number.`);
+            if (c !== undefined && (!Number.isFinite(c))) throw new Error(`Chalkboard.real.linearFormula: Parameter "c" must be a finite number.`);
+            if (d !== undefined && (!Number.isFinite(d))) throw new Error(`Chalkboard.real.linearFormula: Parameter "d" must be a finite number.`);
             if (typeof c === "undefined" && typeof d === "undefined") {
                 return -b / a;
             } else if (typeof c === "number" && typeof d === "undefined") {
@@ -365,6 +391,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const ln = (num: number): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.ln: Parameter "num" must be a number that is not NaN.`);
             if (num <= 0) return NaN;
             if (num === 1) return 0;
             if (num === Infinity) return Infinity;
@@ -390,6 +417,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const log = (base: number, num: number): number => {
+            if (!Number.isFinite(base) || base <= 0 || base === 1) throw new Error(`Chalkboard.real.log: Parameter "base" must be a positive finite number that is not 1.`);
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.log: Parameter "num" must be a number that is not NaN.`);
             return Chalkboard.real.ln(num) / Chalkboard.real.ln(base);
         };
 
@@ -399,6 +428,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const log10 = (num: number): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.log10: Parameter "num" must be a number that is not NaN.`);
             return Chalkboard.real.log(10, num);
         };
 
@@ -409,8 +439,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const mul = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.real.mul: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== func2.type) throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be the same.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.mul: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== func2.type) throw new Error(`Chalkboard.real.mul: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
@@ -441,7 +471,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func1.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.mul: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -450,7 +480,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const negate = (func: ChalkboardFunction): ChalkboardFunction => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.negate: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.negate: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => -f(...x);
@@ -477,7 +507,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.negate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.negate: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -565,7 +595,7 @@ namespace Chalkboard {
                             if (tokens[tokens.length - 1] !== "*") tokens.push("*");
                         }
                     } else {
-                        throw new Error(`Chalkboard.real.parse: Unexpected character ${ch}`);
+                        throw new Error(`Chalkboard.real.parse: Unexpected character "${ch}".`);
                     }
                 }
                 return tokens;
@@ -574,7 +604,7 @@ namespace Chalkboard {
                 let pos = 0;
                 const peek = (): string => tokens[pos] || "";
                 const consume = (token?: string): string => {
-                    if (token && tokens[pos] !== token) throw new Error(`Chalkboard.real.parse: Expected token '${token}' but found '${tokens[pos]}'`);
+                    if (token && tokens[pos] !== token) throw new Error(`Chalkboard.real.parse: Expected token "${token}" but found "${tokens[pos]}".`);
                     return tokens[pos++];
                 };
                 const parseExpression = (): { type: string, [key: string]: any } => parseAdditive();
@@ -649,10 +679,10 @@ namespace Chalkboard {
                         consume(")");
                         return node;
                     }
-                    throw new Error(`Chalkboard.real.parse: Unexpected token ${token}`);
+                    throw new Error(`Chalkboard.real.parse: Unexpected token "${token}".`);
                 };
                 const ast = parseExpression();
-                if (pos < tokens.length) throw new Error(`Chalkboard.real.parse: Unexpected token ${tokens[pos]}`);
+                if (pos < tokens.length) throw new Error(`Chalkboard.real.parse: Unexpected token "${tokens[pos]}".`);
                 return ast;
             };
             const evaluateNode = (node: { type: string, [key: string]: any }, values: Record<string, number>): number => {
@@ -663,7 +693,7 @@ namespace Chalkboard {
                     case "var": {
                         const varname = node.name;
                         if (varname in values) return values[varname];
-                        throw new Error(`Chalkboard.real.parse: Variable '${varname}' not defined in values`);
+                        throw new Error(`Chalkboard.real.parse: Variable "${varname}" is not defined in "config.values".`);
                     }
                     case "add": {
                         return evaluateNode(node.left, values) + evaluateNode(node.right, values);
@@ -677,7 +707,7 @@ namespace Chalkboard {
                     case "div": {
                         const numerator = evaluateNode(node.left, values);
                         const denominator = evaluateNode(node.right, values);
-                        if (denominator === 0) throw new Error(`Chalkboard.real.parse: Division by zero`);
+                        if (denominator === 0) throw new Error(`Chalkboard.real.parse: Division by zero.`);
                         return numerator / denominator;
                     }
                     case "pow": {
@@ -701,11 +731,11 @@ namespace Chalkboard {
                             case "exp": return Math.exp(args[0]);
                             case "min": return Math.min(...args);
                             case "max": return Math.max(...args);
-                            default: throw new Error(`Chalkboard.real.parse: Unknown function ${node.name}`);
+                            default: throw new Error(`Chalkboard.real.parse: Unknown function "${node.name}".`);
                         }
                     }
                 }
-                throw new Error(`Chalkboard.real.parse: Unknown node type ${node.type}`);
+                throw new Error(`Chalkboard.real.parse: Unknown node type "${node.type}".`);
             };
             const nodeToString = (node: { type: string, [key: string]: any }): string => {
                 switch (node.type) {
@@ -808,7 +838,7 @@ namespace Chalkboard {
                         return `\\mathrm{${node.name}}\\left(${node.args.map(nodeToLaTeX).join(", ")}\\right)`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.real.parse: Unknown node type ${node.type}`);
+                        throw new Error(`Chalkboard.real.parse: Unknown node type "${node.type}".`);
                     }
                 }
             };
@@ -1197,10 +1227,8 @@ namespace Chalkboard {
                 if (config.returnLaTeX) return nodeToLaTeX(simplified);
                 return nodeToString(simplified);
             } catch (err) {
-                if (err instanceof Error) {
-                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${err.message}`);
-                } else {
-                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${String(err)}`);
+                if (err instanceof Error) throw new Error(`Chalkboard.real.parse: Error parsing real expression: ${err.message.replace(/\.*$/, "")}.`); else {
+                    throw new Error(`Chalkboard.real.parse: Error parsing real expression: ${String(err).replace(/\.*$/, "")}.`);
                 }
             }
         };
@@ -1213,6 +1241,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const pingpong = (num: number, edge: number = 0, scl: number = 1): number => {
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.real.pingpong: Parameter "num" must be a finite number.`);
+            if (edge !== undefined && (!Number.isFinite(edge))) throw new Error(`Chalkboard.real.pingpong: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl))) throw new Error(`Chalkboard.real.pingpong: Parameter "scl" must be a finite number.`);
             if ((num + edge) % (2 * scl) < scl) {
                 return (num + edge) % scl;
             } else {
@@ -1232,6 +1263,7 @@ namespace Chalkboard {
             } else {
                 arr = coeffs;
             }
+            if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.real.polynomial: Parameter "coeffs" must begin and end with finite numbers.`);
             while (arr.length > 1 && arr[0] === 0) {
                 arr.shift();
             }
@@ -1253,6 +1285,7 @@ namespace Chalkboard {
          * @returns {number | ChalkboardFunction}
          */
         export const pow = (base: number | ChalkboardFunction, num: number): number | ChalkboardFunction => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.pow: Parameter "num" must be a number that is not NaN.`);
             if (typeof base === "number") {
                 if (base === 0 && num === 0) return 1;
                 if (base === 0) return 0;
@@ -1274,7 +1307,7 @@ namespace Chalkboard {
                 }
             } else {
                 const func = base;
-                if (func.field !== "real") throw new TypeError("Chalkboard.real.pow: Property 'field' of 'func' must be 'real'.");
+                if (func.field !== "real") throw new Error(`Chalkboard.real.pow: Property "func.field" must be real.`);
                 if (func.type.startsWith("scalar")) {
                     const f = func.rule as ((...x: number[]) => number);
                     const g = (...x: number[]) => f(...x) ** num;
@@ -1301,7 +1334,7 @@ namespace Chalkboard {
                     }
                     return { rule: g, field: "real", type: func.type } as ChalkboardFunction;
                 }
-                throw new TypeError("Chalkboard.real.pow: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+                throw new Error(`Chalkboard.real.pow: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
             }
         };
 
@@ -1314,6 +1347,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const qerp = (p1: [number, number], p2: [number, number], p3: [number, number], t: number): number => {
+            if (!Number.isFinite(t)) throw new Error(`Chalkboard.real.qerp: Parameter "t" must be a finite number.`);
             const a = p1[1] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
             const b =
                 (-p1[1] * (p2[0] + p3[0])) / ((p1[0] - p2[0]) * (p1[0] - p3[0])) -
@@ -1335,12 +1369,15 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const quadratic = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): ChalkboardFunction => {
+            if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.quadratic: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b)) throw new Error(`Chalkboard.real.quadratic: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c)) throw new Error(`Chalkboard.real.quadratic: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return Chalkboard.real.define((x: number) => a * x * x + b * x + c);
             } else if (form === "vertex") {
                 return Chalkboard.real.define((x: number) => a * (x - b) * (x - b) + c);
             } else {
-                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.quadratic: Parameter "form" must be standard or vertex.`);
             }
         };
 
@@ -1353,12 +1390,15 @@ namespace Chalkboard {
          * @returns {number[]}
          */
         export const quadraticFormula = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): [number, number] => {
+            if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.quadraticFormula: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b)) throw new Error(`Chalkboard.real.quadraticFormula: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c)) throw new Error(`Chalkboard.real.quadraticFormula: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a), (-b - Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a)];
             } else if (form === "vertex") {
                 return [b + Chalkboard.real.sqrt(-c / a), b - Chalkboard.real.sqrt(-c / a)];
             } else {
-                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.quadraticFormula: Parameter "form" must be standard or vertex.`);
             }
         };
 
@@ -1370,6 +1410,9 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const ramp = (num: number, edge: number = 0, scl: number = 1): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.ramp: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge))) throw new Error(`Chalkboard.real.ramp: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl))) throw new Error(`Chalkboard.real.ramp: Parameter "scl" must be a finite number.`);
             if (num >= edge) {
                 return num * scl;
             } else {
@@ -1385,6 +1428,9 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const randomPolynomial = (degree: number, inf: number = 0, sup: number = 1): ChalkboardFunction => {
+            if (!Number.isInteger(degree) || degree < 0) throw new Error(`Chalkboard.real.randomPolynomial: Parameter "degree" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf))) throw new Error(`Chalkboard.real.randomPolynomial: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup))) throw new Error(`Chalkboard.real.randomPolynomial: Parameter "sup" must be a finite number.`);
             return Chalkboard.real.polynomial(...Chalkboard.stat.random(degree + 1, inf, sup));
         };
 
@@ -1394,7 +1440,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const reciprocate = (func: ChalkboardFunction): ChalkboardFunction => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.reciprocate: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.reciprocate: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => 1 / f(...x);
@@ -1421,7 +1467,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.reciprocate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.reciprocate: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -1433,6 +1479,10 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const rect = (num: number, center: number = 0, width: number = 2, scl: number = 1): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.rect: Parameter "num" must be a number that is not NaN.`);
+            if (center !== undefined && (!Number.isFinite(center))) throw new Error(`Chalkboard.real.rect: Parameter "center" must be a finite number.`);
+            if (!Number.isFinite(width) || width <= 0) throw new Error(`Chalkboard.real.rect: Parameter "width" must be greater than 0.`);
+            if (scl !== undefined && (!Number.isFinite(scl))) throw new Error(`Chalkboard.real.rect: Parameter "scl" must be a finite number.`);
             if (num > center + width / 2 || num < center - width / 2) {
                 return 0;
             } else {
@@ -1447,7 +1497,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const root = (num: number, index: number = 3): number => {
-            if (num === 0) return 0;
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.root: Parameter "num" must be a number that is not NaN.`);
+            if (!Number.isInteger(index) || index === 0) throw new Error(`Chalkboard.real.root: Parameter "index" must be an integer that is not 0.`);
+            if (num === 0) return index > 0 ? 0 : Infinity;
+            if (num === Infinity) return index > 0 ? Infinity : 0;
+            if (num === -Infinity) return Math.abs(index) % 2 === 1 ? (index > 0 ? -Infinity : -0) : NaN;
             if (num < 0) {
                 if (Number.isInteger(index) && Math.abs(index) % 2 === 1) return -Chalkboard.E(Chalkboard.real.ln(-num) / index);
                 return NaN;
@@ -1462,7 +1516,7 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const scl = (func: ChalkboardFunction, num: number): ChalkboardFunction => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.scl: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.scl: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule as ((...x: number[]) => number);
                 const g = (...x: number[]) => f(...x) * num;
@@ -1489,7 +1543,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.scl: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.scl: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -1501,6 +1555,11 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const slope = (x1: number, y1: number, x2: number, y2: number): number => {
+            if (!Number.isFinite(x1)) throw new Error(`Chalkboard.real.slope: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1)) throw new Error(`Chalkboard.real.slope: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(x2)) throw new Error(`Chalkboard.real.slope: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2)) throw new Error(`Chalkboard.real.slope: Parameter "y2" must be a finite number.`);
+            if (x1 === x2) throw new Error(`Chalkboard.real.slope: Parameters "x1" and "x2" must be different.`);
             return (y2 - y1) / (x2 - x1);
         };
 
@@ -1510,6 +1569,7 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const sqrt = (num: number): number => {
+            if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.sqrt: Parameter "num" must be a number that is not NaN.`);
             if (num < 0) return NaN;
             if (num === 0 || num === 1 || num === Infinity) return num;
             let S = num, E = 0;
@@ -1537,8 +1597,8 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const sub = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
-            if (func1.field !== "real" || func2.field !== "real") throw new TypeError("Chalkboard.real.sub: Properties 'field' of 'func1' and 'func2' must be 'real'.");
-            if (func1.type !== func2.type) throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be the same.");
+            if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.sub: Properties "func1.field" and "func2.field" must be real.`);
+            if (func1.type !== func2.type) throw new Error(`Chalkboard.real.sub: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule as ((...x: number[]) => number);
                 const f2 = func2.rule as ((...x: number[]) => number);
@@ -1569,7 +1629,7 @@ namespace Chalkboard {
                 }
                 return { rule: g, field: "real", type: func1.type } as ChalkboardFunction;
             }
-            throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.sub: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -1579,7 +1639,8 @@ namespace Chalkboard {
          * @returns {number}
          */
         export const tetration = (base: number, num: number): number | undefined => {
-            if (!Number.isInteger(num) || num < 0) return NaN;
+            if (!Number.isFinite(base)) throw new Error(`Chalkboard.real.tetration: Parameter "base" must be a finite number.`);
+            if (!Number.isInteger(num) || num < 0) throw new Error(`Chalkboard.real.tetration: Parameter "num" must be a non-negative integer.`);
             if (num === 0) return 1;
             if (num === 1) return base;
             let result = base;
@@ -1598,13 +1659,13 @@ namespace Chalkboard {
          * @returns {ChalkboardFunction}
          */
         export const translate = (func: ChalkboardFunction, h: number = 0, v: number = 0): ChalkboardFunction => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.translate: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.translate: Property "func.field" must be real.`);
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
                 const g = (x: number) => f(x - h) + v;
                 return Chalkboard.real.define(g);
             }
-            throw new TypeError("Chalkboard.real.translate: Property 'type' of 'func' must be 'scalar2d'.");
+            throw new Error(`Chalkboard.real.translate: Property "func.type" must be scalar2d.`);
         };
 
         /**
@@ -1614,7 +1675,7 @@ namespace Chalkboard {
          * @returns {number | ChalkboardVector}
          */
         export const val = (func: ChalkboardFunction, val: number | ChalkboardVector): number | ChalkboardVector => {
-            if (func.field !== "real") throw new TypeError("Chalkboard.real.val: Property 'field' of 'func' must be 'real'.");
+            if (func.field !== "real") throw new Error(`Chalkboard.real.val: Property "func.field" must be real.`);
             if (func.type === "scalar2d") {
                 const f = func.rule as (x: number) => number;
                 const x = val as number;
@@ -1656,7 +1717,7 @@ namespace Chalkboard {
                 const v = Chalkboard.vect.toArray(val as ChalkboardVector);
                 return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]), f[2](v[0], v[1]));
             }
-            throw new TypeError("Chalkboard.real.val: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'");
+            throw new Error(`Chalkboard.real.val: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
 
         /**
@@ -1686,7 +1747,7 @@ namespace Chalkboard {
             } else if (type === "surface3d") {
                 return Chalkboard.real.define((s, t) => 0, (s, t) => 0, (s, t) => 0);
             }
-            throw new TypeError("Chalkboard.real.zero: String 'type' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.zero: Parameter "type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
     }
 }

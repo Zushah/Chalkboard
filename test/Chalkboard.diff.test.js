@@ -60,8 +60,8 @@ import cb from "../dist/Chalkboard.js";
     assert.deepStrictEqual(cb.diff.harmonicForced(2, 0.2, (t) => 1).rule(0, [3, 4]), [4, -14.2]);
     assert.deepStrictEqual(cb.diff.Duffing(1, 1, 0, 0, 1).rule(0, [2, 3]), [3, -5]);
     assert.deepStrictEqual(cb.diff.massSpringDamper(2, 4, 1, (t) => 0).rule(0, [3, 5]), [5, -11.5]);
-    assert.deepStrictEqual(cb.diff.pendulum(2, 10).rule(0, [cb.PI(1/2), 0]), [0, -9.81]);
-    assert.deepStrictEqual(cb.diff.pendulumDrag(2, 10, 0.1).rule(0, [cb.PI(1/2), 10]), [10, -9.81]);
+    assert.deepStrictEqual(cb.diff.pendulum({ L: 2, g: 10 }).rule(0, [cb.PI(1/2), 0]), [0, -5]);
+    assert.deepStrictEqual(cb.diff.pendulumDrag({ L: 2, g: 10, c: 0.1 }).rule(0, [cb.PI(1/2), 10]), [10, -15]);
     assert.deepStrictEqual(cb.diff.pendulumDriven(2, 10, 1, 0).rule(0, [cb.PI(1/2), 0]), [0, 9]);
 }
 

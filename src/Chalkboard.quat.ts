@@ -24,6 +24,7 @@ namespace Chalkboard {
          * const q = Chalkboard.quat.absolute(Chalkboard.quat.init(-2, 3, -4, 5));
          */
         export const absolute = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.absolute: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
         };
 
@@ -37,6 +38,8 @@ namespace Chalkboard {
          * const sum = Chalkboard.quat.add(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const add = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.add: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.add: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
@@ -51,6 +54,7 @@ namespace Chalkboard {
          * const conj = Chalkboard.quat.conjugate(Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const conjugate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.conjugate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
         };
 
@@ -64,6 +68,7 @@ namespace Chalkboard {
          * const constrained = Chalkboard.quat.constrain(Chalkboard.quat.init(1.2, 0.6, 0.7, 0.8), [0, 1]);
          */
         export const constrain = (quat: ChalkboardQuaternion, range: [number, number] = [0, 1]): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.constrain: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(
                 Chalkboard.numb.constrain(quat.a, range),
                 Chalkboard.numb.constrain(quat.b, range),
@@ -81,6 +86,7 @@ namespace Chalkboard {
          * const copied = Chalkboard.quat.copy(Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const copy = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.copy: Parameter "quat" must be a quaternion.`);
             return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
         };
 
@@ -94,6 +100,8 @@ namespace Chalkboard {
          * const distance = Chalkboard.quat.dist(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(3, 0, 0, 0));
          */
         export const dist = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): number => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.dist: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.dist: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.real.sqrt(
@@ -111,6 +119,8 @@ namespace Chalkboard {
          * const distanceSquared = Chalkboard.quat.distsq(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(3, 0, 0, 0));
          */
         export const distsq = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): number => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.distsq: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.distsq: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return (quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d);
@@ -126,6 +136,8 @@ namespace Chalkboard {
          * const quotient = Chalkboard.quat.div(Chalkboard.quat.init(1, 0, 0, 0), Chalkboard.quat.init(2, 0, 0, 0));
          */
         export const div = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.div: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.div: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(
@@ -150,7 +162,7 @@ namespace Chalkboard {
             if (v.length === 3) {
                 return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), v[0] * Chalkboard.trig.sin(rad / 2), v[1] * Chalkboard.trig.sin(rad / 2), v[2] * Chalkboard.trig.sin(rad / 2));
             } else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 3 dimensions.');
+                throw new Error(`Chalkboard.quat.fromAxis: Parameter "vect" must be of type ChalkboardVector with 3 dimensions.`);
             }
         };
 
@@ -166,6 +178,10 @@ namespace Chalkboard {
          * const q = Chalkboard.quat.init(1, 2, 3, 4);
          */
         export const init = (a: number, b: number = 0, c: number = 0, d: number = 0): ChalkboardQuaternion => {
+            if (!Number.isFinite(a)) throw new Error(`Chalkboard.quat.init: Parameter "a" must be a finite number.`);
+            if (b !== undefined && (!Number.isFinite(b))) throw new Error(`Chalkboard.quat.init: Parameter "b" must be a finite number.`);
+            if (c !== undefined && (!Number.isFinite(c))) throw new Error(`Chalkboard.quat.init: Parameter "c" must be a finite number.`);
+            if (d !== undefined && (!Number.isFinite(d))) throw new Error(`Chalkboard.quat.init: Parameter "d" must be a finite number.`);
             return { a: a, b: b, c: c, d: d };
         };
 
@@ -178,6 +194,7 @@ namespace Chalkboard {
          * const inverse = Chalkboard.quat.invert(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const invert = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.invert: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
         };
 
@@ -195,6 +212,9 @@ namespace Chalkboard {
          * const no = Chalkboard.quat.isApproxEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1.1, 2.1, 3.1, 4.1));
          */
         export const isApproxEqual = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision: number = 0.000001): boolean => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "quat2" must be a finite number or a quaternion.`);
+            if (precision !== undefined && (!Number.isFinite(precision))) throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.numb.isApproxEqual(quat1.a, quat2.a, precision) && Chalkboard.numb.isApproxEqual(quat1.b, quat2.b, precision) && Chalkboard.numb.isApproxEqual(quat1.c, quat2.c, precision) && Chalkboard.numb.isApproxEqual(quat1.d, quat2.d, precision);
@@ -213,6 +233,8 @@ namespace Chalkboard {
          * const no = Chalkboard.quat.isEqual(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(1, 2, 3, 4.0000001));
          */
         export const isEqual = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): boolean => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.isEqual: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.isEqual: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return quat1.a === quat2.a && quat1.b === quat2.b && quat1.c === quat2.c && quat1.d === quat2.d;
@@ -231,6 +253,9 @@ namespace Chalkboard {
          * const yes = Chalkboard.quat.isInverse(q, qi);
          */
         export const isInverse = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number, precision: number = 0.000001): boolean => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.isInverse: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.isInverse: Parameter "quat2" must be a finite number or a quaternion.`);
+            if (precision !== undefined && (!Number.isFinite(precision))) throw new Error(`Chalkboard.quat.isInverse: Parameter "precision" must be a finite number.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.isApproxEqual(Chalkboard.quat.mul(quat1, quat2), Chalkboard.quat.init(1, 0, 0, 0), precision);
@@ -248,6 +273,7 @@ namespace Chalkboard {
          * const no = Chalkboard.quat.isNormalized(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const isNormalized = (quat: ChalkboardQuaternion): boolean => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.isNormalized: Parameter "quat" must be a quaternion.`);
             return Chalkboard.numb.isApproxEqual(Chalkboard.quat.magsq(quat), 1);
         };
 
@@ -263,6 +289,7 @@ namespace Chalkboard {
          * const no = Chalkboard.quat.isZero(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const isZero = (quat: ChalkboardQuaternion | number): boolean => {
+            if ((!Number.isFinite(quat)) && (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d))) throw new Error(`Chalkboard.quat.isZero: Parameter "quat" must be a finite number or a quaternion.`);
             if (typeof quat === "number") quat = Chalkboard.quat.init(quat, 0, 0, 0);
             return Chalkboard.quat.isApproxEqual(quat, Chalkboard.quat.init(0, 0, 0, 0));
         };
@@ -276,6 +303,7 @@ namespace Chalkboard {
          * const r = Chalkboard.quat.mag(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const mag = (quat: ChalkboardQuaternion): number => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.mag: Parameter "quat" must be a quaternion.`);
             return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
         };
 
@@ -289,6 +317,8 @@ namespace Chalkboard {
          * const normscl = Chalkboard.quat.magset(Chalkboard.quat.init(1, 2, 3, 4), 2);
          */
         export const magset = (quat: ChalkboardQuaternion, num: number): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.magset: Parameter "quat" must be a quaternion.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.quat.magset: Parameter "num" must be a finite number.`);
             return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
         };
 
@@ -301,6 +331,7 @@ namespace Chalkboard {
          * const r2 = Chalkboard.quat.magsq(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const magsq = (quat: ChalkboardQuaternion): number => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.magsq: Parameter "quat" must be a quaternion.`);
             return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
         };
 
@@ -314,6 +345,8 @@ namespace Chalkboard {
          * const product = Chalkboard.quat.mul(Chalkboard.quat.init(1, 2, 3, 0), Chalkboard.quat.init(2, 2, 0, 1));
          */
         export const mul = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.mul: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.mul: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(
@@ -333,6 +366,7 @@ namespace Chalkboard {
          * const negated = Chalkboard.quat.negate(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const negate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.negate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
         };
 
@@ -345,6 +379,7 @@ namespace Chalkboard {
          * const normalized = Chalkboard.quat.normalize(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const normalize = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.normalize: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
         };
 
@@ -357,6 +392,7 @@ namespace Chalkboard {
          * Chalkboard.quat.print(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const print = (quat: ChalkboardQuaternion): void => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.print: Parameter "quat" must be a quaternion.`);
             console.log(Chalkboard.quat.toString(quat));
         };
 
@@ -370,6 +406,8 @@ namespace Chalkboard {
          * const q = Chalkboard.quat.random();
          */
         export const random = (inf: number = 0, sup: number = 1): ChalkboardQuaternion => {
+            if (inf !== undefined && (!Number.isFinite(inf))) throw new Error(`Chalkboard.quat.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup))) throw new Error(`Chalkboard.quat.random: Parameter "sup" must be a finite number.`);
             return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         };
 
@@ -382,6 +420,7 @@ namespace Chalkboard {
          * const reciprocated = Chalkboard.quat.reciprocate(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const reciprocate = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.reciprocate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
         };
 
@@ -394,6 +433,7 @@ namespace Chalkboard {
          * const rounded = Chalkboard.quat.round(Chalkboard.quat.init(0.6, 2.3, 2.7, 4.1));
          */
         export const round = (quat: ChalkboardQuaternion): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.round: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
         };
 
@@ -407,6 +447,8 @@ namespace Chalkboard {
          * const scaled = Chalkboard.quat.scl(Chalkboard.quat.init(1, 2, 3, 4), 2);
          */
         export const scl = (quat: ChalkboardQuaternion, num: number): ChalkboardQuaternion => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.scl: Parameter "quat" must be a quaternion.`);
+            if (!Number.isFinite(num)) throw new Error(`Chalkboard.quat.scl: Parameter "num" must be a finite number.`);
             return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
         };
 
@@ -420,6 +462,8 @@ namespace Chalkboard {
          * const difference = Chalkboard.quat.sub(Chalkboard.quat.init(1, 2, 3, 4), Chalkboard.quat.init(2, 3, 4, 5));
          */
         export const sub = (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number): ChalkboardQuaternion => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof (quat1 as any).a !== "number" || !Number.isFinite((quat1 as any).a) || typeof (quat1 as any).b !== "number" || !Number.isFinite((quat1 as any).b) || typeof (quat1 as any).c !== "number" || !Number.isFinite((quat1 as any).c) || typeof (quat1 as any).d !== "number" || !Number.isFinite((quat1 as any).d))) throw new Error(`Chalkboard.quat.sub: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof (quat2 as any).a !== "number" || !Number.isFinite((quat2 as any).a) || typeof (quat2 as any).b !== "number" || !Number.isFinite((quat2 as any).b) || typeof (quat2 as any).c !== "number" || !Number.isFinite((quat2 as any).c) || typeof (quat2 as any).d !== "number" || !Number.isFinite((quat2 as any).d))) throw new Error(`Chalkboard.quat.sub: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number") quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number") quat2 = Chalkboard.quat.init(quat2, 0, 0, 0);
             return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
@@ -434,6 +478,7 @@ namespace Chalkboard {
          * const arr = Chalkboard.quat.toArray(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toArray = (quat: ChalkboardQuaternion): [number, number, number, number] => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.toArray: Parameter "quat" must be a quaternion.`);
             return [quat.a, quat.b, quat.c, quat.d];
         };
 
@@ -446,6 +491,7 @@ namespace Chalkboard {
          * const matr = Chalkboard.quat.toMatrix(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toMatrix = (quat: ChalkboardQuaternion): ChalkboardMatrix => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.toMatrix: Parameter "quat" must be a quaternion.`);
             return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
         };
 
@@ -462,6 +508,9 @@ namespace Chalkboard {
          * );
          */
         export const toRotation = (quat: ChalkboardQuaternion, vect: ChalkboardVector): ChalkboardVector => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.toRotation: Parameter "quat" must be a quaternion.`);
+            if (vect === null || (vect !== undefined && typeof vect !== "string" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && typeof vect !== "object")) throw new Error(`Chalkboard.quat.toRotation: Parameter "vect" must be a vector.`);
+            if (typeof vect === "object" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && (typeof (vect as any).x !== "number" || typeof (vect as any).y !== "number")) throw new Error(`Chalkboard.quat.toRotation: Parameter "vect" must be a vector.`);
             const vector = Chalkboard.vect.toQuaternion(vect);
             const inverse = Chalkboard.quat.invert(quat);
             const quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
@@ -477,6 +526,7 @@ namespace Chalkboard {
          * const str = Chalkboard.quat.toString(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toString = (quat: ChalkboardQuaternion): string => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.toString: Parameter "quat" must be a quaternion.`);
             let str = quat.a.toString();
             if (quat.b >= 0) {
                 str += " + " + (quat.b === 1 ? "i" : quat.b.toString() + "i");
@@ -521,7 +571,7 @@ namespace Chalkboard {
             } else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.quat.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
 
         /**
@@ -533,6 +583,7 @@ namespace Chalkboard {
          * const v = Chalkboard.quat.toVector(Chalkboard.quat.init(1, 2, 3, 4));
          */
         export const toVector = (quat: ChalkboardQuaternion): ChalkboardVector => {
+            if (quat === null || typeof quat !== "object" || typeof (quat as any).a !== "number" || !Number.isFinite((quat as any).a) || typeof (quat as any).b !== "number" || !Number.isFinite((quat as any).b) || typeof (quat as any).c !== "number" || !Number.isFinite((quat as any).c) || typeof (quat as any).d !== "number" || !Number.isFinite((quat as any).d)) throw new Error(`Chalkboard.quat.toVector: Parameter "quat" must be a quaternion.`);
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
         };
     }
