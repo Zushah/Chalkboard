@@ -1,0 +1,76 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - src/**
+      - test/**
+      - dist/**
+      - .github/workflows/test.yaml
+      - package.json
+      - tsconfig.json
+
+  pull_request:
+    branches:
+      - main
+    paths:
+      - src/**
+      - test/**
+      - dist/**
+      - .github/workflows/test.yaml
+      - package.json
+      - tsconfig.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows 11 AMD64
+            os: windows-2025
+          - name: Windows 11 ARM64
+            os: windows-11-arm
+          - name: MacOS 15 AMD64
+            os: macos-15-intel
+          - name: MacOS 15 ARM64
+            os: macos-15
+          - name: Ubuntu 24 AMD64
+            os: ubuntu-24.04
+          - name: Ubuntu 24 ARM64
+            os: ubuntu-24.04-arm
+
+    steps:
+      -
+        name: Checkout
+        uses: actions/checkout@v7
+
+      -
+        name: Set up Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: "24"
+
+      -
+        name: Install dependencies
+        run: npm ci
+
+      -
+        name: Build
+        run: npm run build
+
+      -
+        name: Test
+        run: npm run test

@@ -1,6 +1,6 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "description": "Hundreds of functions for the manifestation and manipulation of mathematical structures and systems.",
   "main": "./dist/Chalkboard.js",
   "types": "./dist/Chalkboard.d.ts",
@@ -19,11 +19,11 @@
     "docs": "typedoc --options ./typedoc.json --favicon ./assets/favicon.png"
   },
   "devDependencies": {
-    "@types/node": "^26.1.0",
-    "terser": "^5.48.0",
-    "typedoc": "^0.28.20",
-    "typedoc-material-theme": "^1.4.1",
-    "typescript": "^6.0.3"
+    "@types/node": "26.1.1",
+    "terser": "5.49.0",
+    "typedoc": "0.28.20",
+    "typedoc-material-theme": "1.4.1",
+    "typescript": "6.0.3"
   },
   "repository": {
     "type": "git",

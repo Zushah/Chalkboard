@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.3 Euler
-    Released July 6th, 2026
+    Version 3.0.4 Euler
+    Released July 20th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
     Repository: https://www.github.com/Zushah/Chalkboard
@@ -350,12 +350,12 @@ namespace Chalkboard {
 
     /**
      * The version of Chalkboard.
-     * @type {"3.0.3"}
+     * @type {"3.0.4"}
      * @example
-     * // Returns "3.0.3"
+     * // Returns "3.0.4"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "3.0.3" = "3.0.3";
+    export const VERSION: "3.0.4" = "3.0.4";
 
     /**
      * The alias of the version of Chalkboard.

@@ -1,7 +1,7 @@
 /*
     Chalkboard
-    Version 3.0.3 Euler
-    Released July 6th, 2026
+    Version 3.0.4 Euler
+    Released July 20th, 2026
     Authored by Zushah: https://www.github.com/Zushah
     Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
     Repository: https://www.github.com/Zushah/Chalkboard
@@ -16,6 +16,8 @@
 var Chalkboard;
 (function (Chalkboard) {
     Chalkboard.APPLY = (object, callback) => {
+        if (typeof callback !== "function")
+            throw new Error(`Chalkboard.APPLY: Parameter "callback" must be a function.`);
         if (object && typeof object.a === "number" && typeof object.b === "number" && typeof object.c === "undefined") {
             const comp = object;
             return Chalkboard.comp.init(callback(comp.a), callback(comp.b));
@@ -77,7 +79,7 @@ var Chalkboard;
                 return result;
             }
             else {
-                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardSet".');
+                throw new Error(`Chalkboard.APPLY: Parameter "object" cannot be an infinite ChalkboardSet.`);
             }
         }
         if (object && typeof object.set?.contains === "function") {
@@ -90,13 +92,19 @@ var Chalkboard;
                 return result;
             }
             else {
-                throw new TypeError('Chalkboard.APPLY cannot operate on an infinite "ChalkboardStructure".');
+                throw new Error(`Chalkboard.APPLY: Parameter "object" cannot be an infinite ChalkboardStructure.`);
             }
         }
-        throw new TypeError('Chalkboard.APPLY can only operate on a "ChalkboardComplex", "ChalkboardMatrix", "ChalkboardQuaternion", "ChalkboardTensor", "ChalkboardVector", "ChalkboardSet", or "ChalkboardStructure".');
+        throw new Error(`Chalkboard.APPLY: Parameter "object" must be a ChalkboardComplex, ChalkboardMatrix, ChalkboardQuaternion, ChalkboardTensor, ChalkboardVector, ChalkboardSet, or ChalkboardStructure.`);
     };
     Chalkboard.CONTEXT = typeof window !== "undefined" ? "ctx" : "0";
     Chalkboard.E = (exponent = 1) => {
+        if (typeof exponent !== "number" || Number.isNaN(exponent))
+            throw new Error(`Chalkboard.E: Parameter "exponent" must be a number that is not NaN.`);
+        if (exponent === Infinity)
+            return Infinity;
+        if (exponent === -Infinity)
+            return 0;
         if (exponent === 0)
             return 1;
         if (exponent === 1)
@@ -109,7 +117,7 @@ var Chalkboard;
     };
     Chalkboard.I = (exponent = 1) => {
         if (!Number.isInteger(exponent))
-            throw new TypeError(`Chalkboard.I: Parameter "exponent" must be an integer.`);
+            throw new Error(`Chalkboard.I: Parameter "exponent" must be an integer.`);
         const n = Chalkboard.numb.mod(exponent, 4);
         if (n === 0)
             return Chalkboard.comp.init(1, 0);
@@ -122,6 +130,8 @@ var Chalkboard;
         return Chalkboard.comp.init(0, 0);
     };
     Chalkboard.PI = (coefficient = 1) => {
+        if (typeof coefficient !== "number" || Number.isNaN(coefficient))
+            throw new Error(`Chalkboard.PI: Parameter "coefficient" must be a number that is not NaN.`);
         let a = 1.0, b = Math.sqrt(0.5), t = 0.25, p = 1.0;
         let aNext = (a + b) * 0.5, bNext = Math.sqrt(a * b);
         t -= p * (a - aNext) * (a - aNext);
@@ -148,10 +158,14 @@ var Chalkboard;
         return coefficient * (((a + b) * (a + b)) / (4.0 * t));
     };
     Chalkboard.REGISTER = (name, func) => {
+        if (typeof name !== "string")
+            throw new Error(`Chalkboard.REGISTER: Parameter "name" must be a string.`);
+        if (typeof func !== "function")
+            throw new Error(`Chalkboard.REGISTER: Parameter "func" must be a function.`);
         Chalkboard.REGISTRY[name] = func;
     };
     Chalkboard.REGISTRY = {};
-    Chalkboard.VERSION = "3.0.3";
+    Chalkboard.VERSION = "3.0.4";
     Chalkboard.VERSIONALIAS = "Euler";
 })(Chalkboard || (Chalkboard = {}));
 if (typeof window === "undefined")
@@ -164,9 +178,8 @@ var Chalkboard;
     (function (abal) {
         const $ = JSON.stringify;
         abal.A = (n) => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0)
+                throw new Error(`Chalkboard.abal.A: Parameter "n" must be a positive integer.`);
             const Sn = Chalkboard.abal.S(n);
             const isEvenPermutation = (perm) => {
                 let inversions = 0;
@@ -187,12 +200,10 @@ var Chalkboard;
         };
         abal.automorphism = (struc, mapping) => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an automorphism.");
-            }
-            if (!Chalkboard.abal.isBijective(morphism)) {
-                throw new Error("The mapping is not bijective, so it cannot be an automorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism))
+                throw new Error(`Chalkboard.abal.automorphism: The mapping is not a homomorphism, so it cannot be an automorphism.`);
+            if (!Chalkboard.abal.isBijective(morphism))
+                throw new Error(`Chalkboard.abal.automorphism: The mapping is not bijective, so it cannot be an automorphism.`);
             return morphism;
         };
         abal.C = (n) => {
@@ -205,9 +216,8 @@ var Chalkboard;
                 };
             }
             else {
-                if (!Number.isInteger(n) || n <= 0) {
-                    throw new Error('The parameter "n" must be a positive integer.');
-                }
+                if (!Number.isInteger(n) || n <= 0)
+                    throw new Error(`Chalkboard.abal.C: Parameter "n" must be a positive integer.`);
                 const elements = [];
                 for (let k = 0; k < n; k++) {
                     const t = (2 * Math.PI * k) / n;
@@ -233,9 +243,13 @@ var Chalkboard;
             if ("set" in struc && struc.set.elements) {
                 return struc.set.elements.length;
             }
-            throw new Error("The inputted structure does not have a finite cardinality or is missing elements.");
+            throw new Error(`Chalkboard.abal.cardinality: The inputted structure does not have a finite cardinality or is missing elements.`);
         };
         abal.Cartesian = (set1, set2) => {
+            if (set1 === null || typeof set1 !== "object" || typeof set1.contains !== "function")
+                throw new Error(`Chalkboard.abal.Cartesian: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof set2.contains !== "function")
+                throw new Error(`Chalkboard.abal.Cartesian: Parameter "set2" must be a set.`);
             const result = [];
             for (const a of set1.elements || []) {
                 for (const b of set2.elements || []) {
@@ -245,9 +259,8 @@ var Chalkboard;
             return Chalkboard.abal.set(result);
         };
         abal.Cayley = (struc, type = "add") => {
-            if (!struc.set.elements) {
-                throw new Error("The structure must have a finite set of elements.");
-            }
+            if (!struc.set.elements)
+                throw new Error(`Chalkboard.abal.Cayley: The structure must have a finite set of elements.`);
             const elements = struc.set.elements;
             if ("operation" in struc && struc.operation) {
                 if (type === "add") {
@@ -259,7 +272,7 @@ var Chalkboard;
                     }
                     return result;
                 }
-                throw new Error('The "type" parameter for groups should remain as the default "add" since there is no distinction between their additive and multiplicative Cayley tables.');
+                throw new Error(`Chalkboard.abal.Cayley: The "type" parameter for groups should remain as the default add since there is no distinction between their additive and multiplicative Cayley tables.`);
             }
             if ("add" in struc && struc.add && "mul" in struc && struc.mul) {
                 if (type === "add") {
@@ -279,9 +292,11 @@ var Chalkboard;
                 }
                 return result;
             }
-            throw new Error("Invalid algebraic structure for Cayley table.");
+            throw new Error(`Chalkboard.abal.Cayley: Invalid algebraic structure for Cayley table.`);
         };
         abal.center = (group) => {
+            if (group === null || typeof group !== "object" || group.set === null || typeof group.set !== "object" || typeof group.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.center: Parameter "group" must be an algebraic structure.`);
             const { set, operation } = group;
             if (!set.elements || !operation) {
                 return Chalkboard.abal.set([]);
@@ -290,15 +305,17 @@ var Chalkboard;
             return Chalkboard.abal.set(result);
         };
         abal.complement = (set, superset) => {
+            if (set === null || typeof set !== "object" || typeof set.contains !== "function")
+                throw new Error(`Chalkboard.abal.complement: Parameter "set" must be a set.`);
+            if (superset === null || typeof superset !== "object" || typeof superset.contains !== "function")
+                throw new Error(`Chalkboard.abal.complement: Parameter "superset" must be a set.`);
             return Chalkboard.abal.set((superset.elements || []).filter((element) => !set.contains(element)));
         };
         abal.compose = (morph1, morph2) => {
-            if (!Chalkboard.abal.isHomomorphism(morph1) || !Chalkboard.abal.isHomomorphism(morph2)) {
-                throw new Error("Both morphisms of the morphism composition must be homomorphisms.");
-            }
-            if (!Chalkboard.abal.isEqual(morph1.struc2, morph2.struc1)) {
-                throw new Error("The codomain of the first morphism and the domain of the second morphism must be equal to calculate the composition morphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morph1) || !Chalkboard.abal.isHomomorphism(morph2))
+                throw new Error(`Chalkboard.abal.compose: Both morphisms of the morphism composition must be homomorphisms.`);
+            if (!Chalkboard.abal.isEqual(morph1.struc2, morph2.struc1))
+                throw new Error(`Chalkboard.abal.compose: The codomain of the first morphism and the domain of the second morphism must be equal to calculate the composition morphism.`);
             return Chalkboard.abal.homomorphism(morph1.struc1, morph2.struc2, (x) => morph2.mapping(morph1.mapping(x)));
         };
         abal.copy = (struc) => {
@@ -354,15 +371,13 @@ var Chalkboard;
                 };
                 return copiedMorphism;
             }
-            throw new Error('The "struc" must be a set, structure, structure extension, or morphism.');
+            throw new Error(`Chalkboard.abal.copy: The "struc" must be a set, structure, structure extension, or morphism.`);
         };
         abal.coset = (struc, substruc) => {
-            if ("operation" in struc && !Chalkboard.abal.isSubgroup(struc, substruc.set)) {
-                throw new Error('The "substruc" must be a subgroup of the "struc".');
-            }
-            else if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
-                throw new Error('The "substruc" must be an ideal of the "struc".');
-            }
+            if ("operation" in struc && !Chalkboard.abal.isSubgroup(struc, substruc.set))
+                throw new Error(`Chalkboard.abal.coset: The "substruc" must be a subgroup of the "struc".`);
+            else if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set))
+                throw new Error(`Chalkboard.abal.coset: The "substruc" must be an ideal of the "struc".`);
             const elements = Chalkboard.abal.toArray(struc.set);
             const subElements = Chalkboard.abal.toArray(substruc.set);
             const cosets = new Map();
@@ -385,9 +400,8 @@ var Chalkboard;
             return Chalkboard.abal.set(Array.from(cosets.values()));
         };
         abal.cyclicSubgroup = (group, element) => {
-            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
-                throw new Error('The "group" must be finite.');
-            }
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id))
+                throw new Error(`Chalkboard.abal.cyclicSubgroup: The "group" must be finite.`);
             const result = [];
             let current = element;
             if (!group.operation) {
@@ -400,9 +414,8 @@ var Chalkboard;
             return Chalkboard.abal.set(result);
         };
         abal.D = (n) => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0)
+                throw new Error(`Chalkboard.abal.D: Parameter "n" must be a positive integer.`);
             const elements = [];
             for (let i = 0; i < n; i++) {
                 elements.push(`r${i}`);
@@ -417,6 +430,10 @@ var Chalkboard;
             };
         };
         abal.difference = (set1, set2) => {
+            if (set1 === null || typeof set1 !== "object" || typeof set1.contains !== "function")
+                throw new Error(`Chalkboard.abal.difference: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof set2.contains !== "function")
+                throw new Error(`Chalkboard.abal.difference: Parameter "set2" must be a set.`);
             const result = (set1.elements || []).filter((element) => !set2.contains(element));
             return Chalkboard.abal.set(result);
         };
@@ -458,49 +475,43 @@ var Chalkboard;
                         struc2.inverter(a[1])
                     ];
                     if (type === "sum") {
-                        if (!struc1.set.elements || !struc2.set.elements) {
-                            throw new Error("Direct sum is only defined for finite groups.");
-                        }
+                        if (!struc1.set.elements || !struc2.set.elements)
+                            throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite groups.`);
                     }
                     return Chalkboard.abal.group(set, operation, identity, inverter);
                 }
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite structures.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements)
+                        throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite structures.`);
                 }
                 return Chalkboard.abal.monoid(set, operation, identity);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2) {
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite rings.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements)
+                        throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite rings.`);
                 }
                 return Chalkboard.abal.ring(set, add, mul, addIdentity, mulIdentity, addInverter);
             }
             if ("add" in struc1 && "add" in struc2 && "mul" in struc1 && "mul" in struc2 && "mulInverter" in struc1 && "mulInverter" in struc2) {
                 if (type === "sum") {
-                    if (!struc1.set.elements || !struc2.set.elements) {
-                        throw new Error("Direct sum is only defined for finite fields.");
-                    }
+                    if (!struc1.set.elements || !struc2.set.elements)
+                        throw new Error(`Chalkboard.abal.direct: Direct sum is only defined for finite fields.`);
                 }
                 return Chalkboard.abal.field(set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter);
             }
-            throw new Error("Invalid algebraic structures for direct product or sum.");
+            throw new Error(`Chalkboard.abal.direct: Invalid algebraic structures for direct product or sum.`);
         };
         abal.endomorphism = (struc, mapping) => {
             const morphism = Chalkboard.abal.homomorphism(struc, struc, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an endomorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism))
+                throw new Error(`Chalkboard.abal.endomorphism: The mapping is not a homomorphism, so it cannot be an endomorphism.`);
             return morphism;
         };
         abal.field = (set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter) => {
             const autoconfig = () => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.');
-                }
+                if (!set.id)
+                    throw new Error(`Chalkboard.abal.field: The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", "addInverter", and "mulInverter" explicitly.`);
                 if (set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0,
@@ -517,23 +528,20 @@ var Chalkboard;
                         mulInverter: (a) => Chalkboard.comp.invert(a)
                     };
                 }
-                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.field: Automatic configuration of the "addIdentity", "mulIdentity", "addInverter", and "mulInverter" properties is not available for the inputted "set".`);
             };
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" || typeof mulInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter, mulInverter };
             const field = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter, mulInverter: configured.mulInverter };
-            if (!Chalkboard.abal.isField(field)) {
-                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.');
-            }
+            if (!Chalkboard.abal.isField(field))
+                throw new Error(`Chalkboard.abal.field: The inputted "set", "add", "mul", "addIdentity", "mulIdentity", "addInverter", and "mulInverter" do not form a field.`);
             return field;
         };
         abal.fieldExtension = (base, extension, degree, basis, isFinite, isSimple, isAlgebraic) => {
-            if (!Chalkboard.abal.isSubfield(base, extension.set)) {
-                throw new Error('The "base" must be a subfield of the "extension".');
-            }
+            if (!Chalkboard.abal.isSubfield(base, extension.set))
+                throw new Error(`Chalkboard.abal.fieldExtension: The "base" must be a subfield of the "extension".`);
             const autoconfig = () => {
-                if (!base.set.id) {
-                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
-                }
+                if (!base.set.id)
+                    throw new Error(`Chalkboard.abal.fieldExtension: The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.`);
                 if (base.set.id === "Q" && extension.set.id === "R") {
                     return {
                         degree: Infinity,
@@ -552,22 +560,25 @@ var Chalkboard;
                         isAlgebraic: true
                     };
                 }
-                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+                throw new Error(`Chalkboard.abal.fieldExtension: Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".`);
             };
             const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
         };
-        abal.GL = (n) => ({
-            contains: (element) => {
-                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
-            },
-            id: `GL${n}`
-        });
+        abal.GL = (n) => {
+            if (!Number.isInteger(n) || n <= 0)
+                throw new Error(`Chalkboard.abal.GL: Parameter "n" must be a positive integer.`);
+            return {
+                contains: (element) => {
+                    return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, n) && Chalkboard.matr.isInvertible(element);
+                },
+                id: `GL${n}`
+            };
+        };
         abal.group = (set, operation, identity, inverter) => {
             const autoconfig = () => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.');
-                }
+                if (!set.id)
+                    throw new Error(`Chalkboard.abal.group: The "set" must have a valid "id" property, or you must input "identity" and "inverter" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         identity: 0,
@@ -621,49 +632,49 @@ var Chalkboard;
                         }
                     };
                 }
-                throw new Error('Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.group: Automatic configuration of the "identity" and "inverter" properties is not available for the inputted "set".`);
             };
             const configured = typeof identity === "undefined" || typeof inverter === "undefined" ? autoconfig() : { identity, inverter: inverter };
             const group = { set, operation, identity: configured.identity, inverter: configured.inverter };
-            if (!Chalkboard.abal.isGroup(group)) {
-                throw new Error('The inputted "set", "operation", "identity", and "inverter" do not form a group.');
-            }
+            if (!Chalkboard.abal.isGroup(group))
+                throw new Error(`Chalkboard.abal.group: The inputted "set", "operation", "identity", and "inverter" do not form a group.`);
             return group;
         };
         abal.homomorphism = (struc1, struc2, mapping) => {
             const morphism = { struc1, struc2, mapping };
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error('The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.');
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism))
+                throw new Error(`Chalkboard.abal.homomorphism: The inputted "struc1", "struc2", and "mapping" do not form a homomorphism.`);
             return morphism;
         };
         abal.idmorphism = (struc) => {
+            if (struc === null || typeof struc !== "object" || struc.set === null || typeof struc.set !== "object" || typeof struc.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.idmorphism: Parameter "struc" must be an algebraic structure.`);
             return Chalkboard.abal.automorphism(struc, (x) => x);
         };
         abal.image = (morph, subset) => {
             const { struc1, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the image.');
-            }
+            if (!struc1.set.elements)
+                throw new Error(`Chalkboard.abal.image: The domain of the "morph" must have a finite set of elements to calculate the image.`);
             const _subset = subset || struc1.set;
-            if (!_subset.elements) {
-                throw new Error('The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.');
-            }
+            if (!_subset.elements)
+                throw new Error(`Chalkboard.abal.image: The domain of the "morph" or the subset of it must have a finite set of elements to calculate the image.`);
             const mapped = _subset.elements.map(mapping);
             const result = Array.from(new Set(mapped.map((e) => $(e)))).map((e) => JSON.parse(e));
             return Chalkboard.abal.set(result);
         };
         abal.intersection = (set1, set2) => {
+            if (set1 === null || typeof set1 !== "object" || typeof set1.contains !== "function")
+                throw new Error(`Chalkboard.abal.intersection: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof set2.contains !== "function")
+                throw new Error(`Chalkboard.abal.intersection: Parameter "set2" must be a set.`);
             const result = (set1.elements || []).filter((element) => set2.contains(element));
             return Chalkboard.abal.set(result);
         };
         abal.invmorphism = (morph) => {
-            if (morph.struc1.set.id && ["Z", "Q", "R", "C"].includes(morph.struc1.set.id)) {
-                throw new Error('Inverse morphisms cannot be defined for morphisms with infinite domains.');
-            }
-            if (!Chalkboard.abal.isIsomorphism(morph)) {
-                throw new Error("The morphism is not an isomorphism, so it does not have an inverse.");
-            }
+            if (morph.struc1.set.id && ["Z", "Q", "R", "C"].includes(morph.struc1.set.id))
+                throw new Error(`Chalkboard.abal.invmorphism: Inverse morphisms cannot be defined for morphisms with infinite domains.`);
+            if (!Chalkboard.abal.isIsomorphism(morph))
+                throw new Error(`Chalkboard.abal.invmorphism: The morphism is not an isomorphism, so it does not have an inverse.`);
             return Chalkboard.abal.homomorphism(morph.struc2, morph.struc1, (y) => {
                 const domain = morph.struc1.set.elements || [];
                 for (const x of domain) {
@@ -671,19 +682,27 @@ var Chalkboard;
                         return x;
                     }
                 }
-                throw new Error(`The inverse morphism failed to be defined because no element in the domain maps to the element "${$(y)}" in the codomain.`);
+                throw new Error(`Chalkboard.abal.invmorphism: The inverse morphism failed to be defined because no element in the domain maps to the element "${$(y)}" in the codomain.`);
             });
         };
         abal.isAutomorphism = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isAutomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEndomorphism(morph) && Chalkboard.abal.isIsomorphism(morph);
         };
         abal.isBijective = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isBijective: Parameter "morph" must be an algebraic morphism.`);
             if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
                 return morph.struc1.set.id === morph.struc2.set.id;
             }
             return Chalkboard.abal.isInjective(morph) && Chalkboard.abal.isSurjective(morph);
         };
         abal.isClosed = (set, operation) => {
+            if (set === null || typeof set !== "object" || typeof set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isClosed: Parameter "set" must be a set.`);
+            if (typeof operation !== "function")
+                throw new Error(`Chalkboard.abal.isClosed: Parameter "operation" must be a function.`);
             if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
                 return true;
             }
@@ -719,6 +738,8 @@ var Chalkboard;
             return true;
         };
         abal.isCommutative = (struc) => {
+            if (struc === null || typeof struc !== "object" || struc.set === null || typeof struc.set !== "object" || typeof struc.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isCommutative: Parameter "struc" must be an algebraic structure.`);
             const { set } = struc;
             if (set.id && ["Z", "Q", "R", "C"].includes(set.id)) {
                 return true;
@@ -760,6 +781,10 @@ var Chalkboard;
             return false;
         };
         abal.isCyclicSubgroup = (group, subgroup) => {
+            if (group === null || typeof group !== "object" || group.set === null || typeof group.set !== "object" || typeof group.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isCyclicSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subgroup === null || typeof subgroup !== "object" || typeof subgroup.contains !== "function")
+                throw new Error(`Chalkboard.abal.isCyclicSubgroup: Parameter "subgroup" must be a set.`);
             if (!Chalkboard.abal.isSubgroup(group, subgroup) || !group.operation) {
                 return false;
             }
@@ -779,6 +804,8 @@ var Chalkboard;
             return false;
         };
         abal.isEmpty = (struc) => {
+            if (struc === null || typeof struc !== "object" || (typeof struc.contains !== "function" && ((struc.set === null || typeof struc.set !== "object") || typeof struc.set.contains !== "function")))
+                throw new Error(`Chalkboard.abal.isEmpty: Parameter "struc" must be a set or algebraic structure.`);
             const id = "set" in struc && struc.set ? struc.set.id : ("id" in struc ? struc.id : undefined);
             if (id === "Z" || id === "Q" || id === "R" || id === "C" || id?.startsWith("M(")) {
                 return false;
@@ -792,6 +819,8 @@ var Chalkboard;
             return true;
         };
         abal.isEndomorphism = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isEndomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isEqual(morph.struc1, morph.struc2);
         };
         abal.isEqual = (struc1, struc2) => {
@@ -867,9 +896,15 @@ var Chalkboard;
             return false;
         };
         abal.isExact = (morph1, morph2) => {
+            if (morph1 === null || typeof morph1 !== "object" || morph1.struc1 === null || typeof morph1.struc1 !== "object" || morph1.struc2 === null || typeof morph1.struc2 !== "object" || typeof morph1.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isExact: Parameter "morph1" must be an algebraic morphism.`);
+            if (morph2 === null || typeof morph2 !== "object" || morph2.struc1 === null || typeof morph2.struc1 !== "object" || morph2.struc2 === null || typeof morph2.struc2 !== "object" || typeof morph2.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isExact: Parameter "morph2" must be an algebraic morphism.`);
             return Chalkboard.abal.isEqual(Chalkboard.abal.image(morph1), Chalkboard.abal.kernel(morph2));
         };
         abal.isField = (field) => {
+            if (field === null || typeof field !== "object" || field.set === null || typeof field.set !== "object" || typeof field.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isField: Parameter "field" must be an algebraic structure.`);
             const { set, add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
             if (set.id === "Q" || set.id === "R" || set.id === "C") {
                 return true;
@@ -913,6 +948,8 @@ var Chalkboard;
             return true;
         };
         abal.isGroup = (group) => {
+            if (group === null || typeof group !== "object" || group.set === null || typeof group.set !== "object" || typeof group.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isGroup: Parameter "group" must be an algebraic structure.`);
             const { set, operation, identity, inverter } = group;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
                 return true;
@@ -976,9 +1013,13 @@ var Chalkboard;
                 }
                 return true;
             }
-            throw new Error("The algebraic structures of the homomorphism may have missing operations or incompatible types.");
+            throw new Error(`Chalkboard.abal.isHomomorphism: The algebraic structures of the homomorphism may have missing operations or incompatible types.`);
         };
         abal.isIdeal = (ring, subset) => {
+            if (ring === null || typeof ring !== "object" || ring.set === null || typeof ring.set !== "object" || typeof ring.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isIdeal: Parameter "ring" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isIdeal: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, addInverter } = ring;
             if (typeof add === "undefined" || typeof mul === "undefined" || typeof addIdentity === "undefined" || typeof addInverter === "undefined") {
                 return false;
@@ -1004,6 +1045,10 @@ var Chalkboard;
             return true;
         };
         abal.isIdentity = (struc, element, type = "add") => {
+            if (struc === null || typeof struc !== "object" || struc.set === null || typeof struc.set !== "object" || typeof struc.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isIdentity: Parameter "struc" must be an algebraic structure.`);
+            if (type !== undefined && (typeof type !== "string"))
+                throw new Error(`Chalkboard.abal.isIdentity: Parameter "type" must be a string.`);
             if (type === "add" && struc.add && struc.addIdentity) {
                 return ("add" in struc &&
                     struc.add(element, struc.addIdentity) === element &&
@@ -1017,6 +1062,8 @@ var Chalkboard;
             return false;
         };
         abal.isInjective = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isInjective: Parameter "morph" must be an algebraic morphism.`);
             if (["Z", "Q", "R", "C"].includes(morph.struc1.set.id || "") || ["Z", "Q", "R", "C"].includes(morph.struc2.set.id || "")) {
                 return morph.struc1.set.id === morph.struc2.set.id;
             }
@@ -1026,6 +1073,10 @@ var Chalkboard;
             return new Set(mapped.map((e) => $(e))).size === domain.length;
         };
         abal.isInverse = (struc, element1, element2, type = "add") => {
+            if (struc === null || typeof struc !== "object" || struc.set === null || typeof struc.set !== "object" || typeof struc.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isInverse: Parameter "struc" must be an algebraic structure.`);
+            if (type !== undefined && (typeof type !== "string"))
+                throw new Error(`Chalkboard.abal.isInverse: Parameter "type" must be a string.`);
             if (type === "add") {
                 return ("add" in struc &&
                     struc.add?.(element1, element2) === struc.addIdentity &&
@@ -1038,9 +1089,13 @@ var Chalkboard;
             return false;
         };
         abal.isIsomorphism = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isIsomorphism: Parameter "morph" must be an algebraic morphism.`);
             return Chalkboard.abal.isHomomorphism(morph) && Chalkboard.abal.isBijective(morph);
         };
         abal.isMonoid = (monoid) => {
+            if (monoid === null || typeof monoid !== "object" || monoid.set === null || typeof monoid.set !== "object" || typeof monoid.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isMonoid: Parameter "monoid" must be an algebraic structure.`);
             const { set, operation, identity } = monoid;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C" || set.id === "GL") {
                 return true;
@@ -1071,6 +1126,10 @@ var Chalkboard;
             return true;
         };
         abal.isNormalSubgroup = (group, subgroup) => {
+            if (group === null || typeof group !== "object" || group.set === null || typeof group.set !== "object" || typeof group.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isNormalSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subgroup === null || typeof subgroup !== "object" || typeof subgroup.contains !== "function")
+                throw new Error(`Chalkboard.abal.isNormalSubgroup: Parameter "subgroup" must be a set.`);
             const { set, operation, inverter } = group;
             if (!operation || !inverter) {
                 return false;
@@ -1090,15 +1149,17 @@ var Chalkboard;
         };
         abal.isomorphism = (struc1, struc2, mapping) => {
             const morphism = Chalkboard.abal.homomorphism(struc1, struc2, mapping);
-            if (!Chalkboard.abal.isHomomorphism(morphism)) {
-                throw new Error("The mapping is not a homomorphism, so it cannot be an isomorphism.");
-            }
-            if (!Chalkboard.abal.isBijective(morphism)) {
-                throw new Error("The mapping is not bijective, so it cannot be an isomorphism.");
-            }
+            if (!Chalkboard.abal.isHomomorphism(morphism))
+                throw new Error(`Chalkboard.abal.isomorphism: The mapping is not a homomorphism, so it cannot be an isomorphism.`);
+            if (!Chalkboard.abal.isBijective(morphism))
+                throw new Error(`Chalkboard.abal.isomorphism: The mapping is not bijective, so it cannot be an isomorphism.`);
             return morphism;
         };
         abal.isPrincipalIdeal = (ring, ideal) => {
+            if (ring === null || typeof ring !== "object" || ring.set === null || typeof ring.set !== "object" || typeof ring.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isPrincipalIdeal: Parameter "ring" must be an algebraic structure.`);
+            if (ideal === null || typeof ideal !== "object" || typeof ideal.contains !== "function")
+                throw new Error(`Chalkboard.abal.isPrincipalIdeal: Parameter "ideal" must be a set.`);
             for (const generator of ideal.elements || []) {
                 const principalIdeal = Chalkboard.abal.principalIdeal(ring, generator);
                 if (Chalkboard.abal.isSubset(ideal, principalIdeal) && Chalkboard.abal.isSubset(principalIdeal, ideal)) {
@@ -1108,6 +1169,8 @@ var Chalkboard;
             return false;
         };
         abal.isRing = (ring) => {
+            if (ring === null || typeof ring !== "object" || ring.set === null || typeof ring.set !== "object" || typeof ring.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isRing: Parameter "ring" must be an algebraic structure.`);
             const { set, add, mul, addIdentity, addInverter } = ring;
             if (set.id === "Z" || set.id === "Q" || set.id === "R" || set.id === "C") {
                 return true;
@@ -1134,6 +1197,10 @@ var Chalkboard;
             return true;
         };
         abal.isSubfield = (field, subset) => {
+            if (field === null || typeof field !== "object" || field.set === null || typeof field.set !== "object" || typeof field.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubfield: Parameter "field" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubfield: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, mulIdentity, addInverter, mulInverter } = field;
             if (field.set.id && subset.id) {
                 if (subset.id === field.set.id && ["Q", "R", "C"].includes(subset.id)) {
@@ -1171,6 +1238,10 @@ var Chalkboard;
             return true;
         };
         abal.isSubgroup = (group, subset) => {
+            if (group === null || typeof group !== "object" || group.set === null || typeof group.set !== "object" || typeof group.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubgroup: Parameter "group" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubgroup: Parameter "subset" must be a set.`);
             const { operation, identity, inverter } = group;
             if (group.set.id && subset.id) {
                 if (subset.id === "Z" && ["Z", "Q", "R", "C"].includes(group.set.id)) {
@@ -1213,6 +1284,10 @@ var Chalkboard;
             return true;
         };
         abal.isSubmonoid = (monoid, subset) => {
+            if (monoid === null || typeof monoid !== "object" || monoid.set === null || typeof monoid.set !== "object" || typeof monoid.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubmonoid: Parameter "monoid" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubmonoid: Parameter "subset" must be a set.`);
             const { operation, identity } = monoid;
             if (monoid.set.id && subset.id) {
                 if (subset.id === monoid.set.id) {
@@ -1240,6 +1315,10 @@ var Chalkboard;
             return true;
         };
         abal.isSubring = (ring, subset) => {
+            if (ring === null || typeof ring !== "object" || ring.set === null || typeof ring.set !== "object" || typeof ring.set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubring: Parameter "ring" must be an algebraic structure.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubring: Parameter "subset" must be a set.`);
             const { add, mul, addIdentity, addInverter } = ring;
             if (ring.set.id && subset.id) {
                 if (subset.id === ring.set.id) {
@@ -1279,6 +1358,10 @@ var Chalkboard;
             return true;
         };
         abal.isSubset = (set, superset) => {
+            if (set === null || typeof set !== "object" || typeof set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubset: Parameter "set" must be a set.`);
+            if (superset === null || typeof superset !== "object" || typeof superset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSubset: Parameter "superset" must be a set.`);
             if (set.id && superset.id) {
                 if (set.id === superset.id) {
                     return true;
@@ -1306,9 +1389,15 @@ var Chalkboard;
             return (set.elements || []).every((element) => superset.contains(element));
         };
         abal.isSuperset = (set, subset) => {
+            if (set === null || typeof set !== "object" || typeof set.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSuperset: Parameter "set" must be a set.`);
+            if (subset === null || typeof subset !== "object" || typeof subset.contains !== "function")
+                throw new Error(`Chalkboard.abal.isSuperset: Parameter "subset" must be a set.`);
             return Chalkboard.abal.isSubset(subset, set);
         };
         abal.isSurjective = (morph) => {
+            if (morph === null || typeof morph !== "object" || morph.struc1 === null || typeof morph.struc1 !== "object" || morph.struc2 === null || typeof morph.struc2 !== "object" || typeof morph.mapping !== "function")
+                throw new Error(`Chalkboard.abal.isSurjective: Parameter "morph" must be an algebraic morphism.`);
             const { struc1, struc2, mapping } = morph;
             if (["Z", "Q", "R", "C", "P"].includes(struc2.set.id || "")) {
                 if (struc2.set.id === "C" && ["R", "C"].includes(struc1.set.id || ""))
@@ -1326,9 +1415,8 @@ var Chalkboard;
         };
         abal.kernel = (morph, subset) => {
             const { struc1, struc2, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the kernel.');
-            }
+            if (!struc1.set.elements)
+                throw new Error(`Chalkboard.abal.kernel: The domain of the "morph" must have a finite set of elements to calculate the kernel.`);
             const _subset = subset?.elements || struc1.set.elements;
             let identity;
             if ("identity" in struc2) {
@@ -1338,28 +1426,32 @@ var Chalkboard;
                 identity = struc2.addIdentity;
             }
             else {
-                throw new Error('The codomain of the "morph" must have an identity element to calculate the kernel.');
+                throw new Error(`Chalkboard.abal.kernel: The codomain of the "morph" must have an identity element to calculate the kernel.`);
             }
             const result = _subset.filter((element) => $(mapping(element)) === $(identity));
             return Chalkboard.abal.set(result);
         };
         abal.Lagrange = (group, subgroup) => {
-            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id)) {
-                throw new Error("Lagrange's Theorem only applies to finite groups");
-            }
+            if (group.set.id && ["Z", "Q", "R", "C"].includes(group.set.id))
+                throw new Error(`Chalkboard.abal.Lagrange: Lagrange theorem only applies to finite groups.`);
             return Chalkboard.abal.cardinality(group) % Chalkboard.abal.cardinality(subgroup) === 0;
         };
-        abal.M = (rows, cols = rows) => ({
-            contains: (element) => {
-                return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
-            },
-            id: `M(${rows}, ${cols})`
-        });
+        abal.M = (rows, cols = rows) => {
+            if (!Number.isInteger(rows) || rows <= 0)
+                throw new Error(`Chalkboard.abal.M: Parameter "rows" must be a positive integer.`);
+            if (!Number.isInteger(cols) || cols <= 0)
+                throw new Error(`Chalkboard.abal.M: Parameter "cols" must be a positive integer.`);
+            return {
+                contains: (element) => {
+                    return Array.isArray(element) && Chalkboard.matr.isSizeOf(element, rows, cols);
+                },
+                id: `M(${rows}, ${cols})`
+            };
+        };
         abal.monoid = (set, operation, identity) => {
             const autoconfig = () => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "identity" explicitly.');
-                }
+                if (!set.id)
+                    throw new Error(`Chalkboard.abal.monoid: The "set" must have a valid "id" property, or you must input "identity" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return { identity: 0 };
                 }
@@ -1385,13 +1477,12 @@ var Chalkboard;
                     const n = parseInt(set.id.slice(1), 10);
                     return { identity: Array.from({ length: n }, (_, i) => i) };
                 }
-                throw new Error('Automatic configuration of the "identity" property is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.monoid: Automatic configuration of the "identity" property is not available for the inputted "set".`);
             };
             const configured = typeof identity === "undefined" ? autoconfig() : { identity };
             const monoid = { set, operation, identity: configured.identity };
-            if (!Chalkboard.abal.isMonoid(monoid)) {
-                throw new Error('The inputted "set", "operation", and "identity" do not form a monoid.');
-            }
+            if (!Chalkboard.abal.isMonoid(monoid))
+                throw new Error(`Chalkboard.abal.monoid: The inputted "set", "operation", and "identity" do not form a monoid.`);
             return monoid;
         };
         abal.N = () => ({
@@ -1399,17 +1490,15 @@ var Chalkboard;
             id: "N"
         });
         abal.order = (group, element) => {
-            if (!group.operation) {
-                throw new Error('The "group" must have an "operation" property to calculate the order of an element.');
-            }
+            if (!group.operation)
+                throw new Error(`Chalkboard.abal.order: The "group" must have an "operation" property to calculate the order of an element.`);
             let result = 1;
             let current = element;
             while ($(current) !== $(group.identity)) {
                 current = group.operation(current, element);
                 result++;
-                if (result > (group.set.elements?.length || Infinity)) {
-                    throw new Error('The "group" might not be finite because an infinite loop was detected.');
-                }
+                if (result > (group.set.elements?.length || Infinity))
+                    throw new Error(`Chalkboard.abal.order: The "group" might not be finite because an infinite loop was detected.`);
             }
             return result;
         };
@@ -1418,6 +1507,8 @@ var Chalkboard;
             id: "P"
         });
         abal.powerSet = (set) => {
+            if (set === null || typeof set !== "object" || typeof set.contains !== "function")
+                throw new Error(`Chalkboard.abal.powerSet: Parameter "set" must be a set.`);
             const result = [];
             const elements = set.elements || [];
             const totalSubsets = 1 << elements.length;
@@ -1434,25 +1525,21 @@ var Chalkboard;
         };
         abal.preimage = (morph, subset) => {
             const { struc1, struc2, mapping } = morph;
-            if (!struc1.set.elements) {
-                throw new Error('The domain of the "morph" must have a finite set of elements to calculate the preimage.');
-            }
+            if (!struc1.set.elements)
+                throw new Error(`Chalkboard.abal.preimage: The domain of the "morph" must have a finite set of elements to calculate the preimage.`);
             const _subset = subset || struc2.set;
-            if (!_subset.elements) {
-                throw new Error('The codomain of the "morph" or the subset of it must have a finite set of elements to calculate the preimage.');
-            }
+            if (!_subset.elements)
+                throw new Error(`Chalkboard.abal.preimage: The codomain of the "morph" or the subset of it must have a finite set of elements to calculate the preimage.`);
             const result = struc1.set.elements.filter((element) => _subset.contains(mapping(element)));
             return Chalkboard.abal.set(result);
         };
         abal.principalIdeal = (ring, element) => {
-            if (ring.set.id && ["Z", "Q", "R", "C"].includes(ring.set.id)) {
-                throw new Error('The "ring" must be finite.');
-            }
+            if (ring.set.id && ["Z", "Q", "R", "C"].includes(ring.set.id))
+                throw new Error(`Chalkboard.abal.principalIdeal: The "ring" must be finite.`);
             const result = [];
             const { mul, add } = ring;
-            if (!add || !mul) {
-                throw new Error('The "ring" must have "mul" and "add" properties to generate a principal ideal.');
-            }
+            if (!add || !mul)
+                throw new Error(`Chalkboard.abal.principalIdeal: The "ring" must have "mul" and "add" properties to generate a principal ideal.`);
             for (const r of ring.set.elements || []) {
                 const leftProduct = mul(element, r);
                 const rightProduct = mul(r, element);
@@ -1474,6 +1561,8 @@ var Chalkboard;
             return Chalkboard.abal.set(result);
         };
         abal.print = (struc) => {
+            if (struc === null || typeof struc !== "object" || (typeof struc.contains !== "function" && ((struc.set === null || typeof struc.set !== "object") || typeof struc.set.contains !== "function")))
+                throw new Error(`Chalkboard.abal.print: Parameter "struc" must be a set or algebraic structure.`);
             console.log(Chalkboard.abal.toString(struc));
         };
         abal.Q = () => ({
@@ -1481,12 +1570,10 @@ var Chalkboard;
             id: "Q"
         });
         abal.quotient = (struc, substruc) => {
-            if ("operation" in struc && !Chalkboard.abal.isNormalSubgroup(struc, substruc.set)) {
-                throw new Error('The "substruc" must be a normal subgroup of the "struc".');
-            }
-            if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set)) {
-                throw new Error('The "substruc" must be an ideal of the "struc".');
-            }
+            if ("operation" in struc && !Chalkboard.abal.isNormalSubgroup(struc, substruc.set))
+                throw new Error(`Chalkboard.abal.quotient: The "substruc" must be a normal subgroup of the "struc".`);
+            if ("add" in struc && !Chalkboard.abal.isIdeal(struc, substruc.set))
+                throw new Error(`Chalkboard.abal.quotient: The "substruc" must be an ideal of the "struc".`);
             const cosets = Chalkboard.abal.coset(struc, substruc);
             const operationConfig = (a, b, operation) => {
                 const repA = a.elements[0];
@@ -1514,9 +1601,8 @@ var Chalkboard;
         });
         abal.ring = (set, add, mul, addIdentity, mulIdentity, addInverter) => {
             const autoconfig = () => {
-                if (!set.id) {
-                    throw new Error('The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.');
-                }
+                if (!set.id)
+                    throw new Error(`Chalkboard.abal.ring: The "set" must have a valid "id" property, or you must input "addIdentity", "mulIdentity", and "addInverter" explicitly.`);
                 if (set.id === "Z" || set.id === "Q" || set.id === "R") {
                     return {
                         addIdentity: 0,
@@ -1533,9 +1619,8 @@ var Chalkboard;
                 }
                 else if (set.id.startsWith("Z") && set.id.length > 1) {
                     const n = parseInt(set.id.slice(1), 10);
-                    if (isNaN(n) || n <= 0) {
-                        throw new Error(`Invalid modulus in set "${set.id}".`);
-                    }
+                    if (isNaN(n) || n <= 0)
+                        throw new Error(`Chalkboard.abal.ring: Invalid modulus in set "${set.id}".`);
                     return {
                         addIdentity: 0,
                         mulIdentity: 1,
@@ -1545,32 +1630,28 @@ var Chalkboard;
                 else if (set.id.startsWith("M(")) {
                     const rows = set.rows;
                     const cols = set.cols;
-                    if (rows !== cols) {
-                        throw new Error("Only square matrices can form a ring.");
-                    }
+                    if (rows !== cols)
+                        throw new Error(`Chalkboard.abal.ring: Only square matrices can form a ring.`);
                     return {
                         addIdentity: Chalkboard.matr.fill(0, rows, cols),
                         mulIdentity: Chalkboard.matr.identity(rows),
                         addInverter: (a) => Chalkboard.matr.negate(a)
                     };
                 }
-                throw new Error('Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".');
+                throw new Error(`Chalkboard.abal.ring: Automatic configuration of the "addIdentity", "mulIdentity", and "addInverter" properties is not available for the inputted "set".`);
             };
             const configured = typeof addIdentity === "undefined" || typeof mulIdentity === "undefined" || typeof addInverter === "undefined" ? autoconfig() : { addIdentity, mulIdentity, addInverter };
             const ring = { set, add, mul, addIdentity: configured.addIdentity, mulIdentity: configured.mulIdentity, addInverter: configured.addInverter };
-            if (!Chalkboard.abal.isRing(ring)) {
-                throw new Error('The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.');
-            }
+            if (!Chalkboard.abal.isRing(ring))
+                throw new Error(`Chalkboard.abal.ring: The inputted "set", "add", "mul", "addIdentity", "mulIdentity", and "addInverter" do not form a ring.`);
             return ring;
         };
         abal.ringExtension = (base, extension, degree, basis, isFinite, isSimple, isAlgebraic) => {
-            if (!Chalkboard.abal.isSubring(base, extension.set)) {
-                throw new Error('The "base" must be a subring of the "extension".');
-            }
+            if (!Chalkboard.abal.isSubring(base, extension.set))
+                throw new Error(`Chalkboard.abal.ringExtension: The "base" must be a subring of the "extension".`);
             const autoconfig = () => {
-                if (!base.set.id) {
-                    throw new Error('The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.');
-                }
+                if (!base.set.id)
+                    throw new Error(`Chalkboard.abal.ringExtension: The "set" property of the "base" must have a valid "id" property, or you must input "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" explicitly.`);
                 if (base.set.id === "Z" && extension.set.id === "Q") {
                     return {
                         degree: Infinity,
@@ -1598,15 +1679,14 @@ var Chalkboard;
                         isAlgebraic: true
                     };
                 }
-                throw new Error('Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".');
+                throw new Error(`Chalkboard.abal.ringExtension: Automatic configuration of the "degree", "basis", "isFinite", "isSimple", and "isAlgebraic" properties is not available for the inputted "base".`);
             };
             const configured = typeof degree === "undefined" || typeof basis === "undefined" || typeof isFinite === "undefined" || typeof isSimple === "undefined" || typeof isAlgebraic === "undefined" ? autoconfig() : { degree, basis, isFinite, isSimple, isAlgebraic };
             return { base, extension, degree: configured.degree, basis: configured.basis, isFinite: configured.isFinite, isSimple: configured.isSimple, isAlgebraic: configured.isAlgebraic };
         };
         abal.S = (n) => {
-            if (!Number.isInteger(n) || n <= 0) {
-                throw new Error('The parameter "n" must be a positive integer.');
-            }
+            if (!Number.isInteger(n) || n <= 0)
+                throw new Error(`Chalkboard.abal.S: Parameter "n" must be a positive integer.`);
             const generatePermutations = (arr) => {
                 if (arr.length === 0)
                     return [[]];
@@ -1628,6 +1708,8 @@ var Chalkboard;
             };
         };
         abal.set = (set) => {
+            if (!Array.isArray(set))
+                throw new Error(`Chalkboard.abal.set: Parameter "set" must be an array.`);
             const elements = Chalkboard.stat.unique(set);
             return {
                 contains: (element) => elements.some((x) => $(x) === $(element)),
@@ -1635,52 +1717,50 @@ var Chalkboard;
             };
         };
         abal.symmetricDifference = (set1, set2) => {
+            if (set1 === null || typeof set1 !== "object" || typeof set1.contains !== "function")
+                throw new Error(`Chalkboard.abal.symmetricDifference: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof set2.contains !== "function")
+                throw new Error(`Chalkboard.abal.symmetricDifference: Parameter "set2" must be a set.`);
             const diffA = Chalkboard.abal.difference(set1, set2).elements || [];
             const diffB = Chalkboard.abal.difference(set2, set1).elements || [];
             return Chalkboard.abal.set([...diffA, ...diffB]);
         };
         abal.toArray = (struc) => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to array.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toArray: Cannot convert infinite set to array.`);
             return [...result.elements];
         };
         abal.toMatrix = (struc, rows, cols = rows) => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to matrix.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toMatrix: Cannot convert infinite set to matrix.`);
             return Chalkboard.stat.toMatrix(result.elements, rows, cols);
         };
         abal.toObject = (struc) => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to object.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toObject: Cannot convert infinite set to object.`);
             return Chalkboard.stat.toObject(result.elements);
         };
         abal.toString = (struc) => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to string.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toString: Cannot convert infinite set to string.`);
             return Chalkboard.stat.toString(result.elements);
         };
         abal.toTensor = (struc, ...size) => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to tensor.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toTensor: Cannot convert infinite set to tensor.`);
             if (Array.isArray(size[0]))
                 size = size[0];
             return Chalkboard.tens.resize(result.elements, ...size);
         };
         abal.toTypedArray = (struc, type = "float32") => {
             const result = "set" in struc ? struc.set : struc;
-            if (!result.elements) {
-                throw new Error("Cannot convert infinite set to typed array.");
-            }
+            if (!result.elements)
+                throw new Error(`Chalkboard.abal.toTypedArray: Cannot convert infinite set to typed array.`);
             const arr = Chalkboard.abal.toArray(result);
             if (type === "int8") {
                 return new Int8Array(arr);
@@ -1700,13 +1780,12 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.abal.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         abal.toVector = (struc, dimension, index = 0) => {
             const elements = "set" in struc ? struc.set.elements : struc.elements;
-            if (!elements) {
-                throw new Error("Cannot convert infinite set to vector.");
-            }
+            if (!elements)
+                throw new Error(`Chalkboard.abal.toVector: Cannot convert infinite set to vector.`);
             if (dimension === 2) {
                 return Chalkboard.vect.init(elements[index], elements[index + 1]);
             }
@@ -1717,10 +1796,14 @@ var Chalkboard;
                 return Chalkboard.vect.init(elements[index], elements[index + 1], elements[index + 2], elements[index + 3]);
             }
             else {
-                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.abal.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         abal.union = (set1, set2) => {
+            if (set1 === null || typeof set1 !== "object" || typeof set1.contains !== "function")
+                throw new Error(`Chalkboard.abal.union: Parameter "set1" must be a set.`);
+            if (set2 === null || typeof set2 !== "object" || typeof set2.contains !== "function")
+                throw new Error(`Chalkboard.abal.union: Parameter "set2" must be a set.`);
             const result = Array.from(new Set([...(set1.elements || []), ...(set2.elements || [])]));
             return Chalkboard.abal.set(result);
         };
@@ -1732,9 +1815,8 @@ var Chalkboard;
                 };
             }
             else {
-                if (!Number.isInteger(n) || n <= 0) {
-                    throw new Error('The modulus "n" must be a positive integer.');
-                }
+                if (!Number.isInteger(n) || n <= 0)
+                    throw new Error(`Chalkboard.abal.Z: The modulus "n" must be a positive integer.`);
                 return {
                     contains: (element) => Number.isInteger(element) && element >= 0 && element < n,
                     elements: Array.from({ length: n }, (_, i) => i),
@@ -1752,48 +1834,52 @@ var Chalkboard;
         bool.AND = (...vals) => {
             let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const current = vals[i] === true || vals[i] === 1;
-                if (!current) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.AND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (!(vals[i] === true || vals[i] === 1))
                     result = false;
-                    break;
-                }
             }
             return $(result);
         };
         bool.BICOND = (...vals) => {
             if (vals.length === 0)
                 return $(true);
-            const first = (vals[0] === true || vals[0] === 1);
-            for (let i = 1; i < vals.length; i++) {
-                const current = (vals[i] === true || vals[i] === 1);
-                if (first !== current)
-                    return $(false);
+            let first = true, result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.BICOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i === 0)
+                    first = vals[i] === true || vals[i] === 1;
+                else if (first !== (vals[i] === true || vals[i] === 1))
+                    result = false;
             }
-            return $(true);
+            return $(result);
         };
         bool.COND = (...vals) => {
-            if (vals.length < 2)
-                return $(true);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (xp && !xq)
-                    return $(false);
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.COND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i - 1] === true || vals[i - 1] === 1) && !(vals[i] === true || vals[i] === 1))
+                    result = false;
             }
-            return $(true);
+            return $(result);
         };
         bool.CONV = (...vals) => {
-            if (vals.length < 2)
-                return $(true);
-            for (let i = 0; i < vals.length - 1; i++) {
-                const xp = (vals[i] === true || vals[i] === 1);
-                const xq = (vals[i + 1] === true || vals[i + 1] === 1);
-                if (xq && !xp)
-                    return $(false);
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.CONV: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i] === true || vals[i] === 1) && !(vals[i - 1] === true || vals[i - 1] === 1))
+                    result = false;
             }
-            return $(true);
+            return $(result);
         };
         bool.isEqual = (expr1, expr2) => {
+            if (typeof expr1 !== "string")
+                throw new Error(`Chalkboard.bool.isEqual: Parameter "expr1" must be a string.`);
+            if (typeof expr2 !== "string")
+                throw new Error(`Chalkboard.bool.isEqual: Parameter "expr2" must be a string.`);
             const variables = [];
             const varextract = (expr) => {
                 const ast = Chalkboard.bool.parse(expr, { returnAST: true });
@@ -1830,10 +1916,13 @@ var Chalkboard;
             return $(true);
         };
         bool.Karnaugh = (input, variables) => {
+            if (typeof input !== "string")
+                throw new Error(`Chalkboard.bool.Karnaugh: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string")
+                throw new Error(`Chalkboard.bool.Karnaugh: Parameter "variables" must be an array of strings.`);
             const n = variables.length;
-            if (n !== 2 && n !== 3 && n !== 4) {
-                throw new Error("Chalkboard.bool.Karnaugh only supports 2, 3, or 4 variables.");
-            }
+            if (n !== 2 && n !== 3 && n !== 4)
+                throw new Error(`Chalkboard.bool.Karnaugh: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             let rowvars;
             let colvars;
             let rows;
@@ -1889,24 +1978,20 @@ var Chalkboard;
             return result;
         };
         bool.mapping = (inputs, outputs) => {
-            if (inputs.length !== outputs.length) {
-                throw new Error('Parameter "inputs" and "outputs" must have the same length.');
-            }
-            if (inputs.length === 0) {
-                throw new Error('Parameter "inputs" and "outputs" cannot be empty.');
-            }
+            if (!Array.isArray(inputs) || !Array.isArray(outputs))
+                throw new Error(`Chalkboard.bool.mapping: Parameters "inputs" and "outputs" must be arrays.`);
+            if (inputs.length !== outputs.length)
+                throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" and "outputs" must have the same length.`);
+            if (inputs.length === 0)
+                throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" and "outputs" cannot be empty.`);
+            if (!Array.isArray(inputs[0]) || !Array.isArray(outputs[0]) || inputs.length > 1 && !Array.isArray(inputs[inputs.length - 1]) || outputs.length > 1 && !Array.isArray(outputs[outputs.length - 1]))
+                throw new Error(`Chalkboard.bool.mapping: Parameters "inputs" and "outputs" must begin and end with arrays.`);
             const m = inputs[0].length;
             const n = outputs[0].length;
-            for (const row of inputs) {
-                if (row.length !== m) {
-                    throw new Error('Parameter "inputs" must have the same length for each row.');
-                }
-            }
-            for (const row of outputs) {
-                if (row.length !== n) {
-                    throw new Error('Parameter "outputs" must have the same length for each row.');
-                }
-            }
+            if (inputs.length > 1 && inputs[inputs.length - 1].length !== m)
+                throw new Error(`Chalkboard.bool.mapping: Parameter "inputs" must begin and end with rows of the same length.`);
+            if (outputs.length > 1 && outputs[outputs.length - 1].length !== n)
+                throw new Error(`Chalkboard.bool.mapping: Parameter "outputs" must begin and end with rows of the same length.`);
             const variables = Array.from({ length: m }, (_, i) => String.fromCharCode(97 + i));
             const expressions = [];
             for (let outCol = 0; outCol < n; outCol++) {
@@ -1942,9 +2027,10 @@ var Chalkboard;
                 }
             }
             return (...args) => {
-                if (args.length !== m) {
-                    throw new Error(`Expected ${m} arguments, but got ${args.length}.`);
-                }
+                if (args.length !== m)
+                    throw new Error(`Chalkboard.bool.mapping: Expected ${m} arguments, but got ${args.length}.`);
+                if (args.length > 0 && args[0] !== true && args[0] !== false && args[0] !== 0 && args[0] !== 1 || args.length > 1 && args[args.length - 1] !== true && args[args.length - 1] !== false && args[args.length - 1] !== 0 && args[args.length - 1] !== 1)
+                    throw new Error(`Chalkboard.bool.mapping: Parameter "args" must begin and end with true, false, 0, or 1.`);
                 const values = {};
                 for (let i = 0; i < m; i++) {
                     values[variables[i]] = args[i];
@@ -1957,13 +2043,16 @@ var Chalkboard;
             };
         };
         bool.minimize = (input, variables) => {
+            if (typeof input !== "string")
+                throw new Error(`Chalkboard.bool.minimize: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string")
+                throw new Error(`Chalkboard.bool.minimize: Parameter "variables" must be an array of strings.`);
             if (variables.length === 0) {
                 const result = Chalkboard.bool.parse(input);
                 return result ? "true" : "false";
             }
-            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
-                throw new Error("Chalkboard.bool.minimize only supports 2, 3, or 4 variables.");
-            }
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4)
+                throw new Error(`Chalkboard.bool.minimize: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             try {
                 const primes = Chalkboard.bool.primeImplicants(input, variables);
                 if (primes.length === 0) {
@@ -1975,64 +2064,93 @@ var Chalkboard;
                 return Chalkboard.bool.parse(primes.join(" | "));
             }
             catch (e) {
-                if (e instanceof Error) {
-                    throw new Error(`Error minimizing expression: ${e.message}`);
-                }
-                else {
-                    throw new Error(`Error minimizing expression: ${String(e)}`);
-                }
+                if (e instanceof Error)
+                    throw new Error(`Chalkboard.bool.minimize: Error minimizing expression: ${e.message.replace(/\.*$/, "")}.`);
+                else
+                    throw new Error(`Chalkboard.bool.minimize: Error minimizing expression: ${String(e).replace(/\.*$/, "")}.`);
             }
         };
         let mode = "boolean";
         bool.modeConfig = (config) => {
+            if (typeof config !== "string")
+                throw new Error(`Chalkboard.bool.modeConfig: Parameter "config" must be a string.`);
             const _config = config.toLowerCase();
-            if (_config !== "boolean" && _config !== "binary") {
-                throw new Error('The mode must be either "boolean" or "binary".');
-            }
+            if (_config !== "boolean" && _config !== "binary")
+                throw new Error(`Chalkboard.bool.modeConfig: Parameter "config" must be either "boolean" or "binary".`);
             mode = _config;
         };
         bool.NAND = (...vals) => {
-            const andResult = bool.AND(...vals);
-            return $(!(andResult === true || andResult === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NAND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (!(vals[i] === true || vals[i] === 1))
+                    result = false;
+            }
+            return $(!result);
         };
         bool.NBICOND = (...vals) => {
-            const bicondResult = bool.BICOND(...vals);
-            return $(!(bicondResult === true || bicondResult === 1));
+            if (vals.length === 0)
+                return $(false);
+            let first = true, result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NBICOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i === 0)
+                    first = vals[i] === true || vals[i] === 1;
+                else if (first !== (vals[i] === true || vals[i] === 1))
+                    result = false;
+            }
+            return $(!result);
         };
         bool.NCOND = (...vals) => {
-            const cond = bool.COND(...vals);
-            return $(!(cond === true || cond === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NCOND: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i - 1] === true || vals[i - 1] === 1) && !(vals[i] === true || vals[i] === 1))
+                    result = false;
+            }
+            return $(!result);
         };
         bool.NCONV = (...vals) => {
-            const conv = bool.CONV(...vals);
-            return $(!(conv === true || conv === 1));
+            let result = true;
+            for (let i = 0; i < vals.length; i++) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NCONV: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (i > 0 && (vals[i] === true || vals[i] === 1) && !(vals[i - 1] === true || vals[i - 1] === 1))
+                    result = false;
+            }
+            return $(!result);
         };
         bool.NOR = (...vals) => {
+            let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x)
-                    return $(false);
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NOR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1)
+                    result = false;
             }
-            return $(true);
+            return $(result);
         };
         bool.NOT = (...vals) => {
             if (vals.length === 0)
                 return $(true);
             let result = true;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                result = result && !x;
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.NOT: Parameter "vals" must contain only true, false, 0, or 1.`);
+                result = result && !(vals[i] === true || vals[i] === 1);
             }
             return $(result);
         };
         bool.OR = (...vals) => {
             let result = false;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x) {
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.OR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1)
                     result = true;
-                    break;
-                }
             }
             return $(result);
         };
@@ -2050,9 +2168,8 @@ var Chalkboard;
                         tokens.push(ch);
                         i++;
                     }
-                    else if (!/[a-zA-Z0-9_]/.test(ch)) {
-                        throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}"`);
-                    }
+                    else if (!/[a-zA-Z0-9_]/.test(ch))
+                        throw new Error(`Chalkboard.bool.parse: Unsupported character "${ch}".`);
                     else {
                         let name = "";
                         while (i < input.length && /[a-zA-Z0-9_]/.test(input[i])) {
@@ -2067,9 +2184,8 @@ var Chalkboard;
                 let pos = 0;
                 const peek = () => tokens[pos];
                 const consume = (token) => {
-                    if (token && tokens[pos] !== token) {
-                        throw new Error(`Chalkboard.bool.parse: Expected token ${token} but found ${tokens[pos]}`);
-                    }
+                    if (token && tokens[pos] !== token)
+                        throw new Error(`Chalkboard.bool.parse: Expected token "${token}" but found "${tokens[pos]}".`);
                     return tokens[pos++];
                 };
                 const parseExpression = () => parseOr();
@@ -2117,7 +2233,7 @@ var Chalkboard;
                 };
                 const ast = parseExpression();
                 if (pos < tokens.length)
-                    throw new Error("Chalkboard.bool.parse: Unexpected tokens at end");
+                    throw new Error(`Chalkboard.bool.parse: Unexpected tokens at end.`);
                 return ast;
             };
             const nodeEqual = (a, b) => {
@@ -2188,7 +2304,7 @@ var Chalkboard;
                         return `${left} \\lor ${right}`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.bool.parse: Unknown node type ${node.type}`);
+                        throw new Error(`Chalkboard.bool.parse: Unknown node type "${node.type}".`);
                     }
                 }
             };
@@ -2298,7 +2414,7 @@ var Chalkboard;
                     case "var": {
                         const varname = node.name;
                         if (!(varname in values))
-                            throw new Error(`Variable "${varname}" not defined in values`);
+                            throw new Error(`Chalkboard.bool.parse: Variable "${varname}" is not defined in "config.values".`);
                         const value = values[varname];
                         return value === true || value === 1;
                     }
@@ -2312,7 +2428,7 @@ var Chalkboard;
                         return evaluateNode(node.left, values) || evaluateNode(node.right, values);
                     }
                 }
-                throw new Error(`Chalkboard.bool.parse: Unknown node type: ${node.type}`);
+                throw new Error(`Chalkboard.bool.parse: Unknown node type "${node.type}".`);
             };
             try {
                 const tokens = tokenize(expr);
@@ -2332,18 +2448,20 @@ var Chalkboard;
                 return nodeToString(simplified);
             }
             catch (err) {
-                if (err instanceof Error) {
-                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message}`);
-                }
+                if (err instanceof Error)
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${err.message.replace(/\.*$/, "")}.`);
                 else {
-                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err)}`);
+                    throw new Error(`Chalkboard.bool.parse: Error parsing expression: ${String(err).replace(/\.*$/, "")}.`);
                 }
             }
         };
         bool.primeImplicants = (input, variables) => {
-            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4) {
-                throw new Error("Chalkboard.bool.primeImplicants only supports 2, 3, or 4 variables.");
-            }
+            if (typeof input !== "string")
+                throw new Error(`Chalkboard.bool.primeImplicants: Parameter "input" must be a string.`);
+            if (!Array.isArray(variables) || variables.length > 0 && typeof variables[0] !== "string" || variables.length > 1 && typeof variables[variables.length - 1] !== "string")
+                throw new Error(`Chalkboard.bool.primeImplicants: Parameter "variables" must be an array of strings.`);
+            if (variables.length !== 2 && variables.length !== 3 && variables.length !== 4)
+                throw new Error(`Chalkboard.bool.primeImplicants: Parameter "variables" can only be an array with length 2, 3, or 4.`);
             const kmap = Chalkboard.bool.Karnaugh(input, variables);
             const grayCodes = (bits) => {
                 if (bits === 0)
@@ -2504,6 +2622,8 @@ var Chalkboard;
             return primes.map((group) => group.term);
         };
         bool.toCNF = (input) => {
+            if (typeof input !== "string")
+                throw new Error(`Chalkboard.bool.toCNF: Parameter "input" must be a string.`);
             const simplified = Chalkboard.bool.parse(input);
             if (simplified.includes(" & ") && !simplified.includes(" | ")) {
                 return simplified;
@@ -2580,6 +2700,8 @@ var Chalkboard;
             return nodeToString(cnfAST);
         };
         bool.toDNF = (input) => {
+            if (typeof input !== "string")
+                throw new Error(`Chalkboard.bool.toDNF: Parameter "input" must be a string.`);
             const simplified = Chalkboard.bool.parse(input);
             if (simplified.includes(" | ") && !simplified.includes(" & ")) {
                 return simplified;
@@ -2658,6 +2780,8 @@ var Chalkboard;
             return nodeToString(dnfAST);
         };
         bool.truthTable = (...operations) => {
+            if (operations.length > 0 && typeof operations[0] !== "function" || operations.length > 1 && typeof operations[operations.length - 1] !== "function")
+                throw new Error(`Chalkboard.bool.truthTable: Parameter "operations" must begin and end with functions.`);
             const result = [];
             const inputs = [false, true];
             for (let p of inputs) {
@@ -2675,8 +2799,9 @@ var Chalkboard;
         bool.XOR = (...vals) => {
             let count = 0;
             for (let i = 0; i < vals.length; i++) {
-                const x = (vals[i] === true || vals[i] === 1);
-                if (x)
+                if (vals[i] !== true && vals[i] !== false && vals[i] !== 0 && vals[i] !== 1)
+                    throw new Error(`Chalkboard.bool.XOR: Parameter "vals" must contain only true, false, 0, or 1.`);
+                if (vals[i] === true || vals[i] === 1)
                     count++;
             }
             return $(count % 2 === 1);
@@ -2689,20 +2814,20 @@ var Chalkboard;
     (function (calc) {
         calc.autocorrelation = (func, val) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.autocorrelation: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.autocorrelation: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             return Chalkboard.calc.correlation(func, func, val);
         };
         calc.binormal = (func, val) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.binormal: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.binormal: Property "func.field" must be real.`);
             if (func.type.startsWith("curve")) {
                 return Chalkboard.vect.cross(Chalkboard.calc.tangent(func, val), Chalkboard.calc.normal(func, val));
             }
-            throw new TypeError("Chalkboard.real.binormal: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.binormal: Property "func.type" must be curve2d or curve3d.`);
         };
         calc.convolution = (func1, func2, val) => {
             if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.convolution: Properties 'field' of 'func1' and 'func2' must be 'real' and properties 'type' of 'func1' and 'func2' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.convolution: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
             const f1 = func1.rule;
             const f2 = func2.rule;
             const g = (x) => f1(x) * f2(val - x);
@@ -2710,7 +2835,7 @@ var Chalkboard;
         };
         calc.correlation = (func1, func2, val) => {
             if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.correlation: Properties 'field' of 'func1' and 'func2' must be 'real' and properties 'type' of 'func1' and 'func2' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.correlation: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
             const f1 = func1.rule;
             const f2 = func2.rule;
             const g = (x) => f1(x) * f2(val + x);
@@ -2718,7 +2843,7 @@ var Chalkboard;
         };
         calc.curl = (vectfield, vect) => {
             if (vectfield.field !== "real")
-                throw new TypeError("Chalkboard.calc.curl: Property 'field' of 'vectfield' must be 'real'.");
+                throw new Error(`Chalkboard.calc.curl: Property "vectfield.field" must be real.`);
             const f = vectfield.rule;
             const v = Chalkboard.vect.toArray(vect);
             const h = 0.000000001;
@@ -2736,11 +2861,11 @@ var Chalkboard;
                 const drdy = (f[2](v[0], v[1] + h, v[2]) - f[2](v[0], v[1], v[2])) / h;
                 return Chalkboard.vect.init(drdy - dqdz, dpdz - drdx, dqdx - dpdy);
             }
-            throw new TypeError("Chalkboard.real.curl: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d'.");
+            throw new Error(`Chalkboard.calc.curl: Property "vectfield.type" must be vector2d or vector3d.`);
         };
         calc.curvature = (func, val) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.curvature: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.curvature: Property "func.field" must be real.`);
             if (func.type === "curve2d") {
                 const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func, val));
                 const d2 = Chalkboard.vect.toArray(Chalkboard.calc.d2fdx2(func, val));
@@ -2749,21 +2874,21 @@ var Chalkboard;
             else if (func.type === "curve3d") {
                 return Chalkboard.vect.mag(Chalkboard.calc.normal(func, val)) / Chalkboard.vect.mag(Chalkboard.calc.dfdx(func, val));
             }
-            throw new TypeError("Chalkboard.real.curvature: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.curvature: Property "func.type" must be curve2d or curve3d.`);
         };
         calc.dfdv = (func, vectpos, vectdir) => {
             if (func.field !== "real")
-                throw new TypeError('Chalkboard.calc.dfdv: Property "field" of "func" must be "real".');
+                throw new Error(`Chalkboard.calc.dfdv: Property "func.field" must be real.`);
             if (func.type === "scalar3d") {
                 const grad = Chalkboard.calc.grad(func, vectpos);
                 const dir = Chalkboard.vect.normalize(vectdir);
                 return Chalkboard.vect.dot(grad, dir);
             }
-            throw new TypeError("Chalkboard.real.dfdv: Property 'type' of 'func' must be 'scalar3d'.");
+            throw new Error(`Chalkboard.calc.dfdv: Property "func.type" must be scalar3d.`);
         };
         calc.dfdx = (func, val) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.dfdx: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.dfdx: Property "func.field" must be real.`);
             const h = 0.000000001;
             if (func.type === "scalar2d") {
                 const f = func.rule;
@@ -2777,11 +2902,11 @@ var Chalkboard;
                 const f = func.rule;
                 return Chalkboard.vect.init((f[0](val + h) - f[0](val)) / h, (f[1](val + h) - f[1](val)) / h, (f[2](val + h) - f[2](val)) / h);
             }
-            throw new TypeError("Chalkboard.real.dfdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.dfdx: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
         calc.d2fdx2 = (func, val) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.d2fdx2: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.d2fdx2: Property "func.field" must be real.`);
             const h = 0.00001;
             if (func.type === "scalar2d") {
                 const f = func.rule;
@@ -2795,11 +2920,11 @@ var Chalkboard;
                 const f = func.rule;
                 return Chalkboard.vect.init((f[0](val + h) - 2 * f[0](val) + f[0](val - h)) / (h * h), (f[1](val + h) - 2 * f[1](val) + f[1](val - h)) / (h * h), (f[2](val + h) - 2 * f[2](val) + f[2](val - h)) / (h * h));
             }
-            throw new TypeError("Chalkboard.real.d2fdx2: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.d2fdx2: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
         calc.dfdz = (func, comp) => {
             if (func.field !== "comp")
-                throw new TypeError("Chalkboard.calc.dfdz: Property 'field' of 'func' must be 'comp'.");
+                throw new Error(`Chalkboard.calc.dfdz: Property "func.field" must be comp.`);
             const h = 0.000000001;
             if (func.type === "vector2d") {
                 const f = func.rule;
@@ -2809,11 +2934,11 @@ var Chalkboard;
                 const dvdb = (f[1](comp.a, comp.b + h) - f[1](comp.a, comp.b)) / h;
                 return [Chalkboard.comp.init(duda, dvda), Chalkboard.comp.init(dudb, dvdb)];
             }
-            throw new TypeError("Chalkboard.real.dfdz: Property 'type' of 'func' must be 'vector2d'.");
+            throw new Error(`Chalkboard.calc.dfdz: Property "func.type" must be vector2d.`);
         };
         calc.d2fdz2 = (func, comp) => {
             if (func.field !== "comp")
-                throw new TypeError("Chalkboard.calc.d2fdz2: Property 'field' of 'func' must be 'comp'.");
+                throw new Error(`Chalkboard.calc.d2fdz2: Property "func.field" must be comp.`);
             const h = 0.00001;
             if (func.type === "vector2d") {
                 const f = func.rule;
@@ -2823,13 +2948,13 @@ var Chalkboard;
                 const d2vdb2 = (f[1](comp.a, comp.b + h) - 2 * f[1](comp.a, comp.b) + f[1](comp.a, comp.b - h)) / (h * h);
                 return [Chalkboard.comp.init(d2uda2, d2vda2), Chalkboard.comp.init(d2udb2, d2vdb2)];
             }
-            throw new TypeError("Chalkboard.real.d2fdz2: Property 'type' of 'func' must be 'vector2d'.");
+            throw new Error(`Chalkboard.calc.d2fdz2: Property "func.type" must be vector2d.`);
         };
         calc.dfrdt = (func1, func2, val) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.calc.dfrdt: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.calc.dfrdt: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== "scalar3d")
-                throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func1' must be 'scalar3d'.");
+                throw new Error(`Chalkboard.calc.dfrdt: Property "func1.type" must be scalar3d.`);
             const g = Chalkboard.vect.toArray(Chalkboard.calc.grad(func1, Chalkboard.real.val(func2, val)));
             const d = Chalkboard.vect.toArray(Chalkboard.calc.dfdx(func2, val));
             if (func2.type === "curve2d") {
@@ -2838,11 +2963,11 @@ var Chalkboard;
             else if (func2.type === "curve3d") {
                 return g[0] * d[0] + g[1] * d[1] + g[2] * d[2];
             }
-            throw new TypeError("Chalkboard.calc.dfrdt: Property 'type' of 'func2' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.dfrdt: Property "func2.type" must be curve2d or curve3d.`);
         };
         calc.dft = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.dft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.dft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             const out = new Array(N);
             for (let k = 0; k < N; k++) {
@@ -2864,15 +2989,15 @@ var Chalkboard;
         };
         calc.div = (vectfield, vect) => {
             if (vectfield.field !== "real")
-                throw new TypeError("Chalkboard.calc.div: Property 'field' of 'vectfield' must be 'real'.");
+                throw new Error(`Chalkboard.calc.div: Property "vectfield.field" must be real.`);
             if (vectfield.type === "vector2d" || vectfield.type === "vector3d" || vectfield.type === "vector4d") {
                 return Chalkboard.matr.trace(Chalkboard.calc.grad(vectfield, vect));
             }
-            throw new TypeError("Chalkboard.calc.div: Property 'type' of 'vectfield' must be 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.div: Property "vectfield.type" must be vector2d, vector3d, or vector4d.`);
         };
         calc.extrema = (func, domain) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.extrema: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.extrema: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const result = [];
             for (let i = domain[0]; i <= domain[1]; i++) {
                 if (Math.round(Chalkboard.calc.dfdx(func, i)) === 0) {
@@ -2883,7 +3008,7 @@ var Chalkboard;
         };
         calc.fds = (func, tinf, tsup, sinf, ssup) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.fds: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.fds: Property "func.field" must be real.`);
             let result = 0;
             let drdt, drds;
             if (func.type === "curve2d" || func.type === "curve3d") {
@@ -2906,16 +3031,16 @@ var Chalkboard;
                 }
                 return result * ds * dt;
             }
-            throw new TypeError("Chalkboard.calc.fds: Property 'type' of 'func' must be 'curve2d', 'curve3d', or 'surface3d'.");
+            throw new Error(`Chalkboard.calc.fds: Property "func.type" must be curve2d, curve3d, or surface3d.`);
         };
         calc.fft = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.fft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.fft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             if (!Number.isInteger(N) || N <= 0)
-                throw new TypeError("Chalkboard.calc.fft: Input length must be a positive integer.");
+                throw new Error(`Chalkboard.calc.fft: Input length must be a positive integer.`);
             if ((N & (N - 1)) !== 0)
-                throw new TypeError("Chalkboard.calc.fft: Input length must be a power of two.");
+                throw new Error(`Chalkboard.calc.fft: Input length must be a power of two.`);
             const re = new Array(N);
             const im = new Array(N);
             for (let i = 0; i < N; i++) {
@@ -2975,9 +3100,9 @@ var Chalkboard;
         };
         calc.fftfreq = (n, d = 1) => {
             if (!Number.isInteger(n) || n <= 0)
-                throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'n' must be a positive integer.");
-            if (typeof d !== "number" || !Number.isFinite(d) || d <= 0)
-                throw new TypeError("Chalkboard.calc.fftfreq: Parameter 'd' must be a positive finite number.");
+                throw new Error(`Chalkboard.calc.fftfreq: Parameter "n" must be a positive integer.`);
+            if (!Number.isFinite(d) || d <= 0)
+                throw new Error(`Chalkboard.calc.fftfreq: Parameter "d" must be a positive finite number.`);
             const result = new Array(n);
             const scale = 1 / (n * d);
             if (n % 2 === 0) {
@@ -2998,7 +3123,7 @@ var Chalkboard;
         };
         calc.fftshift = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.fftshift: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.fftshift: Parameter "arr" must be an array of complex numbers.`);
             const N = arr.length;
             if (N === 0)
                 return [];
@@ -3007,7 +3132,7 @@ var Chalkboard;
         };
         calc.fnds = (vectfield, func, tinf, tsup, sinf, ssup) => {
             if (vectfield.field !== "real" || func.field !== "real")
-                throw new TypeError("Chalkboard.calc.fnds: Properties 'field' of 'vectfield' and 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.fnds: Properties "vectfield.field" and "func.field" must be real.`);
             let result = 0;
             let drdt, drds;
             if (vectfield.type === "vector2d" && func.type === "curve2d") {
@@ -3038,16 +3163,16 @@ var Chalkboard;
                 }
                 return result * ds * dt;
             }
-            throw new TypeError("Chalkboard.calc.fnds: Property 'type' of 'vectfield' must be 'vector2d' or 'vector3d' and property 'type' of 'func' must be 'curve2d', 'curve3d', or 'surface3d'.");
+            throw new Error(`Chalkboard.calc.fnds: Property "vectfield.type" must be vector2d or vector3d and property "func.type" must be curve2d, curve3d, or surface3d.`);
         };
         calc.Fourier = (func, val, inf = 0, sup = 10, steps = 10000) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.Fourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.Fourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule;
-            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps))
-                throw new TypeError("Chalkboard.calc.Fourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
+            if (!Number.isFinite(inf) || !Number.isFinite(sup))
+                throw new Error(`Chalkboard.calc.Fourier: Parameters "inf" and "sup" must be finite numbers.`);
             if (steps <= 0 || !Number.isInteger(steps))
-                throw new TypeError("Chalkboard.calc.Fourier: Parameter 'steps' must be a positive integer.");
+                throw new Error(`Chalkboard.calc.Fourier: Parameter "steps" must be a positive integer.`);
             if (sup === inf)
                 return 0;
             const dx = (sup - inf) / steps;
@@ -3061,7 +3186,7 @@ var Chalkboard;
         };
         calc.frds = (funcORvectfield, func, inf, sup) => {
             if (funcORvectfield.field !== "real" || func.field !== "real")
-                throw new TypeError("Chalkboard.calc.frds: Properties 'field' of 'funcORvectfield' and 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.frds: Properties "funcORvectfield.field" and "func.field" must be real.`);
             const f = funcORvectfield.rule;
             if (func.type === "curve2d" || func.type === "curve3d") {
                 let result = 0;
@@ -3087,13 +3212,13 @@ var Chalkboard;
                     }
                     return result * dt;
                 }
-                throw new TypeError("Chalkboard.calc.frds: Property 'type' of 'funcORvectfield' must be 'scalar2d', 'vector2d', or 'vector3d'.");
+                throw new Error(`Chalkboard.calc.frds: Property "funcORvectfield.type" must be scalar2d, vector2d, or vector3d.`);
             }
-            throw new TypeError("Chalkboard.calc.frds: Property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.frds: Property "func.type" must be curve2d or curve3d.`);
         };
         calc.fxdx = (func, inf, sup) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.fxdx: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.fxdx: Property "func.field" must be real.`);
             const integrate = (f, a, b, eps = 1e-6) => {
                 const asq = (a, b, fa, fm, fb, whole, eps, depth) => {
                     const m = (a + b) / 2, h = (b - a) / 2;
@@ -3123,11 +3248,11 @@ var Chalkboard;
                 const f = func.rule;
                 return Chalkboard.vect.init(integrate(f[0], inf, sup), integrate(f[1], inf, sup), integrate(f[2], inf, sup));
             }
-            throw new TypeError("Chalkboard.calc.fxdx: Property 'type' of 'func' must be 'scalar2d', 'curve2d', or 'curve3d'.");
+            throw new Error(`Chalkboard.calc.fxdx: Property "func.type" must be scalar2d, curve2d, or curve3d.`);
         };
         calc.fxydxdy = (func, xinf, xsup, yinf, ysup) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.calc.fxydxdy: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.calc.fxydxdy: Property "func.field" must be real.`);
             if (func.type === "scalar3d") {
                 const f = func.rule;
                 const integrate = (g, a, b, eps) => {
@@ -3150,11 +3275,11 @@ var Chalkboard;
                 const g = (x) => integrate((y) => f(x, y), yinf, ysup, 1e-5);
                 return integrate(g, xinf, xsup, 1e-5);
             }
-            throw new TypeError("Chalkboard.calc.fxydxdy: Property 'type' of 'func' must be 'scalar3d'.");
+            throw new Error(`Chalkboard.calc.fxydxdy: Property "func.type" must be scalar3d.`);
         };
         calc.fzdz = (func1, func2, inf, sup) => {
             if (func1.field !== "comp" || func2.field !== "real")
-                throw new TypeError("Chalkboard.calc.fzdz: Property 'field' of 'func1' must be 'comp' and property 'field' of 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.calc.fzdz: Property "func1.field" must be comp and property "func2.field" must be real.`);
             if (func1.type === "vector2d" && func2.type === "curve2d") {
                 let result = Chalkboard.comp.init(0, 0);
                 const dt = (sup - inf) / 10000;
@@ -3165,11 +3290,11 @@ var Chalkboard;
                 }
                 return Chalkboard.comp.scl(result, dt);
             }
-            throw new TypeError("Chalkboard.calc.fzdz: Property 'type' of 'func1' must be 'vector2d' and property 'type' of 'func2' must be 'curve2d'.");
+            throw new Error(`Chalkboard.calc.fzdz: Property "func1.type" must be vector2d and property "func2.type" must be curve2d.`);
         };
         calc.grad = (funcORvectfield, vect) => {
             if (funcORvectfield.field !== "real")
-                throw new TypeError("Chalkboard.calc.grad: Property 'field' of 'funcORvectfield' must be 'real'.");
+                throw new Error(`Chalkboard.calc.grad: Property "funcORvectfield.field" must be real.`);
             const f = funcORvectfield.rule;
             const r = funcORvectfield.rule;
             const F = funcORvectfield.rule;
@@ -3227,11 +3352,11 @@ var Chalkboard;
                 const dsdw = (F[3](v[0], v[1], v[2], v[3] + h) - F[3](v[0], v[1], v[2], v[3])) / h;
                 return Chalkboard.matr.init([dpdx, dpdy, dpdz, dpdw], [dqdx, dqdy, dqdz, dqdw], [drdx, drdy, drdz, drdw], [dsdx, dsdy, dsdz, dsdw]);
             }
-            throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.grad: Property "funcORvectfield.type" must be scalar3d, surface3d, vector2d, vector3d, or vector4d.`);
         };
         calc.grad2 = (funcORvectfield, vect) => {
             if (funcORvectfield.field !== "real")
-                throw new TypeError("Chalkboard.calc.grad2: Property 'field' of 'funcORvectfield' must be 'real'.");
+                throw new Error(`Chalkboard.calc.grad2: Property "funcORvectfield.field" must be real.`);
             const f = funcORvectfield.rule;
             const r = funcORvectfield.rule;
             const F = funcORvectfield.rule;
@@ -3291,11 +3416,11 @@ var Chalkboard;
                 const d2sdw2 = (F[3](v[0], v[1], v[2], v[3] + h) - 2 * F[3](v[0], v[1], v[2], v[3]) + F[3](v[0], v[1], v[2], v[3] - h)) / (h * h);
                 return Chalkboard.matr.init([d2pdx2, d2pdy2, d2pdz2, d2pdw2], [d2qdx2, d2qdy2, d2qdz2, d2qdw2], [d2rdx2, d2rdy2, d2rdz2, d2rdw2], [d2sdx2, d2sdy2, d2sdz2, d2sdw2]);
             }
-            throw new TypeError("Chalkboard.calc.grad: Property 'type' of 'funcORvectfield' must be 'scalar3d', 'surface3d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.calc.grad2: Property "funcORvectfield.type" must be scalar3d, surface3d, vector2d, vector3d, or vector4d.`);
         };
         calc.idft = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.idft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.idft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             const out = new Array(N);
             for (let n = 0; n < N; n++) {
@@ -3317,12 +3442,12 @@ var Chalkboard;
         };
         calc.ifft = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.ifft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.ifft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             const N = arr.length;
             if (!Number.isInteger(N) || N <= 0)
-                throw new TypeError("Chalkboard.calc.ifft: Input length must be a positive integer.");
+                throw new Error(`Chalkboard.calc.ifft: Input length must be a positive integer.`);
             if ((N & (N - 1)) !== 0)
-                throw new TypeError("Chalkboard.calc.ifft: Input length must be a power of two.");
+                throw new Error(`Chalkboard.calc.ifft: Input length must be a power of two.`);
             const conjIn = new Array(N);
             for (let i = 0; i < N; i++) {
                 const v = arr[i];
@@ -3338,7 +3463,7 @@ var Chalkboard;
         };
         calc.ifftshift = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.ifftshift: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.ifftshift: Parameter "arr" must be an array of complex numbers.`);
             const N = arr.length;
             if (N === 0)
                 return [];
@@ -3347,12 +3472,12 @@ var Chalkboard;
         };
         calc.iFourier = (func, val, inf = 0, sup = 10, steps = 10000) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.iFourier: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.iFourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const F = func.rule;
-            if (!Number.isFinite(inf) || !Number.isFinite(sup) || !Number.isFinite(steps))
-                throw new TypeError("Chalkboard.calc.iFourier: Parameters 'inf', 'sup', and 'steps' must be finite.");
+            if (!Number.isFinite(inf) || !Number.isFinite(sup))
+                throw new Error(`Chalkboard.calc.iFourier: Parameters "inf" and "sup" must be finite numbers.`);
             if (steps <= 0 || !Number.isInteger(steps))
-                throw new TypeError("Chalkboard.calc.iFourier: Parameter 'steps' must be a positive integer.");
+                throw new Error(`Chalkboard.calc.iFourier: Parameter "steps" must be a positive integer.`);
             if (sup === inf)
                 return 0;
             const dw = (sup - inf) / steps;
@@ -3366,15 +3491,15 @@ var Chalkboard;
         };
         calc.irfft = (arr, n) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.irfft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.irfft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
             if (arr.length === 0)
                 return [];
             const N = typeof n === "number" ? n : 2 * (arr.length - 1);
             if (!Number.isInteger(N) || N <= 0)
-                throw new TypeError("Chalkboard.calc.irfft: Parameter 'n' must be a positive integer.");
+                throw new Error(`Chalkboard.calc.irfft: Parameter "n" must be a positive integer.`);
             const expected = Math.floor(N / 2) + 1;
             if (arr.length !== expected)
-                throw new RangeError("Chalkboard.calc.irfft: Input spectrum length must be floor(n/2)+1.");
+                throw new Error(`Chalkboard.calc.irfft: Input spectrum length must be floor(n/2)+1.`);
             const full = new Array(N);
             {
                 const v = arr[0];
@@ -3404,17 +3529,17 @@ var Chalkboard;
         };
         calc.Laplace = (func, val) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.Laplace: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.Laplace: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             if (val > 0) {
                 const f = func.rule;
                 const g = (x) => f(x) * Math.exp(-val * x);
                 return Chalkboard.calc.fxdx(Chalkboard.real.define(g), 0, 10);
             }
-            throw new RangeError("Chalkboard.calc.Laplace: 'val' must be greater than 0.");
+            throw new Error(`Chalkboard.calc.Laplace: "val" must be greater than 0.`);
         };
         calc.lim = (func, val) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.lim: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.lim: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule;
             if (val === Infinity) {
                 if (f(101) > f(100)) {
@@ -3454,12 +3579,12 @@ var Chalkboard;
         };
         calc.mean = (func, inf, sup) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.mean: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.mean: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             return Chalkboard.calc.fxdx(func, inf, sup) / (sup - inf);
         };
         calc.Newton = (func, domain = [-1, 1]) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.Newton: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.Newton: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule;
             let x = Chalkboard.numb.random(domain[0], domain[1]);
             for (let i = 0; i < 10; i++) {
@@ -3469,26 +3594,26 @@ var Chalkboard;
         };
         calc.normal = (func, val) => {
             if (func.field !== "real" || !func.type.startsWith("curve"))
-                throw new TypeError("Chalkboard.calc.normal: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+                throw new Error(`Chalkboard.calc.normal: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
             return Chalkboard.vect.normalize(Chalkboard.calc.d2fdx2(func, val));
         };
         calc.rfft = (arr) => {
             if (!Array.isArray(arr))
-                throw new TypeError("Chalkboard.calc.rfft: Parameter 'arr' must be an array.");
+                throw new Error(`Chalkboard.calc.rfft: Parameter "arr" must be an array of finite numbers.`);
             const N = arr.length;
             if (!Number.isInteger(N) || N <= 0)
-                throw new TypeError("Chalkboard.calc.rfft: Input length must be a positive integer.");
+                throw new Error(`Chalkboard.calc.rfft: Input length must be a positive integer.`);
             const X = ((N & (N - 1)) === 0) ? Chalkboard.calc.fft(arr) : Chalkboard.calc.dft(arr);
             return X.slice(0, Math.floor(N / 2) + 1);
         };
         calc.tangent = (func, val) => {
             if (func.field !== "real" || !func.type.startsWith("curve"))
-                throw new TypeError("Chalkboard.calc.tangent: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'curve2d' or 'curve3d'.");
+                throw new Error(`Chalkboard.calc.tangent: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
             return Chalkboard.vect.normalize(Chalkboard.calc.dfdx(func, val));
         };
         calc.Taylor = (func, val, n, a) => {
             if (func.field !== "real" || func.type !== "scalar2d")
-                throw new TypeError("Chalkboard.calc.Taylor: Property 'field' of 'func' must be 'real' and property 'type' of 'func' must be 'scalar2d'.");
+                throw new Error(`Chalkboard.calc.Taylor: Property "func.field" must be real and property "func.type" must be scalar2d.`);
             const f = func.rule;
             const x = val;
             if (n === 0) {
@@ -3500,7 +3625,7 @@ var Chalkboard;
             else if (n === 2) {
                 return f(x) + Chalkboard.calc.dfdx(func, a) * (x - a) + (Chalkboard.calc.d2fdx2(func, a) * (x - a) * (x - a)) / 2;
             }
-            throw new RangeError("Chalkboard.calc.Taylor: 'n' must be 0, 1, or 2.");
+            throw new Error(`Chalkboard.calc.Taylor: "n" must be 0, 1, or 2.`);
         };
     })(calc = Chalkboard.calc || (Chalkboard.calc = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -3511,24 +3636,30 @@ var Chalkboard;
         comp_1.absolute = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.absolute: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(Math.abs(z.a), Math.abs(z.b));
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.absolute: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.absolute: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => Math.abs(f[0](a, b)), (a, b) => Math.abs(f[1](a, b))];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.absolute: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.absolute: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.add = (comp1, comp2) => {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
+            if (comp1 === null || typeof comp1 !== "object")
+                throw new Error(`Chalkboard.comp.add: Parameter "comp1" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (comp2 === null || typeof comp2 !== "object")
+                throw new Error(`Chalkboard.comp.add: Parameter "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
                 const z1 = comp1;
                 const z2 = comp2;
@@ -3536,52 +3667,66 @@ var Chalkboard;
             }
             else if (comp1.hasOwnProperty("rule") && comp2.hasOwnProperty("rule")) {
                 if (comp1.field !== "comp" || comp2.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.add: Properties 'field' of 'comp1' and 'comp2' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.add: Properties "comp1.field" and "comp2.field" must be comp.`);
                 const f1 = comp1.rule;
                 const f2 = comp2.rule;
                 const g = [(a, b) => f1[0](a, b) + f2[0](a, b), (a, b) => f1[1](a, b) + f2[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.add: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.add: Parameters "comp1" and "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.arg = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.arg: Parameter "comp" must be a complex number.`);
             return Chalkboard.trig.arctan2(comp.b, comp.a);
         };
         comp_1.argBetween = (comp1, comp2) => {
+            if (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b))
+                throw new Error(`Chalkboard.comp.argBetween: Parameter "comp1" must be a complex number.`);
+            if (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b))
+                throw new Error(`Chalkboard.comp.argBetween: Parameter "comp2" must be a complex number.`);
             return Chalkboard.vect.angBetween(Chalkboard.comp.toVector(comp1), Chalkboard.comp.toVector(comp2));
         };
         comp_1.conjugate = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.conjugate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(z.a, -z.b);
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.conjugate: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.conjugate: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => f[0](a, b), (a, b) => -f[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.conjugate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.conjugate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.constrain = (comp, range = [0, 1]) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.constrain: Parameter "comp" must be a complex number.`);
             return Chalkboard.comp.init(Chalkboard.numb.constrain(comp.a, range), Chalkboard.numb.constrain(comp.b, range));
         };
         comp_1.copy = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.copy: Parameter "comp" must be a complex number.`);
             return Object.create(Object.getPrototypeOf(comp), Object.getOwnPropertyDescriptors(comp));
         };
         comp_1.cos = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.cos: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(Chalkboard.trig.cos(z.a) * Chalkboard.trig.cosh(z.b), -Chalkboard.trig.sin(z.a) * Chalkboard.trig.sinh(z.b));
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.cos: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.cos: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 return Chalkboard.comp.define((a, b) => {
                     const re = f[0](a, b);
@@ -3593,9 +3738,15 @@ var Chalkboard;
                     return -Chalkboard.trig.sin(re) * Chalkboard.trig.sinh(im);
                 });
             }
-            throw new TypeError("Chalkboard.comp.cos: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.cos: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.define = (...rule) => {
+            if (rule.length === 0)
+                throw new Error(`Chalkboard.comp.define: Parameter "rule" must contain at least one function.`);
+            if (Array.isArray(rule[0]) && (rule[0].length === 0 || typeof rule[0][0] !== "function" || rule[0].length > 1 && typeof rule[0][rule[0].length - 1] !== "function"))
+                throw new Error(`Chalkboard.comp.define: Parameter "rule" must begin and end with functions.`);
+            if (!Array.isArray(rule[0]) && (typeof rule[0] !== "function" || rule.length > 1 && typeof rule[rule.length - 1] !== "function"))
+                throw new Error(`Chalkboard.comp.define: Parameter "rule" must begin and end with functions.`);
             let f;
             if (rule.length === 1 && Array.isArray(rule[0])) {
                 f = rule[0];
@@ -3608,21 +3759,26 @@ var Chalkboard;
             }
             if (Array.isArray(f)) {
                 if (f.length !== 2 || f[0].length !== 2 || f[1].length !== 2)
-                    throw new TypeError("Chalkboard.comp.define: If 'rule' is an array, it must be an array of two functions of two variables.");
+                    throw new Error(`Chalkboard.comp.define: If "rule" is an array, it must be an array of two functions of two variables.`);
                 if (typeof f[0](0, 0) !== "number" || typeof f[1](0, 0) !== "number")
-                    throw new TypeError("Chalkboard.comp.define: If 'rule' is an array, the functions in it must return real numbers.");
+                    throw new Error(`Chalkboard.comp.define: If "rule" is an array, the functions in it must return real numbers.`);
                 return { rule: f, field: "comp", type: "vector2d" };
             }
             else {
                 if (f.length !== 1)
-                    throw new TypeError("Chalkboard.comp.define: If 'rule' is a function, it must be a function of one variable.");
+                    throw new Error(`Chalkboard.comp.define: If "rule" is a function, it must be a function of one variable.`);
                 const F = f;
-                if (!F(Chalkboard.comp.init(0, 0)).hasOwnProperty("a") || !F(Chalkboard.comp.init(0, 0)).hasOwnProperty("b"))
-                    throw new TypeError("Chalkboard.comp.define: If 'rule' is a function, it must return a complex number.");
+                const value = F(Chalkboard.comp.init(0, 0));
+                if (value === null || typeof value !== "object" || !value.hasOwnProperty("a") || !value.hasOwnProperty("b"))
+                    throw new Error(`Chalkboard.comp.define: If "rule" is a function, it must return a complex number.`);
                 return { rule: [(a, b) => F(Chalkboard.comp.init(a, b)).a, (a, b) => F(Chalkboard.comp.init(a, b)).b], field: "comp", type: "vector2d" };
             }
         };
         comp_1.dist = (comp1, comp2) => {
+            if ((!Number.isFinite(comp1)) && (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b)))
+                throw new Error(`Chalkboard.comp.dist: Parameter "comp1" must be a finite number or a complex number.`);
+            if ((!Number.isFinite(comp2)) && (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b)))
+                throw new Error(`Chalkboard.comp.dist: Parameter "comp2" must be a finite number or a complex number.`);
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
@@ -3630,6 +3786,10 @@ var Chalkboard;
             return Chalkboard.real.sqrt((comp2.a - comp1.a) * (comp2.a - comp1.a) + (comp2.b - comp1.b) * (comp2.b - comp1.b));
         };
         comp_1.distsq = (comp1, comp2) => {
+            if ((!Number.isFinite(comp1)) && (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b)))
+                throw new Error(`Chalkboard.comp.distsq: Parameter "comp1" must be a finite number or a complex number.`);
+            if ((!Number.isFinite(comp2)) && (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b)))
+                throw new Error(`Chalkboard.comp.distsq: Parameter "comp2" must be a finite number or a complex number.`);
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
@@ -3641,6 +3801,10 @@ var Chalkboard;
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
+            if (comp1 === null || typeof comp1 !== "object")
+                throw new Error(`Chalkboard.comp.div: Parameter "comp1" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (comp2 === null || typeof comp2 !== "object")
+                throw new Error(`Chalkboard.comp.div: Parameter "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
                 const z1 = comp1;
                 const z2 = comp2;
@@ -3649,7 +3813,7 @@ var Chalkboard;
             }
             else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
                 if (comp1.field !== "comp" || comp2.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.div: Properties 'field' of 'comp1' and 'comp2' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.div: Properties "comp1.field" and "comp2.field" must be comp.`);
                 const f1 = comp1.rule;
                 const f2 = comp2.rule;
                 const g = [
@@ -3664,14 +3828,18 @@ var Chalkboard;
                 ];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.div: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.div: Parameters "comp1" and "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.Euler = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.comp.Euler: Parameter "rad" must be a finite number.`);
             return Chalkboard.comp.init(Chalkboard.trig.cos(rad), Chalkboard.trig.sin(rad));
         };
         comp_1.exp = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.exp: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 const expRe = Math.exp(z.a);
@@ -3679,7 +3847,7 @@ var Chalkboard;
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.exp: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.exp: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 return Chalkboard.comp.define((a, b) => {
                     const expRe = Math.exp(f[0](a, b));
@@ -3689,9 +3857,11 @@ var Chalkboard;
                     return expRe * Math.sin(f[1](a, b));
                 });
             }
-            throw new TypeError("Chalkboard.comp.exp: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.exp: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.Im = (funcORcomp) => {
+            if ((funcORcomp === null || typeof funcORcomp !== "object" || ((typeof funcORcomp.a !== "number" || !Number.isFinite(funcORcomp.a) || typeof funcORcomp.b !== "number" || !Number.isFinite(funcORcomp.b)) && (typeof funcORcomp.rule !== "function" && !Array.isArray(funcORcomp.rule)))))
+                throw new Error(`Chalkboard.comp.Im: Parameter "funcORcomp" must be a complex number or a mathematical function object.`);
             if (funcORcomp.hasOwnProperty("rule")) {
                 return funcORcomp.rule[1];
             }
@@ -3700,12 +3870,24 @@ var Chalkboard;
             }
         };
         comp_1.init = (a, b = 0) => {
+            if (!Number.isFinite(a))
+                throw new Error(`Chalkboard.comp.init: Parameter "a" must be a finite number.`);
+            if (b !== undefined && (!Number.isFinite(b)))
+                throw new Error(`Chalkboard.comp.init: Parameter "b" must be a finite number.`);
             return { a: a, b: b };
         };
         comp_1.invert = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.invert: Parameter "comp" must be a complex number.`);
             return Chalkboard.comp.init(comp.a / Chalkboard.comp.magsq(comp), -comp.b / Chalkboard.comp.magsq(comp));
         };
         comp_1.isApproxEqual = (comp1, comp2, precision = 0.000001) => {
+            if ((!Number.isFinite(comp1)) && (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b)))
+                throw new Error(`Chalkboard.comp.isApproxEqual: Parameter "comp1" must be a finite number or a complex number.`);
+            if ((!Number.isFinite(comp2)) && (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b)))
+                throw new Error(`Chalkboard.comp.isApproxEqual: Parameter "comp2" must be a finite number or a complex number.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.comp.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
@@ -3713,6 +3895,10 @@ var Chalkboard;
             return Chalkboard.numb.isApproxEqual(comp1.a, comp2.a, precision) && Chalkboard.numb.isApproxEqual(comp1.b, comp2.b, precision);
         };
         comp_1.isEqual = (comp1, comp2) => {
+            if ((!Number.isFinite(comp1)) && (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b)))
+                throw new Error(`Chalkboard.comp.isEqual: Parameter "comp1" must be a finite number or a complex number.`);
+            if ((!Number.isFinite(comp2)) && (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b)))
+                throw new Error(`Chalkboard.comp.isEqual: Parameter "comp2" must be a finite number or a complex number.`);
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
@@ -3720,6 +3906,12 @@ var Chalkboard;
             return comp1.a === comp2.a && comp1.b === comp2.b;
         };
         comp_1.isInverse = (comp1, comp2, precision = 0.000001) => {
+            if ((!Number.isFinite(comp1)) && (comp1 === null || typeof comp1 !== "object" || typeof comp1.a !== "number" || !Number.isFinite(comp1.a) || typeof comp1.b !== "number" || !Number.isFinite(comp1.b)))
+                throw new Error(`Chalkboard.comp.isInverse: Parameter "comp1" must be a finite number or a complex number.`);
+            if ((!Number.isFinite(comp2)) && (comp2 === null || typeof comp2 !== "object" || typeof comp2.a !== "number" || !Number.isFinite(comp2.a) || typeof comp2.b !== "number" || !Number.isFinite(comp2.b)))
+                throw new Error(`Chalkboard.comp.isInverse: Parameter "comp2" must be a finite number or a complex number.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.comp.isInverse: Parameter "precision" must be a finite number.`);
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
@@ -3727,23 +3919,37 @@ var Chalkboard;
             return Chalkboard.comp.isApproxEqual(Chalkboard.comp.mul(comp1, comp2), Chalkboard.comp.init(1, 0), precision);
         };
         comp_1.isNormalized = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.isNormalized: Parameter "comp" must be a complex number.`);
             return Chalkboard.numb.isApproxEqual(Chalkboard.comp.magsq(comp), 1);
         };
         comp_1.isZero = (comp) => {
+            if ((!Number.isFinite(comp)) && (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b)))
+                throw new Error(`Chalkboard.comp.isZero: Parameter "comp" must be a finite number or a complex number.`);
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
             return Chalkboard.comp.isApproxEqual(comp, Chalkboard.comp.init(0, 0));
         };
         comp_1.ln = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.ln: Parameter "comp" must be a complex number.`);
             return Chalkboard.comp.init(Chalkboard.real.ln(Chalkboard.comp.mag(comp)), Chalkboard.trig.arctan2(comp.b, comp.a));
         };
         comp_1.mag = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.mag: Parameter "comp" must be a complex number.`);
             return Chalkboard.real.sqrt(comp.a * comp.a + comp.b * comp.b);
         };
         comp_1.magset = (comp, num) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.magset: Parameter "comp" must be a complex number.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.comp.magset: Parameter "num" must be a finite number.`);
             return Chalkboard.comp.scl(Chalkboard.comp.normalize(comp), num);
         };
         comp_1.magsq = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.magsq: Parameter "comp" must be a complex number.`);
             return comp.a * comp.a + comp.b * comp.b;
         };
         comp_1.mul = (comp1, comp2) => {
@@ -3751,6 +3957,10 @@ var Chalkboard;
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
+            if (comp1 === null || typeof comp1 !== "object")
+                throw new Error(`Chalkboard.comp.mul: Parameter "comp1" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (comp2 === null || typeof comp2 !== "object")
+                throw new Error(`Chalkboard.comp.mul: Parameter "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
                 const z1 = comp1;
                 const z2 = comp2;
@@ -3758,31 +3968,35 @@ var Chalkboard;
             }
             else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
                 if (comp1.field !== "comp" || comp2.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.mul: Properties 'field' of 'comp1' and 'comp2' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.mul: Properties "comp1.field" and "comp2.field" must be comp.`);
                 const f1 = comp1.rule;
                 const f2 = comp2.rule;
                 const g = [(a, b) => f1[0](a, b) * f2[0](a, b) - f1[1](a, b) * f2[1](a, b), (a, b) => f1[0](a, b) * f2[1](a, b) + f1[1](a, b) * f2[0](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.mul: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.mul: Parameters "comp1" and "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.negate = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.negate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(-z.a, -z.b);
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.negate: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.negate: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => -f[0](a, b), (a, b) => -f[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.negate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.negate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.normalize = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.normalize: Parameter "comp" must be a complex number.`);
             return Chalkboard.comp.init(comp.a / Chalkboard.comp.mag(comp), comp.b / Chalkboard.comp.mag(comp));
         };
         comp_1.parse = (expr, config = { returnAST: false, returnJSON: false, returnLaTeX: false }) => {
@@ -3860,7 +4074,7 @@ var Chalkboard;
                         }
                     }
                     else {
-                        throw new Error(`Chalkboard.comp.parse: Unexpected character ${ch}`);
+                        throw new Error(`Chalkboard.comp.parse: Unexpected character "${ch}".`);
                     }
                 }
                 return tokens;
@@ -3870,7 +4084,7 @@ var Chalkboard;
                 const peek = () => tokens[pos] || "";
                 const consume = (token) => {
                     if (token && tokens[pos] !== token)
-                        throw new Error(`Chalkboard.comp.parse: Expected token '${token}' but found '${tokens[pos]}'`);
+                        throw new Error(`Chalkboard.comp.parse: Expected token "${token}" but found "${tokens[pos]}".`);
                     return tokens[pos++];
                 };
                 const parseExpression = () => parseAdditive();
@@ -3956,11 +4170,11 @@ var Chalkboard;
                         consume(")");
                         return node;
                     }
-                    throw new Error(`Chalkboard.comp.parse: Unexpected token ${token}`);
+                    throw new Error(`Chalkboard.comp.parse: Unexpected token "${token}".`);
                 };
                 const ast = parseExpression();
                 if (pos < tokens.length)
-                    throw new Error(`Chalkboard.comp.parse: Unexpected token ${tokens[pos]}`);
+                    throw new Error(`Chalkboard.comp.parse: Unexpected token "${tokens[pos]}".`);
                 return ast;
             };
             const evaluateNode = (node, values) => {
@@ -3975,7 +4189,7 @@ var Chalkboard;
                         const varname = node.name;
                         if (varname in values)
                             return values[varname];
-                        throw new Error(`Chalkboard.comp.parse: Variable '${varname}' not defined in values`);
+                        throw new Error(`Chalkboard.comp.parse: Variable "${varname}" is not defined in "config.values".`);
                     }
                     case "add": {
                         return Chalkboard.comp.add(evaluateNode(node.left, values), evaluateNode(node.right, values));
@@ -3996,7 +4210,7 @@ var Chalkboard;
                             return Chalkboard.comp.pow(base, exponent.a);
                         }
                         else {
-                            throw new Error("Chalkboard.comp.parse: Complex exponentiation with complex exponent not supported");
+                            throw new Error(`Chalkboard.comp.parse: Complex exponentiation with complex exponent not supported.`);
                         }
                     }
                     case "neg": {
@@ -4009,7 +4223,7 @@ var Chalkboard;
                             try {
                                 const realArgs = args.map((arg) => {
                                     if (arg.b !== 0)
-                                        throw new Error("Complex argument in real function");
+                                        throw new Error(`Chalkboard.comp.parse: Complex argument in real function.`);
                                     return arg.a;
                                 });
                                 const result = Chalkboard.REGISTRY[funcName](...realArgs);
@@ -4063,24 +4277,24 @@ var Chalkboard;
                             }
                             case "pow": {
                                 if (args.length < 2)
-                                    throw new Error("Chalkboard.comp.parse: Function pow requires two arguments");
+                                    throw new Error(`Chalkboard.comp.parse: Function pow requires two arguments.`);
                                 return Chalkboard.comp.pow(args[0], args[1].a);
                             }
                             case "root": {
                                 if (args.length < 2)
-                                    throw new Error("Chalkboard.comp.parse: Function root requires two arguments");
+                                    throw new Error(`Chalkboard.comp.parse: Function root requires two arguments.`);
                                 const index = args[1].a;
                                 if (!Number.isInteger(index) || index <= 0)
-                                    throw new Error("Chalkboard.comp.parse: Root index must be a positive integer");
+                                    throw new Error(`Chalkboard.comp.parse: Root index must be a positive integer.`);
                                 return Chalkboard.comp.root(args[0], index)[0];
                             }
                             default: {
-                                throw new Error(`Chalkboard.comp.parse: Unknown function ${node.name}`);
+                                throw new Error(`Chalkboard.comp.parse: Unknown function "${node.name}".`);
                             }
                         }
                     }
                 }
-                throw new Error(`Chalkboard.comp.parse: Unknown node type ${node.type}`);
+                throw new Error(`Chalkboard.comp.parse: Unknown node type "${node.type}".`);
             };
             const needsParensInPow = (z) => {
                 if (z.b === 0)
@@ -4221,7 +4435,7 @@ var Chalkboard;
                         return `\\mathrm{${node.name}}\\left(${node.args.map(nodeToLaTeX).join(", ")}\\right)`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.comp.parse: Unknown node type ${node.type}`);
+                        throw new Error(`Chalkboard.comp.parse: Unknown node type "${node.type}".`);
                     }
                 }
             };
@@ -4340,7 +4554,7 @@ var Chalkboard;
                         if (leftDiv.type === "complex" && rightDiv.type === "complex") {
                             const denominator = rightDiv.a * rightDiv.a + rightDiv.b * rightDiv.b;
                             if (denominator === 0)
-                                throw new Error("Chalkboard.comp.parse: Division by zero.");
+                                throw new Error(`Chalkboard.comp.parse: Division by zero.`);
                             return { type: "complex", a: (leftDiv.a * rightDiv.a + leftDiv.b * rightDiv.b) / denominator, b: (leftDiv.b * rightDiv.a - leftDiv.a * rightDiv.b) / denominator };
                         }
                         if (rightDiv.type === "complex" && rightDiv.a === 1 && rightDiv.b === 0)
@@ -4417,7 +4631,7 @@ var Chalkboard;
                         return `-${inner}`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.comp.parse: Unsupported real-node type ${node.type}`);
+                        throw new Error(`Chalkboard.comp.parse: Unsupported real-node type "${node.type}".`);
                     }
                 }
             };
@@ -4483,11 +4697,11 @@ var Chalkboard;
                         const expParts = toReIm(node.exponent);
                         const expImStr = simplifyRealString(realNodeToString(expParts.im));
                         if (expImStr !== "0")
-                            throw new Error("Chalkboard.comp.parse: Complex exponent not supported in symbolic splitting.");
+                            throw new Error(`Chalkboard.comp.parse: Complex exponent not supported in symbolic splitting.`);
                         const expReStr = simplifyRealString(realNodeToString(expParts.re));
                         const n = Number(expReStr);
                         if (!Number.isInteger(n))
-                            throw new Error("Chalkboard.comp.parse: Non-integer exponent not supported in symbolic splitting.");
+                            throw new Error(`Chalkboard.comp.parse: Non-integer exponent not supported in symbolic splitting.`);
                         const baseParts = toReIm(node.base);
                         let re = realNum(1);
                         let im = realNum(0);
@@ -4511,10 +4725,10 @@ var Chalkboard;
                         return { re, im };
                     }
                     case "func": {
-                        throw new Error(`Chalkboard.comp.parse: Symbolic splitting for function '${node.name}' not supported.`);
+                        throw new Error(`Chalkboard.comp.parse: Symbolic splitting for function "${node.name}" is not supported.`);
                     }
                 }
-                throw new Error(`Chalkboard.comp.parse: Unsupported node type '${node.type}' in symbolic splitting.`);
+                throw new Error(`Chalkboard.comp.parse: Unsupported node type "${node.type}" in symbolic splitting.`);
             };
             const combineReImStrings = (reStr, imStr) => {
                 const reS = reStr.trim();
@@ -4592,9 +4806,8 @@ var Chalkboard;
                         const parts = toReIm(ast);
                         const reExprStr = realNodeToString(parts.re);
                         const imExprStr = realNodeToString(parts.im);
-                        if (reExprStr.includes("i") || imExprStr.includes("i")) {
-                            throw new Error("Chalkboard.comp.parse: Internal error: 'i' leaked into real split.");
-                        }
+                        if (reExprStr.includes("i") || imExprStr.includes("i"))
+                            throw new Error(`Chalkboard.comp.parse: Internal error: i leaked into real split.`);
                         const reSimpl = simplifyRealString(reExprStr);
                         const imSimpl = simplifyRealString(imExprStr);
                         if (config.returnLaTeX) {
@@ -4639,17 +4852,20 @@ var Chalkboard;
                 return nodeToString(simplified);
             }
             catch (err) {
-                if (err instanceof Error) {
-                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression ${err.message}`);
-                }
+                if (err instanceof Error)
+                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression: ${err.message.replace(/\.*$/, "")}.`);
                 else {
-                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression ${String(err)}`);
+                    throw new Error(`Chalkboard.comp.parse: Error parsing complex expression: ${String(err).replace(/\.*$/, "")}.`);
                 }
             }
         };
         comp_1.pow = (comp, num) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.pow: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.comp.pow: Parameter "num" must be a number that is not NaN.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 const mag = Chalkboard.comp.mag(z);
@@ -4658,7 +4874,7 @@ var Chalkboard;
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.pow: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.pow: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [
                     (a, b) => {
@@ -4674,15 +4890,23 @@ var Chalkboard;
                 ];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.pow: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.pow: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.print = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.print: Parameter "comp" must be a complex number.`);
             console.log(Chalkboard.comp.toString(comp));
         };
         comp_1.random = (inf = 0, sup = 1) => {
+            if (inf !== undefined && (!Number.isFinite(inf)))
+                throw new Error(`Chalkboard.comp.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup)))
+                throw new Error(`Chalkboard.comp.random: Parameter "sup" must be a finite number.`);
             return Chalkboard.comp.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         };
         comp_1.Re = (funcORcomp) => {
+            if ((funcORcomp === null || typeof funcORcomp !== "object" || ((typeof funcORcomp.a !== "number" || !Number.isFinite(funcORcomp.a) || typeof funcORcomp.b !== "number" || !Number.isFinite(funcORcomp.b)) && (typeof funcORcomp.rule !== "function" && !Array.isArray(funcORcomp.rule)))))
+                throw new Error(`Chalkboard.comp.Re: Parameter "funcORcomp" must be a complex number or a mathematical function object.`);
             if (funcORcomp.hasOwnProperty("rule")) {
                 return funcORcomp.rule[0];
             }
@@ -4693,20 +4917,26 @@ var Chalkboard;
         comp_1.reciprocate = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.reciprocate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(1 / z.a, 1 / z.b);
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.reciprocate: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.reciprocate: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => 1 / f[0](a, b), (a, b) => 1 / f[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.reciprocate: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.reciprocate: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.root = (comp, index = 3) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.root: Parameter "comp" must be a complex number.`);
+            if (!Number.isInteger(index) || index < 1)
+                throw new Error(`Chalkboard.comp.root: Parameter "index" must be a positive integer.`);
             const result = [];
             const r = Chalkboard.comp.mag(comp);
             const t = Chalkboard.comp.arg(comp);
@@ -4716,37 +4946,49 @@ var Chalkboard;
             return result;
         };
         comp_1.rotate = (comp, rad) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.rotate: Parameter "comp" must be a complex number.`);
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.comp.rotate: Parameter "rad" must be a finite number.`);
             return Chalkboard.comp.init(Chalkboard.comp.mag(comp) * Chalkboard.trig.cos(Chalkboard.comp.arg(comp) + rad), Chalkboard.comp.mag(comp) * Chalkboard.trig.sin(Chalkboard.comp.arg(comp) + rad));
         };
         comp_1.round = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.round: Parameter "comp" must be a complex number.`);
             return Chalkboard.comp.init(Math.round(comp.a), Math.round(comp.b));
         };
         comp_1.scl = (comp, num) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.scl: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.comp.scl: Parameter "num" must be a finite number.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(z.a * num, z.b * num);
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.scl: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.scl: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => f[0](a, b) * num, (a, b) => f[1](a, b) * num];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.scl: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.scl: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.sin = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.sin: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(Chalkboard.trig.sin(z.a) * Chalkboard.trig.cosh(z.b), Chalkboard.trig.cos(z.a) * Chalkboard.trig.sinh(z.b));
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.sin: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.sin: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 return Chalkboard.comp.define((a, b) => {
                     const re = f[0](a, b);
@@ -4758,37 +5000,43 @@ var Chalkboard;
                     return Chalkboard.trig.cos(re) * Chalkboard.trig.sinh(im);
                 });
             }
-            throw new TypeError("Chalkboard.comp.sin: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.sin: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.slope = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.slope: Parameter "comp" must be a complex number.`);
             return comp.b / comp.a;
         };
         comp_1.sq = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.sq: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(z.a * z.a - z.b * z.b, 2 * z.a * z.b);
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.sq: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.sq: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [(a, b) => f[0](a, b) * f[0](a, b) - f[1](a, b) * f[1](a, b), (a, b) => 2 * f[0](a, b) * f[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.sq: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.sq: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.sqrt = (comp) => {
             if (typeof comp === "number")
                 comp = Chalkboard.comp.init(comp, 0);
+            if (comp === null || typeof comp !== "object")
+                throw new Error(`Chalkboard.comp.sqrt: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp.hasOwnProperty("a") && comp.hasOwnProperty("b")) {
                 const z = comp;
                 return Chalkboard.comp.init(Chalkboard.real.sqrt((z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2), Chalkboard.numb.sgn(z.b) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2));
             }
             else if (comp.hasOwnProperty("rule")) {
                 if (comp.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.sqrt: Property 'field' of 'comp' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.sqrt: Property "comp.field" must be comp.`);
                 const f = comp.rule;
                 const g = [
                     (a, b) => {
@@ -4804,13 +5052,17 @@ var Chalkboard;
                 ];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.sqrt: Parameter 'comp' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.sqrt: Parameter "comp" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.sub = (comp1, comp2) => {
             if (typeof comp1 === "number")
                 comp1 = Chalkboard.comp.init(comp1, 0);
             if (typeof comp2 === "number")
                 comp2 = Chalkboard.comp.init(comp2, 0);
+            if (comp1 === null || typeof comp1 !== "object")
+                throw new Error(`Chalkboard.comp.sub: Parameter "comp1" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
+            if (comp2 === null || typeof comp2 !== "object")
+                throw new Error(`Chalkboard.comp.sub: Parameter "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
             if (comp1.hasOwnProperty("a") && comp1.hasOwnProperty("b") && comp2.hasOwnProperty("a") && comp2.hasOwnProperty("b")) {
                 const z1 = comp1;
                 const z2 = comp2;
@@ -4818,24 +5070,32 @@ var Chalkboard;
             }
             else if (comp1.hasOwnProperty("rule") || comp2.hasOwnProperty("rule")) {
                 if (comp1.field !== "comp" || comp2.field !== "comp")
-                    throw new TypeError("Chalkboard.comp.sub: Properties 'field' of 'comp1' and 'comp2' must be 'comp'.");
+                    throw new Error(`Chalkboard.comp.sub: Properties "comp1.field" and "comp2.field" must be comp.`);
                 const f1 = comp1.rule;
                 const f2 = comp2.rule;
                 const g = [(a, b) => f1[0](a, b) - f2[0](a, b), (a, b) => f1[1](a, b) - f2[1](a, b)];
                 return Chalkboard.comp.define(...g);
             }
-            throw new TypeError("Chalkboard.comp.sub: Parameters 'comp1' and 'comp2' must be of type ChalkboardComplex, number, or ChalkboardFunction.");
+            throw new Error(`Chalkboard.comp.sub: Parameters "comp1" and "comp2" must be of type ChalkboardComplex, number, or ChalkboardFunction.`);
         };
         comp_1.tan = (comp) => {
+            if ((!Number.isFinite(comp)) && (comp === null || typeof comp !== "object" || ((typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b)) && (typeof comp.rule !== "function" && !Array.isArray(comp.rule)))))
+                throw new Error(`Chalkboard.comp.tan: Parameter "comp" must be a finite number, complex number, or mathematical function object.`);
             return Chalkboard.comp.div(Chalkboard.comp.sin(comp), Chalkboard.comp.cos(comp));
         };
         comp_1.toArray = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.toArray: Parameter "comp" must be a complex number.`);
             return [comp.a, comp.b];
         };
         comp_1.toMatrix = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.toMatrix: Parameter "comp" must be a complex number.`);
             return Chalkboard.matr.init([comp.a, -comp.b], [comp.b, comp.a]);
         };
         comp_1.toString = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.toString: Parameter "comp" must be a complex number.`);
             if (comp.a === 1 && comp.b === 0) {
                 return "1";
             }
@@ -4875,14 +5135,16 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.comp.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         comp_1.toVector = (comp) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.comp.toVector: Parameter "comp" must be a complex number.`);
             return Chalkboard.vect.init(comp.a, comp.b);
         };
         comp_1.val = (func, comp) => {
             if (func.field !== "comp")
-                throw new TypeError("Chalkboard.comp.val: Property 'field' of 'func' must be 'comp'.");
+                throw new Error(`Chalkboard.comp.val: Property "func.field" must be comp.`);
             const f = func.rule;
             return Chalkboard.comp.init(f[0](comp.a, comp.b), f[1](comp.a, comp.b));
         };
@@ -4893,7 +5155,7 @@ var Chalkboard;
     let diff;
     (function (diff) {
         diff.at = (sol, time) => {
-            if (typeof time !== "number" || !Number.isFinite(time))
+            if (!Number.isFinite(time))
                 throw new Error(`Chalkboard.diff.at: Parameter "time" must be a finite number.`);
             const t = sol.t;
             const y = sol.y;
@@ -4914,14 +5176,14 @@ var Chalkboard;
             return result;
         };
         diff.Bernoulli = (p, q, n) => {
-            if (typeof n !== "number" || !Number.isFinite(n))
+            if (!Number.isFinite(n))
                 throw new Error(`Chalkboard.diff.Bernoulli: Parameter "n" must be a finite number.`);
             const P = (typeof p === "number") ? ((t) => p) : p;
             const Q = (typeof q === "number") ? ((t) => q) : q;
             return Chalkboard.diff.init((t, y) => -P(t) * y + Q(t) * Math.pow(y, n));
         };
         diff.BesselI = (nu = 0) => {
-            if (typeof nu !== "number" || !Number.isFinite(nu))
+            if (!Number.isFinite(nu))
                 throw new Error(`Chalkboard.diff.BesselI: Parameter "nu" must be a finite number.`);
             return Chalkboard.diff.init((t, y, dy) => {
                 if (t === 0)
@@ -4931,7 +5193,7 @@ var Chalkboard;
             });
         };
         diff.BesselJ = (nu = 0) => {
-            if (typeof nu !== "number" || !Number.isFinite(nu))
+            if (!Number.isFinite(nu))
                 throw new Error(`Chalkboard.diff.BesselJ: Parameter "nu" must be a finite number.`);
             return Chalkboard.diff.init((t, y, dy) => {
                 if (t === 0)
@@ -4944,7 +5206,7 @@ var Chalkboard;
         diff.closestIndex = (t, target) => {
             if (!Array.isArray(t) || t.length === 0)
                 throw new Error(`Chalkboard.diff.closestIndex: Parameter "t" must be a non-empty array.`);
-            if (typeof target !== "number" || !Number.isFinite(target))
+            if (!Number.isFinite(target))
                 throw new Error(`Chalkboard.diff.closestIndex: Parameter "target" must be a finite number.`);
             let result = 0;
             let resultDist = Math.abs(t[0] - target);
@@ -4959,11 +5221,11 @@ var Chalkboard;
         };
         diff.component = (sol, index) => {
             if (!Number.isInteger(index) || index < 0)
-                throw new Error(`Chalkboard.diff.component: Parameter "index" must be an integer >= 0.`);
+                throw new Error(`Chalkboard.diff.component: Parameter "index" must be a non-negative integer.`);
+            if (sol.y.length > 0 && index >= sol.y[0].length || sol.y.length > 1 && index >= sol.y[sol.y.length - 1].length)
+                throw new Error(`Chalkboard.diff.component: Parameter "index" must be within the first and last solution rows.`);
             const result = [];
             for (let i = 0; i < sol.y.length; i++) {
-                if (index >= sol.y[i].length)
-                    throw new Error(`Chalkboard.diff.component: "index" out of range for solution dimension.`);
                 result.push(sol.y[i][index]);
             }
             return result;
@@ -4999,8 +5261,8 @@ var Chalkboard;
             return dy;
         };
         diff.Duffing = (delta, alpha, beta, gamma, omega) => {
-            if (![delta, alpha, beta, gamma, omega].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.Duffing: Parameters must be finite numbers.`);
+            if (!Number.isFinite(delta) || !Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(omega))
+                throw new Error(`Chalkboard.diff.Duffing: Parameters "delta", "alpha", "beta", "gamma", and "omega" must be finite numbers.`);
             return Chalkboard.diff.init((t, x, v) => -delta * v - alpha * x - beta * x * x * x + gamma * Math.cos(omega * t));
         };
         diff.error = (sol, ode, norm = "L2") => {
@@ -5063,33 +5325,33 @@ var Chalkboard;
             return { t: t.slice(), e, max: maxErr, mean, rmse };
         };
         diff.exponential = (k = 1) => {
-            if (typeof k !== "number" || !Number.isFinite(k))
+            if (!Number.isFinite(k))
                 throw new Error(`Chalkboard.diff.exponential: Parameter "k" must be a finite number.`);
             return Chalkboard.diff.init((t, y) => k * y);
         };
         diff.Gompertz = (a = 1, K = 1) => {
-            if (typeof a !== "number" || !Number.isFinite(a))
+            if (!Number.isFinite(a))
                 throw new Error(`Chalkboard.diff.Gompertz: Parameter "a" must be a finite number.`);
-            if (typeof K !== "number" || !Number.isFinite(K) || K <= 0)
+            if (!Number.isFinite(K) || K <= 0)
                 throw new Error(`Chalkboard.diff.Gompertz: Parameter "K" must be greater than 0.`);
             return Chalkboard.diff.init((t, y) => a * y * Math.log(K / y));
         };
         diff.harmonic = (w = 1) => {
-            if (typeof w !== "number" || !Number.isFinite(w) || w < 0)
+            if (!Number.isFinite(w) || w < 0)
                 throw new Error(`Chalkboard.diff.harmonic: Parameter "w" must be a finite number greater than or equal to 0.`);
             return Chalkboard.diff.init((t, y, dy) => -(w * w) * y);
         };
         diff.harmonicDamped = (w = 1, zeta = 0.1) => {
-            if (typeof w !== "number" || !Number.isFinite(w) || w < 0)
+            if (!Number.isFinite(w) || w < 0)
                 throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "w" must be a finite number greater than or equal to 0.`);
-            if (typeof zeta !== "number" || !Number.isFinite(zeta) || zeta < 0)
+            if (!Number.isFinite(zeta) || zeta < 0)
                 throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "zeta" must be a finite number greater than or equal to 0.`);
             return Chalkboard.diff.init((t, y, dy) => -2 * zeta * w * dy - (w * w) * y);
         };
         diff.harmonicForced = (w, zeta, F) => {
-            if (typeof w !== "number" || !Number.isFinite(w) || w < 0)
+            if (!Number.isFinite(w) || w < 0)
                 throw new Error(`Chalkboard.diff.harmonicForced: Parameter "w" must be a finite number greater than or equal to 0.`);
-            if (typeof zeta !== "number" || !Number.isFinite(zeta) || zeta < 0)
+            if (!Number.isFinite(zeta) || zeta < 0)
                 throw new Error(`Chalkboard.diff.harmonicForced: Parameter "zeta" must be a finite number greater than or equal to 0.`);
             if (typeof F !== "function")
                 throw new Error(`Chalkboard.diff.harmonicForced: Parameter "F" must be a function.`);
@@ -5100,7 +5362,7 @@ var Chalkboard;
                 throw new Error(`Chalkboard.diff.init: Parameter "rule" must be a function.`);
             if (typeof dimension === "number") {
                 if (!Number.isInteger(dimension) || dimension < 1)
-                    throw new Error(`Chalkboard.diff.init: Parameter "dimension" must be an integer >= 1.`);
+                    throw new Error(`Chalkboard.diff.init: Parameter "dimension" must be a positive integer.`);
                 const sys = rule;
                 const ode = {
                     rule: (t, y) => {
@@ -5109,9 +5371,8 @@ var Chalkboard;
                             throw new Error(`Chalkboard.diff.init: System rule must return an array of numbers.`);
                         if (out.length !== dimension)
                             throw new Error(`Chalkboard.diff.init: System rule must return an array of length ${dimension}.`);
-                        for (let i = 0; i < out.length; i++)
-                            if (typeof out[i] !== "number" || !Number.isFinite(out[i]))
-                                throw new Error(`Chalkboard.diff.init: System rule output must be finite numbers (index ${i}).`);
+                        if (out.length > 0 && !Number.isFinite(out[0]) || out.length > 1 && !Number.isFinite(out[out.length - 1]))
+                            throw new Error(`Chalkboard.diff.init: System rule output must begin and end with finite numbers.`);
                         return out;
                     },
                     type: "system",
@@ -5128,7 +5389,7 @@ var Chalkboard;
                         if (y.length !== 1)
                             throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 1).`);
                         const dy = f(t, y[0]);
-                        if (typeof dy !== "number" || !Number.isFinite(dy))
+                        if (!Number.isFinite(dy))
                             throw new Error(`Chalkboard.diff.init: Scalar rule must return a finite number.`);
                         return [dy];
                     },
@@ -5144,7 +5405,7 @@ var Chalkboard;
                         if (y.length !== 2)
                             throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 2 for second-order scalar).`);
                         const ddy = g(t, y[0], y[1]);
-                        if (typeof ddy !== "number" || !Number.isFinite(ddy))
+                        if (!Number.isFinite(ddy))
                             throw new Error(`Chalkboard.diff.init: Second-order scalar rule must return a finite number.`);
                         return [y[1], ddy];
                     },
@@ -5156,8 +5417,8 @@ var Chalkboard;
             throw new Error(`Chalkboard.diff.init: Invalid "rule" arity. Expected (t,y) or (t,y,dy), or provide dimension for systems.`);
         };
         diff.Kepler2D = (mu = 1) => {
-            if (typeof mu !== "number" || !Number.isFinite(mu) || mu < 0)
-                throw new Error(`Chalkboard.diff.Kepler2D: Parameter "mu" must be a finite number >= 0.`);
+            if (!Number.isFinite(mu) || mu < 0)
+                throw new Error(`Chalkboard.diff.Kepler2D: Parameter "mu" must be a finite non-negative number.`);
             return Chalkboard.diff.init((t, y) => {
                 const x = y[0], yy = y[1], vx = y[2], vy = y[3];
                 const r2 = x * x + yy * yy;
@@ -5171,8 +5432,8 @@ var Chalkboard;
             }, 4);
         };
         diff.Kepler3D = (mu = 1) => {
-            if (typeof mu !== "number" || !Number.isFinite(mu) || mu < 0)
-                throw new Error(`Chalkboard.diff.Kepler3D: Parameter "mu" must be a finite number >= 0.`);
+            if (!Number.isFinite(mu) || mu < 0)
+                throw new Error(`Chalkboard.diff.Kepler3D: Parameter "mu" must be a finite non-negative number.`);
             return Chalkboard.diff.init((t, y) => {
                 const x = y[0], yy = y[1], z = y[2];
                 const vx = y[3], vy = y[4], vz = y[5];
@@ -5188,26 +5449,36 @@ var Chalkboard;
             }, 6);
         };
         diff.linear1 = (a, b) => {
+            if ((!Number.isFinite(a)) && typeof a !== "function")
+                throw new Error(`Chalkboard.diff.linear1: Parameter "a" must be a finite number or a function.`);
+            if ((!Number.isFinite(b)) && typeof b !== "function")
+                throw new Error(`Chalkboard.diff.linear1: Parameter "b" must be a finite number or a function.`);
             const A = typeof a === "number" ? (() => a) : a;
             const B = typeof b === "number" ? (() => b) : b;
             return Chalkboard.diff.init((t, y) => A(t) * y + B(t));
         };
         diff.linear2 = (a, b, c) => {
+            if ((!Number.isFinite(a)) && typeof a !== "function")
+                throw new Error(`Chalkboard.diff.linear2: Parameter "a" must be a finite number or a function.`);
+            if ((!Number.isFinite(b)) && typeof b !== "function")
+                throw new Error(`Chalkboard.diff.linear2: Parameter "b" must be a finite number or a function.`);
+            if ((!Number.isFinite(c)) && typeof c !== "function")
+                throw new Error(`Chalkboard.diff.linear2: Parameter "c" must be a finite number or a function.`);
             const A = typeof a === "number" ? (() => a) : a;
             const B = typeof b === "number" ? (() => b) : b;
             const C = typeof c === "number" ? (() => c) : c;
             return Chalkboard.diff.init((t, y, dy) => A(t) * dy + B(t) * y + C(t));
         };
         diff.logistic = (r = 1, K = 1) => {
-            if (typeof r !== "number" || !Number.isFinite(r))
+            if (!Number.isFinite(r))
                 throw new Error(`Chalkboard.diff.logistic: Parameter "r" must be a finite number.`);
-            if (typeof K !== "number" || !Number.isFinite(K) || K === 0)
+            if (!Number.isFinite(K) || K === 0)
                 throw new Error(`Chalkboard.diff.logistic: Parameter "K" must be a finite non-zero number.`);
             return Chalkboard.diff.init((t, y) => r * y * (1 - y / K));
         };
         diff.Lorenz = (sigma = 10, rho = 28, beta = 8 / 3) => {
-            if (![sigma, rho, beta].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.Lorenz: Parameters must be finite numbers.`);
+            if (!Number.isFinite(sigma) || !Number.isFinite(rho) || !Number.isFinite(beta))
+                throw new Error(`Chalkboard.diff.Lorenz: Parameters "sigma", "rho", and "beta" must be finite numbers.`);
             return Chalkboard.diff.init((t, y) => {
                 const x = y[0], yy = y[1], z = y[2];
                 return [
@@ -5218,61 +5489,65 @@ var Chalkboard;
             }, 3);
         };
         diff.LotkaVolterra = (alpha = 1, beta = 1, gamma = 1, delta = 1) => {
-            if (![alpha, beta, gamma, delta].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.LotkaVolterra: Parameters must be finite numbers.`);
+            if (!Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(delta))
+                throw new Error(`Chalkboard.diff.LotkaVolterra: Parameters "alpha", "beta", "gamma", and "delta" must be finite numbers.`);
             return Chalkboard.diff.init((t, y) => {
                 const x = y[0], p = y[1];
                 return [alpha * x - beta * x * p, delta * x * p - gamma * p];
             }, 2);
         };
         diff.massSpringDamper = (m, c, k) => {
-            if (typeof m !== "number" || !Number.isFinite(m) || m === 0)
+            if (!Number.isFinite(m) || m === 0)
                 throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "m" must be finite and non-zero.`);
-            if (typeof c !== "number" || !Number.isFinite(c))
+            if (!Number.isFinite(c))
                 throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "c" must be a finite number.`);
-            if (typeof k !== "number" || !Number.isFinite(k))
+            if (!Number.isFinite(k))
                 throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "k" must be a finite number.`);
             return Chalkboard.diff.init((t, x, v) => -(c / m) * v - (k / m) * x);
         };
         diff.pendulum = (params = {}) => {
+            if (params === null || typeof params !== "object" || Array.isArray(params))
+                throw new Error(`Chalkboard.diff.pendulum: Parameter "params" must be an object.`);
             const g = params.g ?? 9.81;
             const L = params.L ?? 1;
             const b = params.b ?? 0;
             const tau = params.tau ?? (() => 0);
-            if (typeof g !== "number" || !Number.isFinite(g) || g < 0)
-                throw new Error(`Chalkboard.diff.pendulum: "g" must be a finite number greater than or equal to 0.`);
-            if (typeof L !== "number" || !Number.isFinite(L) || L === 0)
-                throw new Error(`Chalkboard.diff.pendulum: "L" must be a finite non-zero number.`);
-            if (typeof b !== "number" || !Number.isFinite(b))
-                throw new Error(`Chalkboard.diff.pendulum: "b" must be a finite number.`);
+            if (!Number.isFinite(g) || g < 0)
+                throw new Error(`Chalkboard.diff.pendulum: Property "params.g" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(L) || L <= 0)
+                throw new Error(`Chalkboard.diff.pendulum: Property "params.L" must be greater than 0.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.diff.pendulum: Property "params.b" must be greater than or equal to 0.`);
             if (typeof tau !== "function")
-                throw new Error(`Chalkboard.diff.pendulum: "tau" must be a function.`);
+                throw new Error(`Chalkboard.diff.pendulum: Property "params.tau" must be a function.`);
             return Chalkboard.diff.init((t, theta, omega) => tau(t) - b * omega - (g / L) * Math.sin(theta));
         };
         diff.pendulumDrag = (params = {}) => {
+            if (params === null || typeof params !== "object" || Array.isArray(params))
+                throw new Error(`Chalkboard.diff.pendulumDrag: Parameter "params" must be an object.`);
             const g = params.g ?? 9.81;
             const L = params.L ?? 1;
             const b = params.b ?? 0;
             const c = params.c ?? 0;
             const tau = params.tau ?? (() => 0);
-            if (typeof g !== "number" || !Number.isFinite(g) || g < 0)
-                throw new Error(`Chalkboard.diff.pendulumDrag: "g" must be a finite number greater than or equal to 0.`);
-            if (typeof L !== "number" || !Number.isFinite(L) || L === 0)
-                throw new Error(`Chalkboard.diff.pendulumDrag: "L" must be a finite non-zero number.`);
-            if (typeof b !== "number" || !Number.isFinite(b))
-                throw new Error(`Chalkboard.diff.pendulumDrag: "b" must be a finite number.`);
-            if (typeof c !== "number" || !Number.isFinite(c))
-                throw new Error(`Chalkboard.diff.pendulumDrag: "c" must be a finite number.`);
+            if (!Number.isFinite(g) || g < 0)
+                throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.g" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(L) || L <= 0)
+                throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.L" must be greater than 0.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.b" must be greater than or equal to 0.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.c" must be greater than or equal to 0.`);
             if (typeof tau !== "function")
-                throw new Error(`Chalkboard.diff.pendulumDrag: "tau" must be a function.`);
+                throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.tau" must be a function.`);
             return Chalkboard.diff.init((t, theta, omega) => {
                 const quad = c * Math.abs(omega) * omega;
                 return tau(t) - b * omega - quad - (g / L) * Math.sin(theta);
             });
         };
         diff.pendulumDriven = (q = 0.5, A = 1.2, Omega = 2 / 3) => {
-            if (![q, A, Omega].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.pendulumDriven: Parameters must be finite numbers.`);
+            if (!Number.isFinite(q) || !Number.isFinite(A) || !Number.isFinite(Omega))
+                throw new Error(`Chalkboard.diff.pendulumDriven: Parameters "q", "A", and "Omega" must be finite numbers.`);
             return Chalkboard.diff.init((t, theta, omega) => A * Math.cos(Omega * t) - q * omega - Math.sin(theta));
         };
         diff.phase = (sol, i, j) => {
@@ -5283,9 +5558,9 @@ var Chalkboard;
             if (sol.y.length === 0)
                 throw new Error(`Chalkboard.diff.phase: Solution has no samples.`);
             if (!Number.isInteger(i) || i < 0)
-                throw new Error(`Chalkboard.diff.phase: Parameter "i" must be an integer >= 0.`);
+                throw new Error(`Chalkboard.diff.phase: Parameter "i" must be a non-negative integer.`);
             if (!Number.isInteger(j) || j < 0)
-                throw new Error(`Chalkboard.diff.phase: Parameter "j" must be an integer >= 0.`);
+                throw new Error(`Chalkboard.diff.phase: Parameter "j" must be a non-negative integer.`);
             if (i === j)
                 throw new Error(`Chalkboard.diff.phase: Parameters "i" and "j" must be different indices.`);
             if (i >= sol.y[0].length || j >= sol.y[0].length)
@@ -5302,22 +5577,22 @@ var Chalkboard;
                 throw new Error(`Chalkboard.diff.sample: Invalid solution object.`);
             if (!Array.isArray(times))
                 throw new Error(`Chalkboard.diff.sample: Parameter "times" must be an array.`);
+            if (times.length > 0 && !Number.isFinite(times[0]) || times.length > 1 && !Number.isFinite(times[times.length - 1]))
+                throw new Error(`Chalkboard.diff.sample: Parameter "times" must begin and end with finite numbers.`);
             const result = [];
             for (let i = 0; i < times.length; i++) {
-                if (typeof times[i] !== "number" || !Number.isFinite(times[i]))
-                    throw new Error(`Chalkboard.diff.sample: "times"[${i}] must be a finite number.`);
                 result.push(Chalkboard.diff.at(sol, times[i]));
             }
             return result;
         };
         diff.separable = (f, g) => {
             if (typeof f !== "function" || typeof g !== "function")
-                throw new Error(`Chalkboard.diff.separable: Parameters must be functions.`);
+                throw new Error(`Chalkboard.diff.separable: Parameters "f" and "g" must be functions.`);
             return Chalkboard.diff.init((t, y) => f(t) * g(y));
         };
         diff.SEIR = (beta = 1, sigma = 1, gamma = 1) => {
-            if (![beta, sigma, gamma].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.SEIR: Parameters must be finite numbers.`);
+            if (!Number.isFinite(beta) || !Number.isFinite(sigma) || !Number.isFinite(gamma))
+                throw new Error(`Chalkboard.diff.SEIR: Parameters "beta", "sigma", and "gamma" must be finite numbers.`);
             return Chalkboard.diff.init((t, y) => {
                 const S = y[0], E = y[1], I = y[2], R = y[3];
                 const inf = beta * S * I;
@@ -5330,16 +5605,16 @@ var Chalkboard;
             }, 4);
         };
         diff.SIR = (beta = 1, gamma = 1) => {
-            if (![beta, gamma].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.SIR: Parameters must be finite numbers.`);
+            if (!Number.isFinite(beta) || !Number.isFinite(gamma))
+                throw new Error(`Chalkboard.diff.SIR: Parameters "beta" and "gamma" must be finite numbers.`);
             return Chalkboard.diff.init((t, y) => {
                 const S = y[0], I = y[1], R = y[2];
                 return [-beta * S * I, beta * S * I - gamma * I, gamma * I];
             }, 3);
         };
         diff.SIS = (beta = 1, gamma = 0.5) => {
-            if (![beta, gamma].every((n) => typeof n === "number" && Number.isFinite(n)))
-                throw new Error(`Chalkboard.diff.SIS: Parameters must be finite numbers.`);
+            if (!Number.isFinite(beta) || !Number.isFinite(gamma))
+                throw new Error(`Chalkboard.diff.SIS: Parameters "beta" and "gamma" must be finite numbers.`);
             return Chalkboard.diff.init((t, I) => beta * I * (1 - I) - gamma * I);
         };
         diff.solve = (ode, config) => {
@@ -5348,13 +5623,13 @@ var Chalkboard;
             if (typeof ode.rule !== "function")
                 throw new Error(`Chalkboard.diff.solve: "ode.rule" must be a function.`);
             if (!Number.isInteger(ode.dimension) || ode.dimension < 1)
-                throw new Error(`Chalkboard.diff.solve: "ode.dimension" must be an integer >= 1.`);
+                throw new Error(`Chalkboard.diff.solve: Property "ode.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null)
                 throw new Error(`Chalkboard.diff.solve: Parameter "config" must be an object.`);
             if (typeof config.t1 !== "number" || !Number.isFinite(config.t1))
                 throw new Error(`Chalkboard.diff.solve: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
-            if (typeof t0 !== "number" || !Number.isFinite(t0))
+            if (!Number.isFinite(t0))
                 throw new Error(`Chalkboard.diff.solve: "config.t0" must be a finite number.`);
             if (config.t1 === t0)
                 throw new Error(`Chalkboard.diff.solve: "config.t1" must be different from "config.t0".`);
@@ -5365,27 +5640,26 @@ var Chalkboard;
             let keys;
             if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
                 if (ode.dimension !== 1)
-                    throw new Error(`Chalkboard.diff.solve: Scalar "y0" is only allowed when "ode.dimension" === 1.`);
+                    throw new Error(`Chalkboard.diff.solve: Property "config.y0" can be a scalar only when property "ode.dimension" is equal to 1.`);
                 y0 = [config.y0];
             }
             else if (Array.isArray(config.y0)) {
                 if (config.y0.length !== ode.dimension)
-                    throw new Error(`Chalkboard.diff.solve: Array "y0" must have length ${ode.dimension}.`);
-                for (let i = 0; i < config.y0.length; i++)
-                    if (typeof config.y0[i] !== "number" || !Number.isFinite(config.y0[i]))
-                        throw new Error(`Chalkboard.diff.solve: "y0"[${i}] must be a finite number.`);
+                    throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have length ${ode.dimension}.`);
+                if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1]))
+                    throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numbers.`);
                 y0 = config.y0.slice();
             }
             else {
                 if (typeof config.y0 !== "object" || config.y0 === null)
-                    throw new Error(`Chalkboard.diff.solve: "y0" must be of type number, number[], or object.`);
+                    throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be a number, number array, or object.`);
                 const y0obj = config.y0;
                 if (ode.type === "single" && ode.order === 2) {
                     if (("y0" in y0obj) && ("dy0" in y0obj)) {
                         const a = y0obj.y0;
                         const b = y0obj.dy0;
-                        if (typeof a !== "number" || !Number.isFinite(a) || typeof b !== "number" || !Number.isFinite(b))
-                            throw new Error(`Chalkboard.diff.solve: For second-order scalar, "y0.y0" and "y0.dy0" must be finite numbers.`);
+                        if (!Number.isFinite(a) || !Number.isFinite(b))
+                            throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
                         y0 = [a, b];
                         if (config.returnObject)
                             keys = ["y", "dy"];
@@ -5393,8 +5667,8 @@ var Chalkboard;
                     else if (("y" in y0obj) && ("dy" in y0obj)) {
                         const a = y0obj.y;
                         const b = y0obj.dy;
-                        if (typeof a !== "number" || !Number.isFinite(a) || typeof b !== "number" || !Number.isFinite(b))
-                            throw new Error(`Chalkboard.diff.solve: For second-order scalar, "y0.y" and "y0.dy" must be finite numbers.`);
+                        if (!Number.isFinite(a) || !Number.isFinite(b))
+                            throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
                         y0 = [a, b];
                         if (config.returnObject)
                             keys = ["y", "dy"];
@@ -5416,21 +5690,20 @@ var Chalkboard;
                 else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
                     const arr = y0obj.y0;
                     if (arr.length !== ode.dimension)
-                        throw new Error(`Chalkboard.diff.solve: Object "y0.y0" must have length ${ode.dimension}.`);
-                    for (let i = 0; i < arr.length; i++)
-                        if (typeof arr[i] !== "number" || !Number.isFinite(arr[i]))
-                            throw new Error(`Chalkboard.diff.solve: y0.y0[${i}] must be a finite number.`);
+                        throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must have length ${ode.dimension}.`);
+                    if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1]))
+                        throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must begin and end with finite numbers.`);
                     y0 = arr.slice();
                 }
                 else {
                     keys = Object.keys(config.y0).sort();
                     if (keys.length !== ode.dimension)
-                        throw new Error(`Chalkboard.diff.solve: Object "y0" must have exactly ${ode.dimension} numeric properties (got ${keys.length}).`);
+                        throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have exactly ${ode.dimension} numeric properties, but it has ${keys.length}.`);
+                    if (keys.length > 0 && !Number.isFinite(config.y0[keys[0]]) || keys.length > 1 && !Number.isFinite(config.y0[keys[keys.length - 1]]))
+                        throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numeric properties.`);
                     const arr = [];
                     for (let i = 0; i < keys.length; i++) {
                         const v = config.y0[keys[i]];
-                        if (typeof v !== "number" || !Number.isFinite(v))
-                            throw new Error(`Chalkboard.diff.solve: y0.${keys[i]} must be a finite number.`);
                         arr.push(v);
                     }
                     y0 = arr;
@@ -5513,11 +5786,6 @@ var Chalkboard;
                 const ti = t[i];
                 const yi = y[i];
                 const yNext = stepper(f, ti, yi, h);
-                if (!Array.isArray(yNext) || yNext.length !== ode.dimension)
-                    throw new Error(`Chalkboard.diff.solve: Internal step produced invalid state length (expected ${ode.dimension}).`);
-                for (let k = 0; k < yNext.length; k++)
-                    if (typeof yNext[k] !== "number" || !Number.isFinite(yNext[k]))
-                        throw new Error(`Chalkboard.diff.solve: State became non-finite at step ${i + 1}, index ${k}.`);
                 t[i + 1] = ti + h;
                 y[i + 1] = yNext;
             }
@@ -5538,50 +5806,49 @@ var Chalkboard;
             if (typeof ode.rule !== "function")
                 throw new Error(`Chalkboard.diff.solveAdaptive: "ode.rule" must be a function.`);
             if (!Number.isInteger(ode.dimension) || ode.dimension < 1)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "ode.dimension" must be an integer >= 1.`);
+                throw new Error(`Chalkboard.diff.solveAdaptive: Property "ode.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null)
                 throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config" must be an object.`);
             if (typeof config.t1 !== "number" || !Number.isFinite(config.t1))
                 throw new Error(`Chalkboard.diff.solveAdaptive: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
-            if (typeof t0 !== "number" || !Number.isFinite(t0))
+            if (!Number.isFinite(t0))
                 throw new Error(`Chalkboard.diff.solveAdaptive: "config.t0" must be a finite number.`);
             if (config.t1 === t0)
                 throw new Error(`Chalkboard.diff.solveAdaptive: "config.t1" must be different from "config.t0".`);
             const rtol = config.rtol ?? 1e-6;
             const atol = config.atol ?? 1e-9;
-            if (typeof rtol !== "number" || !Number.isFinite(rtol) || rtol <= 0)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "rtol" must be > 0.`);
-            if (typeof atol !== "number" || !Number.isFinite(atol) || atol < 0)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "atol" must be >= 0.`);
+            if (!Number.isFinite(rtol) || rtol <= 0)
+                throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.rtol" must be greater than 0.`);
+            if (!Number.isFinite(atol) || atol < 0)
+                throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.atol" must be greater than or equal to 0.`);
             const maxSteps = config.maxSteps ?? 100000;
             if (!Number.isInteger(maxSteps) || maxSteps < 1)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "maxSteps" must be an integer >= 1.`);
+                throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" must be a positive integer.`);
             let y0;
             let keys;
             if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
                 if (ode.dimension !== 1)
-                    throw new Error(`Chalkboard.diff.solveAdaptive: Scalar "y0" is only allowed when "ode.dimension" === 1.`);
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" can be a scalar only when property "ode.dimension" is equal to 1.`);
                 y0 = [config.y0];
             }
             else if (Array.isArray(config.y0)) {
                 if (config.y0.length !== ode.dimension)
-                    throw new Error(`Chalkboard.diff.solveAdaptive: Array "y0" must have length ${ode.dimension}.`);
-                for (let i = 0; i < config.y0.length; i++)
-                    if (typeof config.y0[i] !== "number" || !Number.isFinite(config.y0[i]))
-                        throw new Error(`Chalkboard.diff.solveAdaptive: "y0"[${i}] must be a finite number.`);
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have length ${ode.dimension}.`);
+                if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1]))
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numbers.`);
                 y0 = config.y0.slice();
             }
             else {
                 if (typeof config.y0 !== "object" || config.y0 === null)
-                    throw new Error(`Chalkboard.diff.solveAdaptive: "y0" must be of type number, number[], or object.`);
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be a number, number array, or object.`);
                 const y0obj = config.y0;
                 if (ode.type === "single" && ode.order === 2) {
                     if (("y0" in y0obj) && ("dy0" in y0obj)) {
                         const a = y0obj.y0;
                         const b = y0obj.dy0;
-                        if (typeof a !== "number" || !Number.isFinite(a) || typeof b !== "number" || !Number.isFinite(b))
-                            throw new Error(`Chalkboard.diff.solveAdaptive: For second-order scalar, "y0.y0" and "y0.dy0" must be finite numbers.`);
+                        if (!Number.isFinite(a) || !Number.isFinite(b))
+                            throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
                         y0 = [a, b];
                         if (config.returnObject)
                             keys = ["y", "dy"];
@@ -5589,8 +5856,8 @@ var Chalkboard;
                     else if (("y" in y0obj) && ("dy" in y0obj)) {
                         const a = y0obj.y;
                         const b = y0obj.dy;
-                        if (typeof a !== "number" || !Number.isFinite(a) || typeof b !== "number" || !Number.isFinite(b))
-                            throw new Error(`Chalkboard.diff.solveAdaptive: For second-order scalar, "y0.y" and "y0.dy" must be finite numbers.`);
+                        if (!Number.isFinite(a) || !Number.isFinite(b))
+                            throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
                         y0 = [a, b];
                         if (config.returnObject)
                             keys = ["y", "dy"];
@@ -5612,21 +5879,20 @@ var Chalkboard;
                 else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
                     const arr = y0obj.y0;
                     if (arr.length !== ode.dimension)
-                        throw new Error(`Chalkboard.diff.solveAdaptive: Object "y0.y0" must have length ${ode.dimension}.`);
-                    for (let i = 0; i < arr.length; i++)
-                        if (typeof arr[i] !== "number" || !Number.isFinite(arr[i]))
-                            throw new Error(`Chalkboard.diff.solveAdaptive: y0.y0[${i}] must be a finite number.`);
+                        throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must have length ${ode.dimension}.`);
+                    if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1]))
+                        throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must begin and end with finite numbers.`);
                     y0 = arr.slice();
                 }
                 else {
                     keys = Object.keys(config.y0).sort();
                     if (keys.length !== ode.dimension)
-                        throw new Error(`Chalkboard.diff.solveAdaptive: Object "y0" must have exactly ${ode.dimension} numeric properties (got ${keys.length}).`);
+                        throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have exactly ${ode.dimension} numeric properties, but it has ${keys.length}.`);
+                    if (keys.length > 0 && !Number.isFinite(config.y0[keys[0]]) || keys.length > 1 && !Number.isFinite(config.y0[keys[keys.length - 1]]))
+                        throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numeric properties.`);
                     const arr = [];
                     for (let i = 0; i < keys.length; i++) {
                         const v = config.y0[keys[i]];
-                        if (typeof v !== "number" || !Number.isFinite(v))
-                            throw new Error(`Chalkboard.diff.solveAdaptive: y0.${keys[i]} must be a finite number.`);
                         arr.push(v);
                     }
                     y0 = arr;
@@ -5642,15 +5908,15 @@ var Chalkboard;
             }
             const sign = Math.sign(config.t1 - t0);
             let h = config.h0 ?? (config.t1 - t0) / 100;
-            if (typeof h !== "number" || !Number.isFinite(h) || h === 0)
+            if (!Number.isFinite(h) || h === 0)
                 throw new Error(`Chalkboard.diff.solveAdaptive: "h0" must be a finite non-zero number (or omitted).`);
             h = Math.abs(h) * sign;
             const hMin = (config.hMin ?? 1e-12);
             const hMax = (config.hMax ?? Math.abs(config.t1 - t0));
-            if (typeof hMin !== "number" || !Number.isFinite(hMin) || hMin <= 0)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "hMin" must be > 0.`);
-            if (typeof hMax !== "number" || !Number.isFinite(hMax) || hMax <= 0)
-                throw new Error(`Chalkboard.diff.solveAdaptive: "hMax" must be > 0.`);
+            if (!Number.isFinite(hMin) || hMin <= 0)
+                throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "hMin" must be greater than 0.`);
+            if (!Number.isFinite(hMax) || hMax <= 0)
+                throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "hMax" must be greater than 0.`);
             const clampAbs = (value, minAbs, maxAbs) => {
                 const s = Math.sign(value) || 1;
                 const a = Math.min(maxAbs, Math.max(minAbs, Math.abs(value)));
@@ -5732,11 +5998,11 @@ var Chalkboard;
                     const factor = Math.min(1.0, Math.max(minFactor, safety * Math.pow(1 / e, 1 / 5)));
                     h = h * factor;
                     if (Math.abs(h) < hMin)
-                        throw new Error(`Chalkboard.diff.solveAdaptive: Step size underflow (h < hMin).`);
+                        throw new Error(`Chalkboard.diff.solveAdaptive: Step size became smaller than the minimum step size.`);
                 }
             }
             if (iter >= maxSteps)
-                throw new Error(`Chalkboard.diff.solveAdaptive: Exceeded maxSteps=${maxSteps}.`);
+                throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" cannot be exceeded; its value is ${maxSteps}.`);
             const result = { t, y };
             if (config.returnObject && keys && keys.length === ode.dimension) {
                 result.yObj = y.map((row) => {
@@ -5749,6 +6015,8 @@ var Chalkboard;
             return result;
         };
         diff.toScalarSeries = (sol) => {
+            if (sol === null || typeof sol !== "object")
+                throw new Error(`Chalkboard.diff.toScalarSeries: Parameter "sol" must be an object.`);
             const result = [];
             for (let i = 0; i < sol.y.length; i++)
                 result.push(sol.y[i][0]);
@@ -5761,27 +6029,51 @@ var Chalkboard;
     let geom;
     (function (geom) {
         geom.circleA = (r) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.circleA: Parameter "r" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * r;
         };
         geom.circleP = (r) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.circleP: Parameter "r" must be a non-negative finite number.`);
             return 2 * Chalkboard.PI() * r;
         };
         geom.coneA = (r, h) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.coneA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.coneA: Parameter "h" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * (r + Chalkboard.real.sqrt(h * h + r * r));
         };
         geom.coneV = (r, h) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.coneV: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.coneV: Parameter "h" must be a non-negative finite number.`);
             return (Chalkboard.PI() * r * r * h) / 3;
         };
         geom.cubeA = (s) => {
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.cubeA: Parameter "s" must be a non-negative finite number.`);
             return 6 * s * s;
         };
         geom.cubeV = (s) => {
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.cubeV: Parameter "s" must be a non-negative finite number.`);
             return s * s * s;
         };
         geom.cylinderA = (r, h) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.cylinderA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.cylinderA: Parameter "h" must be a non-negative finite number.`);
             return 2 * Chalkboard.PI() * r * r + 2 * Chalkboard.PI() * r * h;
         };
         geom.cylinderV = (r, h) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.cylinderV: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.cylinderV: Parameter "h" must be a non-negative finite number.`);
             return Chalkboard.PI() * r * r * h;
         };
         geom.dist = (p1, p2) => {
@@ -5793,7 +6085,7 @@ var Chalkboard;
                 return Chalkboard.real.sqrt(result);
             }
             else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.dist: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
         geom.distsq = (p1, p2) => {
@@ -5805,20 +6097,48 @@ var Chalkboard;
                 return result;
             }
             else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.distsq: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
         geom.ellipseA = (a, b) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.ellipseA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.ellipseA: Parameter "b" must be a non-negative finite number.`);
             return Chalkboard.PI() * a * b;
         };
         geom.ellipseP = (a, b) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.ellipseP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.ellipseP: Parameter "b" must be a non-negative finite number.`);
+            if (a === 0 && b === 0)
+                return 0;
             const h = ((a - b) * (a - b)) / ((a + b) * (a + b));
             return Chalkboard.PI() * (a + b) * (1 + (3 * h) / (10 + Math.sqrt(4 - 3 * h)));
         };
         geom.Euler = (v, e, f) => {
+            if (!Number.isInteger(v) || v < 0)
+                throw new Error(`Chalkboard.geom.Euler: Parameter "v" must be a non-negative integer.`);
+            if (!Number.isInteger(e) || e < 0)
+                throw new Error(`Chalkboard.geom.Euler: Parameter "e" must be a non-negative integer.`);
+            if (!Number.isInteger(f) || f < 0)
+                throw new Error(`Chalkboard.geom.Euler: Parameter "f" must be a non-negative integer.`);
             return v - e + f;
         };
         geom.line3D = (x1, y1, z1, x2, y2, z2, context = Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')()) => {
+            if (!Number.isFinite(x1))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(z1))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "z1" must be a finite number.`);
+            if (!Number.isFinite(x2))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "y2" must be a finite number.`);
+            if (!Number.isFinite(z2))
+                throw new Error(`Chalkboard.geom.line3D: Parameter "z2" must be a finite number.`);
             context.beginPath();
             context.moveTo(x1 / (z1 * 0.0025 + 1), y1 / (z1 * 0.0025 + 1));
             context.lineTo(x2 / (z2 * 0.0025 + 1), y2 / (z2 * 0.0025 + 1));
@@ -5833,22 +6153,48 @@ var Chalkboard;
                 return result;
             }
             else {
-                throw new RangeError('Parameters "p1" and "p2" must be of type "number[]" with the same "length" property.');
+                throw new Error(`Chalkboard.geom.mid: Parameters "p1" and "p2" must be of type number[] with the same "length" property.`);
             }
         };
         geom.parallelogramA = (l, w) => {
+            if (!Number.isFinite(l) || l < 0)
+                throw new Error(`Chalkboard.geom.parallelogramA: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0)
+                throw new Error(`Chalkboard.geom.parallelogramA: Parameter "w" must be a non-negative finite number.`);
             return l * w;
         };
         geom.parallelogramP = (l, w) => {
+            if (!Number.isFinite(l) || l < 0)
+                throw new Error(`Chalkboard.geom.parallelogramP: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0)
+                throw new Error(`Chalkboard.geom.parallelogramP: Parameter "w" must be a non-negative finite number.`);
             return 2 * (l + w);
         };
         geom.polygonA = (n, s, a) => {
+            if (!Number.isInteger(n) || n < 3)
+                throw new Error(`Chalkboard.geom.polygonA: Parameter "n" must be an integer greater than or equal to 3.`);
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.polygonA: Parameter "s" must be a non-negative finite number.`);
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.polygonA: Parameter "a" must be a non-negative finite number.`);
             return (n * s * a) / 2;
         };
         geom.polygonP = (n, s) => {
+            if (!Number.isInteger(n) || n < 3)
+                throw new Error(`Chalkboard.geom.polygonP: Parameter "n" must be an integer greater than or equal to 3.`);
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.polygonP: Parameter "s" must be a non-negative finite number.`);
             return n * s;
         };
         geom.Pythagorean = (a, b, type = "hyp") => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.Pythagorean: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.Pythagorean: Parameter "b" must be a non-negative finite number.`);
+            if (type !== "hyp" && type !== "leg")
+                throw new Error(`Chalkboard.geom.Pythagorean: Parameter "type" must be either hyp or leg.`);
+            if (type === "leg" && a > b)
+                throw new Error(`Chalkboard.geom.Pythagorean: Parameter "a" must be less than or equal to parameter "b" when parameter "type" is leg.`);
             if (type === "hyp") {
                 return Math.sqrt(a * a + b * b);
             }
@@ -5857,54 +6203,140 @@ var Chalkboard;
             }
         };
         geom.PythagoreanTriple = (inf, sup) => {
+            if (!Number.isFinite(inf) || inf < 1)
+                throw new Error(`Chalkboard.geom.PythagoreanTriple: Parameter "inf" must be a finite number greater than or equal to 1.`);
+            if (!Number.isFinite(sup) || sup < inf)
+                throw new Error(`Chalkboard.geom.PythagoreanTriple: Parameter "sup" must be a finite number greater than or equal to parameter "inf".`);
             const a = 2 * Math.round(Chalkboard.numb.random(inf, sup)) - 1, b = (a * a) / 2 - 0.5, c = (a * a) / 2 + 0.5;
             return [a, b, c];
         };
         geom.rectangularprismA = (l, w, h) => {
+            if (!Number.isFinite(l) || l < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "w" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismA: Parameter "h" must be a non-negative finite number.`);
             return 2 * (l * h + l * w + w * h);
         };
         geom.rectangularprismV = (l, w, h) => {
+            if (!Number.isFinite(l) || l < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "l" must be a non-negative finite number.`);
+            if (!Number.isFinite(w) || w < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "w" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.rectangularprismV: Parameter "h" must be a non-negative finite number.`);
             return l * w * h;
         };
         geom.sectorA = (r, rad) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.sectorA: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(rad) || rad < 0 || rad > Chalkboard.PI(2))
+                throw new Error(`Chalkboard.geom.sectorA: Parameter "rad" must be between 0 and 2π.`);
             return (r * r * rad) / 2;
         };
         geom.sectorP = (r, rad) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.sectorP: Parameter "r" must be a non-negative finite number.`);
+            if (!Number.isFinite(rad) || rad < 0 || rad > Chalkboard.PI(2))
+                throw new Error(`Chalkboard.geom.sectorP: Parameter "rad" must be between 0 and 2π.`);
             return r * rad;
         };
         geom.sphereA = (r) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.sphereA: Parameter "r" must be a non-negative finite number.`);
             return 4 * Chalkboard.PI() * r * r;
         };
         geom.sphereV = (r) => {
+            if (!Number.isFinite(r) || r < 0)
+                throw new Error(`Chalkboard.geom.sphereV: Parameter "r" must be a non-negative finite number.`);
             return (4 * Chalkboard.PI() * r * r * r) / 3;
         };
         geom.squareA = (s) => {
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.squareA: Parameter "s" must be a non-negative finite number.`);
             return s * s;
         };
         geom.squareP = (s) => {
+            if (!Number.isFinite(s) || s < 0)
+                throw new Error(`Chalkboard.geom.squareP: Parameter "s" must be a non-negative finite number.`);
             return 4 * s;
         };
         geom.trapezoidA = (b1, b2, h) => {
+            if (!Number.isFinite(b1) || b1 < 0)
+                throw new Error(`Chalkboard.geom.trapezoidA: Parameter "b1" must be a non-negative finite number.`);
+            if (!Number.isFinite(b2) || b2 < 0)
+                throw new Error(`Chalkboard.geom.trapezoidA: Parameter "b2" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.trapezoidA: Parameter "h" must be a non-negative finite number.`);
             return ((b1 + b2) / 2) * h;
         };
         geom.trapezoidP = (a, b, c, d) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.trapezoidP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.trapezoidP: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.geom.trapezoidP: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(d) || d < 0)
+                throw new Error(`Chalkboard.geom.trapezoidP: Parameter "d" must be a non-negative finite number.`);
             return a + b + c + d;
         };
         geom.triangleA = (b, h) => {
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.triangleA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.triangleA: Parameter "h" must be a non-negative finite number.`);
             return (b * h) / 2;
         };
         geom.triangleP = (a, b, c) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.triangleP: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.triangleP: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.geom.triangleP: Parameter "c" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a)
+                throw new Error(`Chalkboard.geom.triangleP: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             return a + b + c;
         };
         geom.trianglesidesA = (a, b, c) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.geom.trianglesidesA: Parameter "c" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a)
+                throw new Error(`Chalkboard.geom.trianglesidesA: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             const s = (a + b + c) / 2;
             return Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c)));
         };
         geom.triangularprismA = (a, b, c, h) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.triangularprismA: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.triangularprismA: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.geom.triangularprismA: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.triangularprismA: Parameter "h" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a)
+                throw new Error(`Chalkboard.geom.triangularprismA: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             const s = (a + b + c) / 2;
             return 2 * Chalkboard.real.sqrt(s * ((s - a) * (s - b) * (s - c))) + h * (a + b + c);
         };
         geom.triangularprismV = (a, b, c, h) => {
+            if (!Number.isFinite(a) || a < 0)
+                throw new Error(`Chalkboard.geom.triangularprismV: Parameter "a" must be a non-negative finite number.`);
+            if (!Number.isFinite(b) || b < 0)
+                throw new Error(`Chalkboard.geom.triangularprismV: Parameter "b" must be a non-negative finite number.`);
+            if (!Number.isFinite(c) || c < 0)
+                throw new Error(`Chalkboard.geom.triangularprismV: Parameter "c" must be a non-negative finite number.`);
+            if (!Number.isFinite(h) || h < 0)
+                throw new Error(`Chalkboard.geom.triangularprismV: Parameter "h" must be a non-negative finite number.`);
+            if (a + b <= c || a + c <= b || b + c <= a)
+                throw new Error(`Chalkboard.geom.triangularprismV: Parameters "a", "b", and "c" must form a non-degenerate triangle.`);
             return (h * Chalkboard.real.sqrt(-(a * a * a * a) + 2 * (a * b) * (a * b) + 2 * (a * c) * (a * c) - b * b * b * b + 2 * (b * c) * (b * c) - c * c * c * c)) / 4;
         };
     })(geom = Chalkboard.geom || (Chalkboard.geom = {}));
@@ -5913,8 +6345,10 @@ var Chalkboard;
 (function (Chalkboard) {
     let matr;
     (function (matr_1) {
-        const $ = (input) => {
+        const $ = (input, caller) => {
             const $$ = (x, y, z, w) => {
+                if (!Number.isFinite(x) || !Number.isFinite(y) || z !== undefined && !Number.isFinite(z) || w !== undefined && !Number.isFinite(w))
+                    throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (z === undefined && w === undefined) {
                     return { x: x, y: y };
                 }
@@ -5927,6 +6361,8 @@ var Chalkboard;
             };
             const v = input;
             if (v && typeof v.x === "number" && typeof v.y === "number") {
+                if (v.z !== undefined && typeof v.z !== "number" || v.w !== undefined && (typeof v.z !== "number" || typeof v.w !== "number"))
+                    throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (typeof v.z === "number" && typeof v.w === "number")
                     return $$(v.x, v.y, v.z, v.w);
                 if (typeof v.z === "number")
@@ -5985,21 +6421,21 @@ var Chalkboard;
                     const str = input.trim();
                     if (str.startsWith("(") && str.endsWith(")")) {
                         const content = str.substring(1, str.length - 1);
-                        const components = content.split(",").map(part => parseFloat(part.trim()));
-                        if (components.length >= 2 && components.every(p => !isNaN(p))) {
-                            if (components.length === 2)
-                                return $$(components[0], components[1]);
-                            if (components.length === 3)
-                                return $$(components[0], components[1], components[2]);
-                            if (components.length === 4)
-                                return $$(components[0], components[1], components[2], components[3]);
-                        }
+                        const components = content.split(",").map((part) => part.trim() === "" ? NaN : Number(part.trim()));
+                        if (components.length === 2 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]))
+                            return $$(components[0], components[1]);
+                        if (components.length === 3 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]))
+                            return $$(components[0], components[1], components[2]);
+                        if (components.length === 4 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]) && !Number.isNaN(components[3]))
+                            return $$(components[0], components[1], components[2], components[3]);
                     }
                 }
             }
-            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
+            throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
         };
         matr_1.absolute = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.absolute: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.abs(matr[0][0]), Math.abs(matr[0][1])], [Math.abs(matr[1][0]), Math.abs(matr[1][1])]);
             }
@@ -6043,7 +6479,7 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
+                throw new Error(`Chalkboard.matr.add: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows and columns.`);
             }
         };
         matr_1.addKronecker = (matr1, matr2) => {
@@ -6051,17 +6487,23 @@ var Chalkboard;
                 return Chalkboard.matr.add(Chalkboard.matr.mulKronecker(matr1, Chalkboard.matr.identity(Chalkboard.matr.rows(matr2))), Chalkboard.matr.mulKronecker(Chalkboard.matr.identity(Chalkboard.matr.rows(matr1)), matr2));
             }
             else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" that are square.');
+                throw new Error(`Chalkboard.matr.addKronecker: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix that are square.`);
             }
         };
         matr_1.adjugate = (matr, row, col) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.adjugate: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(row) || row < 0 || row >= matr.length)
+                throw new Error(`Chalkboard.matr.adjugate: Parameter "row" must be an integer within the matrix bounds.`);
+            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr))
+                throw new Error(`Chalkboard.matr.adjugate: Parameter "col" must be an integer within the matrix bounds.`);
             return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
         };
         matr_1.Cholesky = (matr) => {
             if (!Chalkboard.matr.isSquare(matr))
-                throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.');
+                throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.`);
             if (!Chalkboard.matr.isSymmetric(matr))
-                throw new TypeError('Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.');
+                throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.`);
             const n = Chalkboard.matr.rows(matr);
             const L = Chalkboard.matr.fill(0, n);
             for (let i = 0; i < n; i++) {
@@ -6072,7 +6514,7 @@ var Chalkboard;
                     }
                     if (i === j) {
                         if (sum <= 0)
-                            throw new RangeError('Chalkboard.matr.Cholesky: Matrix is not positive definite.');
+                            throw new Error(`Chalkboard.matr.Cholesky: Matrix is not positive definite.`);
                         L[i][j] = Chalkboard.real.sqrt(sum);
                     }
                     else {
@@ -6083,12 +6525,22 @@ var Chalkboard;
             return { L: L, U: Chalkboard.matr.transpose(L) };
         };
         matr_1.cofactor = (matr, row, col) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.cofactor: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(row) || row < 0 || row >= matr.length)
+                throw new Error(`Chalkboard.matr.cofactor: Parameter "row" must be an integer within the matrix bounds.`);
+            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr))
+                throw new Error(`Chalkboard.matr.cofactor: Parameter "col" must be an integer within the matrix bounds.`);
             return matr.slice(0, row).concat(matr.slice(row + 1)).map((row) => row.slice(0, col).concat(row.slice(col + 1)));
         };
         matr_1.cols = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.cols: Parameter "matr" must be a matrix.`);
             return matr[0].length;
         };
         matr_1.colspace = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.colspace: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
         };
         matr_1.concat = (matr1, matr2, axis = 0) => {
@@ -6108,7 +6560,7 @@ var Chalkboard;
                     }
                 }
                 else {
-                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of columns.');
+                    throw new Error(`Chalkboard.matr.concat: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of columns.`);
                 }
             }
             else if (axis === 1) {
@@ -6131,14 +6583,16 @@ var Chalkboard;
                     }
                 }
                 else {
-                    throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
+                    throw new Error(`Chalkboard.matr.concat: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows.`);
                 }
             }
             else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.concat: Parameter "axis" must be 0 or 1.`);
             }
         };
         matr_1.constrain = (matr, range = [0, 1]) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.constrain: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Chalkboard.numb.constrain(matr[0][0], range), Chalkboard.numb.constrain(matr[0][1], range)], [Chalkboard.numb.constrain(matr[1][0], range), Chalkboard.numb.constrain(matr[1][1], range)]);
             }
@@ -6160,6 +6614,8 @@ var Chalkboard;
             }
         };
         matr_1.copy = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.copy: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[0][1]], [matr[1][0], matr[1][1]]);
             }
@@ -6204,10 +6660,14 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.det: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.diagonal = (size, ...elements) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.diagonal: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1]))
+                throw new Error(`Chalkboard.matr.diagonal: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, 0], [0, elements[1] || 0]);
             }
@@ -6228,6 +6688,10 @@ var Chalkboard;
             }
         };
         matr_1.eigenvalue = (matr, maxIterations = 100) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.eigenvalue: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(maxIterations) || maxIterations < 1)
+                throw new Error(`Chalkboard.matr.eigenvalue: Parameter "maxIterations" must be a positive integer.`);
             let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
@@ -6245,6 +6709,10 @@ var Chalkboard;
                 dot(Chalkboard.matr.toArray(Chalkboard.matr.transpose(v)), Chalkboard.matr.toArray(v)));
         };
         matr_1.eigenvector = (matr, maxIterations = 100) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.eigenvector: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(maxIterations) || maxIterations < 1)
+                throw new Error(`Chalkboard.matr.eigenvector: Parameter "maxIterations" must be a positive integer.`);
             let v = Chalkboard.matr.fill(1, Chalkboard.matr.rows(matr), 1);
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
@@ -6255,6 +6723,10 @@ var Chalkboard;
             return result;
         };
         matr_1.empty = (rows, cols = rows) => {
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.empty: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.empty: Parameter "cols" must be a non-negative integer.`);
             const _null = null;
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([_null, _null], [_null, _null]);
@@ -6277,6 +6749,8 @@ var Chalkboard;
             }
         };
         matr_1.exchange = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.exchange: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [1, 0]);
             }
@@ -6299,6 +6773,12 @@ var Chalkboard;
             }
         };
         matr_1.fill = (element, rows, cols = rows) => {
+            if (!Number.isFinite(element))
+                throw new Error(`Chalkboard.matr.fill: Parameter "element" must be a finite number.`);
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.fill: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.fill: Parameter "cols" must be a non-negative integer.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([element, element], [element, element]);
             }
@@ -6320,6 +6800,8 @@ var Chalkboard;
             }
         };
         matr_1.Gaussian = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.Gaussian: Parameter "matr" must be a matrix.`);
             let lead = 0;
             for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
                 if (lead >= Chalkboard.matr.cols(matr)) {
@@ -6356,6 +6838,8 @@ var Chalkboard;
             return matr;
         };
         matr_1.Hilbert = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.Hilbert: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 3]);
             }
@@ -6377,6 +6861,8 @@ var Chalkboard;
             }
         };
         matr_1.identity = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.identity: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [0, 1]);
             }
@@ -6396,6 +6882,8 @@ var Chalkboard;
             }
         };
         matr_1.init = (...matrix) => {
+            if (matrix.length > 0 && !Array.isArray(matrix[0]))
+                throw new Error(`Chalkboard.matr.init: Parameter "matrix" must contain only matrix rows.`);
             if (matrix.length === 0) {
                 return [];
             }
@@ -6461,10 +6949,16 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square and has a non-zero determinant.');
+                throw new Error(`Chalkboard.matr.invert: Parameter "matr" must be of type ChalkboardMatrix that is square and has a non-zero determinant.`);
             }
         };
         matr_1.isApproxEqual = (matr1, matr2, precision = 0.000001) => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
+                throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0]))
+                throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "matr2" must be a matrix.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
                     for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
@@ -6480,6 +6974,8 @@ var Chalkboard;
             }
         };
         matr_1.isDiagonal = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isDiagonal: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.numb.isApproxEqual(matr[0][1], 0) && Chalkboard.numb.isApproxEqual(matr[1][0], 0);
@@ -6505,6 +7001,10 @@ var Chalkboard;
             }
         };
         matr_1.isEqual = (matr1, matr2) => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
+                throw new Error(`Chalkboard.matr.isEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0]))
+                throw new Error(`Chalkboard.matr.isEqual: Parameter "matr2" must be a matrix.`);
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
                 if (Chalkboard.matr.isSizeOf(matr1, 2)) {
                     return matr1[0][0] === matr2[0][0] && matr1[0][1] === matr2[0][1] && matr1[1][0] === matr2[1][0] && matr1[1][1] === matr2[1][1];
@@ -6530,6 +7030,8 @@ var Chalkboard;
             }
         };
         matr_1.isIdentity = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isIdentity: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isDiagonal(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.identity(2));
@@ -6549,9 +7051,13 @@ var Chalkboard;
             }
         };
         matr_1.isInvertible = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isInvertible: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
         };
         matr_1.isLowerTriangular = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isLowerTriangular: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], 0], [matr[1][0], matr[1][1]]));
@@ -6578,6 +7084,8 @@ var Chalkboard;
             }
         };
         matr_1.isOrthogonal = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isOrthogonal: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isInvertible(matr)) {
                 return Chalkboard.matr.isApproxEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.invert(matr));
             }
@@ -6586,21 +7094,39 @@ var Chalkboard;
             }
         };
         matr_1.isSizeEqual = (matr1, matr2) => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
+                throw new Error(`Chalkboard.matr.isSizeEqual: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0]))
+                throw new Error(`Chalkboard.matr.isSizeEqual: Parameter "matr2" must be a matrix.`);
             return Chalkboard.matr.rows(matr1) === Chalkboard.matr.rows(matr2) && Chalkboard.matr.cols(matr1) === Chalkboard.matr.cols(matr2);
         };
         matr_1.isSizeOf = (matr, rows, cols = rows) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isSizeOf: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.isSizeOf: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.isSizeOf: Parameter "cols" must be a non-negative integer.`);
             return Chalkboard.matr.rows(matr) === rows && Chalkboard.matr.cols(matr) === cols;
         };
         matr_1.isSkewSymmetric = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isSkewSymmetric: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isEqual(Chalkboard.matr.transpose(matr), Chalkboard.matr.negate(matr));
         };
         matr_1.isSquare = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isSquare: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.rows(matr) === Chalkboard.matr.cols(matr);
         };
         matr_1.isSymmetric = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isSymmetric: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isEqual(matr, Chalkboard.matr.transpose(matr));
         };
         matr_1.isUpperTriangular = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isUpperTriangular: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (Chalkboard.matr.isSizeOf(matr, 2)) {
                     return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.init([matr[0][0], matr[0][1]], [0, matr[1][1]]));
@@ -6627,9 +7153,13 @@ var Chalkboard;
             }
         };
         matr_1.isZero = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.isZero: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.isApproxEqual(matr, Chalkboard.matr.zero(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)));
         };
         matr_1.Lehmer = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.Lehmer: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1 / 1, 1 / 2], [1 / 2, 1 / 1]);
             }
@@ -6651,6 +7181,8 @@ var Chalkboard;
             }
         };
         matr_1.lowerBinomial = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.lowerBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 0], [1, 1]);
             }
@@ -6672,6 +7204,8 @@ var Chalkboard;
             }
         };
         matr_1.lowerShift = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.lowerShift: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 0], [1, 0]);
             }
@@ -6693,6 +7227,10 @@ var Chalkboard;
             }
         };
         matr_1.lowerTriangular = (size, ...elements) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.lowerTriangular: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1]))
+                throw new Error(`Chalkboard.matr.lowerTriangular: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, 0], [elements[1] || 0, elements[2] || 0]);
             }
@@ -6737,7 +7275,7 @@ var Chalkboard;
                 return { L: L, U: U };
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.LUdecomp: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.mul = (matr1, matr2) => {
@@ -6775,10 +7313,14 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".');
+                throw new Error(`Chalkboard.matr.mul: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".`);
             }
         };
         matr_1.mulKronecker = (matr1, matr2) => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
+                throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0]))
+                throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr2" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr1, 2) && Chalkboard.matr.isSizeOf(matr2, 2)) {
                 return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][0] * matr2[0][1], matr1[0][1] * matr2[0][0], matr1[0][1] * matr2[0][1]], [matr1[0][0] * matr2[1][0], matr1[0][0] * matr2[1][1], matr1[0][1] * matr2[1][0], matr1[0][1] * matr2[1][1]], [matr1[1][0] * matr2[0][0], matr1[1][0] * matr2[0][1], matr1[1][1] * matr2[0][0], matr1[1][1] * matr2[0][1]], [matr1[1][0] * matr2[1][0], matr1[1][0] * matr2[1][1], matr1[1][1] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
             }
@@ -6806,7 +7348,7 @@ var Chalkboard;
             }
         };
         matr_1.mulVector = (matr, vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.matr.mulVector");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (Chalkboard.matr.rows(matr) === 2) {
                     return Chalkboard.matr.toVector(Chalkboard.matr.mul(matr, Chalkboard.vect.toMatrix(vect)), 2);
@@ -6832,10 +7374,12 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.mulVector: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         matr_1.negate = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.negate: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([-matr[0][0], -matr[0][1]], [-matr[1][0], -matr[1][1]]);
             }
@@ -6857,6 +7401,12 @@ var Chalkboard;
             }
         };
         matr_1.norm = (matr, p = 2, q = 2) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.norm: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0)
+                throw new Error(`Chalkboard.matr.norm: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0)
+                throw new Error(`Chalkboard.matr.norm: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
                 return Chalkboard.real.sqrt(matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1]);
             }
@@ -6879,6 +7429,12 @@ var Chalkboard;
             }
         };
         matr_1.normalize = (matr, p = 2, q = 2) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.normalize: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0)
+                throw new Error(`Chalkboard.matr.normalize: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0)
+                throw new Error(`Chalkboard.matr.normalize: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)], [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]);
             }
@@ -6900,6 +7456,12 @@ var Chalkboard;
             }
         };
         matr_1.normsq = (matr, p = 2, q = 2) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.normsq: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(p) || p <= 0)
+                throw new Error(`Chalkboard.matr.normsq: Parameter "p" must be greater than 0.`);
+            if (!Number.isFinite(q) || q <= 0)
+                throw new Error(`Chalkboard.matr.normsq: Parameter "q" must be greater than 0.`);
             if (Chalkboard.matr.isSizeOf(matr, 2) && p === 2 && q === 2) {
                 return matr[0][0] * matr[0][0] + matr[0][1] * matr[0][1] + matr[1][0] * matr[1][0] + matr[1][1] * matr[1][1];
             }
@@ -6922,6 +7484,8 @@ var Chalkboard;
             }
         };
         matr_1.nullspace = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.nullspace: Parameter "matr" must be a matrix.`);
             const augmented = matr.map((row) => row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
             const rowEchelonForm = Chalkboard.matr.Gaussian(augmented);
             return rowEchelonForm.filter((row) => row.slice(0, Chalkboard.matr.rows(matr)).every((element) => element === 0)).map((row) => row.slice(Chalkboard.matr.rows(matr)));
@@ -6950,10 +7514,12 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.perm: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.pow = (matr, num) => {
+            if (!Number.isInteger(num) || num < 0)
+                throw new Error(`Chalkboard.matr.pow: Parameter "num" must be a non-negative integer.`);
             if (Chalkboard.matr.isSquare(matr)) {
                 if (num === 0) {
                     return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
@@ -6967,13 +7533,21 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.pow: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.print = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.print: Parameter "matr" must be a matrix.`);
             console.log(Chalkboard.matr.toString(matr));
         };
         matr_1.pull = (matr, index, axis) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.pull: Parameter "matr" must be a matrix.`);
+            if (axis !== 0 && axis !== 1)
+                throw new Error(`Chalkboard.matr.pull: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && index >= Chalkboard.matr.rows(matr) || axis === 1 && index >= Chalkboard.matr.cols(matr))
+                throw new Error(`Chalkboard.matr.pull: Parameter "index" must be an integer within the selected axis bounds.`);
             if (axis === 0) {
                 matr.splice(index, 1);
                 return matr;
@@ -6985,10 +7559,20 @@ var Chalkboard;
                 return matr;
             }
             else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.pull: Parameter "axis" must be 0 or 1.`);
             }
         };
         matr_1.push = (matr, index, axis, elements) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.push: Parameter "matr" must be a matrix.`);
+            if (axis !== 0 && axis !== 1)
+                throw new Error(`Chalkboard.matr.push: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && index > Chalkboard.matr.rows(matr) || axis === 1 && index > Chalkboard.matr.cols(matr))
+                throw new Error(`Chalkboard.matr.push: Parameter "index" must be an integer within the selected axis insertion bounds.`);
+            if (!Array.isArray(elements))
+                throw new Error(`Chalkboard.matr.push: Parameter "elements" must be an array.`);
+            if (axis === 0 && elements.length !== Chalkboard.matr.cols(matr) || axis === 1 && elements.length !== Chalkboard.matr.rows(matr))
+                throw new Error(`Chalkboard.matr.push: Parameter "elements" must have the same length as the unselected matrix axis.`);
             if (axis === 0) {
                 matr.splice(index, 0, elements);
                 return matr;
@@ -7000,10 +7584,12 @@ var Chalkboard;
                 return matr;
             }
             else {
-                throw new TypeError('Parameter "axis" must be 0 or 1.');
+                throw new Error(`Chalkboard.matr.push: Parameter "axis" must be 0 or 1.`);
             }
         };
         matr_1.QRdecomp = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.QRdecomp: Parameter "matr" must be a matrix.`);
             const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)), R = Chalkboard.matr.copy(matr);
             for (let j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
                 let norm = 0;
@@ -7050,6 +7636,14 @@ var Chalkboard;
             return { Q: Q, R: R };
         };
         matr_1.random = (rows, cols = rows, inf = 0, sup = 1) => {
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.random: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.random: Parameter "cols" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf)))
+                throw new Error(`Chalkboard.matr.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup)))
+                throw new Error(`Chalkboard.matr.random: Parameter "sup" must be a finite number.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)], [Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup)]);
             }
@@ -7071,9 +7665,13 @@ var Chalkboard;
             }
         };
         matr_1.rank = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.rank: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.Gaussian(matr).filter((row) => row.some((element) => element !== 0)).length;
         };
         matr_1.reciprocate = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.reciprocate: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([1 / matr[0][0], 1 / matr[0][1]], [1 / matr[1][0], 1 / matr[1][1]]);
             }
@@ -7095,6 +7693,12 @@ var Chalkboard;
             }
         };
         matr_1.resize = (matr, rows, cols = rows) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.resize: Parameter "matr" must be a matrix.`);
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.resize: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.resize: Parameter "cols" must be a non-negative integer.`);
             const result = Chalkboard.matr.init();
             const matrrows = Chalkboard.matr.rows(matr);
             const matrcols = Chalkboard.matr.cols(matr);
@@ -7107,6 +7711,12 @@ var Chalkboard;
             return result;
         };
         matr_1.rotator = (radx, rady, radz) => {
+            if (!Number.isFinite(radx))
+                throw new Error(`Chalkboard.matr.rotator: Parameter "radx" must be a finite number.`);
+            if (rady !== undefined && (!Number.isFinite(rady)))
+                throw new Error(`Chalkboard.matr.rotator: Parameter "rady" must be a finite number.`);
+            if (radz !== undefined && (!Number.isFinite(radz)))
+                throw new Error(`Chalkboard.matr.rotator: Parameter "radz" must be a finite number.`);
             if (rady === undefined && radz === undefined) {
                 return Chalkboard.matr.init([Math.cos(radx), -Math.sin(radx)], [Math.sin(radx), Math.cos(radx)]);
             }
@@ -7116,6 +7726,8 @@ var Chalkboard;
             }
         };
         matr_1.round = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.round: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([Math.round(matr[0][0]), Math.round(matr[0][1])], [Math.round(matr[1][0]), Math.round(matr[1][1])]);
             }
@@ -7137,13 +7749,17 @@ var Chalkboard;
             }
         };
         matr_1.rows = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.rows: Parameter "matr" must be a matrix.`);
             return matr.length;
         };
         matr_1.rowspace = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.rowspace: Parameter "matr" must be a matrix.`);
             return Chalkboard.matr.Gaussian(matr).filter((row) => row.some((element) => element !== 0));
         };
         matr_1.scaler = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.matr.scaler");
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([vect.x, 0], [0, vect.y]);
             }
@@ -7154,10 +7770,14 @@ var Chalkboard;
                 return Chalkboard.matr.init([vect.x, 0, 0, 0], [0, vect.y, 0, 0], [0, 0, vect.z, 0], [0, 0, 0, vect.w]);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.scaler: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         matr_1.scl = (matr, num) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.scl: Parameter "matr" must be a matrix.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.matr.scl: Parameter "num" must be a finite number.`);
             if (Chalkboard.matr.isSizeOf(matr, 2, 1)) {
                 return Chalkboard.matr.init([matr[0][0] * num], [matr[1][0] * num]);
             }
@@ -7194,15 +7814,15 @@ var Chalkboard;
                         return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     }
                     else {
-                        throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that has a non-zero determinant.');
+                        throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that has a non-zero determinant.`);
                     }
                 }
                 else {
-                    throw new TypeError('Parameters "matrA" and "matrB" must be of type "ChalkboardMatrix" with equivalent numbers of rows.');
+                    throw new Error(`Chalkboard.matr.solve: Parameters "matrA" and "matrB" must be of type ChalkboardMatrix with equivalent numbers of rows.`);
                 }
             }
             else {
-                throw new TypeError('Parameter "matrA" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.sub = (matr1, matr2) => {
@@ -7228,10 +7848,12 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameters "matr1" and "matr2" must be of type "ChalkboardMatrix" with equivalent numbers of rows and columns.');
+                throw new Error(`Chalkboard.matr.sub: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix with equivalent numbers of rows and columns.`);
             }
         };
         matr_1.symmetricBinomial = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.symmetricBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [1, 2]);
             }
@@ -7246,6 +7868,8 @@ var Chalkboard;
             }
         };
         matr_1.toArray = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toArray: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return [matr[0][0], matr[0][1], matr[1][0], matr[1][1]];
             }
@@ -7266,6 +7890,8 @@ var Chalkboard;
             }
         };
         matr_1.toObject = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toObject: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return {
                     i1: { j1: matr[0][0], j2: matr[0][1] },
@@ -7299,9 +7925,13 @@ var Chalkboard;
             }
         };
         matr_1.toSet = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toSet: Parameter "matr" must be a matrix.`);
             return Chalkboard.abal.set(Chalkboard.matr.toArray(matr));
         };
         matr_1.toString = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toString: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return ("[ " + matr[0][0].toString() + " " + matr[0][1].toString() +
                     " ]\n[ " + matr[1][0].toString() + " " + matr[1][1].toString() + " ]");
@@ -7330,7 +7960,11 @@ var Chalkboard;
             }
         };
         matr_1.toTensor = (matr, ...size) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toTensor: Parameter "matr" must be a matrix.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.matr.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(matr, ...size);
         };
         matr_1.toTypedArray = (matr, type = "float32") => {
@@ -7353,9 +7987,17 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.matr.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         matr_1.toVector = (matr, dimension, index = 0, axis = 0) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.toVector: Parameter "matr" must be a matrix.`);
+            if (dimension !== 2 && dimension !== 3 && dimension !== 4)
+                throw new Error(`Chalkboard.matr.toVector: Parameter "dimension" must be 2, 3, or 4.`);
+            if (axis !== 0 && axis !== 1)
+                throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
+            if (!Number.isInteger(index) || index < 0 || axis === 0 && (index >= Chalkboard.matr.cols(matr) || dimension > Chalkboard.matr.rows(matr)) || axis === 1 && (index >= Chalkboard.matr.rows(matr) || dimension > Chalkboard.matr.cols(matr)))
+                throw new Error(`Chalkboard.matr.toVector: Parameter "index" and parameter "dimension" must fit within the selected matrix axis.`);
             if (dimension === 2) {
                 if (axis === 0) {
                     return Chalkboard.vect.init(matr[0][index], matr[1][index]);
@@ -7364,7 +8006,7 @@ var Chalkboard;
                     return Chalkboard.vect.init(matr[index][0], matr[index][1]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else if (dimension === 3) {
@@ -7375,7 +8017,7 @@ var Chalkboard;
                     return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else if (dimension === 4) {
@@ -7386,11 +8028,11 @@ var Chalkboard;
                     return Chalkboard.vect.init(matr[index][0], matr[index][1], matr[index][2], matr[index][3]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.matr.toVector: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.matr.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         matr_1.trace = (matr) => {
@@ -7413,10 +8055,12 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "matr" must be of type "ChalkboardMatrix" that is square.');
+                throw new Error(`Chalkboard.matr.trace: Parameter "matr" must be of type ChalkboardMatrix that is square.`);
             }
         };
         matr_1.transpose = (matr) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.matr.transpose: Parameter "matr" must be a matrix.`);
             if (Chalkboard.matr.isSizeOf(matr, 2)) {
                 return Chalkboard.matr.init([matr[0][0], matr[1][0]], [matr[0][1], matr[1][1]]);
             }
@@ -7438,7 +8082,7 @@ var Chalkboard;
             }
         };
         matr_1.translator = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.matr.translator");
             if (typeof vect.x === "number" && typeof vect.y === "number" && typeof vect.z === "undefined" && typeof vect.w === "undefined") {
                 return Chalkboard.matr.init([1, 0, vect.x], [0, 1, vect.y], [0, 0, 1]);
             }
@@ -7449,10 +8093,12 @@ var Chalkboard;
                 return Chalkboard.matr.init([1, 0, 0, 0, vect.x], [0, 1, 0, 0, vect.y], [0, 0, 1, 0, vect.z], [0, 0, 0, 1, vect.w], [0, 0, 0, 0, 1]);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.matr.translator: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         matr_1.upperBinomial = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.upperBinomial: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([1, 1], [0, 1]);
             }
@@ -7474,6 +8120,8 @@ var Chalkboard;
             }
         };
         matr_1.upperShift = (size) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.upperShift: Parameter "size" must be a positive integer.`);
             if (size === 2) {
                 return Chalkboard.matr.init([0, 1], [0, 0]);
             }
@@ -7495,6 +8143,10 @@ var Chalkboard;
             }
         };
         matr_1.upperTriangular = (size, ...elements) => {
+            if (!Number.isInteger(size) || size < 1)
+                throw new Error(`Chalkboard.matr.upperTriangular: Parameter "size" must be a positive integer.`);
+            if (elements.length > 0 && !Number.isFinite(elements[0]) || elements.length > 1 && !Number.isFinite(elements[elements.length - 1]))
+                throw new Error(`Chalkboard.matr.upperTriangular: Parameter "elements" must begin and end with finite numbers.`);
             if (size === 2) {
                 return Chalkboard.matr.init([elements[0] || 0, elements[1] || 0], [0, elements[2] || 0]);
             }
@@ -7518,6 +8170,10 @@ var Chalkboard;
             }
         };
         matr_1.zero = (rows, cols = rows) => {
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.matr.zero: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.matr.zero: Parameter "cols" must be a non-negative integer.`);
             if (rows === 2 && cols === 2) {
                 return Chalkboard.matr.init([0, 0], [0, 0]);
             }
@@ -7545,7 +8201,7 @@ var Chalkboard;
     let numb;
     (function (numb) {
         numb.Bernoullian = (p = 0.5) => {
-            if (typeof p !== "number" || !Number.isFinite(p) || p < 0 || p > 1)
+            if (!Number.isFinite(p) || p < 0 || p > 1)
                 throw new Error(`Chalkboard.numb.Bernoullian: Parameter "p" must be a finite number between 0 and 1.`);
             return Math.random() < p ? 1 : 0;
         };
@@ -7574,7 +8230,7 @@ var Chalkboard;
         };
         numb.combination = (n, r) => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n)
-                throw new Error(`Chalkboard.numb.combination: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
+                throw new Error(`Chalkboard.numb.combination: Parameters "n" and "r" must be integers with "r" greater than or equal to 0 and less than or equal to "n".`);
             return Chalkboard.numb.binomial(n, r);
         };
         numb.compositeArr = (inf, sup) => {
@@ -7604,22 +8260,21 @@ var Chalkboard;
             return Chalkboard.numb.compositeArr(inf, sup).length;
         };
         numb.constrain = (num, range = [0, 1]) => {
-            if (typeof num !== "number" || !Number.isFinite(num))
-                throw new Error(`Chalkboard.numb.constrain: Parameter "num" must be a finite number.`);
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.numb.constrain: Parameter "num" must be a number that is not NaN.`);
             if (!Array.isArray(range) || range.length !== 2 || typeof range[0] !== "number" || typeof range[1] !== "number" || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[0] > range[1])
-                throw new Error(`Chalkboard.numb.constrain: Parameter "range" must be an array of two finite numbers [min, max] with min <= max.`);
+                throw new Error(`Chalkboard.numb.constrain: Parameter "range" must be an array of two finite numbers whose first element is less than or equal to its second element.`);
             return Math.max(Math.min(num, range[1]), range[0]);
         };
         numb.convert = (num, from, to) => {
             if (typeof from !== "string" || typeof to !== "string")
                 throw new Error(`Chalkboard.numb.convert: Parameters "from" and "to" must be strings.`);
             if (Array.isArray(num)) {
-                for (let i = 0; i < num.length; i++)
-                    if (typeof num[i] !== "number" || !Number.isFinite(num[i]))
-                        throw new Error(`Chalkboard.numb.convert: Parameter "num[${i}]" must be a finite number.`);
+                if (num.length > 0 && !Number.isFinite(num[0]) || num.length > 1 && !Number.isFinite(num[num.length - 1]))
+                    throw new Error(`Chalkboard.numb.convert: Parameter "num" must begin and end with finite numbers.`);
             }
             else {
-                if (typeof num !== "number" || !Number.isFinite(num))
+                if (!Number.isFinite(num))
                     throw new Error(`Chalkboard.numb.convert: Parameter "num" must be a finite number.`);
             }
             const normalize = (str) => str.trim().replace(/\s+/g, " ");
@@ -7785,9 +8440,9 @@ var Chalkboard;
             const toTemp = resolveTemp(to);
             if (fromTemp || toTemp) {
                 if (!fromTemp)
-                    throw new Error(`Chalkboard.numb.convert: Unknown temperature unit: "${from}".`);
+                    throw new Error(`Chalkboard.numb.convert: Unknown temperature unit "${from}".`);
                 if (!toTemp)
-                    throw new Error(`Chalkboard.numb.convert: Unknown temperature unit: "${to}".`);
+                    throw new Error(`Chalkboard.numb.convert: Unknown temperature unit "${to}".`);
                 const toKelvin = (x) => fromTemp.a * x + fromTemp.b;
                 const fromKelvin = (k) => (k - toTemp.b) / toTemp.a;
                 return apply((x) => fromKelvin(toKelvin(x)));
@@ -7795,11 +8450,11 @@ var Chalkboard;
             const fromResolved = resolveFactor(from);
             const toResolved = resolveFactor(to);
             if (!fromResolved)
-                throw new Error(`Chalkboard.numb.convert: Unknown unit: "${from}".`);
+                throw new Error(`Chalkboard.numb.convert: Unknown unit "${from}".`);
             if (!toResolved)
-                throw new Error(`Chalkboard.numb.convert: Unknown unit: "${to}".`);
+                throw new Error(`Chalkboard.numb.convert: Unknown unit "${to}".`);
             if (fromResolved.category !== toResolved.category)
-                throw new Error(`Chalkboard.numb.convert: Incompatible unit conversion: "${from}" (${fromResolved.category}) -> "${to}" (${toResolved.category}).`);
+                throw new Error(`Chalkboard.numb.convert: Incompatible unit conversion from category "${fromResolved.category}" to category "${toResolved.category}".`);
             const factor = fromResolved.factor / toResolved.factor;
             return apply((x) => x * factor);
         };
@@ -7833,7 +8488,7 @@ var Chalkboard;
             return Math.round(result);
         };
         numb.exponential = (l = 1) => {
-            if (typeof l !== "number" || !Number.isFinite(l))
+            if (!Number.isFinite(l))
                 throw new Error(`Chalkboard.numb.exponential: Parameter "l" must be a finite number.`);
             if (l <= 0)
                 throw new Error(`Chalkboard.numb.exponential: Parameter "l" must be positive.`);
@@ -7938,7 +8593,7 @@ var Chalkboard;
             return Math.abs(a - b) < precision;
         };
         numb.isPrime = (num) => {
-            if (typeof num !== "number" || !Number.isInteger(num) || num < 2)
+            if (!Number.isInteger(num) || num < 2)
                 return false;
             if (num === 2)
                 return true;
@@ -8003,12 +8658,12 @@ var Chalkboard;
                 throw new Error(`Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays.`);
             if (range1.length !== 2 || range2.length !== 2)
                 throw new Error(`Chalkboard.numb.map: Parameters "range1" and "range2" must be arrays of length 2.`);
-            if (typeof num !== "number" || !Number.isFinite(num))
-                throw new Error(`Chalkboard.numb.map: Parameter "num" must be a finite number.`);
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.numb.map: Parameter "num" must be a number that is not NaN.`);
             if (typeof range1[0] !== "number" || typeof range1[1] !== "number" || !Number.isFinite(range1[0]) || !Number.isFinite(range1[1]) || range1[0] >= range1[1])
-                throw new Error(`Chalkboard.numb.map: Parameter "range1" must be an array of two finite numbers [min, max] with min < max.`);
+                throw new Error(`Chalkboard.numb.map: Parameter "range1" must be an array of two finite numbers whose first element is less than its second element.`);
             if (typeof range2[0] !== "number" || typeof range2[1] !== "number" || !Number.isFinite(range2[0]) || !Number.isFinite(range2[1]) || range2[0] > range2[1])
-                throw new Error(`Chalkboard.numb.map: Parameter "range2" must be an array of two finite numbers [min, max] with min <= max.`);
+                throw new Error(`Chalkboard.numb.map: Parameter "range2" must be an array of two finite numbers whose first element is less than or equal to its second element.`);
             return range2[0] + (range2[1] - range2[0]) * ((num - range1[0]) / (range1[1] - range1[0]));
         };
         numb.mod = (a, b) => {
@@ -8044,14 +8699,14 @@ var Chalkboard;
         };
         numb.permutation = (n, r) => {
             if (!Number.isInteger(n) || !Number.isInteger(r) || n < 0 || r < 0 || r > n)
-                throw new Error(`Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with 0 <= r <= n.`);
+                throw new Error(`Chalkboard.numb.permutation: Parameters "n" and "r" must be integers with "r" greater than or equal to 0 and less than or equal to "n".`);
             let result = 1;
             for (let i = n; i > n - r; i--)
                 result *= i;
             return Math.round(result);
         };
         numb.Poissonian = (l = 1) => {
-            if (typeof l !== "number" || !Number.isFinite(l))
+            if (!Number.isFinite(l))
                 throw new Error(`Chalkboard.numb.Poissonian: Parameter "l" must be a finite number.`);
             if (l <= 0)
                 throw new Error(`Chalkboard.numb.Poissonian: Parameter "l" must be positive.`);
@@ -8132,7 +8787,7 @@ var Chalkboard;
         };
         numb.roundTo = (num, positionalIndex) => {
             if (!Number.isFinite(num) || !Number.isFinite(positionalIndex))
-                throw new Error(`Chalkboard.numb.roundTo: Parameters must be finite numbers.`);
+                throw new Error(`Chalkboard.numb.roundTo: Parameters "num" and "positionalIndex" must be finite numbers.`);
             if (positionalIndex === 0)
                 throw new Error(`Chalkboard.numb.roundTo: Parameter "positionalIndex" must be non-zero.`);
             const step = Math.abs(positionalIndex);
@@ -8145,10 +8800,10 @@ var Chalkboard;
             return Object.is(result, -0) ? 0 : result;
         };
         numb.sgn = (num) => {
+            if (typeof num !== "number")
+                throw new Error(`Chalkboard.numb.sgn: Parameter "num" must be a number.`);
             if (Number.isNaN(num))
                 return undefined;
-            if (!Number.isFinite(num))
-                throw new Error(`Chalkboard.numb.sgn: Parameter "num" must be a finite number.`);
             if (num > 0)
                 return 1;
             else if (num < 0)
@@ -8193,9 +8848,8 @@ var Chalkboard;
             if (num.length === 0)
                 throw new Error(`Chalkboard.numb.toDecimal: Parameter "num" must contain digits.`);
             const chars = "0123456789abcdefghijklmnopqrstuvwxyz".substring(0, base);
-            for (const char of num)
-                if (!chars.includes(char))
-                    throw new Error(`Chalkboard.numb.toDecimal: Invalid character "${char}" for base ${base}.`);
+            if (num.length > 0 && !chars.includes(num[0]) || num.length > 1 && !chars.includes(num[num.length - 1]))
+                throw new Error(`Chalkboard.numb.toDecimal: Parameter "num" must begin and end with characters valid for the specified "base".`);
             const result = parseInt(num, base);
             if (!Number.isFinite(result))
                 throw new Error(`Chalkboard.numb.toDecimal: Failed to parse "num".`);
@@ -8205,12 +8859,12 @@ var Chalkboard;
             if (typeof num !== "number" || typeof tolerance !== "number")
                 throw new Error(`Chalkboard.numb.toFraction: Parameters "num" and "tolerance" must be numbers.`);
             if (!Number.isFinite(num))
-                throw new Error(`Chalkboard.numb.toFraction: The parameter "num" must be finite to be converted to a fraction.`);
+                throw new Error(`Chalkboard.numb.toFraction: Parameter "num" must be finite to be converted to a fraction.`);
             if (!Number.isFinite(tolerance) || tolerance <= 0)
-                throw new Error(`Chalkboard.numb.toFraction: The parameter "tolerance" must be a positive finite number.`);
+                throw new Error(`Chalkboard.numb.toFraction: Parameter "tolerance" must be a positive finite number.`);
             const sign = Chalkboard.numb.sgn(num);
             if (sign === undefined)
-                throw new Error(`Chalkboard.numb.toFraction: The parameter "num" must be a valid number to be converted to a fraction.`);
+                throw new Error(`Chalkboard.numb.toFraction: Parameter "num" must be a valid number to be converted to a fraction.`);
             const x = Math.abs(num);
             if (Number.isInteger(x))
                 return [sign * x, 1];
@@ -8247,7 +8901,7 @@ var Chalkboard;
         };
         numb.toHexadecimal = (num, prefix = false, uppercase = false) => {
             if (!Number.isInteger(num))
-                throw new Error(`Chalkboard.numb.toHexadecimal: The parameter "num" must be an integer.`);
+                throw new Error(`Chalkboard.numb.toHexadecimal: Parameter "num" must be an integer.`);
             const sign = num < 0 ? "-" : "";
             let digits = Math.abs(num).toString(16);
             if (uppercase)
@@ -8256,7 +8910,7 @@ var Chalkboard;
         };
         numb.toOctal = (num, prefix = false) => {
             if (!Number.isInteger(num))
-                throw new Error(`Chalkboard.numb.toOctal: The parameter "num" must be an integer.`);
+                throw new Error(`Chalkboard.numb.toOctal: Parameter "num" must be an integer.`);
             const sign = num < 0 ? "-" : "";
             const digits = Math.abs(num).toString(8);
             return sign + (prefix ? "0o" : "") + digits;
@@ -8272,7 +8926,7 @@ var Chalkboard;
                 return Function('"use strict"; return (' + Chalkboard.CONTEXT + ')')();
             }
             catch (e) {
-                throw new Error("Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.");
+                throw new Error(`Chalkboard.plot.getContext: Cannot initialize canvas context. Make sure an HTML <canvas> element exists in the webpage before using Chalkboard.plot functions.`);
             }
         };
         const $ = (config, defaults) => {
@@ -8290,6 +8944,10 @@ var Chalkboard;
             return merged;
         };
         plot.autocorrelation = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.autocorrelation: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.autocorrelation: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8315,6 +8973,12 @@ var Chalkboard;
             return data;
         };
         plot.barplot = (arr, bins, config) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.plot.barplot: Parameter "arr" must be an array of finite numbers.`);
+            if (!Array.isArray(bins))
+                throw new Error(`Chalkboard.plot.barplot: Parameter "bins" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.barplot: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "white" });
             _config.context.save();
             _config.context.translate(_config.x, _config.y);
@@ -8340,6 +9004,10 @@ var Chalkboard;
             return bars;
         };
         plot.comp = (comp, config) => {
+            if (comp === null || typeof comp !== "object" || typeof comp.a !== "number" || !Number.isFinite(comp.a) || typeof comp.b !== "number" || !Number.isFinite(comp.b))
+                throw new Error(`Chalkboard.plot.comp: Parameter "comp" must be a complex number.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.comp: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "black", lineWidth: 5 });
             _config.context.fillStyle = _config.fillStyle;
             _config.context.save();
@@ -8351,6 +9019,12 @@ var Chalkboard;
             return [[comp.a], [comp.b]];
         };
         plot.convolution = (func1, func2, config) => {
+            if (func1 === null || typeof func1 !== "object" || (typeof func1.rule !== "function" && !Array.isArray(func1.rule)) || typeof func1.field !== "string" || typeof func1.type !== "string")
+                throw new Error(`Chalkboard.plot.convolution: Parameter "func1" must be a mathematical function object.`);
+            if (func2 === null || typeof func2 !== "object" || (typeof func2.rule !== "function" && !Array.isArray(func2.rule)) || typeof func2.field !== "string" || typeof func2.type !== "string")
+                throw new Error(`Chalkboard.plot.convolution: Parameter "func2" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.convolution: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8376,6 +9050,12 @@ var Chalkboard;
             return data;
         };
         plot.correlation = (func1, func2, config) => {
+            if (func1 === null || typeof func1 !== "object" || (typeof func1.rule !== "function" && !Array.isArray(func1.rule)) || typeof func1.field !== "string" || typeof func1.type !== "string")
+                throw new Error(`Chalkboard.plot.correlation: Parameter "func1" must be a mathematical function object.`);
+            if (func2 === null || typeof func2 !== "object" || (typeof func2.rule !== "function" && !Array.isArray(func2.rule)) || typeof func2.field !== "string" || typeof func2.type !== "string")
+                throw new Error(`Chalkboard.plot.correlation: Parameter "func2" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.correlation: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8492,13 +9172,17 @@ var Chalkboard;
                 }
             }
             else {
-                throw new TypeError('Parameter "func" must be of type "ChalkboardFunction" with a property "type" of "expl", "inve", "pola", "curv", or "comp".');
+                throw new Error(`Chalkboard.plot.definition: Parameter "func" must be of type ChalkboardFunction with a property "type" of expl, inve, pola, curv, or comp.`);
             }
             _config.context.stroke();
             _config.context.restore();
             return data;
         };
         plot.dfdx = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.dfdx: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.dfdx: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -8539,6 +9223,10 @@ var Chalkboard;
             return data;
         };
         plot.d2fdx2 = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.d2fdx2: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.d2fdx2: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -8579,6 +9267,10 @@ var Chalkboard;
             return data;
         };
         plot.field = (vectfield, config) => {
+            if (vectfield === null || typeof vectfield !== "object" || (typeof vectfield.rule !== "function" && !Array.isArray(vectfield.rule)) || typeof vectfield.field !== "string" || typeof vectfield.type !== "string")
+                throw new Error(`Chalkboard.plot.field: Parameter "vectfield" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.field: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [[-10, 10], [-10, 10]], res: 25 });
             const data = [];
             _config.context.strokeStyle = _config.strokeStyle;
@@ -8599,6 +9291,10 @@ var Chalkboard;
             return data;
         };
         plot.Fourier = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.Fourier: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.Fourier: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8624,6 +9320,10 @@ var Chalkboard;
             return data;
         };
         plot.fxdx = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.fxdx: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.fxdx: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25, isInverse: false });
             const data = [];
             _config.context.save();
@@ -8664,6 +9364,10 @@ var Chalkboard;
             return data;
         };
         plot.Laplace = (func, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.Laplace: Parameter "func" must be a mathematical function object.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.Laplace: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8704,6 +9408,12 @@ var Chalkboard;
             return data;
         };
         plot.lineplot = (arr, bins, config) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.plot.lineplot: Parameter "arr" must be an array of finite numbers.`);
+            if (!Array.isArray(bins))
+                throw new Error(`Chalkboard.plot.lineplot: Parameter "bins" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.lineplot: Parameter "config" must be an object.`);
             const _config = $(config);
             _config.context.save();
             _config.context.translate(_config.x, _config.y);
@@ -8729,6 +9439,10 @@ var Chalkboard;
             return verts;
         };
         plot.matr = (matr, config) => {
+            if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
+                throw new Error(`Chalkboard.plot.matr: Parameter "matr" must be a matrix.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.matr: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10] });
             for (let i = _config.domain[0]; i <= _config.domain[1]; i++) {
                 Chalkboard.plot.vect(Chalkboard.vect.init(matr[0][0], matr[1][0]), {
@@ -8778,16 +9492,16 @@ var Chalkboard;
                 throw new Error(`Chalkboard.plot.ode: Invalid solution object (length mismatch or empty).`);
             const dim = sol.y[0].length;
             if (!Number.isInteger(_config.i) || _config.i < 0)
-                throw new Error(`Chalkboard.plot.ode: "i" must be an integer >= 0.`);
+                throw new Error(`Chalkboard.plot.ode: Parameter "config.i" must be a non-negative integer.`);
             if (_config.i >= dim)
-                throw new Error(`Chalkboard.plot.ode: "i" is out of range for solution dimension.`);
+                throw new Error(`Chalkboard.plot.ode: Property "config.i" must be within the solution dimension.`);
             if (_config.phase) {
                 if (!Number.isInteger(_config.j) || _config.j < 0)
-                    throw new Error(`Chalkboard.plot.ode: "j" must be an integer >= 0.`);
+                    throw new Error(`Chalkboard.plot.ode: Property "config.j" must be a non-negative integer.`);
                 if (_config.j >= dim)
-                    throw new Error(`Chalkboard.plot.ode: "j" is out of range for solution dimension.`);
+                    throw new Error(`Chalkboard.plot.ode: Property "config.j" must be within the solution dimension.`);
                 if (_config.i === _config.j)
-                    throw new Error(`Chalkboard.plot.ode: For phase plots, "i" and "j" must be different.`);
+                    throw new Error(`Chalkboard.plot.ode: Properties "config.i" and "config.j" must be different for phase plots.`);
             }
             const data = [];
             _config.context.save();
@@ -8822,6 +9536,8 @@ var Chalkboard;
             return data;
         };
         plot.rOplane = (config) => {
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.rOplane: Parameter "config" must be an object.`);
             const _config = $(config);
             const cw = getContext().canvas.width;
             _config.context.save();
@@ -8845,6 +9561,12 @@ var Chalkboard;
             _config.context.restore();
         };
         plot.scatterplot = (arr1, arr2, config) => {
+            if (!Array.isArray(arr1))
+                throw new Error(`Chalkboard.plot.scatterplot: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2))
+                throw new Error(`Chalkboard.plot.scatterplot: Parameter "arr2" must be an array of finite numbers.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.scatterplot: Parameter "config" must be an object.`);
             const _config = $(config, { fillStyle: "black", lineWidth: 5 });
             const data = [];
             _config.context.save();
@@ -8862,6 +9584,14 @@ var Chalkboard;
             return data;
         };
         plot.Taylor = (func, n, a, config) => {
+            if (func === null || typeof func !== "object" || (typeof func.rule !== "function" && !Array.isArray(func.rule)) || typeof func.field !== "string" || typeof func.type !== "string")
+                throw new Error(`Chalkboard.plot.Taylor: Parameter "func" must be a mathematical function object.`);
+            if (!Number.isFinite(n))
+                throw new Error(`Chalkboard.plot.Taylor: Parameter "n" must be a finite number.`);
+            if (!Number.isFinite(a))
+                throw new Error(`Chalkboard.plot.Taylor: Parameter "a" must be a finite number.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.Taylor: Parameter "config" must be an object.`);
             const _config = $(config, { domain: [-10, 10], res: 25 });
             const data = [];
             _config.context.save();
@@ -8887,6 +9617,10 @@ var Chalkboard;
             return data;
         };
         plot.vect = (vect, config) => {
+            if (vect === null || (vect !== undefined && typeof vect !== "string" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && typeof vect !== "object"))
+                throw new Error(`Chalkboard.plot.vect: Parameter "vect" must be a vector.`);
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.vect: Parameter "config" must be an object.`);
             const _config = $(config, { lineWidth: 5 });
             vect = vect;
             _config.context.strokeStyle = _config.strokeStyle;
@@ -8901,6 +9635,8 @@ var Chalkboard;
             return [[vect.x], [vect.y]];
         };
         plot.xyplane = (config) => {
+            if (config === null || typeof config !== "object")
+                throw new Error(`Chalkboard.plot.xyplane: Parameter "config" must be an object.`);
             const _config = $(config);
             const cw = getContext().canvas.width;
             _config.context.save();
@@ -8937,9 +9673,15 @@ var Chalkboard;
     let quat;
     (function (quat_1) {
         quat_1.absolute = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.absolute: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(Math.abs(quat.a), Math.abs(quat.b), Math.abs(quat.c), Math.abs(quat.d));
         };
         quat_1.add = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.add: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.add: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -8947,15 +9689,25 @@ var Chalkboard;
             return Chalkboard.quat.init(quat1.a + quat2.a, quat1.b + quat2.b, quat1.c + quat2.c, quat1.d + quat2.d);
         };
         quat_1.conjugate = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.conjugate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a, -quat.b, -quat.c, -quat.d);
         };
         quat_1.constrain = (quat, range = [0, 1]) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.constrain: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(Chalkboard.numb.constrain(quat.a, range), Chalkboard.numb.constrain(quat.b, range), Chalkboard.numb.constrain(quat.c, range), Chalkboard.numb.constrain(quat.d, range));
         };
         quat_1.copy = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.copy: Parameter "quat" must be a quaternion.`);
             return Object.create(Object.getPrototypeOf(quat), Object.getOwnPropertyDescriptors(quat));
         };
         quat_1.dist = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.dist: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.dist: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -8963,6 +9715,10 @@ var Chalkboard;
             return Chalkboard.real.sqrt((quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d));
         };
         quat_1.distsq = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.distsq: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.distsq: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -8970,6 +9726,10 @@ var Chalkboard;
             return (quat2.a - quat1.a) * (quat2.a - quat1.a) + (quat2.b - quat1.b) * (quat2.b - quat1.b) + (quat2.c - quat1.c) * (quat2.c - quat1.c) + (quat2.d - quat1.d) * (quat2.d - quat1.d);
         };
         quat_1.div = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.div: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.div: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -8982,16 +9742,32 @@ var Chalkboard;
                 return Chalkboard.quat.init(Chalkboard.trig.cos(rad / 2), v[0] * Chalkboard.trig.sin(rad / 2), v[1] * Chalkboard.trig.sin(rad / 2), v[2] * Chalkboard.trig.sin(rad / 2));
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 3 dimensions.');
+                throw new Error(`Chalkboard.quat.fromAxis: Parameter "vect" must be of type ChalkboardVector with 3 dimensions.`);
             }
         };
         quat_1.init = (a, b = 0, c = 0, d = 0) => {
+            if (!Number.isFinite(a))
+                throw new Error(`Chalkboard.quat.init: Parameter "a" must be a finite number.`);
+            if (b !== undefined && (!Number.isFinite(b)))
+                throw new Error(`Chalkboard.quat.init: Parameter "b" must be a finite number.`);
+            if (c !== undefined && (!Number.isFinite(c)))
+                throw new Error(`Chalkboard.quat.init: Parameter "c" must be a finite number.`);
+            if (d !== undefined && (!Number.isFinite(d)))
+                throw new Error(`Chalkboard.quat.init: Parameter "d" must be a finite number.`);
             return { a: a, b: b, c: c, d: d };
         };
         quat_1.invert = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.invert: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.magsq(quat), -quat.b / Chalkboard.quat.magsq(quat), -quat.c / Chalkboard.quat.magsq(quat), -quat.d / Chalkboard.quat.magsq(quat));
         };
         quat_1.isApproxEqual = (quat1, quat2, precision = 0.000001) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "quat2" must be a finite number or a quaternion.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.quat.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -8999,6 +9775,10 @@ var Chalkboard;
             return Chalkboard.numb.isApproxEqual(quat1.a, quat2.a, precision) && Chalkboard.numb.isApproxEqual(quat1.b, quat2.b, precision) && Chalkboard.numb.isApproxEqual(quat1.c, quat2.c, precision) && Chalkboard.numb.isApproxEqual(quat1.d, quat2.d, precision);
         };
         quat_1.isEqual = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.isEqual: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.isEqual: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -9006,6 +9786,12 @@ var Chalkboard;
             return quat1.a === quat2.a && quat1.b === quat2.b && quat1.c === quat2.c && quat1.d === quat2.d;
         };
         quat_1.isInverse = (quat1, quat2, precision = 0.000001) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.isInverse: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.isInverse: Parameter "quat2" must be a finite number or a quaternion.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.quat.isInverse: Parameter "precision" must be a finite number.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -9013,23 +9799,39 @@ var Chalkboard;
             return Chalkboard.quat.isApproxEqual(Chalkboard.quat.mul(quat1, quat2), Chalkboard.quat.init(1, 0, 0, 0), precision);
         };
         quat_1.isNormalized = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.isNormalized: Parameter "quat" must be a quaternion.`);
             return Chalkboard.numb.isApproxEqual(Chalkboard.quat.magsq(quat), 1);
         };
         quat_1.isZero = (quat) => {
+            if ((!Number.isFinite(quat)) && (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d)))
+                throw new Error(`Chalkboard.quat.isZero: Parameter "quat" must be a finite number or a quaternion.`);
             if (typeof quat === "number")
                 quat = Chalkboard.quat.init(quat, 0, 0, 0);
             return Chalkboard.quat.isApproxEqual(quat, Chalkboard.quat.init(0, 0, 0, 0));
         };
         quat_1.mag = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.mag: Parameter "quat" must be a quaternion.`);
             return Chalkboard.real.sqrt(quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d);
         };
         quat_1.magset = (quat, num) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.magset: Parameter "quat" must be a quaternion.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.quat.magset: Parameter "num" must be a finite number.`);
             return Chalkboard.quat.scl(Chalkboard.quat.normalize(quat), num);
         };
         quat_1.magsq = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.magsq: Parameter "quat" must be a quaternion.`);
             return quat.a * quat.a + quat.b * quat.b + quat.c * quat.c + quat.d * quat.d;
         };
         quat_1.mul = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.mul: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.mul: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -9037,27 +9839,49 @@ var Chalkboard;
             return Chalkboard.quat.init(quat1.a * quat2.a - quat1.b * quat2.b - quat1.c * quat2.c - quat1.d * quat2.d, quat1.a * quat2.b + quat1.b * quat2.a + quat1.c * quat2.d - quat1.d * quat2.c, quat1.a * quat2.c - quat1.b * quat2.d + quat1.c * quat2.a + quat1.d * quat2.b, quat1.a * quat2.d + quat1.b * quat2.c - quat1.c * quat2.b + quat1.d * quat2.a);
         };
         quat_1.negate = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.negate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(-quat.a, -quat.b, -quat.c, -quat.d);
         };
         quat_1.normalize = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.normalize: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(quat.a / Chalkboard.quat.mag(quat), quat.b / Chalkboard.quat.mag(quat), quat.c / Chalkboard.quat.mag(quat), quat.d / Chalkboard.quat.mag(quat));
         };
         quat_1.print = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.print: Parameter "quat" must be a quaternion.`);
             console.log(Chalkboard.quat.toString(quat));
         };
         quat_1.random = (inf = 0, sup = 1) => {
+            if (inf !== undefined && (!Number.isFinite(inf)))
+                throw new Error(`Chalkboard.quat.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup)))
+                throw new Error(`Chalkboard.quat.random: Parameter "sup" must be a finite number.`);
             return Chalkboard.quat.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
         };
         quat_1.reciprocate = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.reciprocate: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(1 / quat.a, 1 / quat.b, 1 / quat.c, 1 / quat.d);
         };
         quat_1.round = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.round: Parameter "quat" must be a quaternion.`);
             return Chalkboard.quat.init(Math.round(quat.a), Math.round(quat.b), Math.round(quat.c), Math.round(quat.d));
         };
         quat_1.scl = (quat, num) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.scl: Parameter "quat" must be a quaternion.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.quat.scl: Parameter "num" must be a finite number.`);
             return Chalkboard.quat.init(quat.a * num, quat.b * num, quat.c * num, quat.d * num);
         };
         quat_1.sub = (quat1, quat2) => {
+            if ((!Number.isFinite(quat1)) && (quat1 === null || typeof quat1 !== "object" || typeof quat1.a !== "number" || !Number.isFinite(quat1.a) || typeof quat1.b !== "number" || !Number.isFinite(quat1.b) || typeof quat1.c !== "number" || !Number.isFinite(quat1.c) || typeof quat1.d !== "number" || !Number.isFinite(quat1.d)))
+                throw new Error(`Chalkboard.quat.sub: Parameter "quat1" must be a finite number or a quaternion.`);
+            if ((!Number.isFinite(quat2)) && (quat2 === null || typeof quat2 !== "object" || typeof quat2.a !== "number" || !Number.isFinite(quat2.a) || typeof quat2.b !== "number" || !Number.isFinite(quat2.b) || typeof quat2.c !== "number" || !Number.isFinite(quat2.c) || typeof quat2.d !== "number" || !Number.isFinite(quat2.d)))
+                throw new Error(`Chalkboard.quat.sub: Parameter "quat2" must be a finite number or a quaternion.`);
             if (typeof quat1 === "number")
                 quat1 = Chalkboard.quat.init(quat1, 0, 0, 0);
             if (typeof quat2 === "number")
@@ -9065,18 +9889,30 @@ var Chalkboard;
             return Chalkboard.quat.init(quat1.a - quat2.a, quat1.b - quat2.b, quat1.c - quat2.c, quat1.d - quat2.d);
         };
         quat_1.toArray = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.toArray: Parameter "quat" must be a quaternion.`);
             return [quat.a, quat.b, quat.c, quat.d];
         };
         quat_1.toMatrix = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.toMatrix: Parameter "quat" must be a quaternion.`);
             return Chalkboard.matr.init([quat.a, -quat.b, -quat.c, -quat.d], [quat.b, quat.a, -quat.d, quat.c], [quat.c, quat.d, quat.a, -quat.b], [quat.d, -quat.c, quat.b, quat.a]);
         };
         quat_1.toRotation = (quat, vect) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.toRotation: Parameter "quat" must be a quaternion.`);
+            if (vect === null || (vect !== undefined && typeof vect !== "string" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && typeof vect !== "object"))
+                throw new Error(`Chalkboard.quat.toRotation: Parameter "vect" must be a vector.`);
+            if (typeof vect === "object" && !Array.isArray(vect) && !(vect instanceof Float32Array) && !(vect instanceof Float64Array) && (typeof vect.x !== "number" || typeof vect.y !== "number"))
+                throw new Error(`Chalkboard.quat.toRotation: Parameter "vect" must be a vector.`);
             const vector = Chalkboard.vect.toQuaternion(vect);
             const inverse = Chalkboard.quat.invert(quat);
             const quat_vector_inverse = Chalkboard.quat.mul(quat, Chalkboard.quat.mul(vector, inverse));
             return Chalkboard.vect.init(quat_vector_inverse.b, quat_vector_inverse.c, quat_vector_inverse.d);
         };
         quat_1.toString = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.toString: Parameter "quat" must be a quaternion.`);
             let str = quat.a.toString();
             if (quat.b >= 0) {
                 str += " + " + (quat.b === 1 ? "i" : quat.b.toString() + "i");
@@ -9118,9 +9954,11 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.quat.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         quat_1.toVector = (quat) => {
+            if (quat === null || typeof quat !== "object" || typeof quat.a !== "number" || !Number.isFinite(quat.a) || typeof quat.b !== "number" || !Number.isFinite(quat.b) || typeof quat.c !== "number" || !Number.isFinite(quat.c) || typeof quat.d !== "number" || !Number.isFinite(quat.d))
+                throw new Error(`Chalkboard.quat.toVector: Parameter "quat" must be a quaternion.`);
             return Chalkboard.vect.init(quat.a, quat.b, quat.c, quat.d);
         };
     })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
@@ -9131,7 +9969,7 @@ var Chalkboard;
     (function (real) {
         real.absolute = (func) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.absolute: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.absolute: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => Math.abs(f(...x));
@@ -9161,13 +9999,13 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func.type };
             }
-            throw new TypeError("Chalkboard.real.absolute: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.absolute: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.add = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.real.add: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.real.add: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== func2.type)
-                throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be the same.");
+                throw new Error(`Chalkboard.real.add: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule;
                 const f2 = func2.rule;
@@ -9201,13 +10039,13 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func1.type };
             }
-            throw new TypeError("Chalkboard.real.add: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.add: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.compose = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.real.compose: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.real.compose: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== func2.type)
-                throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be the same.");
+                throw new Error(`Chalkboard.real.compose: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule;
                 const f2 = func2.rule;
@@ -9223,9 +10061,15 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func1.type };
             }
-            throw new TypeError("Chalkboard.real.compose: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.real.compose: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, or vector4d.`);
         };
         real.define = (...rule) => {
+            if (rule.length === 0)
+                throw new Error(`Chalkboard.real.define: Parameter "rule" must contain at least one function.`);
+            if (Array.isArray(rule[0]) && (rule[0].length === 0 || typeof rule[0][0] !== "function" || rule[0].length > 1 && typeof rule[0][rule[0].length - 1] !== "function"))
+                throw new Error(`Chalkboard.real.define: Parameter "rule" must begin and end with functions.`);
+            if (!Array.isArray(rule[0]) && (typeof rule[0] !== "function" || rule.length > 1 && typeof rule[rule.length - 1] !== "function"))
+                throw new Error(`Chalkboard.real.define: Parameter "rule" must begin and end with functions.`);
             let f;
             let type = "scalar2d";
             if (rule.length === 1 && Array.isArray(rule[0])) {
@@ -9246,7 +10090,7 @@ var Chalkboard;
                         type = "vector2d";
                     }
                     else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or two variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve or two variables to define a vector field.`);
                     }
                 }
                 else if (f.length === 3) {
@@ -9260,7 +10104,7 @@ var Chalkboard;
                         type = "vector3d";
                     }
                     else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve, two variables to define a parametric surface, or three variables to define a vector field.`);
                     }
                 }
                 else if (f.length === 4) {
@@ -9271,7 +10115,7 @@ var Chalkboard;
                         type = "vector4d";
                     }
                     else {
-                        throw new TypeError("Chalkboard.real.define: Functions in array 'rule' must have one variable to define a parametric curve or four variables to define a vector field.");
+                        throw new Error(`Chalkboard.real.define: Functions in array "rule" must have one variable to define a parametric curve or four variables to define a vector field.`);
                     }
                 }
             }
@@ -9286,12 +10130,18 @@ var Chalkboard;
                     type = "scalar4d";
                 }
                 else {
-                    throw new TypeError("Chalkboard.real.define: Function 'rule' must have one, two, or three variables to define a scalar function.");
+                    throw new Error(`Chalkboard.real.define: Function "rule" must have one, two, or three variables to define a scalar function.`);
                 }
             }
             return { rule: f, field: "real", type };
         };
         real.Dirac = (num, edge = 0, scl = 1) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.Dirac: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge)))
+                throw new Error(`Chalkboard.real.Dirac: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl)))
+                throw new Error(`Chalkboard.real.Dirac: Parameter "scl" must be a finite number.`);
             if (num === edge) {
                 return scl;
             }
@@ -9300,6 +10150,12 @@ var Chalkboard;
             }
         };
         real.discriminant = (a, b, c, form = "standard") => {
+            if (!Number.isFinite(a) || a === 0)
+                throw new Error(`Chalkboard.real.discriminant: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b))
+                throw new Error(`Chalkboard.real.discriminant: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c))
+                throw new Error(`Chalkboard.real.discriminant: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return b * b - 4 * a * c;
             }
@@ -9307,14 +10163,14 @@ var Chalkboard;
                 return 2 * a * b * (2 * a * b) - 4 * a * c;
             }
             else {
-                throw new TypeError("Chalkboard.real.discriminant: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.discriminant: Parameter "form" must be standard or vertex.`);
             }
         };
         real.div = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.real.div: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.real.div: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== func2.type)
-                throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be the same.");
+                throw new Error(`Chalkboard.real.div: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule;
                 const f2 = func2.rule;
@@ -9348,11 +10204,15 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func1.type };
             }
-            throw new TypeError("Chalkboard.real.div: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.div: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.erf = (num) => {
-            if (typeof num !== "number" || !Number.isFinite(num))
-                throw new TypeError("Chalkboard.real.erf: Parameter 'num' must be a finite number.");
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.erf: Parameter "num" must be a number that is not NaN.`);
+            if (num === Infinity)
+                return 1;
+            if (num === -Infinity)
+                return -1;
             const sign = num < 0 ? -1 : 1;
             const x = Math.abs(num);
             const p = 0.3275911;
@@ -9366,8 +10226,12 @@ var Chalkboard;
             return sign * y;
         };
         real.Gamma = (num) => {
-            if (typeof num !== "number" || !Number.isFinite(num))
-                throw new TypeError("Chalkboard.real.Gamma: Parameter 'num' must be a finite number.");
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.Gamma: Parameter "num" must be a number that is not NaN.`);
+            if (num === Infinity)
+                return Infinity;
+            if (num === -Infinity)
+                return NaN;
             if (Number.isInteger(num) && num <= 0)
                 return NaN;
             const p0 = 0.99999999999980993;
@@ -9396,6 +10260,12 @@ var Chalkboard;
             return Chalkboard.real.sqrt(Chalkboard.PI(2)) * Chalkboard.real.pow(t, x + 0.5) * Chalkboard.E(-t) * a;
         };
         real.Heaviside = (num, edge = 0, scl = 1) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.Heaviside: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge)))
+                throw new Error(`Chalkboard.real.Heaviside: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl)))
+                throw new Error(`Chalkboard.real.Heaviside: Parameter "scl" must be a finite number.`);
             if (num >= edge) {
                 return scl;
             }
@@ -9404,12 +10274,32 @@ var Chalkboard;
             }
         };
         real.lerp = (p, t) => {
+            if (!Number.isFinite(t))
+                throw new Error(`Chalkboard.real.lerp: Parameter "t" must be a finite number.`);
             return (p[1] - p[0]) * t + p[0];
         };
         real.linear = (x1, y1, x2, y2) => {
+            if (!Number.isFinite(x1))
+                throw new Error(`Chalkboard.real.linear: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1))
+                throw new Error(`Chalkboard.real.linear: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(x2))
+                throw new Error(`Chalkboard.real.linear: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2))
+                throw new Error(`Chalkboard.real.linear: Parameter "y2" must be a finite number.`);
+            if (x1 === x2)
+                throw new Error(`Chalkboard.real.linear: Parameters "x1" and "x2" must be different.`);
             return Chalkboard.real.define((x) => Chalkboard.real.slope(x1, y1, x2, y2) * (x - x2) + y2);
         };
         real.linearFormula = (a, b, c, d) => {
+            if (!Number.isFinite(a))
+                throw new Error(`Chalkboard.real.linearFormula: Parameter "a" must be a finite number.`);
+            if (!Number.isFinite(b))
+                throw new Error(`Chalkboard.real.linearFormula: Parameter "b" must be a finite number.`);
+            if (c !== undefined && (!Number.isFinite(c)))
+                throw new Error(`Chalkboard.real.linearFormula: Parameter "c" must be a finite number.`);
+            if (d !== undefined && (!Number.isFinite(d)))
+                throw new Error(`Chalkboard.real.linearFormula: Parameter "d" must be a finite number.`);
             if (typeof c === "undefined" && typeof d === "undefined") {
                 return -b / a;
             }
@@ -9421,6 +10311,8 @@ var Chalkboard;
             }
         };
         real.ln = (num) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.ln: Parameter "num" must be a number that is not NaN.`);
             if (num <= 0)
                 return NaN;
             if (num === 1)
@@ -9442,16 +10334,22 @@ var Chalkboard;
             return 2 * series + E * LN2;
         };
         real.log = (base, num) => {
+            if (!Number.isFinite(base) || base <= 0 || base === 1)
+                throw new Error(`Chalkboard.real.log: Parameter "base" must be a positive finite number that is not 1.`);
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.log: Parameter "num" must be a number that is not NaN.`);
             return Chalkboard.real.ln(num) / Chalkboard.real.ln(base);
         };
         real.log10 = (num) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.log10: Parameter "num" must be a number that is not NaN.`);
             return Chalkboard.real.log(10, num);
         };
         real.mul = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.real.mul: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.real.mul: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== func2.type)
-                throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be the same.");
+                throw new Error(`Chalkboard.real.mul: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule;
                 const f2 = func2.rule;
@@ -9485,11 +10383,11 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func1.type };
             }
-            throw new TypeError("Chalkboard.real.mul: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.mul: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.negate = (func) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.negate: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.negate: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => -f(...x);
@@ -9519,7 +10417,7 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func.type };
             }
-            throw new TypeError("Chalkboard.real.negate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.negate: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.parse = (expr, config = { returnAST: false, returnJSON: false, returnLaTeX: false }) => {
             if (expr === "")
@@ -9584,7 +10482,7 @@ var Chalkboard;
                         }
                     }
                     else {
-                        throw new Error(`Chalkboard.real.parse: Unexpected character ${ch}`);
+                        throw new Error(`Chalkboard.real.parse: Unexpected character "${ch}".`);
                     }
                 }
                 return tokens;
@@ -9594,7 +10492,7 @@ var Chalkboard;
                 const peek = () => tokens[pos] || "";
                 const consume = (token) => {
                     if (token && tokens[pos] !== token)
-                        throw new Error(`Chalkboard.real.parse: Expected token '${token}' but found '${tokens[pos]}'`);
+                        throw new Error(`Chalkboard.real.parse: Expected token "${token}" but found "${tokens[pos]}".`);
                     return tokens[pos++];
                 };
                 const parseExpression = () => parseAdditive();
@@ -9676,11 +10574,11 @@ var Chalkboard;
                         consume(")");
                         return node;
                     }
-                    throw new Error(`Chalkboard.real.parse: Unexpected token ${token}`);
+                    throw new Error(`Chalkboard.real.parse: Unexpected token "${token}".`);
                 };
                 const ast = parseExpression();
                 if (pos < tokens.length)
-                    throw new Error(`Chalkboard.real.parse: Unexpected token ${tokens[pos]}`);
+                    throw new Error(`Chalkboard.real.parse: Unexpected token "${tokens[pos]}".`);
                 return ast;
             };
             const evaluateNode = (node, values) => {
@@ -9692,7 +10590,7 @@ var Chalkboard;
                         const varname = node.name;
                         if (varname in values)
                             return values[varname];
-                        throw new Error(`Chalkboard.real.parse: Variable '${varname}' not defined in values`);
+                        throw new Error(`Chalkboard.real.parse: Variable "${varname}" is not defined in "config.values".`);
                     }
                     case "add": {
                         return evaluateNode(node.left, values) + evaluateNode(node.right, values);
@@ -9707,7 +10605,7 @@ var Chalkboard;
                         const numerator = evaluateNode(node.left, values);
                         const denominator = evaluateNode(node.right, values);
                         if (denominator === 0)
-                            throw new Error(`Chalkboard.real.parse: Division by zero`);
+                            throw new Error(`Chalkboard.real.parse: Division by zero.`);
                         return numerator / denominator;
                     }
                     case "pow": {
@@ -9732,11 +10630,11 @@ var Chalkboard;
                             case "exp": return Math.exp(args[0]);
                             case "min": return Math.min(...args);
                             case "max": return Math.max(...args);
-                            default: throw new Error(`Chalkboard.real.parse: Unknown function ${node.name}`);
+                            default: throw new Error(`Chalkboard.real.parse: Unknown function "${node.name}".`);
                         }
                     }
                 }
-                throw new Error(`Chalkboard.real.parse: Unknown node type ${node.type}`);
+                throw new Error(`Chalkboard.real.parse: Unknown node type "${node.type}".`);
             };
             const nodeToString = (node) => {
                 switch (node.type) {
@@ -9864,7 +10762,7 @@ var Chalkboard;
                         return `\\mathrm{${node.name}}\\left(${node.args.map(nodeToLaTeX).join(", ")}\\right)`;
                     }
                     default: {
-                        throw new Error(`Chalkboard.real.parse: Unknown node type ${node.type}`);
+                        throw new Error(`Chalkboard.real.parse: Unknown node type "${node.type}".`);
                     }
                 }
             };
@@ -10330,15 +11228,20 @@ var Chalkboard;
                 return nodeToString(simplified);
             }
             catch (err) {
-                if (err instanceof Error) {
-                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${err.message}`);
-                }
+                if (err instanceof Error)
+                    throw new Error(`Chalkboard.real.parse: Error parsing real expression: ${err.message.replace(/\.*$/, "")}.`);
                 else {
-                    throw new Error(`Chalkboard.real.parse: Error parsing real expression ${String(err)}`);
+                    throw new Error(`Chalkboard.real.parse: Error parsing real expression: ${String(err).replace(/\.*$/, "")}.`);
                 }
             }
         };
         real.pingpong = (num, edge = 0, scl = 1) => {
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.real.pingpong: Parameter "num" must be a finite number.`);
+            if (edge !== undefined && (!Number.isFinite(edge)))
+                throw new Error(`Chalkboard.real.pingpong: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl)))
+                throw new Error(`Chalkboard.real.pingpong: Parameter "scl" must be a finite number.`);
             if ((num + edge) % (2 * scl) < scl) {
                 return (num + edge) % scl;
             }
@@ -10354,6 +11257,8 @@ var Chalkboard;
             else {
                 arr = coeffs;
             }
+            if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1]))
+                throw new Error(`Chalkboard.real.polynomial: Parameter "coeffs" must begin and end with finite numbers.`);
             while (arr.length > 1 && arr[0] === 0) {
                 arr.shift();
             }
@@ -10369,6 +11274,8 @@ var Chalkboard;
             return Chalkboard.real.define(f);
         };
         real.pow = (base, num) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.pow: Parameter "num" must be a number that is not NaN.`);
             if (typeof base === "number") {
                 if (base === 0 && num === 0)
                     return 1;
@@ -10399,7 +11306,7 @@ var Chalkboard;
             else {
                 const func = base;
                 if (func.field !== "real")
-                    throw new TypeError("Chalkboard.real.pow: Property 'field' of 'func' must be 'real'.");
+                    throw new Error(`Chalkboard.real.pow: Property "func.field" must be real.`);
                 if (func.type.startsWith("scalar")) {
                     const f = func.rule;
                     const g = (...x) => f(...x) ** num;
@@ -10429,10 +11336,12 @@ var Chalkboard;
                     }
                     return { rule: g, field: "real", type: func.type };
                 }
-                throw new TypeError("Chalkboard.real.pow: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+                throw new Error(`Chalkboard.real.pow: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
             }
         };
         real.qerp = (p1, p2, p3, t) => {
+            if (!Number.isFinite(t))
+                throw new Error(`Chalkboard.real.qerp: Parameter "t" must be a finite number.`);
             const a = p1[1] / ((p1[0] - p2[0]) * (p1[0] - p3[0])) + p2[1] / ((p2[0] - p1[0]) * (p2[0] - p3[0])) + p3[1] / ((p3[0] - p1[0]) * (p3[0] - p2[0]));
             const b = (-p1[1] * (p2[0] + p3[0])) / ((p1[0] - p2[0]) * (p1[0] - p3[0])) -
                 (p2[1] * (p1[0] + p3[0])) / ((p2[0] - p1[0]) * (p2[0] - p3[0])) -
@@ -10443,6 +11352,12 @@ var Chalkboard;
             return a * t * t + b * t + c;
         };
         real.quadratic = (a, b, c, form = "standard") => {
+            if (!Number.isFinite(a) || a === 0)
+                throw new Error(`Chalkboard.real.quadratic: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b))
+                throw new Error(`Chalkboard.real.quadratic: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c))
+                throw new Error(`Chalkboard.real.quadratic: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return Chalkboard.real.define((x) => a * x * x + b * x + c);
             }
@@ -10450,10 +11365,16 @@ var Chalkboard;
                 return Chalkboard.real.define((x) => a * (x - b) * (x - b) + c);
             }
             else {
-                throw new TypeError("Chalkboard.real.quadratic: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.quadratic: Parameter "form" must be standard or vertex.`);
             }
         };
         real.quadraticFormula = (a, b, c, form = "standard") => {
+            if (!Number.isFinite(a) || a === 0)
+                throw new Error(`Chalkboard.real.quadraticFormula: Parameter "a" must be a finite number that is not 0.`);
+            if (!Number.isFinite(b))
+                throw new Error(`Chalkboard.real.quadraticFormula: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(c))
+                throw new Error(`Chalkboard.real.quadraticFormula: Parameter "c" must be a finite number.`);
             if (form === "standard") {
                 return [(-b + Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a), (-b - Chalkboard.real.sqrt(Chalkboard.real.discriminant(a, b, c, "standard"))) / (2 * a)];
             }
@@ -10461,10 +11382,16 @@ var Chalkboard;
                 return [b + Chalkboard.real.sqrt(-c / a), b - Chalkboard.real.sqrt(-c / a)];
             }
             else {
-                throw new TypeError("Chalkboard.real.quadraticFormula: String 'form' must be 'standard' or 'vertex'.");
+                throw new Error(`Chalkboard.real.quadraticFormula: Parameter "form" must be standard or vertex.`);
             }
         };
         real.ramp = (num, edge = 0, scl = 1) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.ramp: Parameter "num" must be a number that is not NaN.`);
+            if (edge !== undefined && (!Number.isFinite(edge)))
+                throw new Error(`Chalkboard.real.ramp: Parameter "edge" must be a finite number.`);
+            if (scl !== undefined && (!Number.isFinite(scl)))
+                throw new Error(`Chalkboard.real.ramp: Parameter "scl" must be a finite number.`);
             if (num >= edge) {
                 return num * scl;
             }
@@ -10473,11 +11400,17 @@ var Chalkboard;
             }
         };
         real.randomPolynomial = (degree, inf = 0, sup = 1) => {
+            if (!Number.isInteger(degree) || degree < 0)
+                throw new Error(`Chalkboard.real.randomPolynomial: Parameter "degree" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf)))
+                throw new Error(`Chalkboard.real.randomPolynomial: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup)))
+                throw new Error(`Chalkboard.real.randomPolynomial: Parameter "sup" must be a finite number.`);
             return Chalkboard.real.polynomial(...Chalkboard.stat.random(degree + 1, inf, sup));
         };
         real.reciprocate = (func) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.reciprocate: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.reciprocate: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => 1 / f(...x);
@@ -10507,9 +11440,17 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func.type };
             }
-            throw new TypeError("Chalkboard.real.reciprocate: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.reciprocate: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.rect = (num, center = 0, width = 2, scl = 1) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.rect: Parameter "num" must be a number that is not NaN.`);
+            if (center !== undefined && (!Number.isFinite(center)))
+                throw new Error(`Chalkboard.real.rect: Parameter "center" must be a finite number.`);
+            if (!Number.isFinite(width) || width <= 0)
+                throw new Error(`Chalkboard.real.rect: Parameter "width" must be greater than 0.`);
+            if (scl !== undefined && (!Number.isFinite(scl)))
+                throw new Error(`Chalkboard.real.rect: Parameter "scl" must be a finite number.`);
             if (num > center + width / 2 || num < center - width / 2) {
                 return 0;
             }
@@ -10518,8 +11459,16 @@ var Chalkboard;
             }
         };
         real.root = (num, index = 3) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.root: Parameter "num" must be a number that is not NaN.`);
+            if (!Number.isInteger(index) || index === 0)
+                throw new Error(`Chalkboard.real.root: Parameter "index" must be an integer that is not 0.`);
             if (num === 0)
-                return 0;
+                return index > 0 ? 0 : Infinity;
+            if (num === Infinity)
+                return index > 0 ? Infinity : 0;
+            if (num === -Infinity)
+                return Math.abs(index) % 2 === 1 ? (index > 0 ? -Infinity : -0) : NaN;
             if (num < 0) {
                 if (Number.isInteger(index) && Math.abs(index) % 2 === 1)
                     return -Chalkboard.E(Chalkboard.real.ln(-num) / index);
@@ -10529,7 +11478,7 @@ var Chalkboard;
         };
         real.scl = (func, num) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.scl: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.scl: Property "func.field" must be real.`);
             if (func.type.startsWith("scalar")) {
                 const f = func.rule;
                 const g = (...x) => f(...x) * num;
@@ -10559,12 +11508,24 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func.type };
             }
-            throw new TypeError("Chalkboard.real.scl: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.scl: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.slope = (x1, y1, x2, y2) => {
+            if (!Number.isFinite(x1))
+                throw new Error(`Chalkboard.real.slope: Parameter "x1" must be a finite number.`);
+            if (!Number.isFinite(y1))
+                throw new Error(`Chalkboard.real.slope: Parameter "y1" must be a finite number.`);
+            if (!Number.isFinite(x2))
+                throw new Error(`Chalkboard.real.slope: Parameter "x2" must be a finite number.`);
+            if (!Number.isFinite(y2))
+                throw new Error(`Chalkboard.real.slope: Parameter "y2" must be a finite number.`);
+            if (x1 === x2)
+                throw new Error(`Chalkboard.real.slope: Parameters "x1" and "x2" must be different.`);
             return (y2 - y1) / (x2 - x1);
         };
         real.sqrt = (num) => {
+            if (typeof num !== "number" || Number.isNaN(num))
+                throw new Error(`Chalkboard.real.sqrt: Parameter "num" must be a number that is not NaN.`);
             if (num < 0)
                 return NaN;
             if (num === 0 || num === 1 || num === Infinity)
@@ -10588,9 +11549,9 @@ var Chalkboard;
         };
         real.sub = (func1, func2) => {
             if (func1.field !== "real" || func2.field !== "real")
-                throw new TypeError("Chalkboard.real.sub: Properties 'field' of 'func1' and 'func2' must be 'real'.");
+                throw new Error(`Chalkboard.real.sub: Properties "func1.field" and "func2.field" must be real.`);
             if (func1.type !== func2.type)
-                throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be the same.");
+                throw new Error(`Chalkboard.real.sub: Properties "func1.type" and "func2.type" must be the same.`);
             if (func1.type.startsWith("scalar")) {
                 const f1 = func1.rule;
                 const f2 = func2.rule;
@@ -10624,11 +11585,13 @@ var Chalkboard;
                 }
                 return { rule: g, field: "real", type: func1.type };
             }
-            throw new TypeError("Chalkboard.real.sub: Properties 'type' of 'func1' and 'func2' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.sub: Properties "func1.type" and "func2.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.tetration = (base, num) => {
+            if (!Number.isFinite(base))
+                throw new Error(`Chalkboard.real.tetration: Parameter "base" must be a finite number.`);
             if (!Number.isInteger(num) || num < 0)
-                return NaN;
+                throw new Error(`Chalkboard.real.tetration: Parameter "num" must be a non-negative integer.`);
             if (num === 0)
                 return 1;
             if (num === 1)
@@ -10643,17 +11606,17 @@ var Chalkboard;
         };
         real.translate = (func, h = 0, v = 0) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.translate: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.translate: Property "func.field" must be real.`);
             if (func.type === "scalar2d") {
                 const f = func.rule;
                 const g = (x) => f(x - h) + v;
                 return Chalkboard.real.define(g);
             }
-            throw new TypeError("Chalkboard.real.translate: Property 'type' of 'func' must be 'scalar2d'.");
+            throw new Error(`Chalkboard.real.translate: Property "func.type" must be scalar2d.`);
         };
         real.val = (func, val) => {
             if (func.field !== "real")
-                throw new TypeError("Chalkboard.real.val: Property 'field' of 'func' must be 'real'.");
+                throw new Error(`Chalkboard.real.val: Property "func.field" must be real.`);
             if (func.type === "scalar2d") {
                 const f = func.rule;
                 const x = val;
@@ -10704,7 +11667,7 @@ var Chalkboard;
                 const v = Chalkboard.vect.toArray(val);
                 return Chalkboard.vect.init(f[0](v[0], v[1]), f[1](v[0], v[1]), f[2](v[0], v[1]));
             }
-            throw new TypeError("Chalkboard.real.val: Property 'type' of 'func' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'");
+            throw new Error(`Chalkboard.real.val: Property "func.type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
         real.zero = (type = "scalar2d") => {
             if (type === "scalar2d") {
@@ -10737,7 +11700,7 @@ var Chalkboard;
             else if (type === "surface3d") {
                 return Chalkboard.real.define((s, t) => 0, (s, t) => 0, (s, t) => 0);
             }
-            throw new TypeError("Chalkboard.real.zero: String 'type' must be 'scalar2d', 'scalar3d', 'scalar4d', 'vector2d', 'vector3d', 'vector4d', 'curve2d', 'curve3d', 'curve4d', or 'surface3d'.");
+            throw new Error(`Chalkboard.real.zero: Parameter "type" must be scalar2d, scalar3d, scalar4d, vector2d, vector3d, vector4d, curve2d, curve3d, curve4d, or surface3d.`);
         };
     })(real = Chalkboard.real || (Chalkboard.real = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -10774,6 +11737,8 @@ var Chalkboard;
             return select(0, arr.length - 1, k);
         };
         stat.absolute = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.absolute: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(Math.abs(arr[i]));
@@ -10781,9 +11746,8 @@ var Chalkboard;
             return result;
         };
         stat.add = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.add: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(arr1[i] + arr2[i]);
@@ -10791,6 +11755,12 @@ var Chalkboard;
             return result;
         };
         stat.array = (inf, sup, length = sup - inf + 1) => {
+            if (!Number.isFinite(inf))
+                throw new Error(`Chalkboard.stat.array: Parameter "inf" must be a finite number.`);
+            if (!Number.isFinite(sup))
+                throw new Error(`Chalkboard.stat.array: Parameter "sup" must be a finite number.`);
+            if (!Number.isInteger(length) || length < 2)
+                throw new Error(`Chalkboard.stat.array: Parameter "length" must be an integer greater than or equal to 2.`);
             const result = [];
             const step = (sup - inf) / (length - 1);
             for (let i = 0; i < length; i++) {
@@ -10799,18 +11769,18 @@ var Chalkboard;
             return result;
         };
         stat.autocorrelation = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.autocorrelation: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.correlation(arr, arr);
         };
         stat.Bayes = (pA, pGivenA, pGivenNotA) => {
-            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1) {
-                throw new RangeError('All probabilities must be between 0 and 1.');
-            }
+            if (pA < 0 || pA > 1 || pGivenA < 0 || pGivenA > 1 || pGivenNotA < 0 || pGivenNotA > 1)
+                throw new Error(`Chalkboard.stat.Bayes: All probabilities must be between 0 and 1.`);
             return (pGivenA * pA) / (pGivenA * pA + pGivenNotA * (1 - pA));
         };
         stat.change = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.change: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(Chalkboard.numb.change(arr1[i], arr2[i]));
@@ -10818,9 +11788,8 @@ var Chalkboard;
             return result;
         };
         stat.chiSquared = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.chiSquared: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(((arr1[i] - arr2[i]) * (arr1[i] - arr2[i])) / arr2[i]);
@@ -10828,15 +11797,16 @@ var Chalkboard;
             return result;
         };
         stat.confidenceInterval = (arr, confidence = 0.95) => {
-            if (confidence <= 0 || confidence >= 1) {
-                throw new RangeError('Parameter "confidence" must be between 0 and 1 (exclusive).');
-            }
+            if (confidence <= 0 || confidence >= 1)
+                throw new Error(`Chalkboard.stat.confidenceInterval: Parameter "confidence" must be between 0 and 1 (exclusive).`);
             const z = Chalkboard.stat.inormal(1 - (1 - confidence) / 2);
             const mean = Chalkboard.stat.mean(arr);
             const standardError = Chalkboard.stat.error(arr);
             return [mean - z * standardError, mean + z * standardError];
         };
         stat.constrain = (arr, range = [0, 1]) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.constrain: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(Chalkboard.numb.constrain(arr[i], range));
@@ -10844,6 +11814,10 @@ var Chalkboard;
             return result;
         };
         stat.convolution = (arr1, arr2) => {
+            if (!Array.isArray(arr1))
+                throw new Error(`Chalkboard.stat.convolution: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2))
+                throw new Error(`Chalkboard.stat.convolution: Parameter "arr2" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
@@ -10855,6 +11829,10 @@ var Chalkboard;
             return result;
         };
         stat.correlation = (arr1, arr2) => {
+            if (!Array.isArray(arr1))
+                throw new Error(`Chalkboard.stat.correlation: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2))
+                throw new Error(`Chalkboard.stat.correlation: Parameter "arr2" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr1.length + arr2.length - 1; i++) {
                 let sum = 0;
@@ -10866,12 +11844,15 @@ var Chalkboard;
             return result;
         };
         stat.correlationCoefficient = (arr1, arr2) => {
+            if (!Array.isArray(arr1))
+                throw new Error(`Chalkboard.stat.correlationCoefficient: Parameter "arr1" must be an array of finite numbers.`);
+            if (!Array.isArray(arr2))
+                throw new Error(`Chalkboard.stat.correlationCoefficient: Parameter "arr2" must be an array of finite numbers.`);
             return Chalkboard.stat.covariance(arr1, arr2) / (Chalkboard.stat.deviation(arr1) * Chalkboard.stat.deviation(arr2));
         };
         stat.covariance = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.covariance: Parameters "arr1" and "arr2" must have the same length.`);
             const mean1 = Chalkboard.stat.mean(arr1);
             const mean2 = Chalkboard.stat.mean(arr2);
             let sum = 0;
@@ -10881,6 +11862,8 @@ var Chalkboard;
             return sum / arr1.length;
         };
         stat.cummax = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.cummax: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let max = -Infinity;
             for (const value of arr) {
@@ -10890,6 +11873,8 @@ var Chalkboard;
             return result;
         };
         stat.cummin = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.cummin: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let min = Infinity;
             for (const value of arr) {
@@ -10899,6 +11884,8 @@ var Chalkboard;
             return result;
         };
         stat.cummul = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.cummul: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let mul = 1;
             for (let i = 0; i < arr.length; i++) {
@@ -10908,6 +11895,8 @@ var Chalkboard;
             return result;
         };
         stat.cumsum = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.cumsum: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             let sum = 0;
             for (let i = 0; i < arr.length; i++) {
@@ -10917,6 +11906,8 @@ var Chalkboard;
             return result;
         };
         stat.deviation = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.deviation: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
@@ -10924,9 +11915,8 @@ var Chalkboard;
             return Chalkboard.real.sqrt(result / arr.length);
         };
         stat.dot = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.dot: Parameters "arr1" and "arr2" must have the same length.`);
             let result = 0;
             for (let i = 0; i < arr1.length; i++) {
                 result += arr1[i] * arr2[i];
@@ -10934,9 +11924,17 @@ var Chalkboard;
             return result;
         };
         stat.error = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.error: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.deviation(arr) / Chalkboard.real.sqrt(arr.length);
         };
         stat.eq = (arr, arrORnum) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.eq: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum))
+                throw new Error(`Chalkboard.stat.eq: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length)
+                throw new Error(`Chalkboard.stat.eq: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -10957,12 +11955,15 @@ var Chalkboard;
             return result;
         };
         stat.expected = (arr, probabilities) => {
+            if (!Array.isArray(arr) || arr.length === 0)
+                throw new Error(`Chalkboard.stat.expected: Parameter "arr" must be a non-empty array.`);
+            if (probabilities !== undefined && !Array.isArray(probabilities))
+                throw new Error(`Chalkboard.stat.expected: Parameter "probabilities" must be an array.`);
             if (!probabilities) {
                 probabilities = Array(arr.length).fill(1 / arr.length);
             }
-            if (arr.length !== probabilities.length) {
-                throw new RangeError('Parameters "values" and "probabilities" must have the same length.');
-            }
+            if (arr.length !== probabilities.length)
+                throw new Error(`Chalkboard.stat.expected: Parameters "arr" and "probabilities" must have the same length.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += arr[i] * probabilities[i];
@@ -10970,9 +11971,23 @@ var Chalkboard;
             return result;
         };
         stat.Gaussian = (height, mean, deviation) => {
+            if (!Number.isFinite(height))
+                throw new Error(`Chalkboard.stat.Gaussian: Parameter "height" must be a finite number.`);
+            if (!Number.isFinite(mean))
+                throw new Error(`Chalkboard.stat.Gaussian: Parameter "mean" must be a finite number.`);
+            if (!Number.isFinite(deviation) || deviation <= 0)
+                throw new Error(`Chalkboard.stat.Gaussian: Parameter "deviation" must be a positive finite number.`);
             return Chalkboard.real.define((x) => height * Math.exp(-((x - mean) * (x - mean)) / (2 * deviation * deviation)));
         };
         stat.gt = (arr, arrORnum, includeEnd = false) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.gt: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum))
+                throw new Error(`Chalkboard.stat.gt: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length)
+                throw new Error(`Chalkboard.stat.gt: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
+            if (includeEnd !== undefined && (typeof includeEnd !== "boolean"))
+                throw new Error(`Chalkboard.stat.gt: Parameter "includeEnd" must be a boolean.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -11007,6 +12022,20 @@ var Chalkboard;
             return result;
         };
         stat.ineq = (arr, inf, sup, includeInf = false, includeSup = false) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.ineq: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof inf !== "number" || Number.isNaN(inf)) && !Array.isArray(inf))
+                throw new Error(`Chalkboard.stat.ineq: Parameter "inf" must be a number or an array.`);
+            if ((typeof sup !== "number" || Number.isNaN(sup)) && !Array.isArray(sup))
+                throw new Error(`Chalkboard.stat.ineq: Parameter "sup" must be a number or an array.`);
+            if (Array.isArray(inf) !== Array.isArray(sup))
+                throw new Error(`Chalkboard.stat.ineq: Parameters "inf" and "sup" must either both be numbers or both be arrays.`);
+            if (Array.isArray(inf) && Array.isArray(sup) && (arr.length !== inf.length || arr.length !== sup.length))
+                throw new Error(`Chalkboard.stat.ineq: Parameters "arr", "inf", and "sup" must have the same length when "inf" and "sup" are arrays.`);
+            if (includeInf !== undefined && (typeof includeInf !== "boolean"))
+                throw new Error(`Chalkboard.stat.ineq: Parameter "includeInf" must be a boolean.`);
+            if (includeSup !== undefined && (typeof includeSup !== "boolean"))
+                throw new Error(`Chalkboard.stat.ineq: Parameter "includeSup" must be a boolean.`);
             const result = [];
             if (Array.isArray(inf) && Array.isArray(sup)) {
                 if (arr.length === inf.length && arr.length === sup.length) {
@@ -11039,27 +12068,29 @@ var Chalkboard;
                 }
             }
             else {
+                const infNum = inf;
+                const supNum = sup;
                 for (let i = 0; i < arr.length; i++) {
                     if (includeInf) {
                         if (includeSup) {
-                            if (arr[i] >= inf && arr[i] <= sup) {
+                            if (arr[i] >= infNum && arr[i] <= supNum) {
                                 result.push(arr[i]);
                             }
                         }
                         else {
-                            if (arr[i] >= inf && arr[i] < sup) {
+                            if (arr[i] >= infNum && arr[i] < supNum) {
                                 result.push(arr[i]);
                             }
                         }
                     }
                     else {
                         if (includeSup) {
-                            if (arr[i] > inf && arr[i] <= sup) {
+                            if (arr[i] > infNum && arr[i] <= supNum) {
                                 result.push(arr[i]);
                             }
                         }
                         else {
-                            if (arr[i] > inf && arr[i] < sup) {
+                            if (arr[i] > infNum && arr[i] < supNum) {
                                 result.push(arr[i]);
                             }
                         }
@@ -11069,9 +12100,8 @@ var Chalkboard;
             return result;
         };
         stat.inormal = (p) => {
-            if (p <= 0 || p >= 1) {
-                throw new RangeError('Parameter "p" must be between 0 and 1 (exclusive).');
-            }
+            if (!Number.isFinite(p) || p <= 0 || p >= 1)
+                throw new Error(`Chalkboard.stat.inormal: Parameter "p" must be a finite number strictly between 0 and 1.`);
             const a = [2.50662823884, -18.61500062529, 41.39119773534, -25.44106049637];
             const b = [-8.4735109309, 23.08336743743, -21.06224101826, 3.13082909833];
             const c = [0.3374754822726147, 0.9761690190917186, 0.1607979714918209,
@@ -11094,6 +12124,10 @@ var Chalkboard;
             }
         };
         stat.interpolate = (arr, type = "linear") => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.interpolate: Parameter "arr" must be an array.`);
+            if (type !== undefined && (typeof type !== "string"))
+                throw new Error(`Chalkboard.stat.interpolate: Parameter "type" must be a string.`);
             const result = arr.slice();
             for (let i = 0; i < result.length; i++) {
                 if (result[i] == null) {
@@ -11124,9 +12158,13 @@ var Chalkboard;
             return result;
         };
         stat.interquartileRange = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.interquartileRange: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.quartile(arr, "Q3") - Chalkboard.stat.quartile(arr, "Q1");
         };
         stat.kurtosis = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.kurtosis: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
@@ -11136,6 +12174,14 @@ var Chalkboard;
             return result / (deviation * deviation * deviation * deviation) - 3;
         };
         stat.lt = (arr, arrORnum, includeEnd = false) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.lt: Parameter "arr" must be an array of finite numbers.`);
+            if ((typeof arrORnum !== "number" || Number.isNaN(arrORnum)) && !Array.isArray(arrORnum))
+                throw new Error(`Chalkboard.stat.lt: Parameter "arrORnum" must be a number or an array.`);
+            if (Array.isArray(arrORnum) && arr.length !== arrORnum.length)
+                throw new Error(`Chalkboard.stat.lt: Parameters "arr" and "arrORnum" must have the same length when "arrORnum" is an array.`);
+            if (includeEnd !== undefined && (typeof includeEnd !== "boolean"))
+                throw new Error(`Chalkboard.stat.lt: Parameter "includeEnd" must be a boolean.`);
             const result = [];
             if (Array.isArray(arrORnum)) {
                 if (arr.length === arrORnum.length) {
@@ -11170,6 +12216,8 @@ var Chalkboard;
             return result;
         };
         stat.mad = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.mad: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += Math.abs(arr[i] - Chalkboard.stat.mean(arr));
@@ -11177,6 +12225,8 @@ var Chalkboard;
             return result / arr.length;
         };
         stat.max = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.max: Parameter "arr" must be an array of finite numbers.`);
             let max = arr[0];
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] > max) {
@@ -11207,13 +12257,14 @@ var Chalkboard;
                 return arr.length / result;
             }
             else {
-                throw new TypeError('Parameter "type" must be "arithmetic", "geometric", or "harmonic".');
+                throw new Error(`Chalkboard.stat.mean: Parameter "type" must be arithmetic, geometric, or harmonic.`);
             }
         };
         stat.meanMoving = (arr, windowSize) => {
-            if (windowSize <= 0 || windowSize > arr.length) {
-                throw new RangeError('Parameter "windowSize" must be greater than 0 and less than or equal to the array length.');
-            }
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.meanMoving: Parameter "arr" must be an array.`);
+            if (!Number.isInteger(windowSize) || windowSize < 1 || windowSize > arr.length)
+                throw new Error(`Chalkboard.stat.meanMoving: Parameter "windowSize" must be a positive integer less than or equal to the array length.`);
             const result = [];
             for (let i = 0; i <= arr.length - windowSize; i++) {
                 const windowArr = arr.slice(i, i + windowSize);
@@ -11222,9 +12273,8 @@ var Chalkboard;
             return result;
         };
         stat.meanWeighted = (arr, weights) => {
-            if (arr.length !== weights.length) {
-                throw new RangeError('Parameters "values" and "weights" must have the same length.');
-            }
+            if (arr.length !== weights.length)
+                throw new Error(`Chalkboard.stat.meanWeighted: Parameters "values" and "weights" must have the same length.`);
             let sum = 0, weightSum = 0;
             for (let i = 0; i < arr.length; i++) {
                 sum += arr[i] * weights[i];
@@ -11233,6 +12283,8 @@ var Chalkboard;
             return sum / weightSum;
         };
         stat.median = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.median: Parameter "arr" must be an array of finite numbers.`);
             if (arr.length === 0)
                 return NaN;
             const copy = arr.slice();
@@ -11245,6 +12297,8 @@ var Chalkboard;
             }
         };
         stat.min = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.min: Parameter "arr" must be an array of finite numbers.`);
             let min = arr[0];
             for (let i = 0; i < arr.length; i++) {
                 if (arr[i] < min) {
@@ -11254,6 +12308,8 @@ var Chalkboard;
             return min;
         };
         stat.mode = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.mode: Parameter "arr" must be an array of finite numbers.`);
             if (arr.length === 0)
                 return NaN;
             const frequency = new Map();
@@ -11271,6 +12327,8 @@ var Chalkboard;
             return result;
         };
         stat.mul = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.mul: Parameter "arr" must be an array of finite numbers.`);
             let result = 1;
             for (let i = 0; i < arr.length; i++) {
                 result *= arr[i];
@@ -11278,6 +12336,8 @@ var Chalkboard;
             return result;
         };
         stat.negate = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.negate: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(-arr[i]);
@@ -11310,15 +12370,23 @@ var Chalkboard;
                 return Math.abs(Chalkboard.stat.max(arr));
             }
             else {
-                throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
+                throw new Error(`Chalkboard.stat.norm: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
         };
         stat.normal = (x) => {
+            if (typeof x !== "number" || Number.isNaN(x))
+                throw new Error(`Chalkboard.stat.normal: Parameter "x" must be a number that is not NaN.`);
+            if (!Number.isFinite(x))
+                return 0;
             const standardNormal = Chalkboard.real.define((x) => 1 / Math.sqrt(2 * Math.PI) * Math.exp(-0.5 * x * x));
             const f = standardNormal.rule;
             return f(x);
         };
         stat.normalize = (arr, type = "L2") => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.normalize: Parameter "arr" must be an array of finite numbers.`);
+            if (type !== undefined && (typeof type !== "string"))
+                throw new Error(`Chalkboard.stat.normalize: Parameter "type" must be a string.`);
             const result = [];
             const norm = Chalkboard.stat.norm(arr, type);
             for (let i = 0; i < arr.length; i++) {
@@ -11352,10 +12420,16 @@ var Chalkboard;
                 return Math.abs(Chalkboard.stat.max(arr)) * Math.abs(Chalkboard.stat.max(arr));
             }
             else {
-                throw new TypeError('Parameter "type" must be "L0", "L1", "L2", or "LInfinity".');
+                throw new Error(`Chalkboard.stat.normsq: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
         };
         stat.pad = (arr, length, num = 0) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.pad: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isInteger(length) || length < 0)
+                throw new Error(`Chalkboard.stat.pad: Parameter "length" must be a non-negative integer.`);
+            if (num !== undefined && (!Number.isFinite(num)))
+                throw new Error(`Chalkboard.stat.pad: Parameter "num" must be a finite number.`);
             const result = arr.slice();
             while (result.length < length) {
                 result.push(num);
@@ -11363,6 +12437,10 @@ var Chalkboard;
             return result;
         };
         stat.percentile = (arr, num) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.percentile: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.stat.percentile: Parameter "num" must be a finite number.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 if (num >= arr[i]) {
@@ -11372,6 +12450,8 @@ var Chalkboard;
             return (result / arr.length) * 100;
         };
         stat.print = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.print: Parameter "arr" must be an array of finite numbers.`);
             console.log(Chalkboard.stat.toString(arr));
         };
         stat.quartile = (arr, type) => {
@@ -11397,10 +12477,16 @@ var Chalkboard;
                     return ($quickselect(copy, q3Mid - 1) + $quickselect(copy, q3Mid)) / 2.0;
             }
             else {
-                throw new TypeError('Parameter "type" must be "Q1", "Q2", or "Q3".');
+                throw new Error(`Chalkboard.stat.quartile: Parameter "type" must be Q1, Q2, or Q3.`);
             }
         };
         stat.random = (length, inf = 0, sup = 1) => {
+            if (!Number.isInteger(length) || length < 0)
+                throw new Error(`Chalkboard.stat.random: Parameter "length" must be a non-negative integer.`);
+            if (inf !== undefined && (!Number.isFinite(inf)))
+                throw new Error(`Chalkboard.stat.random: Parameter "inf" must be a finite number.`);
+            if (sup !== undefined && (!Number.isFinite(sup)))
+                throw new Error(`Chalkboard.stat.random: Parameter "sup" must be a finite number.`);
             const result = [];
             for (let i = 0; i < length; i++) {
                 result.push(Chalkboard.numb.random(inf, sup));
@@ -11408,9 +12494,15 @@ var Chalkboard;
             return result;
         };
         stat.range = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.range: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.stat.max(arr) - Chalkboard.stat.min(arr);
         };
         stat.regression = (data, type = "linear", degree = 2) => {
+            if (!Array.isArray(data) || data.length === 0 || !Array.isArray(data[0]) || data[0].length < 2)
+                throw new Error(`Chalkboard.stat.regression: Parameter "data" must be a non-empty array of coordinate pairs.`);
+            if (!Number.isInteger(degree) || degree < 0)
+                throw new Error(`Chalkboard.stat.regression: Parameter "degree" must be a non-negative integer.`);
             if (type === "linear") {
                 let x = 0, y = 0;
                 let xx = 0, xy = 0;
@@ -11492,10 +12584,12 @@ var Chalkboard;
                 return Chalkboard.real.define((x) => a + b * Math.log(x));
             }
             else {
-                throw new TypeError('Parameter "type" must be "linear", "polynomial", "power", "exponential", or "logarithmic".');
+                throw new Error(`Chalkboard.stat.regression: Parameter "type" must be linear, polynomial, power, exponential, or logarithmic.`);
             }
         };
         stat.resampling = (arr, samples, type = "bootstrap") => {
+            if (samples !== undefined && (!Number.isInteger(samples) || samples < 1))
+                throw new Error(`Chalkboard.stat.resampling: Parameter "samples" must be a positive integer.`);
             if (type === "bootstrap") {
                 const numSamples = samples ?? 100;
                 const result = [];
@@ -11529,10 +12623,12 @@ var Chalkboard;
                 return allJackknifeSamples;
             }
             else {
-                throw new TypeError('Parameter "type" must be "bootstrap" or "jackknife".');
+                throw new Error(`Chalkboard.stat.resampling: Parameter "type" must be bootstrap or jackknife.`);
             }
         };
         stat.reverse = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.reverse: Parameter "arr" must be an array of finite numbers.`);
             const result = [];
             for (let i = arr.length - 1; i >= 0; i--) {
                 result.push(arr[i]);
@@ -11540,6 +12636,10 @@ var Chalkboard;
             return result;
         };
         stat.scl = (arr, num) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.scl: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.stat.scl: Parameter "num" must be a finite number.`);
             const result = [];
             for (let i = 0; i < arr.length; i++) {
                 result.push(arr[i] * num);
@@ -11547,6 +12647,8 @@ var Chalkboard;
             return result;
         };
         stat.shuffle = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.shuffle: Parameter "arr" must be an array of finite numbers.`);
             let index, temp, rindex;
             for (index = arr.length - 1; index > 0; index--) {
                 rindex = Math.floor(Chalkboard.numb.random(0, index + 1));
@@ -11557,6 +12659,8 @@ var Chalkboard;
             return arr;
         };
         stat.skewness = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.skewness: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
@@ -11566,9 +12670,8 @@ var Chalkboard;
             return result / ((arr.length - 1) * (deviation * deviation * deviation));
         };
         stat.sub = (arr1, arr2) => {
-            if (arr1.length !== arr2.length) {
-                throw new RangeError('Parameters "arr1" and "arr2" must have the same length.');
-            }
+            if (arr1.length !== arr2.length)
+                throw new Error(`Chalkboard.stat.sub: Parameters "arr1" and "arr2" must have the same length.`);
             const result = [];
             for (let i = 0; i < arr1.length; i++) {
                 result.push(arr1[i] - arr2[i]);
@@ -11576,6 +12679,8 @@ var Chalkboard;
             return result;
         };
         stat.subsets = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.subsets: Parameter "arr" must be an array of finite numbers.`);
             let result = [[]];
             arr.sort();
             for (let i = 0; i < arr.length; i++) {
@@ -11593,6 +12698,8 @@ var Chalkboard;
             return result;
         };
         stat.sum = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.sum: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += arr[i];
@@ -11600,6 +12707,12 @@ var Chalkboard;
             return result;
         };
         stat.toMatrix = (arr, rows, cols = rows) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toMatrix: Parameter "arr" must be an array of finite numbers.`);
+            if (!Number.isInteger(rows) || rows < 0)
+                throw new Error(`Chalkboard.stat.toMatrix: Parameter "rows" must be a non-negative integer.`);
+            if (!Number.isInteger(cols) || cols < 0)
+                throw new Error(`Chalkboard.stat.toMatrix: Parameter "cols" must be a non-negative integer.`);
             const result = Chalkboard.matr.init();
             let index = 0;
             for (let i = 0; i < rows; i++) {
@@ -11617,6 +12730,8 @@ var Chalkboard;
             return result;
         };
         stat.toObject = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toObject: Parameter "arr" must be an array of finite numbers.`);
             const result = {};
             for (let i = 0; i < arr.length; i++) {
                 result["_" + i.toString()] = arr[i];
@@ -11624,18 +12739,32 @@ var Chalkboard;
             return result;
         };
         stat.toSet = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toSet: Parameter "arr" must be an array of finite numbers.`);
             return Chalkboard.abal.set(arr);
         };
         stat.toString = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toString: Parameter "arr" must be an array.`);
             return "[" + arr.join(", ") + "]";
         };
         stat.toTensor = (arr, ...size) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toTensor: Parameter "arr" must be an array of finite numbers.`);
             if (Array.isArray(size[0])) {
                 size = size[0];
             }
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.stat.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(arr, ...size);
         };
         stat.toVector = (arr, dimension, index = 0) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.toVector: Parameter "arr" must be an array.`);
+            if (dimension !== 2 && dimension !== 3 && dimension !== 4)
+                throw new Error(`Chalkboard.stat.toVector: Parameter "dimension" must be 2, 3, or 4.`);
+            if (!Number.isInteger(index) || index < 0 || index + dimension > arr.length)
+                throw new Error(`Chalkboard.stat.toVector: Parameter "index" and parameter "dimension" must fit within the array bounds.`);
             if (dimension === 2) {
                 return Chalkboard.vect.init(arr[index], arr[index + 1]);
             }
@@ -11646,10 +12775,12 @@ var Chalkboard;
                 return Chalkboard.vect.init(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             }
             else {
-                throw new RangeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.stat.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         stat.unique = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.unique: Parameter "arr" must be an array.`);
             if (arr.length === 0)
                 return [];
             const firstType = typeof arr[0];
@@ -11679,6 +12810,8 @@ var Chalkboard;
             return Array.from(seen.values());
         };
         stat.variance = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.variance: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
@@ -11686,6 +12819,8 @@ var Chalkboard;
             return result / arr.length;
         };
         stat.zscored = (arr) => {
+            if (!Array.isArray(arr))
+                throw new Error(`Chalkboard.stat.zscored: Parameter "arr" must be an array of finite numbers.`);
             let result = [];
             const mean = Chalkboard.stat.mean(arr);
             const deviation = Chalkboard.stat.deviation(arr);
@@ -11701,6 +12836,8 @@ var Chalkboard;
     let tens;
     (function (tens_1) {
         tens_1.absolute = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.absolute: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -11713,6 +12850,10 @@ var Chalkboard;
             }
         };
         tens_1.add = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.add: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.add: Parameter "tens2" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens1) && Array.isArray(tens2)) {
                 for (let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
@@ -11725,6 +12866,12 @@ var Chalkboard;
             }
         };
         tens_1.concat = (tens1, tens2, rank = 1) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.concat: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.concat: Parameter "tens2" must be a tensor.`);
+            if (!Number.isInteger(rank) || rank < 1 || rank > Math.min(Chalkboard.tens.rank(tens1), Chalkboard.tens.rank(tens2)))
+                throw new Error(`Chalkboard.tens.concat: Parameter "rank" must be a positive integer less than or equal to both tensor ranks.`);
             const concatAtRank = function (arr1, arr2, currentRank) {
                 if (currentRank === rank) {
                     return Chalkboard.tens.init(arr1.concat(arr2));
@@ -11736,6 +12883,8 @@ var Chalkboard;
             return concatAtRank(tens1, tens2, 1);
         };
         tens_1.constrain = (tens, range = [0, 1]) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.constrain: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -11748,6 +12897,8 @@ var Chalkboard;
             }
         };
         tens_1.contract = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.contract: Parameter "tens" must be a tensor.`);
             if (Chalkboard.tens.rank(tens) > 2) {
                 return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens)[0], Chalkboard.tens
                     .size(tens)
@@ -11764,6 +12915,8 @@ var Chalkboard;
             }
         };
         tens_1.copy = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.copy: Parameter "tens" must be a tensor.`);
             if (Array.isArray(tens)) {
                 const result = Chalkboard.tens.init();
                 for (let i = 0; i < tens.length; i++) {
@@ -11777,6 +12930,8 @@ var Chalkboard;
         };
         tens_1.empty = (...size) => {
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.empty: Parameter "size" must begin and end with non-negative integers.`);
             const newNDArray = function (size) {
                 if (size.length === 0) {
                     return null;
@@ -11792,7 +12947,11 @@ var Chalkboard;
             return newNDArray(size);
         };
         tens_1.fill = (element, ...size) => {
+            if (!Number.isFinite(element))
+                throw new Error(`Chalkboard.tens.fill: Parameter "element" must be a finite number.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.fill: Parameter "size" must begin and end with non-negative integers.`);
             const newNDArray = function (size) {
                 if (size.length === 0) {
                     return element;
@@ -11827,6 +12986,12 @@ var Chalkboard;
             return newNDArray(tensor);
         };
         tens_1.isApproxEqual = (tens1, tens2, precision = 0.000001) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens2" must be a tensor.`);
+            if (precision !== undefined && (!Number.isFinite(precision)))
+                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "precision" must be a finite number.`);
             if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
                 (tens1 = tens1), (tens2 = tens2);
                 for (let i = 0; i < tens1.length; i++) {
@@ -11846,6 +13011,10 @@ var Chalkboard;
             }
         };
         tens_1.isEqual = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.isEqual: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.isEqual: Parameter "tens2" must be a tensor.`);
             if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
                 (tens1 = tens1), (tens2 = tens2);
                 for (let i = 0; i < tens1.length; i++) {
@@ -11865,12 +13034,24 @@ var Chalkboard;
             }
         };
         tens_1.isRankEqual = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.isRankEqual: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.isRankEqual: Parameter "tens2" must be a tensor.`);
             return Chalkboard.tens.rank(tens1) === Chalkboard.tens.rank(tens2);
         };
         tens_1.isRankOf = (tens, rank) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.isRankOf: Parameter "tens" must be a tensor.`);
+            if (!Number.isInteger(rank) || rank < 0)
+                throw new Error(`Chalkboard.tens.isRankOf: Parameter "rank" must be a non-negative integer.`);
             return Chalkboard.tens.rank(tens) === rank;
         };
         tens_1.isSizeEqual = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.isSizeEqual: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.isSizeEqual: Parameter "tens2" must be a tensor.`);
             if (Chalkboard.tens.isRankEqual(tens1, tens2)) {
                 let score = 0;
                 for (let i = 0; i < Chalkboard.tens.rank(tens1); i++) {
@@ -11884,10 +13065,16 @@ var Chalkboard;
             }
         };
         tens_1.isSizeOf = (tens, ...size) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.isSizeOf: Parameter "tens" must be a tensor.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.isSizeOf: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.isSizeEqual(tens, Chalkboard.tens.empty(...size));
         };
         tens_1.isSizeUniform = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.isSizeUniform: Parameter "tens" must be a tensor.`);
             let score = 0;
             for (let i = 0; i < Chalkboard.tens.rank(tens); i++) {
                 if (Chalkboard.tens.size(tens)[i] !== Chalkboard.tens.size(tens)[0])
@@ -11896,6 +13083,8 @@ var Chalkboard;
             return score === 0;
         };
         tens_1.isZero = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.isZero: Parameter "tens" must be a tensor.`);
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
                     if (!Chalkboard.tens.isZero(tens[i]))
@@ -11908,6 +13097,10 @@ var Chalkboard;
             }
         };
         tens_1.mul = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.mul: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.mul: Parameter "tens2" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens1) && Array.isArray(tens2)) {
                 for (let i = 0; i < tens1.length; i++) {
@@ -11924,6 +13117,8 @@ var Chalkboard;
             }
         };
         tens_1.negate = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.negate: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -11936,9 +13131,18 @@ var Chalkboard;
             }
         };
         tens_1.print = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.print: Parameter "tens" must be a tensor.`);
             console.log(Chalkboard.tens.toString(tens));
         };
         tens_1.pull = (tens, rank, index) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.pull: Parameter "tens" must be a tensor.`);
+            const size = Chalkboard.tens.size(tens);
+            if (!Number.isInteger(rank) || rank < 0 || rank >= size.length)
+                throw new Error(`Chalkboard.tens.pull: Parameter "rank" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(index) || index < 0 || index >= size[rank])
+                throw new Error(`Chalkboard.tens.pull: Parameter "index" must be an integer within the selected rank bounds.`);
             tens = tens;
             if (rank === 0) {
                 tens.splice(index, 1);
@@ -11952,20 +13156,37 @@ var Chalkboard;
             }
         };
         tens_1.push = (tens, rank, index, elements) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.push: Parameter "tens" must be a tensor.`);
+            const size = Chalkboard.tens.size(tens);
+            if (!Number.isInteger(rank) || rank < 0 || rank >= size.length)
+                throw new Error(`Chalkboard.tens.push: Parameter "rank" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(index) || index < 0 || index > size[rank])
+                throw new Error(`Chalkboard.tens.push: Parameter "index" must be an integer within the selected rank insertion bounds.`);
+            if (!Array.isArray(elements))
+                throw new Error(`Chalkboard.tens.push: Parameter "elements" must be an array.`);
             tens = tens;
-            if (rank === 0) {
-                tens.splice(index, 0, elements);
-                return tens;
-            }
-            else {
-                for (let i = 0; i < tens.length; i++) {
-                    Chalkboard.tens.push(tens[i], rank - 1, index, elements[i]);
+            const insert = (tensor, currentRank, currentElements) => {
+                if (currentRank === 0) {
+                    tensor.splice(index, 0, currentElements);
                 }
-                return tens;
-            }
+                else {
+                    for (let i = 0; i < tensor.length; i++) {
+                        insert(tensor[i], currentRank - 1, currentElements[i]);
+                    }
+                }
+                return tensor;
+            };
+            return insert(tens, rank, elements);
         };
         tens_1.random = (inf, sup, ...size) => {
+            if (!Number.isFinite(inf))
+                throw new Error(`Chalkboard.tens.random: Parameter "inf" must be a finite number.`);
+            if (!Number.isFinite(sup))
+                throw new Error(`Chalkboard.tens.random: Parameter "sup" must be a finite number.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.random: Parameter "size" must begin and end with non-negative integers.`);
             const newNDArray = function (size) {
                 if (size.length === 0) {
                     return Chalkboard.numb.random(inf, sup);
@@ -11981,9 +13202,13 @@ var Chalkboard;
             return newNDArray(size);
         };
         tens_1.rank = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.rank: Parameter "tens" must be a tensor.`);
             return Chalkboard.tens.size(tens).length;
         };
         tens_1.reciprocate = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.reciprocate: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -11996,7 +13221,11 @@ var Chalkboard;
             }
         };
         tens_1.resize = (tens, ...size) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.resize: Parameter "tens" must be a tensor.`);
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.resize: Parameter "size" must begin and end with non-negative integers.`);
             const result = Chalkboard.tens.fill(0, ...size);
             const refill = function (arr1, arr2) {
                 for (let i = 0; i < arr2.length; i++) {
@@ -12012,6 +13241,8 @@ var Chalkboard;
             return result;
         };
         tens_1.round = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.round: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -12024,6 +13255,10 @@ var Chalkboard;
             }
         };
         tens_1.scl = (tens, num) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.scl: Parameter "tens" must be a tensor.`);
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.tens.scl: Parameter "num" must be a finite number.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens)) {
                 for (let i = 0; i < tens.length; i++) {
@@ -12036,6 +13271,8 @@ var Chalkboard;
             }
         };
         tens_1.size = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.size: Parameter "tens" must be a tensor.`);
             if (Array.isArray(tens)) {
                 let result = [tens.length];
                 if (Array.isArray(tens[0])) {
@@ -12048,6 +13285,10 @@ var Chalkboard;
             }
         };
         tens_1.sub = (tens1, tens2) => {
+            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
+                throw new Error(`Chalkboard.tens.sub: Parameter "tens1" must be a tensor.`);
+            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
+                throw new Error(`Chalkboard.tens.sub: Parameter "tens2" must be a tensor.`);
             const result = Chalkboard.tens.init();
             if (Array.isArray(tens1) && Array.isArray(tens2)) {
                 for (let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
@@ -12060,6 +13301,8 @@ var Chalkboard;
             }
         };
         tens_1.toArray = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toArray: Parameter "tens" must be a tensor.`);
             const result = [];
             const flatten = function (tens) {
                 for (let i = 0; i < tens.length; i++) {
@@ -12075,6 +13318,8 @@ var Chalkboard;
             return result;
         };
         tens_1.toMatrix = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toMatrix: Parameter "tens" must be a tensor.`);
             const result = Chalkboard.matr.init();
             const flatten = function (tens, result) {
                 for (let i = 0; i < tens.length; i++) {
@@ -12095,6 +13340,8 @@ var Chalkboard;
             return result;
         };
         tens_1.toObject = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toObject: Parameter "tens" must be a tensor.`);
             if (Array.isArray(tens)) {
                 const result = {};
                 for (let i = 0; i < tens.length; i++) {
@@ -12107,9 +13354,15 @@ var Chalkboard;
             }
         };
         tens_1.toSet = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toSet: Parameter "tens" must be a tensor.`);
             return Chalkboard.abal.set(Chalkboard.tens.toArray(tens));
         };
         tens_1.toString = (tens, indentation = 0) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toString: Parameter "tens" must be a tensor.`);
+            if (!Number.isInteger(indentation) || indentation < 0)
+                throw new Error(`Chalkboard.tens.toString: Parameter "indentation" must be a non-negative integer.`);
             if (Array.isArray(tens[0])) {
                 let result = "\t".repeat(indentation) + "[\n";
                 for (let i = 0; i < tens.length; i++) {
@@ -12147,10 +13400,16 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.tens.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         tens_1.toVector = (tens, dimension, index = 0) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.toVector: Parameter "tens" must be a tensor.`);
+            if (dimension !== 2 && dimension !== 3 && dimension !== 4)
+                throw new Error(`Chalkboard.tens.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             const arr = Chalkboard.tens.toArray(tens);
+            if (!Number.isInteger(index) || index < 0 || index + dimension > arr.length)
+                throw new Error(`Chalkboard.tens.toVector: Parameter "index" and parameter "dimension" must fit within the flattened tensor bounds.`);
             if (dimension === 2) {
                 return Chalkboard.vect.init(arr[index], arr[index + 1]);
             }
@@ -12161,14 +13420,18 @@ var Chalkboard;
                 return Chalkboard.vect.init(arr[index], arr[index + 1], arr[index + 2], arr[index + 3]);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.tens.toVector: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         tens_1.transpose = (tens) => {
+            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.transpose: Parameter "tens" must be a tensor.`);
             return Chalkboard.tens.resize(tens, ...Chalkboard.tens.size(tens).reverse());
         };
         tens_1.zero = (...size) => {
             size = Array.isArray(size[0]) ? size[0] : size;
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.tens.zero: Parameter "size" must begin and end with non-negative integers.`);
             const newNDArray = function (size) {
                 if (size.length === 0) {
                     return 0;
@@ -12190,6 +13453,8 @@ var Chalkboard;
     let trig;
     (function (trig) {
         trig.arccos = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccos: Parameter "rad" must be a number that is not NaN.`);
             if (rad === 1) {
                 return 0;
             }
@@ -12209,6 +13474,8 @@ var Chalkboard;
             }
         };
         trig.arccosh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccosh: Parameter "rad" must be a number that is not NaN.`);
             if (rad >= 1) {
                 return Math.log(rad + Math.sqrt(rad * rad - 1));
             }
@@ -12217,9 +13484,15 @@ var Chalkboard;
             }
         };
         trig.arccot = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccot: Parameter "rad" must be a number that is not NaN.`);
             return Chalkboard.PI(0.5) - Chalkboard.trig.arctan(rad);
         };
         trig.arccoth = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccoth: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return 0;
             if (rad < -1 || rad > 1) {
                 return Math.log((rad + 1) / (rad - 1)) / 2;
             }
@@ -12228,6 +13501,8 @@ var Chalkboard;
             }
         };
         trig.arccsc = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccsc: Parameter "rad" must be a number that is not NaN.`);
             if (rad === 1) {
                 return Chalkboard.PI(0.5);
             }
@@ -12242,6 +13517,10 @@ var Chalkboard;
             }
         };
         trig.arccsch = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arccsch: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return 0;
             if (rad !== 0) {
                 return Math.log(1 / rad + Math.sqrt(1 / (rad * rad) + 1));
             }
@@ -12250,6 +13529,8 @@ var Chalkboard;
             }
         };
         trig.arcsec = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arcsec: Parameter "rad" must be a number that is not NaN.`);
             if (rad === 1) {
                 return 0;
             }
@@ -12264,6 +13545,8 @@ var Chalkboard;
             }
         };
         trig.arcsech = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arcsech: Parameter "rad" must be a number that is not NaN.`);
             if (rad > 0 && rad <= 1) {
                 return Math.log(1 / rad + Math.sqrt(1 / (rad * rad) - 1));
             }
@@ -12272,6 +13555,8 @@ var Chalkboard;
             }
         };
         trig.arcsin = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arcsin: Parameter "rad" must be a number that is not NaN.`);
             if (rad > -1 && rad < 1) {
                 const t = 1 - rad * rad;
                 const s = Chalkboard.real.sqrt(t < 0 ? 0 : t);
@@ -12288,9 +13573,15 @@ var Chalkboard;
             }
         };
         trig.arcsinh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arcsinh: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return rad;
             return Math.log(rad + Math.sqrt(rad * rad + 1));
         };
         trig.arctan = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arctan: Parameter "rad" must be a number that is not NaN.`);
             const series = (x) => {
                 const x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2, x31 = x29 * x2, x33 = x31 * x2, x35 = x33 * x2, x37 = x35 * x2, x39 = x37 * x2;
                 return x - x3 / 3 + x5 / 5 - x7 / 7 + x9 / 9 - x11 / 11 + x13 / 13 - x15 / 15 + x17 / 17 - x19 / 19 + x21 / 21 - x23 / 23 + x25 / 25 - x27 / 27 + x29 / 29 - x31 / 31 + x33 / 33 - x35 / 35 + x37 / 37 - x39 / 39;
@@ -12316,6 +13607,8 @@ var Chalkboard;
             return sign * result;
         };
         trig.arctanh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.arctanh: Parameter "rad" must be a number that is not NaN.`);
             if (rad > -1 && rad < 1) {
                 return Math.log((1 + rad) / (1 - rad)) / 2;
             }
@@ -12324,6 +13617,12 @@ var Chalkboard;
             }
         };
         trig.arctan2 = (y, x) => {
+            if (typeof y !== "number" || Number.isNaN(y))
+                throw new Error(`Chalkboard.trig.arctan2: Parameter "y" must be a number that is not NaN.`);
+            if (typeof x !== "number" || Number.isNaN(x))
+                throw new Error(`Chalkboard.trig.arctan2: Parameter "x" must be a number that is not NaN.`);
+            if (!Number.isFinite(y) || !Number.isFinite(x))
+                return Math.atan2(y, x);
             if (x === 0) {
                 if (y > 0) {
                     return Chalkboard.PI(0.5);
@@ -12351,6 +13650,8 @@ var Chalkboard;
             }
         };
         trig.cos = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.cos: Parameter "rad" must be a finite number.`);
             const x = Chalkboard.trig.coterminal(rad);
             const x2 = x * x, x4 = x2 * x2, x6 = x4 * x2, x8 = x4 * x4, x10 = x6 * x4, x12 = x8 * x4, x14 = x8 * x6, x16 = x8 * x8, x18 = x10 * x8, x20 = x10 * x10, x22 = x12 * x10, x24 = x12 * x12, x26 = x14 * x12, x28 = x14 * x14;
             return (1 -
@@ -12370,30 +13671,56 @@ var Chalkboard;
                 x28 / 3.0488834461171384e+29);
         };
         trig.cosh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.cosh: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return Infinity;
             return (Math.pow(Chalkboard.E(), rad) + Math.pow(Chalkboard.E(), -rad)) / 2;
         };
         trig.cot = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.cot: Parameter "rad" must be a finite number.`);
             return 1 / Chalkboard.trig.tan(rad);
         };
         trig.coth = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.coth: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return rad > 0 ? 1 : -1;
             return 1 / Chalkboard.trig.tanh(rad);
         };
         trig.coterminal = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.coterminal: Parameter "rad" must be a finite number.`);
             return rad % (2 * Chalkboard.PI());
         };
         trig.csc = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.csc: Parameter "rad" must be a finite number.`);
             return 1 / Chalkboard.trig.sin(rad);
         };
         trig.csch = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.csch: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return 0;
             return 1 / Chalkboard.trig.sinh(rad);
         };
         trig.sec = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.sec: Parameter "rad" must be a finite number.`);
             return 1 / Chalkboard.trig.cos(rad);
         };
         trig.sech = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.sech: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return 0;
             return 1 / Chalkboard.trig.cosh(rad);
         };
         trig.sin = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.sin: Parameter "rad" must be a finite number.`);
             const x = Chalkboard.trig.coterminal(rad);
             const x2 = x * x, x3 = x2 * x, x5 = x3 * x2, x7 = x5 * x2, x9 = x7 * x2, x11 = x9 * x2, x13 = x11 * x2, x15 = x13 * x2, x17 = x15 * x2, x19 = x17 * x2, x21 = x19 * x2, x23 = x21 * x2, x25 = x23 * x2, x27 = x25 * x2, x29 = x27 * x2;
             return (x -
@@ -12413,18 +13740,32 @@ var Chalkboard;
                 x29 / 8.841761993739701e+30);
         };
         trig.sinh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.sinh: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return rad;
             return (Math.pow(Chalkboard.E(), rad) - Math.pow(Chalkboard.E(), -rad)) / 2;
         };
         trig.tan = (rad) => {
+            if (!Number.isFinite(rad))
+                throw new Error(`Chalkboard.trig.tan: Parameter "rad" must be a finite number.`);
             return Chalkboard.trig.sin(rad) / Chalkboard.trig.cos(rad);
         };
         trig.tanh = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.tanh: Parameter "rad" must be a number that is not NaN.`);
+            if (!Number.isFinite(rad))
+                return rad > 0 ? 1 : -1;
             return Chalkboard.trig.sinh(rad) / Chalkboard.trig.cosh(rad);
         };
         trig.toDeg = (rad) => {
+            if (typeof rad !== "number" || Number.isNaN(rad))
+                throw new Error(`Chalkboard.trig.toDeg: Parameter "rad" must be a number that is not NaN.`);
             return rad * (180 / Chalkboard.PI());
         };
         trig.toRad = (deg) => {
+            if (typeof deg !== "number" || Number.isNaN(deg))
+                throw new Error(`Chalkboard.trig.toRad: Parameter "deg" must be a number that is not NaN.`);
             return deg * (Chalkboard.PI() / 180);
         };
     })(trig = Chalkboard.trig || (Chalkboard.trig = {}));
@@ -12433,8 +13774,10 @@ var Chalkboard;
 (function (Chalkboard) {
     let vect;
     (function (vect_1) {
-        const $ = (input) => {
+        const $ = (input, caller) => {
             const $$ = (x, y, z, w) => {
+                if (!Number.isFinite(x) || !Number.isFinite(y) || z !== undefined && !Number.isFinite(z) || w !== undefined && !Number.isFinite(w))
+                    throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (z === undefined && w === undefined) {
                     return { x: x, y: y };
                 }
@@ -12447,6 +13790,8 @@ var Chalkboard;
             };
             const v = input;
             if (v && typeof v.x === "number" && typeof v.y === "number") {
+                if (v.z !== undefined && typeof v.z !== "number" || v.w !== undefined && (typeof v.z !== "number" || typeof v.w !== "number"))
+                    throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
                 if (typeof v.z === "number" && typeof v.w === "number")
                     return $$(v.x, v.y, v.z, v.w);
                 if (typeof v.z === "number")
@@ -12505,22 +13850,20 @@ var Chalkboard;
                     const str = input.trim();
                     if (str.startsWith("(") && str.endsWith(")")) {
                         const content = str.substring(1, str.length - 1);
-                        const components = content.split(",").map(part => parseFloat(part.trim()));
-                        if (components.length >= 2 && components.every(p => !isNaN(p))) {
-                            if (components.length === 2)
-                                return $$(components[0], components[1]);
-                            if (components.length === 3)
-                                return $$(components[0], components[1], components[2]);
-                            if (components.length === 4)
-                                return $$(components[0], components[1], components[2], components[3]);
-                        }
+                        const components = content.split(",").map((part) => part.trim() === "" ? NaN : Number(part.trim()));
+                        if (components.length === 2 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]))
+                            return $$(components[0], components[1]);
+                        if (components.length === 3 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]))
+                            return $$(components[0], components[1], components[2]);
+                        if (components.length === 4 && !Number.isNaN(components[0]) && !Number.isNaN(components[1]) && !Number.isNaN(components[2]) && !Number.isNaN(components[3]))
+                            return $$(components[0], components[1], components[2], components[3]);
                     }
                 }
             }
-            throw new TypeError(`Invalid ChalkboardVector input: ${JSON.stringify(input)}`);
+            throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
         };
         vect_1.absolute = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.absolute");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y));
             }
@@ -12531,12 +13874,12 @@ var Chalkboard;
                 return Chalkboard.vect.init(Math.abs(vect.x), Math.abs(vect.y), Math.abs(vect.z), Math.abs(vect.w));
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.absolute: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.add = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.add");
+            vect2 = $(vect2, "Chalkboard.vect.add");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y);
             }
@@ -12547,11 +13890,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect1.x + vect2.x, vect1.y + vect2.y, vect1.z + vect2.z, vect1.w + vect2.w);
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.add: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.ang = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.ang");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.trig.arctan2(vect.y, vect.x);
             }
@@ -12564,14 +13907,16 @@ var Chalkboard;
                 return [Math.acos(vect.x / m), Math.acos(vect.y / m), Math.acos(vect.z / m), Math.acos(vect.w / m)];
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.ang: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.angBetween = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.angBetween");
+            vect2 = $(vect2, "Chalkboard.vect.angBetween");
             return Math.acos(Chalkboard.vect.dot(vect1, vect2) / (Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2)));
         };
         vect_1.constrain = (vect, range = [0, 1]) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.constrain");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range));
             }
@@ -12582,11 +13927,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(Chalkboard.numb.constrain(vect.x, range), Chalkboard.numb.constrain(vect.y, range), Chalkboard.numb.constrain(vect.z, range), Chalkboard.numb.constrain(vect.w, range));
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.constrain: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.copy = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.copy");
             const _vect = Object.create(Object.getPrototypeOf(vect), Object.getOwnPropertyDescriptors(vect));
             if (mode === "vector")
                 return _vect;
@@ -12605,8 +13950,8 @@ var Chalkboard;
             return _vect;
         };
         vect_1.cross = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.cross");
+            vect2 = $(vect2, "Chalkboard.vect.cross");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(0, 0, vect1.x * vect2.y - vect1.y * vect2.x);
             }
@@ -12614,12 +13959,12 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect1.y * vect2.z - vect1.z * vect2.y, vect1.z * vect2.x - vect1.x * vect2.z, vect1.x * vect2.y - vect1.y * vect2.x);
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2 or 3 dimensions.');
+                throw new Error(`Chalkboard.vect.cross: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2 or 3 dimensions.`);
             }
         };
         vect_1.dimension = (vectORvectfield) => {
             try {
-                const v = $(vectORvectfield);
+                const v = $(vectORvectfield, "Chalkboard.vect.dimension");
                 if (typeof v.x === "number" && typeof v.y === "number" && typeof v.z === "undefined" && typeof v.w === "undefined") {
                     return 2;
                 }
@@ -12642,11 +13987,11 @@ var Chalkboard;
                     return 4;
                 }
             }
-            throw new TypeError('Parameter "vectORvectfield" must be a vector or vector field with 2, 3, or 4 dimensions.');
+            throw new Error(`Chalkboard.vect.dimension: Parameter "vectORvectfield" must be a vector or vector field with 2, 3, or 4 dimensions.`);
         };
         vect_1.dist = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.dist");
+            vect2 = $(vect2, "Chalkboard.vect.dist");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y));
             }
@@ -12657,12 +14002,12 @@ var Chalkboard;
                 return Chalkboard.real.sqrt((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.dist: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.distsq = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.distsq");
+            vect2 = $(vect2, "Chalkboard.vect.distsq");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return (vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y);
             }
@@ -12673,12 +14018,12 @@ var Chalkboard;
                 return ((vect2.x - vect1.x) * (vect2.x - vect1.x) + (vect2.y - vect1.y) * (vect2.y - vect1.y) + (vect2.z - vect1.z) * (vect2.z - vect1.z) + (vect2.w - vect1.w) * (vect2.w - vect1.w));
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.distsq: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.dot = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.dot");
+            vect2 = $(vect2, "Chalkboard.vect.dot");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return vect1.x * vect2.x + vect1.y * vect2.y;
             }
@@ -12689,25 +14034,33 @@ var Chalkboard;
                 return vect1.x * vect2.x + vect1.y * vect2.y + vect1.z * vect2.z + vect1.w * vect2.w;
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.dot: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.empty = (dimension) => {
             const _null = null;
             if (dimension === 2) {
-                return Chalkboard.vect.init(_null, _null);
+                return { x: _null, y: _null };
             }
             else if (dimension === 3) {
-                return Chalkboard.vect.init(_null, _null, _null);
+                return { x: _null, y: _null, z: _null };
             }
             else if (dimension === 4) {
-                return Chalkboard.vect.init(_null, _null, _null, _null);
+                return { x: _null, y: _null, z: _null, w: _null };
             }
             else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.empty: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         vect_1.field = (p, q, r, s) => {
+            if (typeof p !== "function")
+                throw new Error(`Chalkboard.vect.field: Parameter "p" must be a function.`);
+            if (typeof q !== "function")
+                throw new Error(`Chalkboard.vect.field: Parameter "q" must be a function.`);
+            if (r !== undefined && (typeof r !== "function"))
+                throw new Error(`Chalkboard.vect.field: Parameter "r" must be a function.`);
+            if (s !== undefined && (typeof s !== "function"))
+                throw new Error(`Chalkboard.vect.field: Parameter "s" must be a function.`);
             if (r === undefined && s === undefined) {
                 return { rule: [p, q], field: "real", type: "vector2d" };
             }
@@ -12729,11 +14082,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(num, num, num, num);
             }
             else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.fill: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         vect_1.fromAlternateToCartesian = (vect, type) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.fromAlternateToCartesian");
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.cos(vect.y), vect.y * Chalkboard.trig.sin(vect.y));
             }
@@ -12747,10 +14100,14 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.cos(vect.y), vect.x * Chalkboard.trig.sin(vect.z) * Chalkboard.trig.sin(vect.y), vect.x * Chalkboard.trig.cos(vect.z));
             }
             else {
-                throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
+                throw new Error(`Chalkboard.vect.fromAlternateToCartesian: Parameter "type" must be polar, bipolar, cylindrical, or spherical.`);
             }
         };
         vect_1.fromAngle = (rad1, rad2) => {
+            if (!Number.isFinite(rad1))
+                throw new Error(`Chalkboard.vect.fromAngle: Parameter "rad1" must be a finite number.`);
+            if (rad2 !== undefined && (!Number.isFinite(rad2)))
+                throw new Error(`Chalkboard.vect.fromAngle: Parameter "rad2" must be a finite number.`);
             if (typeof rad2 === "undefined") {
                 return Chalkboard.vect.init(Chalkboard.trig.cos(rad1), Chalkboard.trig.sin(rad1));
             }
@@ -12759,7 +14116,7 @@ var Chalkboard;
             }
         };
         vect_1.fromCartesianToAlternate = (vect, type) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.fromCartesianToAlternate");
             if (type === "polar" && Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(vect));
             }
@@ -12773,12 +14130,12 @@ var Chalkboard;
                 return Chalkboard.vect.init(Chalkboard.vect.mag(vect), Chalkboard.vect.ang(Chalkboard.vect.init(vect.x, vect.y)), Chalkboard.vect.ang(vect)[2]);
             }
             else {
-                throw new TypeError('Parameter "type" must be "polar", "bipolar", "cylindrical", or "spherical".');
+                throw new Error(`Chalkboard.vect.fromCartesianToAlternate: Parameter "type" must be polar, bipolar, cylindrical, or spherical.`);
             }
         };
         vect_1.fromField = (vectfield, vect) => {
             const f = vectfield.rule;
-            const v = vect = $(vect);
+            const v = vect = $(vect, "Chalkboard.vect.fromField");
             if (vectfield.type === "vector2d") {
                 return Chalkboard.vect.init(f[0](v.x, v.y), f[1](v.x, v.y));
             }
@@ -12788,10 +14145,10 @@ var Chalkboard;
             else if (vectfield.type === "vector4d") {
                 return Chalkboard.vect.init(f[0](v.x, v.y, v.z, v.w), f[1](v.x, v.y, v.z, v.w), f[2](v.x, v.y, v.z, v.w), f[3](v.x, v.y, v.z, v.w));
             }
-            throw new TypeError("Chalkboard.vect.fromField: Property 'type' of 'vectfield' must be 'vector2d', 'vector3d', or 'vector4d'.");
+            throw new Error(`Chalkboard.vect.fromField: Property "vectfield.type" must be vector2d, vector3d, or vector4d.`);
         };
         vect_1.fromVector = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.fromVector");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x, vect.y, 0);
             }
@@ -12802,10 +14159,18 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect.x, vect.y);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.fromVector: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.init = (x, y, z, w) => {
+            if (!Number.isFinite(x))
+                throw new Error(`Chalkboard.vect.init: Parameter "x" must be a finite number.`);
+            if (!Number.isFinite(y))
+                throw new Error(`Chalkboard.vect.init: Parameter "y" must be a finite number.`);
+            if (z !== undefined && (!Number.isFinite(z)))
+                throw new Error(`Chalkboard.vect.init: Parameter "z" must be a finite number.`);
+            if (w !== undefined && (!Number.isFinite(w)))
+                throw new Error(`Chalkboard.vect.init: Parameter "w" must be a finite number.`);
             let v;
             if (z === undefined && w === undefined) {
                 v = { x: x, y: y };
@@ -12833,7 +14198,7 @@ var Chalkboard;
             return v;
         };
         vect_1.interpolate = (vect, a, b, c, d) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.interpolate");
             if (Chalkboard.vect.isDimensionOf(vect, 2) && typeof c === "undefined" && typeof d === "undefined") {
                 return Chalkboard.vect.init((a * vect.x + b * vect.y) / (a + b), (a * vect.x + b * vect.y) / (a + b));
             }
@@ -12844,12 +14209,12 @@ var Chalkboard;
                 return Chalkboard.vect.init((a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d), (a * vect.x + b * vect.y + c * vect.z + d * vect.w) / (a + b + c + d));
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.interpolate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.isApproxEqual = (vect1, vect2, precision = 0.000001) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.isApproxEqual");
+            vect2 = $(vect2, "Chalkboard.vect.isApproxEqual");
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision);
@@ -12861,7 +14226,7 @@ var Chalkboard;
                     return Chalkboard.numb.isApproxEqual(vect1.x, vect2.x, precision) && Chalkboard.numb.isApproxEqual(vect1.y, vect2.y, precision) && Chalkboard.numb.isApproxEqual(vect1.z, vect2.z, precision) && Chalkboard.numb.isApproxEqual(vect1.w, vect2.w, precision);
                 }
                 else {
-                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                    throw new Error(`Chalkboard.vect.isApproxEqual: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
                 }
             }
             else {
@@ -12873,7 +14238,7 @@ var Chalkboard;
         };
         vect_1.isDimensionOf = (vectORvectfield, dimension) => {
             try {
-                const vect = $(vectORvectfield);
+                const vect = $(vectORvectfield, "Chalkboard.vect.isDimensionOf");
                 if (dimension === 2) {
                     return Chalkboard.vect.dimension(vect) === 2;
                 }
@@ -12896,11 +14261,11 @@ var Chalkboard;
                     return Chalkboard.vect.dimension(vectfield) === 4;
                 }
             }
-            throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+            throw new Error(`Chalkboard.vect.isDimensionOf: Parameter "dimension" must be 2, 3, or 4.`);
         };
         vect_1.isEqual = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.isEqual");
+            vect2 = $(vect2, "Chalkboard.vect.isEqual");
             if (Chalkboard.vect.isDimensionEqual(vect1, vect2)) {
                 if (Chalkboard.vect.isDimensionOf(vect1, 2)) {
                     return vect1.x === vect2.x && vect1.y === vect2.y;
@@ -12912,7 +14277,7 @@ var Chalkboard;
                     return vect1.x === vect2.x && vect1.y === vect2.y && vect1.z === vect2.z && vect1.w === vect2.w;
                 }
                 else {
-                    throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                    throw new Error(`Chalkboard.vect.isEqual: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
                 }
             }
             else {
@@ -12920,19 +14285,25 @@ var Chalkboard;
             }
         };
         vect_1.isNormalized = (vect) => {
+            vect = $(vect, "Chalkboard.vect.isNormalized");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.magsq(vect), 1);
         };
         vect_1.isOrthogonal = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.isOrthogonal");
+            vect2 = $(vect2, "Chalkboard.vect.isOrthogonal");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), 0);
         };
         vect_1.isParallel = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.isParallel");
+            vect2 = $(vect2, "Chalkboard.vect.isParallel");
             return Chalkboard.numb.isApproxEqual(Chalkboard.vect.dot(vect1, vect2), Chalkboard.vect.mag(vect1) * Chalkboard.vect.mag(vect2));
         };
         vect_1.isZero = (vect) => {
+            vect = $(vect, "Chalkboard.vect.isZero");
             return Chalkboard.vect.isApproxEqual(vect, Chalkboard.vect.zero(Chalkboard.vect.dimension(vect)));
         };
         vect_1.mag = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.mag");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y);
             }
@@ -12943,14 +14314,17 @@ var Chalkboard;
                 return Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z * vect.z + vect.w * vect.w);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.mag: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.magset = (vect, num) => {
+            vect = $(vect, "Chalkboard.vect.magset");
+            if (!Number.isFinite(num))
+                throw new Error(`Chalkboard.vect.magset: Parameter "num" must be a finite number.`);
             return Chalkboard.vect.scl(Chalkboard.vect.normalize(vect), num);
         };
         vect_1.magsq = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.magsq");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.x * vect.x + vect.y * vect.y;
             }
@@ -12961,19 +14335,20 @@ var Chalkboard;
                 return vect.x * vect.x + vect.y * vect.y + vect.z * vect.z + vect.w * vect.w;
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.magsq: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         let mode = "vector";
         vect_1.modeConfig = (config) => {
+            if (typeof config !== "string")
+                throw new Error(`Chalkboard.vect.modeConfig: Parameter "config" must be a string.`);
             const _config = config.toLowerCase();
-            if (["vector", "array", "float32array", "float64array", "matrix", "string", "json"].indexOf(_config) === -1) {
-                throw new Error('The mode must be "vector", "array", "float32array", "float64array", "matrix", "string", or "json".');
-            }
+            if (["vector", "array", "float32array", "float64array", "matrix", "string", "json"].indexOf(_config) === -1)
+                throw new Error(`Chalkboard.vect.modeConfig: The mode must be vector, array, float32array, float64array, matrix, string, or json.`);
             mode = _config;
         };
         vect_1.negate = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.negate");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(-vect.x, -vect.y);
             }
@@ -12984,11 +14359,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(-vect.x, -vect.y, -vect.z, -vect.w);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.negate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.normalize = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.normalize");
             const m = Chalkboard.vect.mag(vect);
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x / m, vect.y / m);
@@ -13000,16 +14375,21 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect.x / m, vect.y / m, vect.z / m, vect.w / m);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.normalize: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.oproj = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.oproj");
+            vect2 = $(vect2, "Chalkboard.vect.oproj");
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.proj(vect1, vect2));
         };
         vect_1.print = (vect) => {
+            vect = $(vect, "Chalkboard.vect.print");
             console.log(Chalkboard.vect.toString(vect));
         };
         vect_1.proj = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.proj");
+            vect2 = $(vect2, "Chalkboard.vect.proj");
             return Chalkboard.vect.scl(vect2, Chalkboard.vect.dot(vect1, vect2) / Chalkboard.vect.dot(vect2, vect2));
         };
         vect_1.random = (dimension, inf = 0, sup = 1) => {
@@ -13023,11 +14403,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup), Chalkboard.numb.random(inf, sup));
             }
             else {
-                throw new TypeError('Parameter "dimension" must be 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.random: Parameter "dimension" must be 2, 3, or 4.`);
             }
         };
         vect_1.reciprocate = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.reciprocate");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y);
             }
@@ -13038,10 +14418,12 @@ var Chalkboard;
                 return Chalkboard.vect.init(1 / vect.x, 1 / vect.y, 1 / vect.z, 1 / vect.w);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.reciprocate: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.reflect = (vect1, vect2) => {
+            vect1 = $(vect1, "Chalkboard.vect.reflect");
+            vect2 = $(vect2, "Chalkboard.vect.reflect");
             return Chalkboard.vect.sub(vect1, Chalkboard.vect.scl(vect2, 2 * Chalkboard.vect.dot(vect1, vect2)));
         };
         vect_1.refract = (vect1, vect2, refractiveIndex) => {
@@ -13051,11 +14433,11 @@ var Chalkboard;
                 return Chalkboard.vect.add(perp, parr);
             }
             else {
-                throw new RangeError('Parameter "refractiveIndex" must be of type "number" greater than 0.');
+                throw new Error(`Chalkboard.vect.refract: Parameter "refractiveIndex" must be of type number greater than 0.`);
             }
         };
         vect_1.round = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.round");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y));
             }
@@ -13066,17 +14448,24 @@ var Chalkboard;
                 return Chalkboard.vect.init(Math.round(vect.x), Math.round(vect.y), Math.round(vect.z), Math.round(vect.w));
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.round: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.scalarQuadruple = (vect1, vect2, vect3, vect4) => {
+            vect1 = $(vect1, "Chalkboard.vect.scalarQuadruple");
+            vect2 = $(vect2, "Chalkboard.vect.scalarQuadruple");
+            vect3 = $(vect3, "Chalkboard.vect.scalarQuadruple");
+            vect4 = $(vect4, "Chalkboard.vect.scalarQuadruple");
             return Chalkboard.vect.dot(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
         vect_1.scalarTriple = (vect1, vect2, vect3) => {
+            vect1 = $(vect1, "Chalkboard.vect.scalarTriple");
+            vect2 = $(vect2, "Chalkboard.vect.scalarTriple");
+            vect3 = $(vect3, "Chalkboard.vect.scalarTriple");
             return Chalkboard.vect.dot(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
         vect_1.scl = (vect, num) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.scl");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.vect.init(vect.x * num, vect.y * num);
             }
@@ -13087,11 +14476,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect.x * num, vect.y * num, vect.z * num, vect.w * num);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.scl: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.slope = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.slope");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return vect.y / vect.x;
             }
@@ -13102,12 +14491,12 @@ var Chalkboard;
                 return vect.w / Chalkboard.real.sqrt(vect.x * vect.x + vect.y * vect.y + vect.z * vect.z);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.slope: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.sub = (vect1, vect2) => {
-            vect1 = $(vect1);
-            vect2 = $(vect2);
+            vect1 = $(vect1, "Chalkboard.vect.sub");
+            vect2 = $(vect2, "Chalkboard.vect.sub");
             if (Chalkboard.vect.isDimensionOf(vect1, 2) && Chalkboard.vect.isDimensionOf(vect2, 2)) {
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y);
             }
@@ -13118,11 +14507,11 @@ var Chalkboard;
                 return Chalkboard.vect.init(vect1.x - vect2.x, vect1.y - vect2.y, vect1.z - vect2.z, vect1.w - vect2.w);
             }
             else {
-                throw new TypeError('Parameters "vect1" and "vect2" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.sub: Parameters "vect1" and "vect2" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.toArray = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toArray");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return [vect.x, vect.y];
             }
@@ -13133,15 +14522,15 @@ var Chalkboard;
                 return [vect.x, vect.y, vect.z, vect.w];
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toArray: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.toComplex = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toComplex");
             return Chalkboard.comp.init(vect.x, vect.y);
         };
         vect_1.toMatrix = (vect, axis = 0) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toMatrix");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 if (axis === 0) {
                     return Chalkboard.matr.init([vect.x], [vect.y]);
@@ -13150,7 +14539,7 @@ var Chalkboard;
                     return Chalkboard.matr.init([vect.x, vect.y]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 3)) {
@@ -13161,7 +14550,7 @@ var Chalkboard;
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else if (Chalkboard.vect.isDimensionOf(vect, 4)) {
@@ -13172,15 +14561,15 @@ var Chalkboard;
                     return Chalkboard.matr.init([vect.x, vect.y, vect.z, vect.w]);
                 }
                 else {
-                    throw new TypeError('Parameter "axis" must be 0 or 1.');
+                    throw new Error(`Chalkboard.vect.toMatrix: Parameter "axis" must be 0 or 1.`);
                 }
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toMatrix: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.toQuaternion = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toQuaternion");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return Chalkboard.quat.init(vect.x, vect.y, 0, 0);
             }
@@ -13191,11 +14580,11 @@ var Chalkboard;
                 return Chalkboard.quat.init(vect.x, vect.y, vect.z, vect.w);
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toQuaternion: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.toString = (vect) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toString");
             if (Chalkboard.vect.isDimensionOf(vect, 2)) {
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ")";
             }
@@ -13206,18 +14595,20 @@ var Chalkboard;
                 return "(" + vect.x.toString() + ", " + vect.y.toString() + ", " + vect.z.toString() + ", " + vect.w.toString() + ")";
             }
             else {
-                throw new TypeError('Parameter "vect" must be of type "ChalkboardVector" with 2, 3, or 4 dimensions.');
+                throw new Error(`Chalkboard.vect.toString: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
         vect_1.toTensor = (vect, ...size) => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toTensor");
             if (Array.isArray(size[0])) {
                 size = size[0];
             }
+            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
+                throw new Error(`Chalkboard.vect.toTensor: Parameter "size" must begin and end with non-negative integers.`);
             return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), ...size);
         };
         vect_1.toTypedArray = (vect, type = "float32") => {
-            vect = $(vect);
+            vect = $(vect, "Chalkboard.vect.toTypedArray");
             const arr = Chalkboard.vect.toArray(vect);
             if (type === "int8") {
                 return new Int8Array(arr);
@@ -13237,12 +14628,19 @@ var Chalkboard;
             else if (type === "bigint64") {
                 return new BigInt64Array(arr.map((n) => BigInt(Math.floor(n))));
             }
-            throw new TypeError('Parameter "type" must be "int8", "int16", "int32", "float32", "float64", or "bigint64".');
+            throw new Error(`Chalkboard.vect.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         vect_1.vectorQuadruple = (vect1, vect2, vect3, vect4) => {
+            vect1 = $(vect1, "Chalkboard.vect.vectorQuadruple");
+            vect2 = $(vect2, "Chalkboard.vect.vectorQuadruple");
+            vect3 = $(vect3, "Chalkboard.vect.vectorQuadruple");
+            vect4 = $(vect4, "Chalkboard.vect.vectorQuadruple");
             return Chalkboard.vect.cross(Chalkboard.vect.cross(vect1, vect2), Chalkboard.vect.cross(vect3, vect4));
         };
         vect_1.vectorTriple = (vect1, vect2, vect3) => {
+            vect1 = $(vect1, "Chalkboard.vect.vectorTriple");
+            vect2 = $(vect2, "Chalkboard.vect.vectorTriple");
+            vect3 = $(vect3, "Chalkboard.vect.vectorTriple");
             return Chalkboard.vect.cross(vect1, Chalkboard.vect.cross(vect2, vect3));
         };
         vect_1.zero = (dimension) => {
@@ -13256,7 +14654,7 @@ var Chalkboard;
                 return Chalkboard.vect.init(0, 0, 0, 0);
             }
             else {
-                throw new TypeError('Parameter "dimension" must be either 2, 3, or 4.');
+                throw new Error(`Chalkboard.vect.zero: Parameter "dimension" must be either 2, 3, or 4.`);
             }
         };
     })(vect = Chalkboard.vect || (Chalkboard.vect = {}));

@@ -66,7 +66,7 @@ declare namespace Chalkboard {
     const PI: (coefficient?: number) => number;
     const REGISTER: (name: string, func: (...x: number[]) => number) => void;
     const REGISTRY: Record<string, (...x: number[]) => number>;
-    const VERSION: "3.0.3";
+    const VERSION: "3.0.4";
     const VERSIONALIAS: "Euler";
 }
 declare namespace Chalkboard {
@@ -900,7 +900,7 @@ declare namespace Chalkboard {
         const expected: (arr: number[], probabilities?: number[]) => number;
         const Gaussian: (height: number, mean: number, deviation: number) => ChalkboardFunction;
         const gt: (arr: number[], arrORnum: number | number[], includeEnd?: boolean) => number[];
-        const ineq: (arr: number[], inf: number, sup: number, includeInf?: boolean, includeSup?: boolean) => number[];
+        const ineq: (arr: number[], inf: number | number[], sup: number | number[], includeInf?: boolean, includeSup?: boolean) => number[];
         const inormal: (p: number) => number;
         const interpolate: (arr: (number | null | undefined)[], type?: "linear" | "quadratic") => number[];
         const interquartileRange: (arr: number[]) => number;

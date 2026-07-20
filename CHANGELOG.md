@@ -1,6 +1,12 @@
 # Chalkboard changelog
 All notable changes for every update of Chalkboard are recorded in this file.
 
+## [v3.0.4 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.4) - 07/20/2026
+The nineteenth release of Chalkboard.
+Commits: [`v3.0.3...v3.0.4`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.3...v3.0.4)
+- Added examples in the documentation for 423 functions in the nine namespaces that were missing them.
+- Fixed 645 functions in all fifteen namespaces so that they have thorough, standardized, predictable error-checking for correct input types, values, and forms.
+
 ## [v3.0.3 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.3) - 07/06/2026
 The eighteenth release of Chalkboard.
 Commits: [`v3.0.2...v3.0.3`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.2...v3.0.3)
