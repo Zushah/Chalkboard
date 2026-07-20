@@ -20,6 +20,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const f = Chalkboard.real.define((x) => Math.exp(-x * x));
+         * const value = Chalkboard.calc.autocorrelation(f, 1); // Returns the function's autocorrelation at 1
          */
         export const autocorrelation = (func: ChalkboardFunction, val: number): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.autocorrelation: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -31,6 +34,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {ChalkboardVector}
+         * @example
+         * const curve = Chalkboard.real.define((t) => t, (t) => t * t, (t) => t * t * t);
+         * const binormal = Chalkboard.calc.binormal(curve, 1); // Returns the curve's binormal vector
          */
         export const binormal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.binormal: Property "func.field" must be real.`);
@@ -46,6 +52,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func2 - The second function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const f = Chalkboard.real.define((x) => Math.exp(-x * x));
+         * const value = Chalkboard.calc.convolution(f, f, 0); // Convolves a Gaussian with itself
          */
         export const convolution = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new Error(`Chalkboard.calc.convolution: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
@@ -61,6 +70,10 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func2 - The second function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const sine = Chalkboard.real.define((x) => Math.sin(x));
+         * const cosine = Chalkboard.real.define((x) => Math.cos(x));
+         * const value = Chalkboard.calc.correlation(sine, cosine, 0); // Returns their correlation at zero lag
          */
         export const correlation = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             if (func1.field !== "real" || func2.field !== "real" || func1.type !== "scalar2d" || func2.type !== "scalar2d") throw new Error(`Chalkboard.calc.correlation: Properties "func1.field" and "func2.field" must be real and properties "func1.type" and "func2.type" must be scalar2d.`);
@@ -75,6 +88,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} vectfield - The vector field
          * @param {ChalkboardVector} vect - The vector
          * @returns {ChalkboardVector}
+         * @example
+         * const field = Chalkboard.vect.field((x, y, z) => -y, (x, y, z) => x, (x, y, z) => 0);
+         * const curl = Chalkboard.calc.curl(field, Chalkboard.vect.init(1, 0, 0)); // Returns the rotational tendency
          */
         export const curl = (vectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector => {
             if (vectfield.field !== "real") throw new Error(`Chalkboard.calc.curl: Property "vectfield.field" must be real.`);
@@ -102,6 +118,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const circle = Chalkboard.real.define((t) => Math.cos(t), (t) => Math.sin(t));
+         * const curvature = Chalkboard.calc.curvature(circle, 0); // Returns approximately 1
          */
         export const curvature = (func: ChalkboardFunction, val: number): number => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.curvature: Property "func.field" must be real.`);
@@ -121,6 +140,9 @@ namespace Chalkboard {
          * @param {ChalkboardVector} vectpos - The position vector
          * @param {ChalkboardVector} vectdir - The direction vector
          * @returns {number}
+         * @example
+         * const f = Chalkboard.real.define((x, y) => x * x + y * y);
+         * const derivative = Chalkboard.calc.dfdv(f, Chalkboard.vect.init(1, 2), Chalkboard.vect.init(1, 0)); // Returns the directional derivative
          */
         export const dfdv = (func: ChalkboardFunction, vectpos: ChalkboardVector, vectdir: ChalkboardVector): number => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.dfdv: Property "func.field" must be real.`);
@@ -137,6 +159,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number | ChalkboardVector}
+         * @example
+         * const cubic = Chalkboard.real.define((x) => x * x * x);
+         * const derivative = Chalkboard.calc.dfdx(cubic, 2); // Returns approximately 12
          */
         export const dfdx = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.dfdx: Property "func.field" must be real.`);
@@ -159,6 +184,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number | ChalkboardVector}
+         * @example
+         * const cubic = Chalkboard.real.define((x) => x * x * x);
+         * const derivative = Chalkboard.calc.d2fdx2(cubic, 2); // Returns approximately 12
          */
         export const d2fdx2 = (func: ChalkboardFunction, val: number): number | ChalkboardVector => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.d2fdx2: Property "func.field" must be real.`);
@@ -181,6 +209,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const square = Chalkboard.comp.define((z) => Chalkboard.comp.sq(z));
+         * const derivative = Chalkboard.calc.dfdz(square, Chalkboard.comp.init(1, 1)); // Returns the Wirtinger derivatives
          */
         export const dfdz = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
             if (func.field !== "comp") throw new Error(`Chalkboard.calc.dfdz: Property "func.field" must be comp.`);
@@ -201,6 +232,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {ChalkboardComplex} comp - The complex number
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const square = Chalkboard.comp.define((z) => Chalkboard.comp.sq(z));
+         * const derivative = Chalkboard.calc.d2fdz2(square, Chalkboard.comp.init(1, 1)); // Returns the second Wirtinger derivatives
          */
         export const d2fdz2 = (func: ChalkboardFunction, comp: ChalkboardComplex): [ChalkboardComplex, ChalkboardComplex] => {
             if (func.field !== "comp") throw new Error(`Chalkboard.calc.d2fdz2: Property "func.field" must be comp.`);
@@ -222,6 +256,10 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func2 - The parametric curve function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const field = Chalkboard.real.define((x, y) => x + y);
+         * const circle = Chalkboard.real.define((t) => Math.cos(t), (t) => Math.sin(t));
+         * const rate = Chalkboard.calc.dfrdt(field, circle, 0); // Returns approximately 1
          */
         export const dfrdt = (func1: ChalkboardFunction, func2: ChalkboardFunction, val: number): number => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.calc.dfrdt: Properties "func1.field" and "func2.field" must be real.`);
@@ -240,6 +278,8 @@ namespace Chalkboard {
          * Calculates the discrete Fourier transform of an array of numbers or complex numbers.
          * @param {(number | ChalkboardComplex)[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const result = Chalkboard.calc.dft([1, 0, -1, 0]); // Returns the four-point discrete Fourier transform
          */
         export const dft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.dft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
@@ -268,6 +308,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} vectfield - The vector field
          * @param {ChalkboardVector} vect - The vector
          * @returns {number}
+         * @example
+         * const field = Chalkboard.vect.field((x, y) => x, (x, y) => y);
+         * const divergence = Chalkboard.calc.div(field, Chalkboard.vect.init(1, 1)); // Returns approximately 2
          */
         export const div = (vectfield: ChalkboardFunction, vect: ChalkboardVector): number => {
             if (vectfield.field !== "real") throw new Error(`Chalkboard.calc.div: Property "vectfield.field" must be real.`);
@@ -282,6 +325,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number[]} domain - The interval
          * @returns {number[]}
+         * @example
+         * const quartic = Chalkboard.real.define((x) => x * x * x * x - 2 * x * x);
+         * const points = Chalkboard.calc.extrema(quartic, [-2, 2]); // Returns its local extrema
          */
         export const extrema = (func: ChalkboardFunction, domain: [number, number]): number[] => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.extrema: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -302,6 +348,9 @@ namespace Chalkboard {
          * @param {number} [sinf] - The lower s-bound (only for surface area)
          * @param {number} [ssup] - The upper s-bound (only for surface area)
          * @returns {number}
+         * @example
+         * const plane = Chalkboard.real.define((s, t) => s, (s, t) => t, (s, t) => 0);
+         * const integral = Chalkboard.calc.fds(plane, 0, 1, 0, 1); // Returns approximately 1
          */
         export const fds = (func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.fds: Property "func.field" must be real.`);
@@ -333,6 +382,8 @@ namespace Chalkboard {
          * Calculates the fast Fourier transform of an array of numbers or complex numbers. The input length must be a power of two.
          * @param {(number | ChalkboardComplex)[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const result = Chalkboard.calc.fft([1, 0, -1, 0]); // Returns the fast Fourier transform
          */
         export const fft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.fft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
@@ -396,6 +447,8 @@ namespace Chalkboard {
          * @param {number} n - FFT length
          * @param {number} [d=1] - Sample spacing
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.calc.fftfreq(8, 0.5); // Returns the eight Fourier sample frequencies
          */
         export const fftfreq = (n: number, d: number = 1): number[] => {
             if (!Number.isInteger(n) || n <= 0) throw new Error(`Chalkboard.calc.fftfreq: Parameter "n" must be a positive integer.`);
@@ -422,6 +475,9 @@ namespace Chalkboard {
          * Calculates the FFT shift of an array of numbers or complex numbers, which rearranges the output of the FFT by moving the zero-frequency component to the center of the array.
          * @param {ChalkboardComplex[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const spectrum = Chalkboard.calc.fft([1, 0, -1, 0]);
+         * const centered = Chalkboard.calc.fftshift(spectrum); // Centers the zero-frequency component
          */
         export const fftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.fftshift: Parameter "arr" must be an array of complex numbers.`);
@@ -440,6 +496,10 @@ namespace Chalkboard {
          * @param {number} [sinf] - The lower s-bound (only for 3D)
          * @param {number} [ssup] - The upper s-bound (only for 3D)
          * @returns {number}
+         * @example
+         * const field = Chalkboard.vect.field((x, y, z) => x, (x, y, z) => y, (x, y, z) => z);
+         * const surface = Chalkboard.real.define((t, s) => t, (t, s) => s, (t, s) => 1);
+         * const flux = Chalkboard.calc.fnds(field, surface, 0, 1, 0, 1); // Computes the surface flux
          */
         export const fnds = (vectfield: ChalkboardFunction, func: ChalkboardFunction, tinf: number, tsup: number, sinf?: number, ssup?: number): number => {
             if (vectfield.field !== "real" || func.field !== "real") throw new Error(`Chalkboard.calc.fnds: Properties "vectfield.field" and "func.field" must be real.`);
@@ -482,6 +542,9 @@ namespace Chalkboard {
          * @param {number} [sup=10] - The upper bound
          * @param {number} [steps=10000] - The number of steps for numerical integration
          * @returns {number}
+         * @example
+         * const pulse = Chalkboard.real.define((x) => Chalkboard.real.rect(x));
+         * const coefficient = Chalkboard.calc.Fourier(pulse, 1, -1, 1); // Returns a Fourier coefficient
          */
         export const Fourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Fourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -506,6 +569,10 @@ namespace Chalkboard {
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
          * @returns {number}
+         * @example
+         * const segment = Chalkboard.real.define((t) => t, (t) => 0);
+         * const scalar = Chalkboard.real.define((x) => 1);
+         * const integral = Chalkboard.calc.frds(scalar, segment, 0, 1); // Returns approximately 1
          */
         export const frds = (funcORvectfield: ChalkboardFunction, func: ChalkboardFunction, inf: number, sup: number): number => {
             if (funcORvectfield.field !== "real" || func.field !== "real") throw new Error(`Chalkboard.calc.frds: Properties "funcORvectfield.field" and "func.field" must be real.`);
@@ -543,6 +610,9 @@ namespace Chalkboard {
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
          * @returns {number | ChalkboardVector}
+         * @example
+         * const square = Chalkboard.real.define((x) => x * x);
+         * const integral = Chalkboard.calc.fxdx(square, 0, 1); // Returns approximately 1/3
          */
         export const fxdx = (func: ChalkboardFunction, inf: number, sup: number): number | ChalkboardVector => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.fxdx: Property "func.field" must be real.`);
@@ -583,6 +653,9 @@ namespace Chalkboard {
          * @param {number} yinf - The lower y-bound
          * @param {number} ysup - The upper y-bound
          * @returns {number}
+         * @example
+         * const f = Chalkboard.real.define((x, y) => x + y);
+         * const integral = Chalkboard.calc.fxydxdy(f, 0, 1, 0, 1); // Returns approximately 1
          */
         export const fxydxdy = (func: ChalkboardFunction, xinf: number, xsup: number, yinf: number, ysup: number): number => {
             if (func.field !== "real") throw new Error(`Chalkboard.calc.fxydxdy: Property "func.field" must be real.`);
@@ -617,6 +690,10 @@ namespace Chalkboard {
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
          * @returns {ChalkboardComplex}
+         * @example
+         * const constant = Chalkboard.comp.define((a, b) => 1, (a, b) => 0);
+         * const segment = Chalkboard.real.define((t) => t, (t) => 0);
+         * const integral = Chalkboard.calc.fzdz(constant, segment, 0, 1); // Returns approximately 1 + 0i
          */
         export const fzdz = (func1: ChalkboardFunction, func2: ChalkboardFunction, inf: number, sup: number): ChalkboardComplex => {
             if (func1.field !== "comp" || func2.field !== "real") throw new Error(`Chalkboard.calc.fzdz: Property "func1.field" must be comp and property "func2.field" must be real.`);
@@ -638,6 +715,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} funcORvectfield - The function or vector field
          * @param {ChalkboardVector} vect - The vector
          * @returns {ChalkboardVector | ChalkboardMatrix}
+         * @example
+         * const f = Chalkboard.real.define((x, y) => x * x + y * y);
+         * const gradient = Chalkboard.calc.grad(f, Chalkboard.vect.init(1, 2)); // Returns approximately (2, 4)
          */
         export const grad = (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardVector | ChalkboardMatrix => {
             if (funcORvectfield.field !== "real") throw new Error(`Chalkboard.calc.grad: Property "funcORvectfield.field" must be real.`);
@@ -702,6 +782,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} funcORvectfield - The function or vector field
          * @param {ChalkboardVector} vect - The vector
          * @returns {ChalkboardMatrix}
+         * @example
+         * const f = Chalkboard.real.define((x, y) => x * x + x * y + y * y);
+         * const Hessian = Chalkboard.calc.grad2(f, Chalkboard.vect.init(0, 0)); // Returns the Hessian matrix
          */
         export const grad2 = (funcORvectfield: ChalkboardFunction, vect: ChalkboardVector): ChalkboardMatrix => {
             if (funcORvectfield.field !== "real") throw new Error(`Chalkboard.calc.grad2: Property "funcORvectfield.field" must be real.`);
@@ -767,6 +850,9 @@ namespace Chalkboard {
          * Calculates the inverse discrete Fourier transform of an array of numbers or complex numbers.
          * @param {(number | ChalkboardComplex)[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const spectrum = Chalkboard.calc.dft([1, 0, -1, 0]);
+         * const signal = Chalkboard.calc.idft(spectrum); // Reconstructs the original signal
          */
         export const idft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.idft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
@@ -794,6 +880,9 @@ namespace Chalkboard {
          * Calculates the inverse fast Fourier transform of an array of numbers or complex numbers. The input length must be a power of two.
          * @param {(number | ChalkboardComplex)[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const spectrum = Chalkboard.calc.fft([1, 0, -1, 0]);
+         * const signal = Chalkboard.calc.ifft(spectrum); // Reconstructs the original signal
          */
         export const ifft = (arr: (number | ChalkboardComplex)[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.ifft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
@@ -817,6 +906,9 @@ namespace Chalkboard {
          * Calculates the inverse FFT shift of an array, which undoes the effect of fftshift by moving the zero-frequency component back to the beginning of the array.
          * @param {ChalkboardComplex[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const spectrum = Chalkboard.calc.fftshift(Chalkboard.calc.fft([1, 0, -1, 0]));
+         * const restored = Chalkboard.calc.ifftshift(spectrum); // Restores the original frequency ordering
          */
         export const ifftshift = (arr: ChalkboardComplex[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.ifftshift: Parameter "arr" must be an array of complex numbers.`);
@@ -834,6 +926,9 @@ namespace Chalkboard {
          * @param {number} [sup=10] - The upper bound
          * @param {number} [steps=10000] - The number of steps for numerical integration
          * @returns {number}
+         * @example
+         * const spectrum = Chalkboard.real.define((x) => Math.exp(-x * x));
+         * const value = Chalkboard.calc.iFourier(spectrum, 0, -5, 5); // Evaluates the inverse transform at zero
          */
         export const iFourier = (func: ChalkboardFunction, val: number, inf: number = 0, sup: number = 10, steps: number = 10000): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.iFourier: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -856,6 +951,9 @@ namespace Chalkboard {
          * @param {(number | ChalkboardComplex)[]} arr - Non-negative frequency spectrum
          * @param {number} [n] - Length of the output real signal
          * @returns {number[]}
+         * @example
+         * const spectrum = Chalkboard.calc.rfft([1, 0, -1, 0]);
+         * const signal = Chalkboard.calc.irfft(spectrum, 4); // Reconstructs the real signal
          */
         export const irfft = (arr: (number | ChalkboardComplex)[], n?: number): number[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.irfft: Parameter "arr" must be an array of finite numbers or complex numbers.`);
@@ -892,6 +990,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number}
+         * @example
+         * const exponential = Chalkboard.real.define((t) => Math.exp(-2 * t));
+         * const value = Chalkboard.calc.Laplace(exponential, 3); // Returns approximately 1/5
          */
         export const Laplace = (func: ChalkboardFunction, val: number): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Laplace: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -908,6 +1009,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number | undefined}
+         * @example
+         * const sinc = Chalkboard.real.define((x) => x === 0 ? 1 : Math.sin(x) / x);
+         * const limit = Chalkboard.calc.lim(sinc, 0); // Returns approximately 1
          */
         export const lim = (func: ChalkboardFunction, val: number): number | undefined => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.lim: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -947,6 +1051,9 @@ namespace Chalkboard {
          * @param {number} inf - The lower bound
          * @param {number} sup - The upper bound
          * @returns {number}
+         * @example
+         * const square = Chalkboard.real.define((x) => x * x);
+         * const average = Chalkboard.calc.mean(square, 0, 1); // Returns approximately 1/3
          */
         export const mean = (func: ChalkboardFunction, inf: number, sup: number): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.mean: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -958,6 +1065,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number[]} [domain=[-1, 1]] - The interval
          * @returns {number}
+         * @example
+         * const polynomial = Chalkboard.real.define((x) => x * x - 2);
+         * const root = Chalkboard.calc.Newton(polynomial, [1, 2]); // Returns approximately √2
          */
         export const Newton = (func: ChalkboardFunction, domain: [number, number] = [-1, 1]): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Newton: Property "func.field" must be real and property "func.type" must be scalar2d.`);
@@ -974,6 +1084,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {ChalkboardVector}
+         * @example
+         * const circle = Chalkboard.real.define((t) => Math.cos(t), (t) => Math.sin(t));
+         * const normal = Chalkboard.calc.normal(circle, 0); // Returns approximately (-1, 0)
          */
         export const normal = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if (func.field !== "real" || !func.type.startsWith("curve")) throw new Error(`Chalkboard.calc.normal: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
@@ -984,6 +1097,8 @@ namespace Chalkboard {
          * Calculates the real-valued discrete Fourier transform of an array of numbers.
          * @param {number[]} arr - The array
          * @returns {ChalkboardComplex[]}
+         * @example
+         * const result = Chalkboard.calc.rfft([1, 0, -1, 0]); // Returns the real-input Fourier spectrum
          */
         export const rfft = (arr: number[]): ChalkboardComplex[] => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.calc.rfft: Parameter "arr" must be an array of finite numbers.`);
@@ -998,6 +1113,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {ChalkboardVector}
+         * @example
+         * const circle = Chalkboard.real.define((t) => Math.cos(t), (t) => Math.sin(t));
+         * const tangent = Chalkboard.calc.tangent(circle, 0); // Returns approximately (0, 1)
          */
         export const tangent = (func: ChalkboardFunction, val: number): ChalkboardVector => {
             if (func.field !== "real" || !func.type.startsWith("curve")) throw new Error(`Chalkboard.calc.tangent: Property "func.field" must be real and property "func.type" must be curve2d or curve3d.`);
@@ -1011,6 +1129,9 @@ namespace Chalkboard {
          * @param {number} n - The degree
          * @param {number} a - The center
          * @returns {number}
+         * @example
+         * const exponential = Chalkboard.real.define((x) => Math.exp(x));
+         * const approximation = Chalkboard.calc.Taylor(exponential, 0.1, 2, 0); // Uses the quadratic Taylor polynomial
          */
         export const Taylor = (func: ChalkboardFunction, val: number, n: 0 | 1 | 2, a: number): number => {
             if (func.field !== "real" || func.type !== "scalar2d") throw new Error(`Chalkboard.calc.Taylor: Property "func.field" must be real and property "func.type" must be scalar2d.`);

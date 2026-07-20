@@ -51,6 +51,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const f = Chalkboard.real.define((x) => Math.exp(-x * x));
+         * const points = Chalkboard.plot.autocorrelation(f, { domain: [-3, 3] }); // Plots its autocorrelation
          */
         export const autocorrelation = (
             func: ChalkboardFunction,
@@ -103,6 +106,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=2] - Stroke width for bars
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.barplot([1, 4, 9], [1, 2, 3], { fillStyle: "royalblue" }); // Plots three bars
          */
         export const barplot = (
             arr: number[],
@@ -155,6 +160,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=5] - Line width for the complex number
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.comp(Chalkboard.comp.init(3, 4), { fillStyle: "crimson" }); // Plots 3 + 4i
          */
         export const comp = (
             comp: ChalkboardComplex,
@@ -193,6 +200,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const f = Chalkboard.real.define((x) => Math.exp(-x * x));
+         * const points = Chalkboard.plot.convolution(f, f, { domain: [-3, 3] }); // Plots the Gaussian convolution
          */
         export const convolution = (
             func1: ChalkboardFunction,
@@ -248,6 +258,10 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const sine = Chalkboard.real.define((x) => Math.sin(x));
+         * const cosine = Chalkboard.real.define((x) => Math.cos(x));
+         * const points = Chalkboard.plot.correlation(sine, cosine, { domain: [-5, 5] }); // Plots their correlation
          */
         export const correlation = (
             func1: ChalkboardFunction,
@@ -304,6 +318,9 @@ namespace Chalkboard {
          * @param {boolean} [config.isPolar=false] - Whether to plot in polar coordinates (only for scalar2d)
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const parabola = Chalkboard.real.define((x) => x * x);
+         * const points = Chalkboard.plot.definition(parabola, { domain: [-3, 3] }); // Plots y = x²
          */
         export const definition = (
             func: ChalkboardFunction,
@@ -420,6 +437,9 @@ namespace Chalkboard {
          * @param {boolean} [config.isInverse=false] - Whether to plot the derivative of the inverse of the function (only for scalar2d)
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const cubic = Chalkboard.real.define((x) => x * x * x);
+         * const points = Chalkboard.plot.dfdx(cubic, { domain: [-3, 3] }); // Plots the first derivative
          */
         export const dfdx = (
             func: ChalkboardFunction,
@@ -487,6 +507,9 @@ namespace Chalkboard {
          * @param {boolean} [config.isInverse=false] - Whether to plot the second derivative of the inverse of the function (only for scalar2d)
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const quartic = Chalkboard.real.define((x) => x ** 4);
+         * const points = Chalkboard.plot.d2fdx2(quartic, { domain: [-3, 3] }); // Plots the second derivative
          */
         export const d2fdx2 = (
             func: ChalkboardFunction,
@@ -553,6 +576,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const rotation = Chalkboard.vect.field((x, y) => -y, (x, y) => x);
+         * const vectors = Chalkboard.plot.field(rotation, { domain: [[-2, 2], [-2, 2]] }); // Plots a rotational field
          */
         export const field = (
             vectfield: ChalkboardFunction,
@@ -601,6 +627,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const pulse = Chalkboard.real.define((x) => Chalkboard.real.rect(x));
+         * const points = Chalkboard.plot.Fourier(pulse, { domain: [-5, 5] }); // Plots its Fourier transform
          */
         export const Fourier = (
             func: ChalkboardFunction,
@@ -654,6 +683,9 @@ namespace Chalkboard {
          * @param {boolean} [config.isInverse=false] - Whether to plot the inverse function
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const square = Chalkboard.real.define((x) => x * x);
+         * const points = Chalkboard.plot.fxdx(square, { domain: [0, 2] }); // Shades the integral of x²
          */
         export const fxdx = (
             func: ChalkboardFunction,
@@ -720,6 +752,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution (distance in pixels between sampled points), higher values result in faster plotting but less smooth plots
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const exponential = Chalkboard.real.define((x) => Math.exp(-x));
+         * const points = Chalkboard.plot.Laplace(exponential, { domain: [0.1, 5] }); // Plots its Laplace transform
          */
         export const Laplace = (
             func: ChalkboardFunction,
@@ -784,6 +819,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=2] - Stroke width
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.lineplot([1, 4, 9, 16], [1, 2, 3, 4], { strokeStyle: "purple" }); // Plots the square numbers
          */
         export const lineplot = (
             arr: number[],
@@ -836,6 +873,8 @@ namespace Chalkboard {
          * @param {number[]} [config.domain=[-10, 10]] - Domain over which to plot (in units of the matrix, not pixels)
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.matr([[0, -1], [1, 0]], { domain: [-2, 2] }); // Plots a quarter-turn transformation
          */
         export const matr = (
             matr: ChalkboardMatrix,
@@ -979,6 +1018,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=2] - Stroke width
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {void}
+         * @example
+         * Chalkboard.plot.rOplane({ size: 1 }); // Draws the polar plane
          */
         export const rOplane = (config: {
             x: number;
@@ -1023,6 +1064,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=5] - Diameter of the points in pixels
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.scatterplot([1, 2, 3, 4], [1, 4, 9, 16], { fillStyle: "green" }); // Plots the square numbers
          */
         export const scatterplot = (
             arr1: number[],
@@ -1070,6 +1113,9 @@ namespace Chalkboard {
          * @param {number} [config.res=25] - Resolution of the plot
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const exponential = Chalkboard.real.define((x) => Math.exp(x));
+         * const points = Chalkboard.plot.Taylor(exponential, 2, 0, { domain: [-2, 2] }); // Plots a quadratic Taylor approximation
          */
         export const Taylor = (
             func: ChalkboardFunction,
@@ -1124,6 +1170,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=5] - Stroke width
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.plot.vect(Chalkboard.vect.init(3, 4), { strokeStyle: "navy" }); // Plots the vector (3, 4)
          */
         export const vect = (
             vect: ChalkboardVector,
@@ -1161,6 +1209,8 @@ namespace Chalkboard {
          * @param {number} [config.lineWidth=2] - Stroke width
          * @param {CanvasRenderingContext2D} [config.context] - Optional custom canvas context to draw on
          * @returns {void}
+         * @example
+         * Chalkboard.plot.xyplane({ size: 1 }); // Draws the Cartesian plane
          */
         export const xyplane = (config: {
             x: number;

@@ -19,6 +19,8 @@ namespace Chalkboard {
          * Calculates the absolute value of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.absolute([[-1, 2], [-3, 4]]); // Returns [[1, 2], [3, 4]]
          */
         export const absolute = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.absolute: Parameter "tens" must be a tensor.`);
@@ -38,6 +40,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.add([[1, 2], [3, 4]], [[4, 3], [2, 1]]); // Returns [[5, 5], [5, 5]]
          */
         export const add = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.add: Parameter "tens1" must be a tensor.`);
@@ -59,6 +63,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @param {number} [rank=1] - The rank to concatenate
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.concat([[1, 2]], [[3, 4]], 1); // Concatenates the rank-2 tensors
          */
         export const concat = (tens1: ChalkboardTensor, tens2: ChalkboardTensor, rank: number = 1): ChalkboardTensor => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.concat: Parameter "tens1" must be a tensor.`);
@@ -80,6 +86,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number[]} [range=[0, 1]] - The range
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.constrain([[-1, 0.5], [2, 1]], [0, 1]); // Returns [[0, 0.5], [1, 1]]
          */
         export const constrain = (tens: ChalkboardTensor, range: [number, number] = [0, 1]): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.constrain: Parameter "tens" must be a tensor.`);
@@ -98,6 +106,8 @@ namespace Chalkboard {
          * Calculates the contraction of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor | number}
+         * @example
+         * const result = Chalkboard.tens.contract([[1, 2], [3, 4]]); // Contracts the tensor along its outer indices
          */
         export const contract = (tens: ChalkboardTensor): ChalkboardTensor | number => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.contract: Parameter "tens" must be a tensor.`);
@@ -123,6 +133,8 @@ namespace Chalkboard {
          * Copies a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.copy([[[1, 2]], [[3, 4]]]); // Returns an independent copy
          */
         export const copy = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.copy: Parameter "tens" must be a tensor.`);
@@ -141,6 +153,8 @@ namespace Chalkboard {
          * Initializes an empty tensor.
          * @param {number[]} size - The size
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.empty(2, 3, 4); // Returns an empty 2-by-3-by-4 tensor
          */
         export const empty = (...size: number[]): ChalkboardTensor => {
             size = Array.isArray(size[0]) ? size[0] : size;
@@ -165,6 +179,8 @@ namespace Chalkboard {
          * @param {number} element - The number to fill the elements with
          * @param {number[]} size - The size
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.fill(1, 2, 2, 2); // Returns a 2-by-2-by-2 tensor of ones
          */
         export const fill = (element: number, ...size: number[]): ChalkboardTensor => {
             if (!Number.isFinite(element)) throw new Error(`Chalkboard.tens.fill: Parameter "element" must be a finite number.`);
@@ -220,6 +236,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @param {number} [precision=0.000001] - The precision to check
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isApproxEqual([[1, 2]], [[1, 2.0000001]]); // Returns true
          */
         export const isApproxEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor, precision: number = 0.000001): boolean => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens1" must be a tensor.`);
@@ -245,6 +263,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isEqual([[1, 2]], [[1, 2]]); // Returns true
          */
         export const isEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isEqual: Parameter "tens1" must be a tensor.`);
@@ -269,6 +289,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isRankEqual([[1, 2]], [[3, 4], [5, 6]]); // Returns true
          */
         export const isRankEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isRankEqual: Parameter "tens1" must be a tensor.`);
@@ -281,6 +303,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number} rank - The rank
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isRankOf([[[1]]], 3); // Returns true
          */
         export const isRankOf = (tens: ChalkboardTensor, rank: number): boolean => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.isRankOf: Parameter "tens" must be a tensor.`);
@@ -293,6 +317,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isSizeEqual([[1, 2]], [[3, 4]]); // Returns true
          */
         export const isSizeEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isSizeEqual: Parameter "tens1" must be a tensor.`);
@@ -313,6 +339,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number[]} size - The size
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isSizeOf([[[1, 2]], [[3, 4]]], 2, 1, 2); // Returns true
          */
         export const isSizeOf = (tens: ChalkboardTensor, ...size: number[]): boolean => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.isSizeOf: Parameter "tens" must be a tensor.`);
@@ -325,6 +353,8 @@ namespace Chalkboard {
          * Checks if a tensor has a uniform size (analogous to checking if a matrix is square).
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isSizeUniform([[1, 2], [3, 4]]); // Returns true
          */
         export const isSizeUniform = (tens: ChalkboardTensor): boolean => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.isSizeUniform: Parameter "tens" must be a tensor.`);
@@ -339,6 +369,8 @@ namespace Chalkboard {
          * Checks if a tensor is a zero tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.tens.isZero([[0, 0], [0, 0]]); // Returns true
          */
         export const isZero = (tens: ChalkboardTensor): boolean => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.isZero: Parameter "tens" must be a tensor.`);
@@ -357,6 +389,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.mul([[1, 2], [3, 4]], [[2, 3], [4, 5]]); // Returns the elementwise product
          */
         export const mul = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.mul: Parameter "tens1" must be a tensor.`);
@@ -380,6 +414,8 @@ namespace Chalkboard {
          * Calculates the negation of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.negate([[1, -2], [3, -4]]); // Returns [[-1, 2], [-3, 4]]
          */
         export const negate = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.negate: Parameter "tens" must be a tensor.`);
@@ -398,6 +434,8 @@ namespace Chalkboard {
          * Prints a tensor in the console.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {void}
+         * @example
+         * Chalkboard.tens.print([[[1, 2]], [[3, 4]]]); // Prints the tensor
          */
         export const print = (tens: ChalkboardTensor): void => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.print: Parameter "tens" must be a tensor.`);
@@ -410,6 +448,8 @@ namespace Chalkboard {
          * @param {number} rank - The rank
          * @param {number} index - The index of the elements to pull
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.pull([[[1, 2]], [[3, 4]]], 1, 0); // Removes the first outer slice
          */
         export const pull = (tens: ChalkboardTensor, rank: number, index: number): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.pull: Parameter "tens" must be a tensor.`);
@@ -435,6 +475,8 @@ namespace Chalkboard {
          * @param {number} index - The index of the elements to pull
          * @param {number[]} elements - The elements to push
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.push([[[1, 2]]], 1, 1, [3, 4]); // Inserts an outer slice
          */
         export const push = (tens: ChalkboardTensor, rank: number, index: number, elements: number[]): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.push: Parameter "tens" must be a tensor.`);
@@ -462,6 +504,8 @@ namespace Chalkboard {
          * @param {number} sup - The upper bound
          * @param {number[]} size - The size
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.random(-1, 1, 2, 2, 2); // Returns a random 2-by-2-by-2 tensor
          */
         export const random = (inf: number, sup: number, ...size: number[]): ChalkboardTensor => {
             if (!Number.isFinite(inf)) throw new Error(`Chalkboard.tens.random: Parameter "inf" must be a finite number.`);
@@ -487,6 +531,8 @@ namespace Chalkboard {
          * Calculates the rank of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {number}
+         * @example
+         * const result = Chalkboard.tens.rank([[[1, 2]], [[3, 4]]]); // Returns 3
          */
         export const rank = (tens: ChalkboardTensor): number => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.rank: Parameter "tens" must be a tensor.`);
@@ -497,6 +543,8 @@ namespace Chalkboard {
          * Calculates the reciprocal of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.reciprocate([[1, 2], [4, 8]]); // Returns [[1, 0.5], [0.25, 0.125]]
          */
         export const reciprocate = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.reciprocate: Parameter "tens" must be a tensor.`);
@@ -516,6 +564,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number[]} size - The size to change to
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.resize([[1, 2], [3, 4]], 4); // Returns [1, 2, 3, 4]
          */
         export const resize = (tens: ChalkboardTensor, ...size: number[]): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.resize: Parameter "tens" must be a tensor.`);
@@ -539,6 +589,8 @@ namespace Chalkboard {
          * Calculates the rounding of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.round([[1.2, 2.7], [-3.5, 4.4]]); // Returns [[1, 3], [-3, 4]]
          */
         export const round = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.round: Parameter "tens" must be a tensor.`);
@@ -558,6 +610,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {number} num - The number
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.scl([[1, 2], [3, 4]], 2); // Returns [[2, 4], [6, 8]]
          */
         export const scl = (tens: ChalkboardTensor, num: number): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.scl: Parameter "tens" must be a tensor.`);
@@ -577,6 +631,8 @@ namespace Chalkboard {
          * Returns the size of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.tens.size([[[1, 2]], [[3, 4]]]); // Returns [2, 1, 2]
          */
         export const size = (tens: ChalkboardTensor): number[] => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.size: Parameter "tens" must be a tensor.`);
@@ -596,6 +652,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.sub([[5, 8], [13, 21]], [[2, 3], [5, 8]]); // Returns [[3, 5], [8, 13]]
          */
         export const sub = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.sub: Parameter "tens1" must be a tensor.`);
@@ -615,6 +673,8 @@ namespace Chalkboard {
          * Converts a tensor to an array.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.tens.toArray([[[1, 2]], [[3, 4]]]); // Returns [1, 2, 3, 4]
          */
         export const toArray = (tens: ChalkboardTensor): number[] => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toArray: Parameter "tens" must be a tensor.`);
@@ -636,6 +696,8 @@ namespace Chalkboard {
          * Converts a tensor to a matrix.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.tens.toMatrix([[[1, 2]], [[3, 4]]]); // Returns a matrix containing the tensor values
          */
         export const toMatrix = (tens: ChalkboardTensor): ChalkboardMatrix => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toMatrix: Parameter "tens" must be a tensor.`);
@@ -662,6 +724,8 @@ namespace Chalkboard {
          * Converts a tensor to an object.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {object}
+         * @example
+         * const result = Chalkboard.tens.toObject([[1, 2], [3, 4]]); // Returns a nested object
          */
         export const toObject = (tens: ChalkboardTensor): object | number => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toObject: Parameter "tens" must be a tensor.`);
@@ -680,6 +744,8 @@ namespace Chalkboard {
          * Converts a tensor to a set.
          * @param {ChalkboardTensor} tens - The tensor 
          * @returns {ChalkboardSet<number>}
+         * @example
+         * const result = Chalkboard.tens.toSet([[1, 1], [2, 3]]); // Returns the set {1, 2, 3}
          */
         export const toSet = (tens: ChalkboardTensor): ChalkboardSet<number> => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toSet: Parameter "tens" must be a tensor.`);
@@ -690,6 +756,8 @@ namespace Chalkboard {
          * Converts a tensor to a string.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {string}
+         * @example
+         * const result = Chalkboard.tens.toString([[[1, 2]], [[3, 4]]], 2); // Returns an indented tensor string
          */
         export const toString = (tens: ChalkboardTensor, indentation: number = 0): string => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toString: Parameter "tens" must be a tensor.`);
@@ -716,6 +784,8 @@ namespace Chalkboard {
          * @param {ChalkboardTensor} tens - The tensor
          * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
          * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         * @example
+         * const result = Chalkboard.tens.toTypedArray([[1, 2], [3, 4]], "float64"); // Returns a Float64Array
          */
         export const toTypedArray = (tens: ChalkboardTensor, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
             const arr = Chalkboard.tens.toArray(tens);
@@ -741,6 +811,8 @@ namespace Chalkboard {
          * @param {number} dimension - The dimension of the vector, which can be 2, 3, or 4
          * @param {number} [index=0] - The index to start from
          * @returns {ChalkboardVector}
+         * @example
+         * const result = Chalkboard.tens.toVector([[3, 4], [5, 12]], 2, 1); // Returns the second two-dimensional vector
          */
         export const toVector = (tens: ChalkboardTensor, dimension: number, index: number = 0): ChalkboardVector => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toVector: Parameter "tens" must be a tensor.`);
@@ -762,6 +834,8 @@ namespace Chalkboard {
          * Calculates the transpose of a tensor.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.transpose([[[1, 2]], [[3, 4]]]); // Reverses the tensor axes
          */
         export const transpose = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.transpose: Parameter "tens" must be a tensor.`);
@@ -772,6 +846,8 @@ namespace Chalkboard {
          * Initializes a zero tensor.
          * @param {number[]} size - The size
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.zero(2, 2, 2); // Returns a 2-by-2-by-2 zero tensor
          */
         export const zero = (...size: number[]): ChalkboardTensor => {
             size = Array.isArray(size[0]) ? size[0] : size;

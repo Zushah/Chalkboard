@@ -19,6 +19,8 @@ namespace Chalkboard {
          * Calculates the inverse cosine of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arccos(0.5); // Returns π/3
          */
         export const arccos = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccos: Parameter "rad" must be a number that is not NaN.`);
@@ -41,6 +43,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic cosine of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arccosh(1); // Returns 0
          */
         export const arccosh = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccosh: Parameter "rad" must be a number that is not NaN.`);
@@ -55,6 +59,8 @@ namespace Chalkboard {
          * Calculates the inverse cotangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const angle = Chalkboard.trig.arccot(1); // Returns π/4
          */
         export const arccot = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccot: Parameter "rad" must be a number that is not NaN.`);
@@ -65,6 +71,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic cotangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arccoth(2); // Returns approximately 0.5493
          */
         export const arccoth = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccoth: Parameter "rad" must be a number that is not NaN.`);
@@ -80,6 +88,8 @@ namespace Chalkboard {
          * Calculates the inverse cosecant of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arccsc(2); // Returns π/6
          */
         export const arccsc = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccsc: Parameter "rad" must be a number that is not NaN.`);
@@ -98,6 +108,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic cosecant of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arccsch(1); // Returns approximately 0.8814
          */
         export const arccsch = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arccsch: Parameter "rad" must be a number that is not NaN.`);
@@ -113,6 +125,8 @@ namespace Chalkboard {
          * Calculates the inverse secant of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arcsec(2); // Returns π/3
          */
         export const arcsec = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arcsec: Parameter "rad" must be a number that is not NaN.`);
@@ -131,6 +145,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic secant of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arcsech(1); // Returns 0
          */
         export const arcsech = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arcsech: Parameter "rad" must be a number that is not NaN.`);
@@ -145,6 +161,8 @@ namespace Chalkboard {
          * Calculates the inverse sine of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arcsin(0.5); // Returns π/6
          */
         export const arcsin = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arcsin: Parameter "rad" must be a number that is not NaN.`);
@@ -165,6 +183,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic sine of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const angle = Chalkboard.trig.arcsinh(0); // Returns 0
          */
         export const arcsinh = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arcsinh: Parameter "rad" must be a number that is not NaN.`);
@@ -176,6 +196,8 @@ namespace Chalkboard {
          * Calculates the inverse tangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const angle = Chalkboard.trig.arctan(1); // Returns π/4
          */
         export const arctan = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arctan: Parameter "rad" must be a number that is not NaN.`);
@@ -204,6 +226,8 @@ namespace Chalkboard {
          * Calculates the inverse hyperbolic tangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number | undefined}
+         * @example
+         * const angle = Chalkboard.trig.arctanh(0.5); // Returns approximately 0.5493
          */
         export const arctanh = (rad: number): number | undefined => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.arctanh: Parameter "rad" must be a number that is not NaN.`);
@@ -219,6 +243,8 @@ namespace Chalkboard {
          * @param {number} y - The y-coordinate of the point
          * @param {number} x - The x-coordinate of the point
          * @returns {number}
+         * @example
+         * const angle = Chalkboard.trig.arctan2(1, 1); // Returns π/4
          */
         export const arctan2 = (y: number, x: number): number => {
             if (typeof y !== "number" || Number.isNaN(y)) throw new Error(`Chalkboard.trig.arctan2: Parameter "y" must be a number that is not NaN.`);
@@ -249,6 +275,8 @@ namespace Chalkboard {
          * Calculates the cosine of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.cos(Chalkboard.PI()); // Returns -1
          */
         export const cos = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.cos: Parameter "rad" must be a finite number.`);
@@ -277,6 +305,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic cosine of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.cosh(0); // Returns 1
          */
         export const cosh = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.cosh: Parameter "rad" must be a number that is not NaN.`);
@@ -288,6 +318,8 @@ namespace Chalkboard {
          * Calculates the cotangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.cot(Chalkboard.PI(1 / 4)); // Returns approximately 1
          */
         export const cot = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.cot: Parameter "rad" must be a finite number.`);
@@ -298,6 +330,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic cotangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.coth(1); // Returns approximately 1.3130
          */
         export const coth = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.coth: Parameter "rad" must be a number that is not NaN.`);
@@ -309,6 +343,8 @@ namespace Chalkboard {
          * Calculates the coterminal angle of an angle.
          * @param {number} rad - The angle in radians
          * @returns {number}
+         * @example
+         * const angle = Chalkboard.trig.coterminal(Chalkboard.PI(5)); // Returns π
          */
         export const coterminal = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.coterminal: Parameter "rad" must be a finite number.`);
@@ -319,6 +355,8 @@ namespace Chalkboard {
          * Calculates the cosecant of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.csc(Chalkboard.PI(1 / 2)); // Returns 1
          */
         export const csc = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.csc: Parameter "rad" must be a finite number.`);
@@ -329,6 +367,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic cosecant of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.csch(1); // Returns approximately 0.8509
          */
         export const csch = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.csch: Parameter "rad" must be a number that is not NaN.`);
@@ -340,6 +380,8 @@ namespace Chalkboard {
          * Calculates the secant of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.sec(0); // Returns 1
          */
         export const sec = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.sec: Parameter "rad" must be a finite number.`);
@@ -350,6 +392,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic cosecant of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.sech(0); // Returns 1
          */
         export const sech = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.sech: Parameter "rad" must be a number that is not NaN.`);
@@ -361,6 +405,8 @@ namespace Chalkboard {
          * Calculates the sine of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.sin(Chalkboard.PI(1 / 2)); // Returns 1
          */
         export const sin = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.sin: Parameter "rad" must be a finite number.`);
@@ -389,6 +435,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic sine of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.sinh(0); // Returns 0
          */
         export const sinh = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.sinh: Parameter "rad" must be a number that is not NaN.`);
@@ -400,6 +448,8 @@ namespace Chalkboard {
          * Calculates the tangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.tan(Chalkboard.PI(1 / 4)); // Returns approximately 1
          */
         export const tan = (rad: number): number => {
             if (!Number.isFinite(rad)) throw new Error(`Chalkboard.trig.tan: Parameter "rad" must be a finite number.`);
@@ -410,6 +460,8 @@ namespace Chalkboard {
          * Calculates the hyperbolic tangent of a number.
          * @param {number} rad - The number in radians
          * @returns {number}
+         * @example
+         * const x = Chalkboard.trig.tanh(0); // Returns 0
          */
         export const tanh = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.tanh: Parameter "rad" must be a number that is not NaN.`);
@@ -421,6 +473,8 @@ namespace Chalkboard {
          * Calculates a radian converted to a degree.
          * @param {number} rad - The radian
          * @returns {number}
+         * @example
+         * const degrees = Chalkboard.trig.toDeg(Chalkboard.PI()); // Returns 180
          */
         export const toDeg = (rad: number): number => {
             if (typeof rad !== "number" || Number.isNaN(rad)) throw new Error(`Chalkboard.trig.toDeg: Parameter "rad" must be a number that is not NaN.`);
@@ -431,6 +485,8 @@ namespace Chalkboard {
          * Calculates a degree converted to a radian.
          * @param {number} deg - The degree
          * @returns {number}
+         * @example
+         * const radians = Chalkboard.trig.toRad(180); // Returns π
          */
         export const toRad = (deg: number): number => {
             if (typeof deg !== "number" || Number.isNaN(deg)) throw new Error(`Chalkboard.trig.toRad: Parameter "deg" must be a number that is not NaN.`);

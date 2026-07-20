@@ -19,6 +19,9 @@ namespace Chalkboard {
          * Calculates the absolute value of a function.
          * @param {ChalkboardFunction} func - The function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.absolute(Chalkboard.real.define((x) => x - 2));
+         * const y = Chalkboard.real.val(f, 0); // Returns 2
          */
         export const absolute = (func: ChalkboardFunction): ChalkboardFunction => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.absolute: Property "func.field" must be real.`);
@@ -56,6 +59,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.add(Chalkboard.real.define((x) => x), Chalkboard.real.define((x) => x * x));
+         * const y = Chalkboard.real.val(f, 2); // Returns 6
          */
         export const add = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.add: Properties "func1.field" and "func2.field" must be real.`);
@@ -98,6 +104,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func1 - The outer function
          * @param {ChalkboardFunction} func2 - The inner function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.compose(Chalkboard.real.define((x) => x + 1), Chalkboard.real.define((x) => x * x));
+         * const y = Chalkboard.real.val(f, 3); // Returns 10
          */
         export const compose = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.compose: Properties "func1.field" and "func2.field" must be real.`);
@@ -123,6 +132,9 @@ namespace Chalkboard {
          * Defines a mathematical function in the field of real numbers.
          * @param {Function | Function[]} rule - The rule(s) of the function
          * @returns {ChalkboardFunction}
+         * @example
+         * const parabola = Chalkboard.real.define((x) => x * x - 4);
+         * const y = Chalkboard.real.val(parabola, 3); // Returns 5
          */
         export const define = (...rule: (((...x: number[]) => number) | ((...x: number[]) => number)[])[]): ChalkboardFunction => {
             if (rule.length === 0) throw new Error(`Chalkboard.real.define: Parameter "rule" must contain at least one function.`);
@@ -185,6 +197,8 @@ namespace Chalkboard {
          * @param {number} [edge=0] - The edge of the function
          * @param {number} [scl=1] - The scale of the function
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.Dirac(0); // Returns 1
          */
         export const Dirac = (num: number, edge: number = 0, scl: number = 1): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Dirac: Parameter "num" must be a number that is not NaN.`);
@@ -204,6 +218,8 @@ namespace Chalkboard {
          * @param {number} c - The last coefficient (the constant)
          * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.discriminant(1, -3, 2); // Returns 1
          */
         export const discriminant = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): number => {
             if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.discriminant: Parameter "a" must be a finite number that is not 0.`);
@@ -223,6 +239,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func1 - The numerator function
          * @param {ChalkboardFunction} func2 - The denominator function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.div(Chalkboard.real.define((x) => x * x - 1), Chalkboard.real.define((x) => x - 1));
+         * const y = Chalkboard.real.val(f, 2); // Returns 3
          */
         export const div = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.div: Properties "func1.field" and "func2.field" must be real.`);
@@ -264,6 +283,8 @@ namespace Chalkboard {
          * Evaluates the error function erf(x) on a number.
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.erf(1); // Returns approximately 0.8427
          */
         export const erf = (num: number): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.erf: Parameter "num" must be a number that is not NaN.`);
@@ -286,6 +307,8 @@ namespace Chalkboard {
          * Evaluates the Gamma function Γ(x) on a number.
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.Gamma(5); // Returns 24
          */
         export const Gamma = (num: number): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Gamma: Parameter "num" must be a number that is not NaN.`);
@@ -323,6 +346,8 @@ namespace Chalkboard {
          * @param {number} edge - The edge of the function
          * @param {number} scl - The scale of the function
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.Heaviside(2); // Returns 1
          */
         export const Heaviside = (num: number, edge: number = 0, scl: number = 1): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.Heaviside: Parameter "num" must be a number that is not NaN.`);
@@ -340,6 +365,8 @@ namespace Chalkboard {
          * @param {number} p - The point
          * @param {number} t - The variable
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.lerp([10, 20], 0.25); // Returns 12.5
          */
         export const lerp = (p: [number, number], t: number): number => {
             if (!Number.isFinite(t)) throw new Error(`Chalkboard.real.lerp: Parameter "t" must be a finite number.`);
@@ -353,6 +380,9 @@ namespace Chalkboard {
          * @param {number} x2 - The x-coordinate of the second point
          * @param {number} y2 - The y-coordinate of the second point
          * @returns {ChalkboardFunction}
+         * @example
+         * const line = Chalkboard.real.linear(0, 1, 2, 5);
+         * const y = Chalkboard.real.val(line, 3); // Returns 7
          */
         export const linear = (x1: number, y1: number, x2: number, y2: number): ChalkboardFunction => {
             if (!Number.isFinite(x1)) throw new Error(`Chalkboard.real.linear: Parameter "x1" must be a finite number.`);
@@ -370,6 +400,8 @@ namespace Chalkboard {
          * @param {number} [c] - The y-intercept (in standard form)
          * @param {number} [d] - The y-coordinate of the second point (in point-slope form)
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.linearFormula(1, 3, 2, 5); // Returns 2
          */
         export const linearFormula = (a: number, b: number, c?: number, d?: number): number => {
             if (!Number.isFinite(a)) throw new Error(`Chalkboard.real.linearFormula: Parameter "a" must be a finite number.`);
@@ -389,6 +421,8 @@ namespace Chalkboard {
          * Calculates the natural logarithm of a number.
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.ln(Math.E ** 3); // Returns 3
          */
         export const ln = (num: number): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.ln: Parameter "num" must be a number that is not NaN.`);
@@ -415,6 +449,8 @@ namespace Chalkboard {
          * @param {number} base - The base
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.log(2, 32); // Returns 5
          */
         export const log = (base: number, num: number): number => {
             if (!Number.isFinite(base) || base <= 0 || base === 1) throw new Error(`Chalkboard.real.log: Parameter "base" must be a positive finite number that is not 1.`);
@@ -426,6 +462,8 @@ namespace Chalkboard {
          * Calculates the logarithm of a number with base 10.
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.log10(1000); // Returns 3
          */
         export const log10 = (num: number): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.log10: Parameter "num" must be a number that is not NaN.`);
@@ -437,6 +475,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.mul(Chalkboard.real.define((x) => x + 1), Chalkboard.real.define((x) => x - 1));
+         * const y = Chalkboard.real.val(f, 3); // Returns 8
          */
         export const mul = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.mul: Properties "func1.field" and "func2.field" must be real.`);
@@ -478,6 +519,9 @@ namespace Chalkboard {
          * Calculates the negation of a function.
          * @param {ChalkboardFunction} func - The function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.negate(Chalkboard.real.define((x) => x * x));
+         * const y = Chalkboard.real.val(f, 3); // Returns -9
          */
         export const negate = (func: ChalkboardFunction): ChalkboardFunction => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.negate: Property "func.field" must be real.`);
@@ -1239,6 +1283,8 @@ namespace Chalkboard {
          * @param {number} edge - The edge of the function
          * @param {number} scl - The scale of the function
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.pingpong(7, 0, 5); // Returns a reflected periodic value
          */
         export const pingpong = (num: number, edge: number = 0, scl: number = 1): number => {
             if (!Number.isFinite(num)) throw new Error(`Chalkboard.real.pingpong: Parameter "num" must be a finite number.`);
@@ -1255,6 +1301,9 @@ namespace Chalkboard {
          * Defines a polynomial function by its coefficients.
          * @param {...number[]} coeffs - The coefficients of the polynomial, starting with the leading coefficient and ending with the constant term, which can be written either in an array or as separate arguments
          * @returns {ChalkboardFunction}
+         * @example
+         * const p = Chalkboard.real.polynomial(1, -3, 2);
+         * const y = Chalkboard.real.val(p, 2); // Evaluates the quadratic polynomial
          */
         export const polynomial = (...coeffs: number[]): ChalkboardFunction => {
             let arr: number[];
@@ -1283,6 +1332,8 @@ namespace Chalkboard {
          * @param {number | ChalkboardFunction} base - The number or function
          * @param {number} num - The power
          * @returns {number | ChalkboardFunction}
+         * @example
+         * const result = Chalkboard.real.pow(2, 10); // Returns 1024
          */
         export const pow = (base: number | ChalkboardFunction, num: number): number | ChalkboardFunction => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.pow: Parameter "num" must be a number that is not NaN.`);
@@ -1345,6 +1396,8 @@ namespace Chalkboard {
          * @param {number[]} p3 - The third point
          * @param {number} t - The variable
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.qerp([0, 0], [1, 1], [2, 4], 0.5); // Returns the quadratic interpolation
          */
         export const qerp = (p1: [number, number], p2: [number, number], p3: [number, number], t: number): number => {
             if (!Number.isFinite(t)) throw new Error(`Chalkboard.real.qerp: Parameter "t" must be a finite number.`);
@@ -1367,6 +1420,9 @@ namespace Chalkboard {
          * @param {number} c - The last coefficient (the constant)
          * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {ChalkboardFunction}
+         * @example
+         * const parabola = Chalkboard.real.quadratic(1, -3, 2);
+         * const y = Chalkboard.real.val(parabola, 1); // Returns 0
          */
         export const quadratic = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): ChalkboardFunction => {
             if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.quadratic: Parameter "a" must be a finite number that is not 0.`);
@@ -1388,6 +1444,8 @@ namespace Chalkboard {
          * @param {number} c - The last coefficient (the constant)
          * @param {"standard" | "vertex"} [form="standard"] - The form of the polynomial, which can be "standard" for standard form or "vertex" for vertex form
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.real.quadraticFormula(1, -3, 2); // Returns [2, 1]
          */
         export const quadraticFormula = (a: number, b: number, c: number, form: "standard" | "vertex" = "standard"): [number, number] => {
             if (!Number.isFinite(a) || a === 0) throw new Error(`Chalkboard.real.quadraticFormula: Parameter "a" must be a finite number that is not 0.`);
@@ -1408,6 +1466,8 @@ namespace Chalkboard {
          * @param {number} edge - The edge of the function
          * @param {number} scl - The scale of the function
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.ramp(3, 1, 2); // Returns 4
          */
         export const ramp = (num: number, edge: number = 0, scl: number = 1): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.ramp: Parameter "num" must be a number that is not NaN.`);
@@ -1426,6 +1486,8 @@ namespace Chalkboard {
          * @param {number} [inf=0] - The lower bound of the coefficients (optional, defaults to 0)
          * @param {number} [sup=1] - The upper bound of the coefficients (optional, defaults to 1)
          * @returns {ChalkboardFunction}
+         * @example
+         * const result = Chalkboard.real.randomPolynomial(4, -1, 1); // Returns a random quartic polynomial
          */
         export const randomPolynomial = (degree: number, inf: number = 0, sup: number = 1): ChalkboardFunction => {
             if (!Number.isInteger(degree) || degree < 0) throw new Error(`Chalkboard.real.randomPolynomial: Parameter "degree" must be a non-negative integer.`);
@@ -1438,6 +1500,9 @@ namespace Chalkboard {
          * Calculates the reciprocation of a function.
          * @param {ChalkboardFunction} func - The function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.reciprocate(Chalkboard.real.define((x) => x + 1));
+         * const y = Chalkboard.real.val(f, 3); // Returns 0.25
          */
         export const reciprocate = (func: ChalkboardFunction): ChalkboardFunction => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.reciprocate: Property "func.field" must be real.`);
@@ -1477,6 +1542,8 @@ namespace Chalkboard {
          * @param {number} width - The width of the function
          * @param {number} scl - The scale of the function
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.rect(0, 0, 2); // Returns 1
          */
         export const rect = (num: number, center: number = 0, width: number = 2, scl: number = 1): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.rect: Parameter "num" must be a number that is not NaN.`);
@@ -1495,6 +1562,8 @@ namespace Chalkboard {
          * @param {number} num - The number
          * @param {number} [index=3] - The nth-root to take
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.root(27, 3); // Returns 3
          */
         export const root = (num: number, index: number = 3): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.root: Parameter "num" must be a number that is not NaN.`);
@@ -1514,6 +1583,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} num - The scalar
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.scl(Chalkboard.real.define((x) => x * x), 3);
+         * const y = Chalkboard.real.val(f, 2); // Returns 12
          */
         export const scl = (func: ChalkboardFunction, num: number): ChalkboardFunction => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.scl: Property "func.field" must be real.`);
@@ -1553,6 +1625,8 @@ namespace Chalkboard {
          * @param {number} x2 - The x-coordinate of the first point
          * @param {number} y2 - The y-coordinate of the second point
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.slope(1, 3, 4, 9); // Returns 2
          */
         export const slope = (x1: number, y1: number, x2: number, y2: number): number => {
             if (!Number.isFinite(x1)) throw new Error(`Chalkboard.real.slope: Parameter "x1" must be a finite number.`);
@@ -1567,6 +1641,8 @@ namespace Chalkboard {
          * Calculates the square root of a number.
          * @param {number} num - The number
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.sqrt(2); // Returns approximately 1.4142
          */
         export const sqrt = (num: number): number => {
             if (typeof num !== "number" || Number.isNaN(num)) throw new Error(`Chalkboard.real.sqrt: Parameter "num" must be a number that is not NaN.`);
@@ -1595,6 +1671,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func1 - The first function
          * @param {ChalkboardFunction} func2 - The second function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.sub(Chalkboard.real.define((x) => x * x), Chalkboard.real.define((x) => x));
+         * const y = Chalkboard.real.val(f, 3); // Returns 6
          */
         export const sub = (func1: ChalkboardFunction, func2: ChalkboardFunction): ChalkboardFunction => {
             if (func1.field !== "real" || func2.field !== "real") throw new Error(`Chalkboard.real.sub: Properties "func1.field" and "func2.field" must be real.`);
@@ -1637,6 +1716,8 @@ namespace Chalkboard {
          * @param {number} base - The number
          * @param {number} num - The tetratant, or the height of the power tower
          * @returns {number}
+         * @example
+         * const result = Chalkboard.real.tetration(2, 4); // Returns 65536
          */
         export const tetration = (base: number, num: number): number | undefined => {
             if (!Number.isFinite(base)) throw new Error(`Chalkboard.real.tetration: Parameter "base" must be a finite number.`);
@@ -1657,6 +1738,9 @@ namespace Chalkboard {
          * @param {number} h - Horizontal translation (positive moves right)
          * @param {number} v - Vertical translation (positive moves up)
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.translate(Chalkboard.real.define((x) => x * x), 2, 3);
+         * const y = Chalkboard.real.val(f, 2); // Returns 3
          */
         export const translate = (func: ChalkboardFunction, h: number = 0, v: number = 0): ChalkboardFunction => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.translate: Property "func.field" must be real.`);
@@ -1673,6 +1757,9 @@ namespace Chalkboard {
          * @param {ChalkboardFunction} func - The function
          * @param {number} val - The value
          * @returns {number | ChalkboardVector}
+         * @example
+         * const f = Chalkboard.real.define((x) => x * x + 1);
+         * const y = Chalkboard.real.val(f, 3); // Returns 10
          */
         export const val = (func: ChalkboardFunction, val: number | ChalkboardVector): number | ChalkboardVector => {
             if (func.field !== "real") throw new Error(`Chalkboard.real.val: Property "func.field" must be real.`);
@@ -1724,6 +1811,9 @@ namespace Chalkboard {
          * Defines a zero function of a particular type.
          * @param {"scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d"} [type="scalar2d"] - The type of the function
          * @returns {ChalkboardFunction}
+         * @example
+         * const f = Chalkboard.real.zero("scalar2d");
+         * const y = Chalkboard.real.val(f, 100); // Returns 0
          */
         export const zero = (type: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d" = "scalar2d"): ChalkboardFunction => {
             if (type === "scalar2d") {

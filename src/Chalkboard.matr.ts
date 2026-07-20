@@ -85,6 +85,8 @@ namespace Chalkboard {
          * Calculates the absolute value of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.absolute([[-1, 2], [-3, 4]]); // Returns [[1, 2], [3, 4]]
          */
         export const absolute = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.absolute: Parameter "matr" must be a matrix.`);
@@ -111,6 +113,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.add([[1, 1], [1, 0]], [[0, 1], [1, 1]]); // Returns [[1, 2], [2, 1]]
          */
         export const add = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
@@ -152,6 +156,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.addKronecker([[1, 0], [0, 1]], [[0, 1], [1, 0]]); // Returns the Kronecker sum
          */
         export const addKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSquare(matr1) && Chalkboard.matr.isSquare(matr2)) {
@@ -170,6 +176,8 @@ namespace Chalkboard {
          * @param {number} row - The row
          * @param {number} col - The column
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.adjugate([[1, 2, 3], [0, 4, 5], [1, 0, 6]], 0, 0); // Returns the selected minor
          */
         export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.adjugate: Parameter "matr" must be a matrix.`);
@@ -182,6 +190,8 @@ namespace Chalkboard {
          * Calculates the Cholesky decomposition of a symmetric positive definite matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {{ L: ChalkboardMatrix, U: ChalkboardMatrix }}
+         * @example
+         * const result = Chalkboard.matr.Cholesky([[4, 2], [2, 3]]); // Returns the Cholesky factors
          */
         export const Cholesky = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (!Chalkboard.matr.isSquare(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.`);
@@ -211,6 +221,8 @@ namespace Chalkboard {
          * @param {number} row - The row
          * @param {number} col - The column
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.cofactor([[1, 2, 3], [0, 4, 5], [1, 0, 6]], 0, 1); // Returns the signed minor
          */
         export const cofactor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cofactor: Parameter "matr" must be a matrix.`);
@@ -223,6 +235,8 @@ namespace Chalkboard {
          * Returns the number of columns in a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.cols([[1, 2, 3], [4, 5, 6]]); // Returns 3
          */
         export const cols = (matr: ChalkboardMatrix): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cols: Parameter "matr" must be a matrix.`);
@@ -233,6 +247,8 @@ namespace Chalkboard {
          * Calculates the column space of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.colspace([[1, 2], [2, 4], [0, 1]]); // Returns a basis for the column space
          */
         export const colspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.colspace: Parameter "matr" must be a matrix.`);
@@ -245,6 +261,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @param {number} [axis=0] - The axis to concatenate over, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.concat([[1, 2]], [[3, 4]], 0); // Returns [[1, 2], [3, 4]]
          */
         export const concat = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, axis: 0 | 1 = 0): ChalkboardMatrix => {
             if (axis === 0) {
@@ -320,6 +338,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number[]} [range=[0, 1]] - The range
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.constrain([[-1, 0.5], [2, 1]], [0, 1]); // Returns [[0, 0.5], [1, 1]]
          */
         export const constrain = (matr: ChalkboardMatrix, range: [number, number] = [0, 1]): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.constrain: Parameter "matr" must be a matrix.`);
@@ -357,6 +377,8 @@ namespace Chalkboard {
          * Copies a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.copy([[1, 2], [3, 4]]); // Returns an independent copy
          */
         export const copy = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.copy: Parameter "matr" must be a matrix.`);
@@ -382,6 +404,8 @@ namespace Chalkboard {
          * Calculates the determinant of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.det([[1, 2], [3, 4]]); // Returns -2
          */
         export const det = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.isSquare(matr)) {
@@ -411,6 +435,8 @@ namespace Chalkboard {
          * @param {number} size - The number of rows or columns
          * @param {number[]} elements - The elements on the main diagonal
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.diagonal(3, 2, 3, 5); // Returns a diagonal matrix
          */
         export const diagonal = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.diagonal: Parameter "size" must be a positive integer.`);
@@ -437,6 +463,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} [maxIterations=100] - The number of iterations the algorithm runs
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.eigenvalue([[2, 1], [1, 2]]); // Returns the dominant eigenvalue
          */
         export const eigenvalue = (matr: ChalkboardMatrix, maxIterations: number = 100): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.eigenvalue: Parameter "matr" must be a matrix.`);
@@ -469,6 +497,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} [maxIterations=100] - The number of iterations the algorithm runs
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.matr.eigenvector([[2, 1], [1, 2]]); // Returns a dominant eigenvector
          */
         export const eigenvector = (matr: ChalkboardMatrix, maxIterations: number = 100): number[] => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.eigenvector: Parameter "matr" must be a matrix.`);
@@ -488,6 +518,8 @@ namespace Chalkboard {
          * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
          * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.empty(2, 3); // Returns a 2-by-3 empty matrix
          */
         export const empty = (rows: number, cols: number = rows): ChalkboardMatrix => {
             if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.empty: Parameter "rows" must be a non-negative integer.`);
@@ -515,6 +547,8 @@ namespace Chalkboard {
          * Initializes an exchange matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.exchange(3); // Returns the 3-by-3 exchange matrix
          */
         export const exchange = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.exchange: Parameter "size" must be a positive integer.`);
@@ -543,6 +577,8 @@ namespace Chalkboard {
          * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
          * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.fill(7, 2, 3); // Returns a 2-by-3 matrix filled with 7
          */
         export const fill = (element: number, rows: number, cols: number = rows): ChalkboardMatrix => {
             if (!Number.isFinite(element)) throw new Error(`Chalkboard.matr.fill: Parameter "element" must be a finite number.`);
@@ -570,6 +606,8 @@ namespace Chalkboard {
          * Calculates the row echelon form of a matrix (performs Gaussian elimination on it).
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.Gaussian([[1, 2, 1], [2, 4, 0], [3, 6, 3]]); // Returns its row-echelon form
          */
         export const Gaussian = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.Gaussian: Parameter "matr" must be a matrix.`);
@@ -613,6 +651,8 @@ namespace Chalkboard {
          * Initializes a Hilbert matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.Hilbert(3); // Returns the 3-by-3 Hilbert matrix
          */
         export const Hilbert = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.Hilbert: Parameter "size" must be a positive integer.`);
@@ -638,6 +678,8 @@ namespace Chalkboard {
          * Initializes an identity matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.identity(3); // Returns the 3-by-3 identity matrix
          */
         export const identity = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.identity: Parameter "size" must be a positive integer.`);
@@ -685,6 +727,8 @@ namespace Chalkboard {
          * Calculates the inverse of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.invert([[1, 1], [1, 2]]); // Returns [[2, -1], [-1, 1]]
          */
         export const invert = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isInvertible(matr)) {
@@ -770,6 +814,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @param {number} [precision=0.000001] - The precision to check
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isApproxEqual([[1, 2]], [[1, 2.0000001]]); // Returns true
          */
         export const isApproxEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix, precision: number = 0.000001): boolean => {
             if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isApproxEqual: Parameter "matr1" must be a matrix.`);
@@ -793,6 +839,8 @@ namespace Chalkboard {
          * Checks if a matrix is a diagonal matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isDiagonal([[2, 0], [0, 3]]); // Returns true
          */
         export const isDiagonal = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isDiagonal: Parameter "matr" must be a matrix.`);
@@ -821,6 +869,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isEqual([[1, 2]], [[1, 2]]); // Returns true
          */
         export const isEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isEqual: Parameter "matr1" must be a matrix.`);
@@ -849,6 +899,8 @@ namespace Chalkboard {
          * Checks if a matrix is an identity matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isIdentity([[1, 0], [0, 1]]); // Returns true
          */
         export const isIdentity = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isIdentity: Parameter "matr" must be a matrix.`);
@@ -871,6 +923,8 @@ namespace Chalkboard {
          * Checks if a matrix is invertible.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isInvertible([[1, 2], [3, 4]]); // Returns true
          */
         export const isInvertible = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isInvertible: Parameter "matr" must be a matrix.`);
@@ -881,6 +935,8 @@ namespace Chalkboard {
          * Checks if a matrix is a lower triangular matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isLowerTriangular([[1, 0], [2, 3]]); // Returns true
          */
         export const isLowerTriangular = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isLowerTriangular: Parameter "matr" must be a matrix.`);
@@ -909,6 +965,8 @@ namespace Chalkboard {
          * Checks if a matrix is orthogonal.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isOrthogonal([[0, -1], [1, 0]]); // Returns true
          */
         export const isOrthogonal = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isOrthogonal: Parameter "matr" must be a matrix.`);
@@ -924,6 +982,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isSizeEqual([[1, 2]], [[3, 4]]); // Returns true
          */
         export const isSizeEqual = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.isSizeEqual: Parameter "matr1" must be a matrix.`);
@@ -936,6 +996,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
          * @param {number} [cols=rows] - The number of columns
+         * @example
+         * const result = Chalkboard.matr.isSizeOf([[1, 2, 3], [4, 5, 6]], 2, 3); // Returns true
          */
         export const isSizeOf = (matr: ChalkboardMatrix, rows: number, cols: number = rows): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSizeOf: Parameter "matr" must be a matrix.`);
@@ -948,6 +1010,8 @@ namespace Chalkboard {
          * Checks if a matrix is skew-symmetric.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isSkewSymmetric([[0, -2], [2, 0]]); // Returns true
          */
         export const isSkewSymmetric = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSkewSymmetric: Parameter "matr" must be a matrix.`);
@@ -958,6 +1022,8 @@ namespace Chalkboard {
          * Checks if a matrix is square.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isSquare([[1, 2], [3, 4]]); // Returns true
          */
         export const isSquare = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSquare: Parameter "matr" must be a matrix.`);
@@ -968,6 +1034,8 @@ namespace Chalkboard {
          * Checks if a matrix is symmetric.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isSymmetric([[1, 2], [2, 3]]); // Returns true
          */
         export const isSymmetric = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isSymmetric: Parameter "matr" must be a matrix.`);
@@ -978,6 +1046,8 @@ namespace Chalkboard {
          * Checks if a matrix is an upper triangular matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isUpperTriangular([[1, 2], [0, 3]]); // Returns true
          */
         export const isUpperTriangular = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isUpperTriangular: Parameter "matr" must be a matrix.`);
@@ -1006,6 +1076,8 @@ namespace Chalkboard {
          * Checks if a matrix is a zero matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {boolean}
+         * @example
+         * const result = Chalkboard.matr.isZero([[0, 0], [0, 0]]); // Returns true
          */
         export const isZero = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isZero: Parameter "matr" must be a matrix.`);
@@ -1016,6 +1088,8 @@ namespace Chalkboard {
          * Initializes a Lehmer matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.Lehmer(4); // Returns the 4-by-4 Lehmer matrix
          */
         export const Lehmer = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.Lehmer: Parameter "size" must be a positive integer.`);
@@ -1041,6 +1115,8 @@ namespace Chalkboard {
          * Initializes a lower binomial matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.lowerBinomial(4); // Returns a lower-triangular Pascal matrix
          */
         export const lowerBinomial = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerBinomial: Parameter "size" must be a positive integer.`);
@@ -1066,6 +1142,8 @@ namespace Chalkboard {
          * Initializes a lower shift matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.lowerShift(4); // Returns the 4-by-4 lower shift matrix
          */
         export const lowerShift = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerShift: Parameter "size" must be a positive integer.`);
@@ -1092,6 +1170,8 @@ namespace Chalkboard {
          * @param {number} size - The number of rows or columns
          * @param {number[]} elements - The elements on and below the main diagonal
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.lowerTriangular(3, 1, 2, 3, 4, 5, 6); // Returns a lower-triangular matrix
          */
         export const lowerTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.lowerTriangular: Parameter "size" must be a positive integer.`);
@@ -1125,6 +1205,8 @@ namespace Chalkboard {
          * Calculates the LU decomposition of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {{L: ChalkboardMatrix, U: ChalkboardMatrix}}
+         * @example
+         * const result = Chalkboard.matr.LUdecomp([[4, 3], [6, 3]]); // Returns the lower and upper factors
          */
         export const LUdecomp = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (Chalkboard.matr.isSquare(matr)) {
@@ -1157,6 +1239,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.mul([[1, 2], [3, 4]], [[0, 1], [1, 0]]); // Returns [[2, 1], [4, 3]]
          */
         export const mul = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.cols(matr1) === Chalkboard.matr.rows(matr2)) {
@@ -1219,6 +1303,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.mulKronecker([[1, 2], [3, 4]], [[0, 1], [1, 0]]); // Returns the Kronecker product
          */
         export const mulKronecker = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr1" must be a matrix.`);
@@ -1284,6 +1370,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {ChalkboardVector} vect - The vector
          * @returns {ChalkboardMatrix | ChalkboardVector}
+         * @example
+         * const result = Chalkboard.matr.mulVector([[1, 2], [3, 4]], Chalkboard.vect.init(1, -1)); // Returns the transformed vector
          */
         export const mulVector = (matr: ChalkboardMatrix, vect: ChalkboardVector): ChalkboardMatrix | ChalkboardVector => {
             vect = $(vect, "Chalkboard.matr.mulVector") as { x: number, y: number, z?: number, w?: number };
@@ -1314,6 +1402,8 @@ namespace Chalkboard {
          * Calculates the negation of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.negate([[1, -2], [3, -4]]); // Returns [[-1, 2], [-3, 4]]
          */
         export const negate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.negate: Parameter "matr" must be a matrix.`);
@@ -1341,6 +1431,8 @@ namespace Chalkboard {
          * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
          * @param {number} [q=2] - The numerator of the exponent of the sum of the rows and the denominator of the exponent of the sum of the summed rows
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.norm([[3, 4]]); // Returns 5
          */
         export const norm = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.norm: Parameter "matr" must be a matrix.`);
@@ -1371,6 +1463,8 @@ namespace Chalkboard {
          * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
          * @param {number} [q=2] - The numerator of the exponent of the sum of the rows and the denominator of the exponent of the sum of the summed rows
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.normalize([[3, 4]]); // Returns a unit-norm matrix
          */
         export const normalize = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.normalize: Parameter "matr" must be a matrix.`);
@@ -1412,6 +1506,8 @@ namespace Chalkboard {
          * @param {number} [p=2] - The exponent of each element and the denominator of the exponent of the sum of the rows
          * @param {number} [q=2] - The numerator of the exponent of the sum of the rows
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.normsq([[3, 4]]); // Returns 25
          */
         export const normsq = (matr: ChalkboardMatrix, p: number = 2, q: number = 2): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.normsq: Parameter "matr" must be a matrix.`);
@@ -1440,6 +1536,8 @@ namespace Chalkboard {
          * Calculates the null space of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.nullspace([[1, 2, 3], [2, 4, 6]]); // Returns a basis for the null space
          */
         export const nullspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.nullspace: Parameter "matr" must be a matrix.`);
@@ -1452,6 +1550,8 @@ namespace Chalkboard {
          * Calculates the permanent of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.perm([[0, 1], [1, 0]]); // Returns -1
          */
         export const perm = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.isSquare(matr)) {
@@ -1481,6 +1581,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} num - The exponent
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.pow([[1, 1], [1, 0]], 5); // Returns the fifth power of the Fibonacci matrix
          */
         export const pow = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
             if (!Number.isInteger(num) || num < 0) throw new Error(`Chalkboard.matr.pow: Parameter "num" must be a non-negative integer.`);
@@ -1503,6 +1605,8 @@ namespace Chalkboard {
          * Prints a matrix in the console.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {void}
+         * @example
+         * Chalkboard.matr.print([[1, 2], [3, 4]]); // Prints the matrix
          */
         export const print = (matr: ChalkboardMatrix): void => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.print: Parameter "matr" must be a matrix.`);
@@ -1515,6 +1619,8 @@ namespace Chalkboard {
          * @param {number} index - The index of the row or column to pull
          * @param {number} axis - The axis to pull from, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.pull([[1, 2], [3, 4]], 0, 0); // Removes the first row
          */
         export const pull = (matr: ChalkboardMatrix, index: number, axis: 0 | 1): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.pull: Parameter "matr" must be a matrix.`);
@@ -1540,6 +1646,8 @@ namespace Chalkboard {
          * @param {number} axis - The axis to push to, which is 0 for the rows or 1 for the columns
          * @param {number[]} elements - The elements to push
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.push([[1, 2], [3, 4]], 1, 0, [5, 6]); // Inserts a row at index 1
          */
         export const push = (matr: ChalkboardMatrix, index: number, axis: 0 | 1, elements: number[]): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.push: Parameter "matr" must be a matrix.`);
@@ -1564,6 +1672,8 @@ namespace Chalkboard {
          * Calculates the QR decomposition of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {{Q: ChalkboardMatrix, R: ChalkboardMatrix}}
+         * @example
+         * const result = Chalkboard.matr.QRdecomp([[1, 1], [1, -1]]); // Returns the orthogonal and upper-triangular factors
          */
         export const QRdecomp = (matr: ChalkboardMatrix): { Q: ChalkboardMatrix; R: ChalkboardMatrix } => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.QRdecomp: Parameter "matr" must be a matrix.`);
@@ -1621,6 +1731,8 @@ namespace Chalkboard {
          * @param {number} [inf=0] - The lower bound
          * @param {number} [sup=1] - The upper bound
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.random(3, 3, -1, 1); // Returns a random 3-by-3 matrix
          */
         export const random = (rows: number, cols: number = rows, inf: number = 0, sup: number = 1): ChalkboardMatrix => {
             if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.random: Parameter "rows" must be a non-negative integer.`);
@@ -1649,6 +1761,8 @@ namespace Chalkboard {
          * Calculates the rank of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.rank([[1, 2], [2, 4]]); // Returns 1
          */
         export const rank = (matr: ChalkboardMatrix): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rank: Parameter "matr" must be a matrix.`);
@@ -1659,6 +1773,8 @@ namespace Chalkboard {
          * Calculates the reciprocal of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.reciprocate([[1, 2], [4, 8]]); // Returns [[1, 0.5], [0.25, 0.125]]
          */
         export const reciprocate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.reciprocate: Parameter "matr" must be a matrix.`);
@@ -1686,6 +1802,8 @@ namespace Chalkboard {
          * @param {number} rows - The number of rows to change to or (if the cols parameter is blank) the number of rows or columns (the size) to change to
          * @param {nmber} [cols=rows] - The number of columns to change to
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.resize([[1, 2], [3, 4]], 1, 4); // Returns [[1, 2, 3, 4]]
          */
         export const resize = (matr: ChalkboardMatrix, rows: number, cols: number = rows): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.resize: Parameter "matr" must be a matrix.`);
@@ -1709,6 +1827,8 @@ namespace Chalkboard {
          * @param {number} [rady] - The y-rotation in radians (for 3D)
          * @param {number} [radz] - The z-rotation in radians (for 3D)
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.rotator(Chalkboard.PI(1 / 2)); // Returns a quarter-turn rotation matrix
          */
         export const rotator = (radx: number, rady?: number, radz?: number): ChalkboardMatrix => {
             if (!Number.isFinite(radx)) throw new Error(`Chalkboard.matr.rotator: Parameter "radx" must be a finite number.`);
@@ -1728,6 +1848,8 @@ namespace Chalkboard {
          * Calculates the rounding of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.round([[1.2, 2.7], [-3.5, 4.4]]); // Returns [[1, 3], [-3, 4]]
          */
         export const round = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.round: Parameter "matr" must be a matrix.`);
@@ -1753,6 +1875,8 @@ namespace Chalkboard {
          * Returns the number of rows in a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.rows([[1, 2, 3], [4, 5, 6]]); // Returns 2
          */
         export const rows = (matr: ChalkboardMatrix): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rows: Parameter "matr" must be a matrix.`);
@@ -1763,6 +1887,8 @@ namespace Chalkboard {
          * Calculates the row space of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.rowspace([[1, 2], [2, 4], [0, 1]]); // Returns a basis for the row space
          */
         export const rowspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rowspace: Parameter "matr" must be a matrix.`);
@@ -1773,6 +1899,8 @@ namespace Chalkboard {
          * Initializes a scaling matrix.
          * @param {ChalkboardVector} vect - The coordinates to use represented as a vector
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.scaler(Chalkboard.vect.init(2, 3)); // Returns a two-dimensional scaling matrix
          */
         export const scaler = (vect: ChalkboardVector): ChalkboardMatrix => {
             vect = $(vect, "Chalkboard.matr.scaler") as { x: number, y: number, z?: number, w?: number };
@@ -1792,6 +1920,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number} num - The number
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.scl([[1, 2], [3, 4]], 2); // Returns [[2, 4], [6, 8]]
          */
         export const scl = (matr: ChalkboardMatrix, num: number): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.scl: Parameter "matr" must be a matrix.`);
@@ -1825,6 +1955,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matrA - The coefficients matrix
          * @param {ChalkboardMatrix} matrB - The constants matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.solve([[2, 1], [1, -1]], [[5], [1]]); // Solves the linear system
          */
         export const solve = (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSquare(matrA)) {
@@ -1847,6 +1979,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.sub([[5, 8], [13, 21]], [[2, 3], [5, 8]]); // Returns [[3, 5], [8, 13]]
          */
         export const sub = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSizeEqual(matr1, matr2)) {
@@ -1887,6 +2021,8 @@ namespace Chalkboard {
          * Initializes a symmetric binomial matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.symmetricBinomial(4); // Returns a symmetric Pascal matrix
          */
         export const symmetricBinomial = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.symmetricBinomial: Parameter "size" must be a positive integer.`);
@@ -1905,6 +2041,8 @@ namespace Chalkboard {
          * Converts a matrix to an array.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.matr.toArray([[1, 2], [3, 4]]); // Returns [1, 2, 3, 4]
          */
         export const toArray = (matr: ChalkboardMatrix): number[] => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toArray: Parameter "matr" must be a matrix.`);
@@ -1929,6 +2067,8 @@ namespace Chalkboard {
          * Converts a matrix to an object.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {object}
+         * @example
+         * const result = Chalkboard.matr.toObject([[1, 2], [3, 4]]); // Returns an indexed object
          */
         export const toObject = (matr: ChalkboardMatrix): object => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toObject: Parameter "matr" must be a matrix.`);
@@ -1966,6 +2106,8 @@ namespace Chalkboard {
          * Converts a matrix to a set.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardSet<number>}
+         * @example
+         * const result = Chalkboard.matr.toSet([[1, 1], [2, 3]]); // Returns the set {1, 2, 3}
          */
         export const toSet = (matr: ChalkboardMatrix): ChalkboardSet<number> => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toSet: Parameter "matr" must be a matrix.`);
@@ -1976,6 +2118,8 @@ namespace Chalkboard {
          * Converts a matrix to a string.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {string}
+         * @example
+         * const result = Chalkboard.matr.toString([[1, 2], [3, 4]]); // Returns a matrix string
          */
         export const toString = (matr: ChalkboardMatrix): string => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toString: Parameter "matr" must be a matrix.`);
@@ -2015,6 +2159,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {number[]} size - The number of rows, columns, tubes, etc. of the tensor represented as a single array or a sequence of arguments
          * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.matr.toTensor([[1, 2], [3, 4]], 2, 2); // Returns an equivalent rank-2 tensor
          */
         export const toTensor = (matr: ChalkboardMatrix, ...size: number[]): ChalkboardTensor => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toTensor: Parameter "matr" must be a matrix.`);
@@ -2028,6 +2174,8 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @param {"int8" | "int16" | "int32" | "float32" | "float64" | "bigint64"} [type="float32"] - The type of the typed array, which can be "int8", "int16", "int32", "float32", "float64", or "bigint64" (optional, defaults to "float32")
          * @returns {Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array}
+         * @example
+         * const result = Chalkboard.matr.toTypedArray([[1, 2], [3, 4]], "float64"); // Returns a Float64Array
          */
         export const toTypedArray = (matr: ChalkboardMatrix, type: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64" = "float32"): Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array => {
             const arr = Chalkboard.matr.toArray(matr);
@@ -2054,6 +2202,8 @@ namespace Chalkboard {
          * @param {number} index - The index of the row or column of the matrix which is the first component of the converted vector
          * @param {number} [axis=0] - The axis of the matrix to convert, which is 0 for the rows or 1 for the columns
          * @returns {ChalkboardVector}
+         * @example
+         * const result = Chalkboard.matr.toVector([[3, 4], [5, 12]], 2, 1, 0); // Returns the second row as a vector
          */
         export const toVector = (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index: number = 0, axis: 0 | 1 = 0): ChalkboardVector => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toVector: Parameter "matr" must be a matrix.`);
@@ -2093,6 +2243,8 @@ namespace Chalkboard {
          * Calculates the trace of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
+         * @example
+         * const result = Chalkboard.matr.trace([[2, 1], [3, 5]]); // Returns 7
          */
         export const trace = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.isSquare(matr)) {
@@ -2118,6 +2270,8 @@ namespace Chalkboard {
          * Calculates the transpose of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.transpose([[1, 2, 3], [4, 5, 6]]); // Returns [[1, 4], [2, 5], [3, 6]]
          */
         export const transpose = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.transpose: Parameter "matr" must be a matrix.`);
@@ -2143,6 +2297,8 @@ namespace Chalkboard {
          * Initializes a translation matrix.
          * @param {ChalkboardVector} vect - The coordinates to use represented as a vector
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.translator(Chalkboard.vect.init(3, -2)); // Returns a two-dimensional translation matrix
          */
         export const translator = (vect: ChalkboardVector): ChalkboardMatrix => {
             vect = $(vect, "Chalkboard.matr.translator") as { x: number, y: number, z?: number, w?: number };
@@ -2161,6 +2317,8 @@ namespace Chalkboard {
          * Initializes an upper binomial matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.upperBinomial(4); // Returns an upper-triangular Pascal matrix
          */
         export const upperBinomial = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperBinomial: Parameter "size" must be a positive integer.`);
@@ -2186,6 +2344,8 @@ namespace Chalkboard {
          * Initializes an upper shift matrix.
          * @param {number} size - The number of rows or columns of the matrix
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.upperShift(4); // Returns the 4-by-4 upper shift matrix
          */
         export const upperShift = (size: number): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperShift: Parameter "size" must be a positive integer.`);
@@ -2212,6 +2372,8 @@ namespace Chalkboard {
          * @param {number} size - The number of rows or columns
          * @param {number[]} elements - The elements on and above the main diagonal
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.upperTriangular(3, 1, 2, 3, 4, 5, 6); // Returns an upper-triangular matrix
          */
         export const upperTriangular = (size: number, ...elements: number[]): ChalkboardMatrix => {
             if (!Number.isInteger(size) || size < 1) throw new Error(`Chalkboard.matr.upperTriangular: Parameter "size" must be a positive integer.`);
@@ -2241,6 +2403,8 @@ namespace Chalkboard {
          * @param {number} rows - The number of rows or (if the cols parameter is blank) the number of rows or columns (the size)
          * @param {number} [cols=rows] - The number of columns
          * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.zero(2, 3); // Returns a 2-by-3 zero matrix
          */
         export const zero = (rows: number, cols: number = rows): ChalkboardMatrix => {
             if (!Number.isInteger(rows) || rows < 0) throw new Error(`Chalkboard.matr.zero: Parameter "rows" must be a non-negative integer.`);

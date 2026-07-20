@@ -20,6 +20,8 @@ namespace Chalkboard {
          * @param {{ t: number[]; y: number[][] }} sol - The solution.
          * @param {number} time - The time to sample at.
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.diff.at({ t: [0, 1, 2], y: [[0], [1], [4]] }, 1.5); // Interpolates the solution at t = 1.5
          */
         export const at = (sol: { t: number[]; y: number[][] }, time: number): number[] => {
             if (!Number.isFinite(time)) throw new Error(`Chalkboard.diff.at: Parameter "time" must be a finite number.`);
@@ -43,6 +45,9 @@ namespace Chalkboard {
          * @param {number | ((t: number) => number)} q - q or q(t)
          * @param {number} n - Exponent
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Bernoulli(1, 1, 2);
+         * const derivative = ode.rule(0, [2]); // Evaluates the Bernoulli equation
          */
         export const Bernoulli = (p: number | ((t: number) => number), q: number | ((t: number) => number), n: number): ChalkboardODE => {
             if (!Number.isFinite(n)) throw new Error(`Chalkboard.diff.Bernoulli: Parameter "n" must be a finite number.`);
@@ -55,6 +60,9 @@ namespace Chalkboard {
          * Defines a modified Bessel equation of order ν: x²y'' + xy' - (x² + ν²)y = 0. Equivalent: y'' = -(1/x)y' + (1 + (ν²/x²))y. Note: singular at x=0. Start from x>0.
          * @param {number} nu - Order ν
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.BesselI(0);
+         * const derivative = ode.rule(1, [1, 0]); // Evaluates the modified Bessel equation
          */
         export const BesselI = (nu: number = 0): ChalkboardODE => {
             if (!Number.isFinite(nu)) throw new Error(`Chalkboard.diff.BesselI: Parameter "nu" must be a finite number.`);
@@ -69,6 +77,9 @@ namespace Chalkboard {
          * Defines a Bessel equation of order ν: x²y'' + xy' + (x² - ν²)y = 0. Equivalent: y'' = -(1/x)y' - (1 - (ν²/x²))y. Note: singular at x=0. Start from x>0.
          * @param {number} nu - Order ν
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.BesselJ(0);
+         * const derivative = ode.rule(1, [1, 0]); // Evaluates Bessel's equation
          */
         export const BesselJ = (nu: number = 0): ChalkboardODE => {
             if (!Number.isFinite(nu)) throw new Error(`Chalkboard.diff.BesselJ: Parameter "nu" must be a finite number.`);
@@ -85,6 +96,8 @@ namespace Chalkboard {
          * @param {number[]} t - Time array.
          * @param {number} target - Target time.
          * @returns {number}
+         * @example
+         * const result = Chalkboard.diff.closestIndex([0, 0.5, 1, 1.5], 0.9); // Returns 2
          */
         export const closestIndex = (t: number[], target: number): number => {
             if (!Array.isArray(t) || t.length === 0) throw new Error(`Chalkboard.diff.closestIndex: Parameter "t" must be a non-empty array.`);
@@ -106,6 +119,8 @@ namespace Chalkboard {
          * @param {{ t: number[]; y: number[][] }} sol - The solution of the ODE.
          * @param {number} index - Component index.
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.diff.component({ t: [0, 1], y: [[1, 2], [3, 4]] }, 1); // Returns [2, 4]
          */
         export const component = (sol: { t: number[]; y: number[][] }, index: number): number[] => {
             if (!Number.isInteger(index) || index < 0) throw new Error(`Chalkboard.diff.component: Parameter "index" must be a non-negative integer.`);
@@ -121,6 +136,8 @@ namespace Chalkboard {
          * Returns an estimate of y'(t) (an estimate of the derivative series) from a solved solution using finite differences on the solution grid.
          * @param {{ t: number[]; y: number[][] }} sol - Solution
          * @returns {number[][]}
+         * @example
+         * const result = Chalkboard.diff.derivative({ t: [0, 1, 2], y: [[0], [1], [4]] }); // Estimates the derivative samples
          */
         export const derivative = (sol: { t: number[]; y: number[][] }): number[][] => {
             if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y)) throw new Error(`Chalkboard.diff.derivative: Invalid solution object.`);
@@ -153,6 +170,9 @@ namespace Chalkboard {
          * @param {number} gamma - γ
          * @param {number} omega - ω
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Duffing(0.2, -1, 1, 0.3, 1.2);
+         * const acceleration = ode.rule(0, [1, 0]); // Evaluates a Duffing oscillator
          */
         export const Duffing = (delta: number, alpha: number, beta: number, gamma: number, omega: number): ChalkboardODE => {
             if (!Number.isFinite(delta) || !Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(omega)) throw new Error(`Chalkboard.diff.Duffing: Parameters "delta", "alpha", "beta", "gamma", and "omega" must be finite numbers.`);
@@ -228,6 +248,9 @@ namespace Chalkboard {
          * Defines an exponential growth/decay equation: y' = ky
          * @param {number} k - Rate
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.exponential(-2);
+         * const derivative = ode.rule(0, [3]); // Returns [-6]
          */
         export const exponential = (k: number = 1): ChalkboardODE => {
             if (!Number.isFinite(k)) throw new Error(`Chalkboard.diff.exponential: Parameter "k" must be a finite number.`);
@@ -239,6 +262,9 @@ namespace Chalkboard {
          * @param {number} a - Growth rate
          * @param {number} K - Carrying capacity (K > 0)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Gompertz(1, 100);
+         * const derivative = ode.rule(0, [10]); // Evaluates Gompertz growth
          */
         export const Gompertz = (a: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(a)) throw new Error(`Chalkboard.diff.Gompertz: Parameter "a" must be a finite number.`);
@@ -250,6 +276,9 @@ namespace Chalkboard {
          * Defines an undamped harmonic oscillator: y'' + (w²)y = 0. Equivalent: y'' = -(w²)y.
          * @param {number} w - Angular frequency (must be greater than or equal to 0)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.harmonic(2);
+         * const acceleration = ode.rule(0, [3, 0]); // Returns [0, -12]
          */
         export const harmonic = (w: number = 1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonic: Parameter "w" must be a finite number greater than or equal to 0.`);
@@ -261,6 +290,9 @@ namespace Chalkboard {
          * @param {number} w - Angular frequency (must be greater than or equal to 0)
          * @param {number} zeta - Damping ratio (must be greater than or equal to 0)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.harmonicDamped(2, 0.1);
+         * const acceleration = ode.rule(0, [3, 4]); // Evaluates damped harmonic motion
          */
         export const harmonicDamped = (w: number = 1, zeta: number = 0.1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "w" must be a finite number greater than or equal to 0.`);
@@ -274,6 +306,9 @@ namespace Chalkboard {
          * @param {number} zeta - Damping ratio (must be greater than or equal to 0)
          * @param {(t: number) => number} F - Forcing term
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.harmonicForced(2, 0.1, (t) => Math.cos(t));
+         * const acceleration = ode.rule(0, [3, 4]); // Evaluates forced harmonic motion
          */
         export const harmonicForced = (w: number, zeta: number, F: (t: number) => number): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicForced: Parameter "w" must be a finite number greater than or equal to 0.`);
@@ -355,6 +390,9 @@ namespace Chalkboard {
          * Defines a Kepler two-body problem in 2D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, vx, vy].
          * @param {number} [mu=1] - Gravitational parameter μ = G(M+m)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Kepler2D(1);
+         * const derivative = ode.rule(0, [1, 0, 0, 1]); // Evaluates a circular-orbit state
          */
         export const Kepler2D = (mu: number = 1): ChalkboardODE => {
             if (!Number.isFinite(mu) || mu < 0) throw new Error(`Chalkboard.diff.Kepler2D: Parameter "mu" must be a finite non-negative number.`);
@@ -374,6 +412,9 @@ namespace Chalkboard {
          * Defines a Kepler two-body problem in 3D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, z, vx, vy, vz].
          * @param {number} [mu=1] - Gravitational parameter μ = G(M+m)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Kepler3D(1);
+         * const derivative = ode.rule(0, [1, 0, 0, 0, 1, 0]); // Evaluates a three-dimensional orbit state
          */
         export const Kepler3D = (mu: number = 1): ChalkboardODE => {
             if (!Number.isFinite(mu) || mu < 0) throw new Error(`Chalkboard.diff.Kepler3D: Parameter "mu" must be a finite non-negative number.`);
@@ -396,6 +437,9 @@ namespace Chalkboard {
          * @param {((t: number) => number) | number} a - Coefficient a(t) or constant a.
          * @param {((t: number) => number) | number} b - Coefficient b(t) or constant b.
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.linear1(-2, 1);
+         * const derivative = ode.rule(0, [3]); // Returns [-5]
          */
         export const linear1 = (a: ((t: number) => number) | number, b: ((t: number) => number) | number): ChalkboardODE => {
             if ((!Number.isFinite(a)) && typeof a !== "function") throw new Error(`Chalkboard.diff.linear1: Parameter "a" must be a finite number or a function.`);
@@ -411,6 +455,9 @@ namespace Chalkboard {
          * @param {((t: number) => number) | number} b - Coefficient b(t) or constant b.
          * @param {((t: number) => number) | number} c - Coefficient c(t) or constant c.
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.linear2(-1, -4, 0);
+         * const derivative = ode.rule(0, [3, 2]); // Evaluates a second-order linear equation
          */
         export const linear2 = (a: ((t: number) => number) | number, b: ((t: number) => number) | number, c: ((t: number) => number) | number): ChalkboardODE => {
             if ((!Number.isFinite(a)) && typeof a !== "function") throw new Error(`Chalkboard.diff.linear2: Parameter "a" must be a finite number or a function.`);
@@ -427,6 +474,9 @@ namespace Chalkboard {
          * @param {number} r - Growth rate
          * @param {number} K - Carrying capacity (non-zero)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.logistic(1, 100);
+         * const derivative = ode.rule(0, [50]); // Returns [25]
          */
         export const logistic = (r: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(r)) throw new Error(`Chalkboard.diff.logistic: Parameter "r" must be a finite number.`);
@@ -440,6 +490,9 @@ namespace Chalkboard {
          * @param {number} [rho=28] - ρ, Rayleigh number
          * @param {number} [beta=8/3] - β, geometric factor
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.Lorenz();
+         * const derivative = ode.rule(0, [1, 1, 1]); // Evaluates the Lorenz system
          */
         export const Lorenz = (sigma: number = 10, rho: number = 28, beta: number = 8 / 3): ChalkboardODE => {
             if (!Number.isFinite(sigma) || !Number.isFinite(rho) || !Number.isFinite(beta)) throw new Error(`Chalkboard.diff.Lorenz: Parameters "sigma", "rho", and "beta" must be finite numbers.`);
@@ -460,6 +513,9 @@ namespace Chalkboard {
          * @param {number} gamma - Predator death rate
          * @param {number} delta - Predator reproduction rate
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.LotkaVolterra(1.5, 1, 3, 1);
+         * const derivative = ode.rule(0, [10, 5]); // Evaluates predator-prey dynamics
          */
         export const LotkaVolterra = (alpha: number = 1, beta: number = 1, gamma: number = 1, delta: number = 1): ChalkboardODE => {
             if (!Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(delta)) throw new Error(`Chalkboard.diff.LotkaVolterra: Parameters "alpha", "beta", "gamma", and "delta" must be finite numbers.`);
@@ -475,6 +531,9 @@ namespace Chalkboard {
          * @param {number} c - Damping
          * @param {number} k - Spring constant
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.massSpringDamper(2, 0.5, 8);
+         * const acceleration = ode.rule(0, [1, 0]); // Evaluates a mass-spring-damper system
          */
         export const massSpringDamper = (m: number, c: number, k: number): ChalkboardODE => {
             if (!Number.isFinite(m) || m === 0) throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "m" must be finite and non-zero.`);
@@ -490,6 +549,9 @@ namespace Chalkboard {
          * @param {number} [params.b=0] - Damping coefficient
          * @param {(t:number)=>number} [params.tau] - External torque τ(t) (0 by default)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.pendulum({ L: 2, g: 9.81 });
+         * const acceleration = ode.rule(0, [Chalkboard.PI(1 / 2), 0]); // Evaluates a simple pendulum
          */
         export const pendulum = (params: { g?: number; L?: number; b?: number; tau?: (t: number) => number; } = {}): ChalkboardODE => {
             if (params === null || typeof params !== "object" || Array.isArray(params)) throw new Error(`Chalkboard.diff.pendulum: Parameter "params" must be an object.`);
@@ -512,6 +574,9 @@ namespace Chalkboard {
          * @param {number} [params.c=0] - Quadratic damping coefficient
          * @param {(t:number)=>number} [params.tau] - External torque τ(t) (0 by default)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.pendulumDrag({ L: 2, g: 9.81, c: 0.1 });
+         * const acceleration = ode.rule(0, [Chalkboard.PI(1 / 2), 1]); // Includes quadratic drag
          */
         export const pendulumDrag = (params: { g?: number; L?: number; b?: number; c?: number; tau?: (t: number) => number; } = {}): ChalkboardODE => {
             if (params === null || typeof params !== "object" || Array.isArray(params)) throw new Error(`Chalkboard.diff.pendulumDrag: Parameter "params" must be an object.`);
@@ -537,6 +602,9 @@ namespace Chalkboard {
          * @param {number} [A=1.2] - Drive amplitude
          * @param {number} [Omega=2/3] - Drive frequency
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.pendulumDriven(0.5, 1.2, 2 / 3);
+         * const acceleration = ode.rule(0, [0, 0]); // Evaluates a driven pendulum
          */
         export const pendulumDriven = (q: number = 0.5, A: number = 1.2, Omega: number = 2 / 3): ChalkboardODE => {
             if (!Number.isFinite(q) || !Number.isFinite(A) || !Number.isFinite(Omega)) throw new Error(`Chalkboard.diff.pendulumDriven: Parameters "q", "A", and "Omega" must be finite numbers.`);
@@ -597,6 +665,9 @@ namespace Chalkboard {
          * @param {(t: number) => number} f - f(t)
          * @param {(y: number) => number} g - g(y)
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.separable((t) => t, (y) => y);
+         * const derivative = ode.rule(2, [3]); // Returns [6]
          */
         export const separable = (f: (t: number) => number, g: (y: number) => number): ChalkboardODE => {
             if (typeof f !== "function" || typeof g !== "function") throw new Error(`Chalkboard.diff.separable: Parameters "f" and "g" must be functions.`);
@@ -609,6 +680,9 @@ namespace Chalkboard {
          * @param {number} sigma - Incubation rate
          * @param {number} gamma - Recovery rate
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.SEIR(0.8, 0.2, 0.1);
+         * const derivative = ode.rule(0, [0.99, 0.01, 0, 0]); // Evaluates an SEIR state
          */
         export const SEIR = (beta: number = 1, sigma: number = 1, gamma: number = 1): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(sigma) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SEIR: Parameters "beta", "sigma", and "gamma" must be finite numbers.`);
@@ -629,6 +703,9 @@ namespace Chalkboard {
          * @param {number} beta - Infection rate
          * @param {number} gamma - Recovery rate
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.SIR(0.8, 0.1);
+         * const derivative = ode.rule(0, [0.99, 0.01, 0]); // Evaluates an SIR state
          */
         export const SIR = (beta: number = 1, gamma: number = 1): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SIR: Parameters "beta" and "gamma" must be finite numbers.`);
@@ -643,6 +720,9 @@ namespace Chalkboard {
          * @param {number} beta - Infection rate
          * @param {number} gamma - Recovery rate
          * @returns {ChalkboardODE}
+         * @example
+         * const ode = Chalkboard.diff.SIS(0.8, 0.1);
+         * const derivative = ode.rule(0, [0.01]); // Evaluates an SIS state
          */
         export const SIS = (beta: number = 1, gamma: number = 0.5): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SIS: Parameters "beta" and "gamma" must be finite numbers.`);
@@ -1072,6 +1152,8 @@ namespace Chalkboard {
          * Returns the first component of a solution of an ODE.
          * @param {{ t: number[]; y: number[][] }} sol - The solution of the ODE.
          * @returns {number[]}
+         * @example
+         * const result = Chalkboard.diff.toScalarSeries({ t: [0, 1, 2], y: [[1], [2], [4]] }); // Returns [1, 2, 4]
          */
         export const toScalarSeries = (sol: { t: number[]; y: number[][] }): number[] => {
             if (sol === null || typeof sol !== "object") throw new Error(`Chalkboard.diff.toScalarSeries: Parameter "sol" must be an object.`);
