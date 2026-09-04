@@ -366,6 +366,3 @@ namespace Chalkboard {
      */
     export const VERSIONALIAS: "Euler" = "Euler";
 }
-
-if (typeof window === "undefined") module.exports = Chalkboard;
-else window.Chalkboard = Chalkboard;

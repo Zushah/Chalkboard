@@ -7,7 +7,7 @@
 */
 
 import assert from "assert";
-import cb from "../dist/Chalkboard.js";
+import cb from "@zushah/chalkboard";
 
 // geom.circleA, geom.circleP, geom.ellipseA, geom.ellipseP, geom.sectorA, geom.sectorP, geom.squareA, geom.squareP, geom.triangleA, geom.triangleP, geom.trianglesidesA, geom.trapezoidA, geom.trapezoidP, geom.parallelogramA, geom.parallelogramP, geom.polygonA, geom.polygonP
 {

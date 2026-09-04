@@ -7,7 +7,7 @@
 */
 
 import assert from "assert";
-import cb from "../dist/Chalkboard.js";
+import cb from "@zushah/chalkboard";
 
 // calc.dfdx, calc.d2fdx2, calc.dfdv, calc.dfrdt, calc.grad, calc.grad2, calc.div, calc.curl
 {

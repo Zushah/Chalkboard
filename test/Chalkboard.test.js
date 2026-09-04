@@ -7,7 +7,44 @@
 */
 
 import assert from "assert";
-import cb from "../dist/Chalkboard.js";
+import cb from "@zushah/chalkboard";
+import { readFileSync, readdirSync } from "node:fs";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
+import vm from "node:vm";
+
+// Distribution compatibility: ESM and CDN.
+{
+    const entry = await import("@zushah/chalkboard");
+    const canonical = new URL("../dist/Chalkboard.js", import.meta.url);
+    assert.strictEqual(import.meta.resolve("@zushah/chalkboard"), new URL("../dist/Chalkboard.mjs", import.meta.url).href);
+    assert.deepStrictEqual(Object.keys(entry), ["default"]);
+    assert.strictEqual(entry.default, cb);
+    await import(canonical.href);
+    assert.strictEqual(cb, globalThis.Chalkboard);
+    assert.strictEqual(typeof cb.PI, "function");
+    assert.strictEqual(typeof cb.comp.init, "function");
+    assert.strictEqual(typeof cb.vect.init, "function");
+    const adapter = readFileSync(new URL("../dist/Chalkboard.mjs", import.meta.url), "utf8");
+    assert.strictEqual(adapter.replace(/\/\*[\s\S]*?\*\//g, "").trim(), 'import "./Chalkboard.js";\n\nexport default globalThis.Chalkboard;');
+    assert.deepStrictEqual(readdirSync(new URL("../dist/", import.meta.url)).sort(), ["Chalkboard.d.ts", "Chalkboard.js", "Chalkboard.min.js", "Chalkboard.mjs"]);
+    for (const name of ["Chalkboard.js", "Chalkboard.min.js", "Chalkboard.d.ts", "Chalkboard.mjs"]) {
+        const code = readFileSync(new URL(`../dist/${name}`, import.meta.url), "utf8");
+        assert.ok(code.startsWith("/*!\n * Chalkboard v3.0.4\n * Released on Monday, July 20, 2026\n"));
+        assert.ok(code.includes("SPDX-License-Identifier: MPL-2.0"));
+        assert.match(code, /^\/\*![\s\S]*?\*\/\n\n\S/, `${name}: exactly one blank line after the banner`);
+        if (name.endsWith(".mjs") || name.endsWith(".d.ts")) continue;
+        const context = vm.createContext({});
+        vm.runInContext("window = globalThis", context);
+        new vm.Script(code, { filename: name }).runInContext(context);
+        assert.strictEqual(context.Chalkboard.VERSION, cb.VERSION);
+        assert.strictEqual(context.Chalkboard.PI(), cb.PI());
+        assert.strictEqual(JSON.stringify(context.Chalkboard.comp.init(1, 2)), '{"a":1,"b":2}');
+        for (const namespace of ["abal", "bool", "calc", "comp", "diff", "geom", "matr", "numb", "plot", "quat", "real", "stat", "tens", "trig", "vect"]) assert.strictEqual(typeof context.Chalkboard[namespace], "object");
+        const moduleCheck = spawnSync(process.execPath, ["--input-type=module", "--eval", `import { readFileSync } from 'node:fs'; await import('data:text/javascript;base64,' + readFileSync(${JSON.stringify(fileURLToPath(new URL(`../dist/${name}`, import.meta.url)))}).toString('base64')); if (Math.abs(globalThis.Chalkboard.PI() - Math.PI) > 1e-15) process.exit(1);`], { encoding: "utf8" });
+        assert.strictEqual(moduleCheck.status, 0, moduleCheck.stderr || String(moduleCheck.error));
+    }
+}
 
 // VERSION, VERSIONALIAS
 {

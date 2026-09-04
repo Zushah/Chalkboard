@@ -7,7 +7,7 @@
 */
 
 import assert from "assert";
-import cb from "../dist/Chalkboard.js";
+import cb from "@zushah/chalkboard";
 
 // numb.factorial, numb.Fibonacci, numb.binomial, numb.combination, numb.permutation, numb.mul, numb.sum
 {

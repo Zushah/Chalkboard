@@ -2,28 +2,35 @@
   "name": "@zushah/chalkboard",
   "version": "3.0.4",
   "description": "Hundreds of functions for the manifestation and manipulation of mathematical structures and systems.",
-  "main": "./dist/Chalkboard.js",
+  "main": "./dist/Chalkboard.mjs",
   "types": "./dist/Chalkboard.d.ts",
   "files": [
-    "./dist/",
+    "./dist/Chalkboard.js",
+    "./dist/Chalkboard.min.js",
+    "./dist/Chalkboard.d.ts",
+    "./dist/Chalkboard.mjs",
     "./CHANGELOG.md",
     "./LICENSE.md",
     "./package.json",
     "./README.md"
   ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/Chalkboard.d.ts",
+      "import": "./dist/Chalkboard.mjs"
+    }
+  },
   "scripts": {
-    "build": "tsc --project ./tsconfig.json && terser ./dist/Chalkboard.js --compress --mangle --output ./dist/Chalkboard.min.js",
+    "build": "node ./scripts/build.js",
     "test": "node --test ./test/*.test.js",
-    "dev": "npm run build && npm run test",
+    "dev": "npm run build && npm run test && npm run restore",
     "restore": "git restore dist",
-    "docs": "typedoc --options ./typedoc.json --favicon ./assets/favicon.png"
+    "docs": "npm --prefix docs run docs --"
   },
   "devDependencies": {
-    "@types/node": "26.1.1",
-    "terser": "5.49.0",
-    "typedoc": "0.28.20",
-    "typedoc-material-theme": "1.4.1",
-    "typescript": "6.0.3"
+    "terser": "5.51.2",
+    "typescript": "7.0.2"
   },
   "repository": {
     "type": "git",

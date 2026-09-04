@@ -7,7 +7,7 @@
 */
 
 import assert from "assert";
-import cb from "../dist/Chalkboard.js";
+import cb from "@zushah/chalkboard";
 
 // bool.modeConfig, bool.AND, bool.OR, bool.NOT
 {

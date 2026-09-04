@@ -1,0 +1,12 @@
+{
+  "name": "chalkboard-docs",
+  "private": true,
+  "scripts": {
+    "docs": "typedoc --options ../typedoc.json --favicon ../assets/favicon.png"
+  },
+  "devDependencies": {
+    "typescript": "6.0.3",
+    "typedoc": "0.28.20",
+    "typedoc-material-theme": "1.4.1"
+  }
+}
