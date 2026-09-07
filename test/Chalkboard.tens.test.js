@@ -1,10 +1,10 @@
 /*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Test: Tensor Namespace
-*/
+ * Chalkboard - Tensor Namespace Tests
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 import assert from "assert";
 import cb from "@zushah/chalkboard";

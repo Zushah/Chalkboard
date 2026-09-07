@@ -1,3 +1,14 @@
+/*!
+ * Chalkboard v3.0.5
+ * Released on Monday, September 7, 2026
+ * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
+ * Copyright (c) Zushah and contributors
+ * SPDX-License-Identifier: MPL-2.0
+ * Source: https://github.com/Zushah/Chalkboard
+ * Website: https://zushah.github.io/Chalkboard
+ */
+
+declare global {
 type ChalkboardComplex = {
     a: number;
     b: number;
@@ -58,7 +69,7 @@ type ChalkboardVector = {
     z?: number;
     w?: number;
 } | number[] | Float32Array | Float64Array | ChalkboardMatrix | string;
-declare namespace Chalkboard {
+namespace Chalkboard {
     const APPLY: <T>(object: ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>, callback: (x: any) => any) => ChalkboardComplex | ChalkboardMatrix | ChalkboardQuaternion | ChalkboardTensor | ChalkboardVector | ChalkboardSet<T> | ChalkboardStructure<T>;
     let CONTEXT: string;
     const E: (exponent?: number) => number;
@@ -66,10 +77,11 @@ declare namespace Chalkboard {
     const PI: (coefficient?: number) => number;
     const REGISTER: (name: string, func: (...x: number[]) => number) => void;
     const REGISTRY: Record<string, (...x: number[]) => number>;
-    const VERSION: "3.0.4";
+    const VERSION: "3.0.5";
     const VERSIONALIAS: "Euler";
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace abal {
         const A: (n: number) => ChalkboardSet<number[]>;
         const automorphism: <T>(struc: ChalkboardStructure<T>, mapping: (element: T) => T) => ChalkboardMorphism<T, T>;
@@ -155,7 +167,8 @@ declare namespace Chalkboard {
         const Z: (n?: number) => ChalkboardSet<number>;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace bool {
         const AND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
         const BICOND: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
@@ -189,7 +202,8 @@ declare namespace Chalkboard {
         const XOR: (...vals: (boolean | 0 | 1)[]) => boolean | 0 | 1;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace calc {
         const autocorrelation: (func: ChalkboardFunction, val: number) => number;
         const binormal: (func: ChalkboardFunction, val: number) => ChalkboardVector;
@@ -233,7 +247,8 @@ declare namespace Chalkboard {
         const Taylor: (func: ChalkboardFunction, val: number, n: 0 | 1 | 2, a: number) => number;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace comp {
         const absolute: (comp: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
         const add: (comp1: ChalkboardComplex | number | ChalkboardFunction, comp2: ChalkboardComplex | number | ChalkboardFunction) => ChalkboardComplex | ChalkboardFunction;
@@ -297,7 +312,8 @@ declare namespace Chalkboard {
         const val: (func: ChalkboardFunction, comp: ChalkboardComplex) => ChalkboardComplex;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace diff {
         const at: (sol: {
             t: number[];
@@ -405,7 +421,8 @@ declare namespace Chalkboard {
         }) => number[];
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace geom {
         const circleA: (r: number) => number;
         const circleP: (r: number) => number;
@@ -445,7 +462,8 @@ declare namespace Chalkboard {
         const triangularprismV: (a: number, b: number, c: number, h: number) => number;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace matr {
         const absolute: (matr: ChalkboardMatrix) => ChalkboardMatrix;
         const add: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
@@ -541,7 +559,8 @@ declare namespace Chalkboard {
         const zero: (rows: number, cols?: number) => ChalkboardMatrix;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace numb {
         const Bernoullian: (p?: number) => number;
         const binomial: (n: number, k: number) => number;
@@ -586,7 +605,8 @@ declare namespace Chalkboard {
         const toOctal: (num: number, prefix?: boolean) => string;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace plot {
         const autocorrelation: (func: ChalkboardFunction, config: {
             x: number;
@@ -785,7 +805,8 @@ declare namespace Chalkboard {
         }) => void;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace quat {
         const absolute: (quat: ChalkboardQuaternion) => ChalkboardQuaternion;
         const add: (quat1: ChalkboardQuaternion | number, quat2: ChalkboardQuaternion | number) => ChalkboardQuaternion;
@@ -823,7 +844,8 @@ declare namespace Chalkboard {
         const toVector: (quat: ChalkboardQuaternion) => ChalkboardVector;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace real {
         const absolute: (func: ChalkboardFunction) => ChalkboardFunction;
         const add: (func1: ChalkboardFunction, func2: ChalkboardFunction) => ChalkboardFunction;
@@ -874,7 +896,8 @@ declare namespace Chalkboard {
         const zero: (type?: "scalar2d" | "scalar3d" | "scalar4d" | "vector2d" | "vector3d" | "vector4d" | "curve2d" | "curve3d" | "curve4d" | "surface3d") => ChalkboardFunction;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace stat {
         const absolute: (arr: number[]) => number[];
         const add: (arr1: number[], arr2: number[]) => number[];
@@ -946,7 +969,8 @@ declare namespace Chalkboard {
         const zscored: (arr: number[]) => number[];
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace tens {
         const absolute: (tens: ChalkboardTensor) => ChalkboardTensor;
         const add: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
@@ -989,7 +1013,8 @@ declare namespace Chalkboard {
         const zero: (...size: number[]) => ChalkboardTensor;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace trig {
         const arccos: (rad: number) => number | undefined;
         const arccosh: (rad: number) => number | undefined;
@@ -1021,7 +1046,8 @@ declare namespace Chalkboard {
         const toRad: (deg: number) => number;
     }
 }
-declare namespace Chalkboard {
+
+namespace Chalkboard {
     namespace vect {
         const absolute: (vect: ChalkboardVector) => ChalkboardVector;
         const add: (vect1: ChalkboardVector, vect2: ChalkboardVector) => ChalkboardVector;
@@ -1083,4 +1109,6 @@ declare namespace Chalkboard {
         const zero: (dimension: 2 | 3 | 4) => ChalkboardVector;
     }
 }
-//# sourceMappingURL=Chalkboard.d.ts.map
+}
+
+export default Chalkboard;

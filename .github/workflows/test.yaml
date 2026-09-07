@@ -5,26 +5,26 @@ on:
     branches:
       - main
     paths:
-      - package-lock.json
       - src/**
       - test/**
       - scripts/**
       - dist/**
       - .github/workflows/test.yaml
       - package.json
+      - package-lock.json
       - tsconfig.json
 
   pull_request:
     branches:
       - main
     paths:
-      - package-lock.json
       - src/**
       - test/**
       - scripts/**
       - dist/**
       - .github/workflows/test.yaml
       - package.json
+      - package-lock.json
       - tsconfig.json
 
 permissions:
@@ -47,10 +47,10 @@ jobs:
             os: windows-2025
           - name: Windows 11 ARM64
             os: windows-11-arm
-          - name: MacOS 15 AMD64
-            os: macos-15-intel
-          - name: MacOS 15 ARM64
-            os: macos-15
+          - name: MacOS 26 AMD64
+            os: macos-26-intel
+          - name: MacOS 26 ARM64
+            os: macos-26
           - name: Ubuntu 24 AMD64
             os: ubuntu-24.04
           - name: Ubuntu 24 ARM64
@@ -72,9 +72,9 @@ jobs:
         run: npm ci
 
       -
-        name: Build
+        name: Build Chalkboard
         run: npm run build
 
       -
-        name: Test
+        name: Run Tests
         run: npm run test

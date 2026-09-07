@@ -1,10 +1,10 @@
 /*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Example Program: Fluid Flow
-*/
+ * Chalkboard - Fluid Flow Example
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 // Initialize the JavaScript Canvas API
 const ctx = document.getElementById("canvas").getContext("2d");
@@ -15,7 +15,7 @@ canvas.height = window.innerHeight;
 const cb = Chalkboard;
 
 // Vector field defined as F(x, y) = (y, -x/(1 + x^2)^2)
-// adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://www.github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
+// adapted from "Learning about Hamiltonian Monte Carlo" which can be found here: https://github.com/anvaka/fieldplay/blob/main/Awesome%20Fields.md
 const F = cb.vect.field((x, y) => y, (x, y) => -x / ((1 + x*x) * (1 + x*x)));
 
 // Basic particle system to simulate the fluid flow

@@ -1,13 +1,11 @@
 /*
-    Chalkboard - Geometry Namespace
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-*/
-/*
-    This Source Code Form is subject to the terms of the
-    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
-    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
+ * Chalkboard - Geometry Namespace
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /// <reference path="Chalkboard.ts"/>
 namespace Chalkboard {
     /**

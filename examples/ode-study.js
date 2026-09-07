@@ -1,17 +1,18 @@
 /*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Example Program: ODE Solver Error vs. Step Size Study
-*/
+ * Chalkboard - ODE Solver Error vs. Step Size Study Example
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 /*
-    This program benchmarks Chalkboard's fixed-step ODE solvers on standard initial-value problems with known exact solutions.
-    For each method and step count, it solves the same system, measures trajectory and endpoint errors on the solver's native
-    time grid, and estimates observed convergence rates from the error-vs-step-size data. The full results can be exported as
-    JSON or CSV. The goal is to show that Chalkboard can not only generate solutions and plots in the browser, but also that
-    it can support computational experiments of the kind expected in research software.
-*/
+ * This program benchmarks Chalkboard's fixed-step ODE solvers on standard initial-value problems with known exact solutions.
+ * For each method and step count, it solves the same system, measures trajectory and endpoint errors on the solver's native
+ * time grid, and estimates observed convergence rates from the error-vs-step-size data. The full results can be exported as
+ * JSON or CSV. The goal is to show that Chalkboard can not only generate solutions and plots in the browser, but also that
+ * it can support computational experiments of the kind expected in research software.
+ */
 
 const cb = Chalkboard;
 

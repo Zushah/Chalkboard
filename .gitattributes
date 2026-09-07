@@ -1,3 +1,13 @@
 * text=auto
+assets/** linguist-detectable=false
+dist/** linguist-detectable=false
+docs/** linguist-detectable=false
+docs/build/*.html linguist-generated=true
+docs/build/*.css linguist-generated=true
+docs/build/*.js linguist-generated=true
+examples/** linguist-detectable=false
+paper/** linguist-detectable=false
+scripts/** linguist-detectable=false
+tests/** linguist-detectable=false
 *.png binary
 *.pdf binary

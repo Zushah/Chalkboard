@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="os">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>Examples | Chalkboard - v{{VERSION}}</title>
+        <link href="./assets/favicon.png" rel="icon" type="image/x-icon">
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap");
+            :root {
+                color-scheme: light dark;
+                --font-sans: "Space Grotesk", sans-serif;
+                --font-mono: "Space Mono", monospace;
+                --radius-panel: 28px;
+                --radius-control: 24px;
+                --toolbar-height: 4.5rem;
+                --page-gutter: clamp(1.25rem, 4vw, 2rem);
+                --content-width: 1180px;
+            }
+            :root, :root[data-theme="light"] {
+                --md-sys-color-primary: #00658d;
+                --md-sys-color-on-primary: #ffffff;
+                --md-sys-color-primary-container: #c6e7ff;
+                --md-sys-color-on-primary-container: #001e2d;
+                --md-sys-color-secondary: #4f616e;
+                --md-sys-color-secondary-container: #d2e5f4;
+                --md-sys-color-tertiary: #62597c;
+                --md-sys-color-error: #ba1a1a;
+                --md-sys-color-background: #fcfcff;
+                --md-sys-color-on-background: #191c1e;
+                --md-sys-color-surface: #fcfcff;
+                --md-sys-color-on-surface: #191c1e;
+                --md-sys-color-surface-variant: #dde3ea;
+                --md-sys-color-on-surface-variant: #41484d;
+                --md-sys-color-outline: #71787e;
+                --md-sys-color-outline-variant: #c1c7ce;
+                --md-sys-color-surface-container: #edeef0;
+                --md-sys-color-surface-container-high: #e7e8eb;
+                --md-sys-color-surface-container-highest: #e2e2e5;
+                --md-sys-color-shadow: #000000;
+                --color-link: var(--md-sys-color-primary);
+                --color-accent: var(--md-sys-color-secondary-container);
+                --color-card: var(--md-sys-color-surface);
+                --color-card-muted: var(--md-sys-color-surface-container-low, #f3f3f6);
+                --color-text: var(--md-sys-color-on-surface);
+                --color-text-muted: var(--md-sys-color-on-surface-variant);
+                --color-border: var(--md-sys-color-outline-variant);
+                --color-card-shadow: rgba(25, 28, 30, 0.08);
+            }
+            @media (prefers-color-scheme: dark) {
+                :root {
+                    color-scheme: dark;
+                    --md-sys-color-primary: #83cfff;
+                    --md-sys-color-on-primary: #00344b;
+                    --md-sys-color-primary-container: #004c6b;
+                    --md-sys-color-on-primary-container: #c6e7ff;
+                    --md-sys-color-secondary: #b6c9d8;
+                    --md-sys-color-secondary-container: #374955;
+                    --md-sys-color-tertiary: #ccc1e9;
+                    --md-sys-color-error: #ffb4ab;
+                    --md-sys-color-background: #191c1e;
+                    --md-sys-color-on-background: #e2e2e5;
+                    --md-sys-color-surface: #191c1e;
+                    --md-sys-color-on-surface: #e2e2e5;
+                    --md-sys-color-surface-variant: #41484d;
+                    --md-sys-color-on-surface-variant: #c1c7ce;
+                    --md-sys-color-outline: #8b9198;
+                    --md-sys-color-outline-variant: #41484d;
+                    --md-sys-color-surface-container: #1d2022;
+                    --md-sys-color-surface-container-high: #282a2c;
+                    --md-sys-color-surface-container-highest: #333537;
+                    --md-sys-color-shadow: #000000;
+                    --color-card-muted: #1d2022;
+                    --color-card-shadow: rgba(0, 0, 0, 0.2);
+                }
+            }
+            :root[data-theme="dark"] {
+                color-scheme: dark;
+                --md-sys-color-primary: #83cfff;
+                --md-sys-color-on-primary: #00344b;
+                --md-sys-color-primary-container: #004c6b;
+                --md-sys-color-on-primary-container: #c6e7ff;
+                --md-sys-color-secondary: #b6c9d8;
+                --md-sys-color-secondary-container: #374955;
+                --md-sys-color-tertiary: #ccc1e9;
+                --md-sys-color-error: #ffb4ab;
+                --md-sys-color-background: #191c1e;
+                --md-sys-color-on-background: #e2e2e5;
+                --md-sys-color-surface: #191c1e;
+                --md-sys-color-on-surface: #e2e2e5;
+                --md-sys-color-on-surface-variant: #c1c7ce;
+                --md-sys-color-outline: #8b9198;
+                --md-sys-color-outline-variant: #41484d;
+                --md-sys-color-surface-container: #1d2022;
+                --md-sys-color-surface-container-high: #282a2c;
+                --md-sys-color-surface-container-highest: #333537;
+                --md-sys-color-shadow: #000000;
+                --color-card-muted: #1d2022;
+                --color-card-shadow: rgba(0, 0, 0, 0.2);
+            }
+            * {
+                box-sizing: border-box;
+            }
+            html {
+                min-width: 320px;
+                background: var(--md-sys-color-surface-container);
+                scroll-behavior: smooth;
+            }
+            body {
+                min-height: 100vh;
+                margin: 0;
+                background: radial-gradient(circle at 12% 0%, rgba(131, 207, 255, 0.08), transparent 28rem), var(--md-sys-color-surface-container);
+                color: var(--color-text);
+                font-family: var(--font-sans);
+                font-size: 16px;
+                line-height: 1.55;
+                text-rendering: optimizeLegibility;
+            }
+            a {
+                color: var(--color-link);
+                text-decoration: none;
+                transition: color 160ms ease, background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+            }
+            a:hover {
+                text-decoration: none;
+            }
+            a:focus-visible {
+                outline: 2px solid var(--color-link);
+                outline-offset: 4px;
+            }
+            .container {
+                width: min(100% - (2 * var(--page-gutter)), 1700px);
+                margin-inline: auto;
+            }
+            .docs-toolbar {
+                position: sticky;
+                z-index: 10;
+                top: 0;
+                padding: 1rem 0;
+                background: color-mix(in srgb, var(--md-sys-color-surface-container) 92%, transparent);
+                border-bottom: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 55%, transparent);
+                backdrop-filter: blur(18px);
+            }
+            .toolbar-inner {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 2.5rem;
+            }
+            .toolbar-mark {
+                position: relative;
+                display: inline-block;
+                width: 2.5rem;
+                height: 2.5rem;
+                overflow: hidden;
+                border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 70%, transparent);
+                border-radius: 50%;
+                background: var(--md-sys-color-primary-container);
+                box-shadow: 0 8px 22px var(--color-card-shadow);
+            }
+            .toolbar-mark::before, .toolbar-mark::after {
+                position: absolute;
+                content: "";
+                border: 2px solid var(--md-sys-color-primary);
+                border-radius: 50%;
+            }
+            .toolbar-mark::before {
+                inset: 0.42rem;
+            }
+            .toolbar-mark::after {
+                top: 0.3rem;
+                bottom: 0.3rem;
+                left: 50%;
+                width: 0.35rem;
+                border-top: 0;
+                border-bottom: 0;
+                border-radius: 0;
+                transform: translateX(-50%);
+            }
+            .toolbar-rule {
+                position: relative;
+                display: block;
+                width: 2.5rem;
+                height: 2.5rem;
+                border-radius: 50%;
+                opacity: 0.82;
+            }
+            .toolbar-rule::before, .toolbar-rule::after {
+                position: absolute;
+                content: "";
+            }
+            .toolbar-rule::before {
+                top: 0.75rem;
+                left: 0.75rem;
+                width: 0.65rem;
+                height: 0.65rem;
+                border: 2px solid var(--color-text);
+                border-radius: 50%;
+            }
+            .toolbar-rule::after {
+                top: 1.42rem;
+                left: 1.38rem;
+                width: 0.55rem;
+                height: 2px;
+                border-radius: 999px;
+                background: var(--color-text);
+                transform: rotate(45deg);
+            }
+            .examples-layout {
+                width: min(100% - (2 * var(--page-gutter)), var(--content-width));
+                margin: 2rem auto 2.5rem;
+            }
+            .content-panel {
+                position: relative;
+                overflow: hidden;
+                padding: clamp(1.5rem, 4vw, 2.25rem);
+                border: 1px solid color-mix(in srgb, var(--md-sys-color-outline-variant) 45%, transparent);
+                border-radius: var(--radius-panel);
+                background: var(--color-card);
+                box-shadow: 0 20px 55px var(--color-card-shadow);
+            }
+            .content-panel::before {
+                position: absolute;
+                top: -8rem;
+                right: -6rem;
+                width: 22rem;
+                height: 22rem;
+                border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 20%, transparent);
+                border-radius: 50%;
+                box-shadow: 0 0 0 1.2rem color-mix(in srgb, var(--md-sys-color-primary) 4%, transparent), 0 0 0 2.4rem color-mix(in srgb, var(--md-sys-color-primary) 3%, transparent);
+                content: "";
+                pointer-events: none;
+            }
+            .page-title {
+                position: relative;
+                margin-bottom: 2rem;
+                padding-bottom: 1.5rem;
+                border-bottom: 1px solid var(--md-sys-color-outline-variant);
+            }
+            .page-title::after {
+                position: absolute;
+                bottom: -2px;
+                left: 0;
+                width: 4rem;
+                height: 3px;
+                border-radius: 999px;
+                background: var(--md-sys-color-primary);
+                content: "";
+            }
+            h1, h2, h3 {
+                line-height: 1.2;
+            }
+            h2 {
+                max-width: 30rem;
+                margin: 0;
+                color: var(--md-sys-color-on-surface);
+                font-size: clamp(1.8rem, 4vw, 2.35rem);
+                font-weight: 600;
+                letter-spacing: -0.04em;
+            }
+            p {
+                margin: 0 0 1.5rem;
+            }
+            .lead {
+                max-width: 64rem;
+                margin-bottom: 2rem;
+                color: var(--color-text-muted);
+                font-size: 1.05rem;
+                line-height: 1.7;
+            }
+            .example-grid {
+                display: grid;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 0.85rem;
+                margin: 0 0 2.25rem;
+                padding: 0;
+                list-style: none;
+            }
+            .example-grid li {
+                min-width: 0;
+            }
+            .example-link {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                min-height: 4.5rem;
+                gap: 1rem;
+                padding: 1rem 1.15rem 1rem 1.25rem;
+                border: 1px solid var(--md-sys-color-outline-variant);
+                border-radius: var(--radius-control);
+                background: var(--color-card-muted);
+                color: var(--color-text);
+                font-size: 1rem;
+                font-weight: 500;
+            }
+            .example-link::before {
+                flex: 0 0 auto;
+                width: 0.55rem;
+                height: 0.55rem;
+                margin-right: 0.15rem;
+                border: 1px solid var(--md-sys-color-primary);
+                border-radius: 50%;
+                background: color-mix(in srgb, var(--md-sys-color-primary) 18%, transparent);
+                content: "";
+            }
+            .example-link::after {
+                flex: 0 0 auto;
+                width: 0.55rem;
+                height: 0.55rem;
+                border-top: 2px solid var(--md-sys-color-primary);
+                border-right: 2px solid var(--md-sys-color-primary);
+                color: var(--md-sys-color-primary);
+                content: "";
+                transition: transform 160ms ease;
+                transform: rotate(45deg);
+            }
+            .example-link:hover {
+                border-color: var(--md-sys-color-primary);
+                background: var(--md-sys-color-surface-container-high);
+                color: var(--md-sys-color-primary);
+                transform: translateY(-2px);
+            }
+            .example-link:hover::after {
+                transform: translateX(0.2rem);
+            }
+            .featured-example {
+                position: relative;
+                margin-top: 0.5rem;
+                padding: 1.25rem 1.35rem;
+                border: 1px solid color-mix(in srgb, var(--md-sys-color-primary) 48%, var(--md-sys-color-outline-variant));
+                border-radius: var(--radius-control);
+                background: linear-gradient(105deg, color-mix(in srgb, var(--md-sys-color-primary-container) 48%, transparent), transparent 70%), var(--color-card-muted);
+                color: var(--color-text-muted);
+                line-height: 1.7;
+            }
+            .featured-example::before {
+                position: absolute;
+                top: 1.2rem;
+                bottom: 1.2rem;
+                left: 0;
+                width: 3px;
+                border-radius: 999px;
+                background: var(--md-sys-color-primary);
+                content: "";
+            }
+            .featured-example a {
+                font-weight: 600;
+            }
+            .page-footer {
+                width: min(100% - (2 * var(--page-gutter)), var(--content-width));
+                margin: 0 auto;
+                padding: 1.25rem 0 2.5rem;
+                border-top: 1px solid var(--md-sys-color-outline-variant);
+                color: var(--color-text-muted);
+                text-align: center;
+                font-size: 0.95rem;
+            }
+            .page-footer p {
+                margin: 0;
+            }
+            .page-footer a {
+                display: inline-block;
+                padding: 0.25rem 0.15rem;
+                color: var(--color-text-muted);
+            }
+            .page-footer a:hover {
+                color: var(--md-sys-color-primary);
+            }
+            @media (max-width: 680px) {
+                .docs-toolbar {
+                    padding: 0.75rem 0;
+                }
+                .toolbar-rule {
+                    font-size: 0.62rem;
+                }
+                .examples-layout {
+                    margin-top: 1rem;
+                }
+                .content-panel {
+                    border-radius: 22px;
+                }
+                .example-grid {
+                    grid-template-columns: 1fr;
+                }
+                .page-footer {
+                    line-height: 2;
+                }
+            }
+            @media (prefers-reduced-motion: reduce) {
+                *, *::before, *::after {
+                    scroll-behavior: auto !important;
+                    transition-duration: 0.01ms !important;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <header class="docs-toolbar">
+            <div class="container toolbar-inner">
+                <a class="toolbar-mark" href="../index.html" aria-label="Back to the docs"></a>
+                <div class="toolbar-rule" aria-hidden="true"></div>
+            </div>
+        </header>
+        <main class="examples-layout">
+            <section class="content-panel" aria-labelledby="examples-title">
+                <div class="page-title">
+                    <h2 id="examples-title">Chalkboard Examples</h2>
+                </div>
+                <p class="lead">Here are a few interesting examples that demonstrate some of the features of Chalkboard (their source code can be found <a href="https://github.com/Zushah/Chalkboard/tree/main/examples">here</a>):</p>
+                <ul class="example-grid">
+                    <li><a class="example-link" href="./fluid.html" target="_blank">Fluid flow</a></li>
+                    <li><a class="example-link" href="./hyperbolics.html" target="_blank">Hyperbolic functions</a></li>
+                    <li><a class="example-link" href="./isomorphism.html" target="_blank">Isomorphism visualization</a></li>
+                    <li><a class="example-link" href="./mandala.html" target="_blank">Modular multiplication mandala</a></li>
+                    <li><a class="example-link" href="./mandelbrot.html" target="_blank">Mandelbrot set</a></li>
+                    <li><a class="example-link" href="./matr-donut.html" target="_blank">Matrix donut</a></li>
+                    <li><a class="example-link" href="./newton.html" target="_blank">Newton's method</a></li>
+                    <li><a class="example-link" href="./quat-donut.html" target="_blank">Quaternion donut</a></li>
+                    <li><a class="example-link" href="./telemetry.html" target="_blank">Telemetry dashboard</a></li>
+                    <li><a class="example-link" href="./threebody.html" target="_blank">Three-body problem</a></li>
+                </ul>
+                <p class="featured-example">There is also one example that is more in-depth, <a href="./ode-study.html" target="_blank">ODE Solver Error vs. Step Size Study</a>, which performs a benchmarking study of the error vs. step size of various fixed-step methods for numerically solving ordinary differential equations, so it shows Chalkboard's support for not only cool visualizations but also computational demos in numerical analysis.</p>
+            </section>
+        </main>
+        <footer class="page-footer">
+            <p><a href="../index.html">Back to the docs</a> | <a href="https://github.com/Zushah/Chalkboard">GitHub</a> | <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard">jsDelivr</a> | <a href="https://www.npmjs.com/package/@zushah/chalkboard">npm</a></p>
+        </footer>
+    </body>
+</html>

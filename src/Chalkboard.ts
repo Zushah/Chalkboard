@@ -1,17 +1,16 @@
 /*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
-    Repository: https://www.github.com/Zushah/Chalkboard
-    Website: https://zushah.github.io/Chalkboard
-*/
-/*
-    This Source Code Form is subject to the terms of the
-    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
-    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
+ * Chalkboard v3.0.5
+ * Released on Monday, September 7, 2026
+ * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
+ * Copyright (c) Zushah and contributors
+ * SPDX-License-Identifier: MPL-2.0
+ * Source: https://github.com/Zushah/Chalkboard
+ * Website: https://zushah.github.io/Chalkboard
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 /**
  * The type for complex numbers.
@@ -350,12 +349,12 @@ namespace Chalkboard {
 
     /**
      * The version of Chalkboard.
-     * @type {"3.0.4"}
+     * @type {"3.0.5"}
      * @example
-     * // Returns "3.0.4"
+     * // Returns "3.0.5"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "3.0.4" = "3.0.4";
+    export const VERSION: "3.0.5" = "3.0.5";
 
     /**
      * The alias of the version of Chalkboard.

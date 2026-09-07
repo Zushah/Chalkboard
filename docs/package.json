@@ -1,5 +1,5 @@
 {
-  "name": "chalkboard-docs",
+  "name": "@zushah/chalkboard-docs",
   "private": true,
   "scripts": {
     "docs": "typedoc --options ../typedoc.json --favicon ../assets/favicon.png"

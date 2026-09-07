@@ -1,15 +1,10 @@
 {
-  "include": [
-    "./src/**/*"
-  ],
+  "include": ["./src/**/*"],
   "compilerOptions": {
     "target": "es2023",
     "moduleResolution": "bundler",
     "types": [],
-    "lib": [
-      "es2023",
-      "dom"
-    ],
+    "lib": ["es2023", "dom"],
     "rootDir": "./src/",
     "declaration": true,
     "strict": true,

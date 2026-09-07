@@ -1,10 +1,10 @@
-<p align="center"><a href="https://www.github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/logo.png" width="50%"></a></p>
+<p align="center"><a href="https://github.com/Zushah/Chalkboard"><img src="https://raw.githubusercontent.com/Zushah/Chalkboard/main/assets/logo.png" width="50%"></a></p>
 <p align="center">
-    <a href="https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.4"><img src="https://img.shields.io/badge/release-v3.0.4_Euler-327dc8?logo=github&logoColor=white" alt="Latest release is v3.0.4 Euler"></a>
-    <a href="https://raw.githubusercontent.com/Zushah/Chalkboard/v3.0.4/dist/Chalkboard.js"><img src="https://img.shields.io/badge/minified-408.9_kB-327dc8?logo=javascript&logoColor=white" alt="408.9 kilobytes minified bundle size"></a>
+    <a href="https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5"><img src="https://img.shields.io/badge/release-v3.0.5_Euler-327dc8?logo=github&logoColor=white" alt="Latest release is v3.0.5 Euler"></a>
+    <a href="https://raw.githubusercontent.com/Zushah/Chalkboard/v3.0.5/dist/Chalkboard.js"><img src="https://img.shields.io/badge/bundle-409.2_kB-327dc8?logo=javascript&logoColor=white" alt="409.2 kilobytes minified bundle size"></a>
     <a href="https://www.npmjs.com/package/@zushah/chalkboard"><img src="https://img.shields.io/npm/dm/%40zushah/chalkboard?color=327dc8&logo=npm&logoColor=white" alt="npm downloads per month"></a>
     <a href="https://www.jsdelivr.com/package/gh/Zushah/Chalkboard"><img src="https://img.shields.io/jsdelivr/gh/hm/Zushah/Chalkboard?color=327dc8&logo=jsdelivr&logoColor=white" alt="jsDelivr requests per month"></a>
-    <a href="https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MPL--2.0-327dc8?logo=gitbook&logoColor=white" alt="Mozilla Public License 2.0"></a>
+    <a href="https://github.com/Zushah/Chalkboard/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MPL--2.0-327dc8?logo=gitbook&logoColor=white" alt="Mozilla Public License 2.0"></a>
     <br>
     <a href="https://zushah.github.io/Chalkboard">https://zushah.github.io/Chalkboard</a>
 </p><br>
@@ -20,17 +20,18 @@ Chalkboard is a TypeScript library with hundreds of functions for the manifestat
 - automating Karnaugh map minimizations,
 - and hundreds upon hundreds of more functionalities.
 
-It is all organized in coherent namespaces rather than isolated utilities, providing an ergonomic API for mathematical abstractions and pedagogical applications in both JavaScript and Node.js environments.
+It is all organized in coherent namespaces rather than isolated utilities, providing an ergonomic API for mathematical abstractions and pedagogical applications in both browser and Node environments.
 
 ## Installation
+
 ```bash
 npm install @zushah/chalkboard
 ```
 or
 ```html
-<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@3.0.4/dist/Chalkboard.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Zushah/Chalkboard@3.0.5/dist/Chalkboard.min.js"></script>
 ```
-or download the bundle of the [latest release](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.4).
+or manually download the bundle of the [latest release](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
 ## Documentation
 
@@ -78,6 +79,7 @@ Lastly, Chalkboard has eleven data types (also known as Chalkboard objects):
 - `ChalkboardVector` - Vectors
 
 ## Getting Started
+
 After installing Chalkboard, you can straightforwardly get started with it, since every function begins with `Chalkboard` followed by a period, then a `namespace` (all fifteen namespaces are listed [above](#documentation)) followed by another period, and lastly the `function` itself.
 ```js
 Chalkboard.namespace.function(parameters);
@@ -86,8 +88,7 @@ Chalkboard.namespace.function(parameters);
 Here are snippets of code that show off only a few features of Chalkboard, but you can find more interesting ones on the [website](https://zushah.github.io/Chalkboard/examples):
 ```js
 const cb = Chalkboard; // Initialize in a browser
-const cb = require("@zushah/chalkboard"); // Initialize in Node with CommonJS
-import cb from "@zushah/chalkboard"; // Initialize in Node with ES Modules
+import cb from "@zushah/chalkboard"; // Initialize in Node
 
 const Z4 = cb.abal.Z(4); // The set of integers modulo 4 is the set {0, 1, 2, 3}
 const C4 = cb.abal.C(4); // The set of fourth roots of unity is the set {1, i, -1, -i}
@@ -181,12 +182,16 @@ const k = cb.numb.convert(98.6, "F", "K"); // Temperature conversion
 ```
 
 ## Contributing
-Contributions to Chalkboard are welcome! Make sure to check out the [contribution guidelines](https://www.github.com/Zushah/Chalkboard/blob/main/CONTRIBUTING.md), the [changelog](https://www.github.com/Zushah/Chalkboard/blob/main/CHANGELOG.md), and the [design document](https://www.github.com/Zushah/Chalkboard/blob/main/DESIGN.md).
+
+Asking questions, reporting bugs, suggesting features, and contributing code is very welcome. The guidelines can be found [here](https://github.com/Zushah/Chalkboard/blob/main/CONTRIBUTING.md).
 
 ## Acknowledgments
-- Thanks to [@bhavjitChauhan](https://www.github.com/bhavjitChauhan) for his contribution ([`d3f0a82`](https://github.com/Zushah/Chalkboard/commit/d3f0a82f0c2b1351f391908ef2d6f78403881259)) of adding partial pivoting to matrix inversion in [v1.3.0 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0).
-- Thanks to [@gyang0](https://www.github.com/gyang0) for his contributions ([`00a7428`](https://github.com/Zushah/zushah.github.io/commit/00a7428bf7036fd169545b16c1845ce0ddcf0f56), [`90c9564`](https://github.com/Zushah/Chalkboard/commit/90c9564d0e12a7de1795dc034d2f9260c0336f30)) to the plotting and geometry namespaces in the [documentation](https://www.github.com/Zushah/zushah.github.io/tree/main/Chalkboard).
-- Thanks to [@JentGent](https://www.github.com/JentGent) for his [implementation](https://www.github.com/JentGent/linalg/blob/7fc3f1bf593f2b5d4ed4b2a48bc109e545a9905a/linalg.js#L519) of QR decomposition which was adapted ([`1dce0db`](https://www.github.com/Zushah/Chalkboard/commit/1dce0dbac82b38f9a550dd496bc878c402a92442)) in [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0).
+
+- [@Zushah](https://github.com/Zushah): main author.
+- [@gyang0](https://github.com/gyang0): examples for plotting docs ([#1](https://github.com/Zushah/zushah.github.io/pull/1)) in [v1.4.0 Herschel](https://github.com/Zushah/Chalkboard/releases/tag/v1.4.0) and examples for geometry docs ([#5](https://github.com/Zushah/Chalkboard/pull/5)) in [v2.2.0 Galois](https://github.com/Zushah/Chalkboard/releases/tag/v2.2.0).
+- [@bhavjitChauhan](https://github.com/bhavjitChauhan): partial pivoting in matrix inversion ([#1](https://github.com/Zushah/Chalkboard/pull/1)) in [v1.3.0 Heaviside](https://github.com/Zushah/Chalkboard/releases/tag/v1.3.0).
+- [@JentGent](https://github.com/JentGent): QR decomposition ([1dce0db](https://github.com/Zushah/Chalkboard/commit/1dce0dbac82b38f9a550dd496bc878c402a92442)) in [v1.7.0 Descartes](https:/github.com/Zushah/Chalkboard/releases/tag/v1.7.0).
 
 ## License
-Chalkboard is available under the [Mozilla Public License 2.0](https://www.github.com/Zushah/Chalkboard/blob/main/LICENSE.md).
+
+Chalkboard is available under the [Mozilla Public License 2.0](https://github.com/Zushah/Chalkboard/blob/main/LICENSE.md).

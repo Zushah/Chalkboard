@@ -1,3 +1,9 @@
+/*
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
+
 import { readdir, readFile, rm, mkdir, writeFile } from "node:fs/promises";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
@@ -27,8 +33,8 @@ const sources = [
 ];
 
 const banner = `/*!
- * Chalkboard v3.0.4
- * Released on Monday, July 20, 2026
+ * Chalkboard v3.0.5
+ * Released on Monday, September 7, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0
@@ -58,7 +64,7 @@ const build = async () => {
     const types = `declare global {\n${globals}}\n\nexport default Chalkboard;\n`;
     const minified = await minify(javascript, { ecma: 2023, compress: true, mangle: true, format: { comments: /^!/ } });
     if (!minified.code) throw new Error("Minifier produced no output");
-    const adapter = `import "./Chalkboard.js";\n\nexport default globalThis.Chalkboard;\n`;
+    const adapter = `import "./Chalkboard.js";\nexport default globalThis.Chalkboard;\n`;
     const artifacts = Object.fromEntries(Object.entries({ "Chalkboard.js": javascript, "Chalkboard.min.js": minified.code + "\n", "Chalkboard.d.ts": types, "Chalkboard.mjs": adapter }).map(([name, contents]) => [name, `${banner}\n${contents}`]));
     await rm(path("dist"), { recursive: true, force: true });
     try {

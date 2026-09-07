@@ -1,3 +1,5 @@
+build/
+docs/build/
 node_modules/
 paper/jats/
 *.log
@@ -10,5 +12,6 @@ Thumbs.db
 .vscode/
 .cache/
 .tmp/
+.temp/
+tmp/
 temp/
-build/

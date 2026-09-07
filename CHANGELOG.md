@@ -1,15 +1,20 @@
 # Chalkboard changelog
 All notable changes for every update of Chalkboard are recorded in this file.
 
-## [v3.0.4 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.4) - 07/20/2026
+## [v3.0.5 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5) | 2026-09-07
+The twentieth release of Chalkboard.
+Commits: [`v3.0.4...v3.0.5`](https://github.com/Zushah/Chalkboard/compare/v3.0.4...v3.0.5)
+- Changed the build toolchain to use TypeScript v7.0.2, Terser v5.51.2, and a custom script.
+
+## [v3.0.4 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.4) | 2026-07-20
 The nineteenth release of Chalkboard.
-Commits: [`v3.0.3...v3.0.4`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.3...v3.0.4)
+Commits: [`v3.0.3...v3.0.4`](https://github.com/Zushah/Chalkboard/compare/v3.0.3...v3.0.4)
 - Added examples in the documentation for 423 functions in the nine namespaces that were missing them.
 - Fixed 645 functions in all fifteen namespaces so that they have thorough, standardized, predictable error-checking for correct input types, values, and forms.
 
-## [v3.0.3 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.3) - 07/06/2026
+## [v3.0.3 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.3) | 2026-07-06
 The eighteenth release of Chalkboard.
-Commits: [`v3.0.2...v3.0.3`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.2...v3.0.3)
+Commits: [`v3.0.2...v3.0.3`](https://github.com/Zushah/Chalkboard/compare/v3.0.2...v3.0.3)
 - Fixed `calc.curl`, `calc.curvature`, `calc.dfrdt`, `calc.fnds`, `calc.frds`, `calc.fzdz`, `calc.grad`, `calc.grad2`, `quat.fromAxis`, and `real.val` which had the possible danger of not returning the correct output type when the input was a vector in a non-object mode, such as an array, matrix, or typed array.
 - Fixed `real.absolute`, `real.add`, `real.compose`, `real.div`, `real.mul`, `real.negate`, `real.pow`, `real.reciprocate`, `real.scl`, and `real.sub` which were not preserving the original function's type.
 - Fixed `numb.roundTo` which was exhibiting floating-point imprecision and fixed `numb.isRational` which had poor rigor.
@@ -17,16 +22,16 @@ Commits: [`v3.0.2...v3.0.3`](https://www.github.com/Zushah/Chalkboard/compare/v3
 - Fixed `matr.addKronecker` which was using a slightly incorrect formula and fixed `matr.Lehmer` which had one incorrect entry in its 4x4 matrix.
 - Fixed `I` which was not able to handle negative exponents due to the `%` operator's behavior and thus had to use `numb.mod` instead.
 
-## [v3.0.2 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.2) - 04/13/2026
+## [v3.0.2 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.2) | 2026-04-13
 The seventeenth release of Chalkboard.
-Commits: [`v3.0.1...v3.0.2`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.1...v3.0.2)
+Commits: [`v3.0.1...v3.0.2`](https://github.com/Zushah/Chalkboard/compare/v3.0.1...v3.0.2)
 - Fixed `plot.autocorrelation`, `plot.convolution`, `plot.correlation`, `plot.definition`, `plot.dfdx`, `plot.d2fdx2`, `plot.Fourier`, `plot.fxdx`, `plot.Laplace`, and `plot.Taylor` which had no mechanism to properly handle discontinuities and singularities.
 - Fixed `plot.barplot` and `plot.lineplot` which were using a single fixed width for all of their bins.
 - Fixed `plot.scatterplot` which was offsetting points downwards and leftwards based on the number of points.
 
-## [v3.0.1 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.1) - 03/09/2026
+## [v3.0.1 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.1) | 2026-03-09
 The sixteenth release of Chalkboard.
-Commits: [`v3.0.0...v3.0.1`](https://www.github.com/Zushah/Chalkboard/compare/v3.0.0...v3.0.1)
+Commits: [`v3.0.0...v3.0.1`](https://github.com/Zushah/Chalkboard/compare/v3.0.0...v3.0.1)
 - Changed both `calc.fxdx` (5829.1ms → 0.7ms for a thousand calls) and `calc.fxydxdy` (495242.4ms → 2.1ms for a thousand calls) to be over 99.99% faster by using the adaptive-step Simpson's method instead of the fixed-step Simpson's/Riemann's method.
 - Changed `real.ln` to be about 99.91% faster (911.5ms → 0.8ms for a thousand calls) by using a Taylor series with range reduction.
 - Changed `numb.divisors` to be about 99.40% faster (1317.5ms → 7.9ms for a thousand calls of the divisors of one million) by using the trial division algorithm.
@@ -42,9 +47,9 @@ Commits: [`v3.0.0...v3.0.1`](https://www.github.com/Zushah/Chalkboard/compare/v3
 - Changed `real.erf` and `real.Gamma` to use Chalkboard functions instead of native Math functions.
 - Fixed `real.root` which was doing unnecessary calculations for 0 and not doing anything for odd roots of negative numbers.
 
-## [v3.0.0 Euler](https://www.github.com/Zushah/Chalkboard/releases/tag/v3.0.0) - 03/02/2026
+## [v3.0.0 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.0) | 2026-03-02
 The fifteenth release of Chalkboard.
-Commits: [`v2.4.0...v3.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.4.0...v3.0.0)
+Commits: [`v2.4.0...v3.0.0`](https://github.com/Zushah/Chalkboard/compare/v2.4.0...v3.0.0)
 - Added `REGISTRY` and `REGISTER` which enable the inclusion of custom functions in `real.parse` and `comp.parse`.
 - Added `diff.init` which defines ordinary differential equations (both singles and systems).
 - Added `diff.solve` which calculates the solutions of differential equations using either Euler's method, the midpoint method, Heun's method, Ralston's method, or the fourth-order Runge-Kutta method, and added `diff.solveAdaptive` which calculates the solutions of differential equations using the Dormand-Prince (or Runge–Kutta–Fehlberg) method.
@@ -83,9 +88,9 @@ Commits: [`v2.4.0...v3.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Fixed `stat.mean` which was always returning 0 for its calculation of geometric means.
 - Fixed `trig.arccos`, `trig.arccsc`, and `trig.arcsec` which were broken due to singularities and undefined domains.
 
-## [v2.4.0 Noether](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.4.0) - 04/28/2025
+## [v2.4.0 Noether](https://github.com/Zushah/Chalkboard/releases/tag/v2.4.0) | 2025-04-28
 The fourteenth release of Chalkboard.
-Commits: [`v2.3.0...v2.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.3.0...v2.4.0)
+Commits: [`v2.3.0...v2.4.0`](https://github.com/Zushah/Chalkboard/compare/v2.3.0...v2.4.0)
 - Added `vect.modeConfig` which can change the input/output mode of the `vect` commands so that they can accept and return vectors (`"vector"` mode, which is the default), arrays (`"array"` mode), typed arrays (`"float32array"` or `"float64array"` modes), matrices (`"matrix"` mode), strings (`"string"` mode), or JSON strings (`"json"` mode).
 - Added `abal.monoid`, `abal.isMonoid`, and `abal.isSubmonoid` which defines and checks for the algebraic structures known as monoids.
 - Added `abal.toTypedArray`, `comp.toTypedArray`, `matr.toTypedArray`, `quat.toTypedArray`, `tens.toTypedArray` and `vect.toTypedArray` which convert sets, structures, complex numbers, matrices, quaternions, tensors, and vectors to six different possible typed arrays.
@@ -103,9 +108,9 @@ Commits: [`v2.3.0...v2.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Fixed `plot.PARSED_CONTEXT` by replacing it with `plot.getContext` as it was throwing false errors when no HTML `<canvas>` element was available even if the `plot` commands weren't in use.
 - Fixed `numb.isRational` which was giving inaccurate results because it was able to turn any floating-point number into a fraction even if it's mathematically inaccurate.
 
-## [v2.3.0 Boole](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.3.0) - 04/14/2025
+## [v2.3.0 Boole](https://github.com/Zushah/Chalkboard/releases/tag/v2.3.0) | 2025-04-14
 The thirteenth release of Chalkboard.
-Commits: [`v2.2.0...v2.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.2.0...v2.3.0)
+Commits: [`v2.2.0...v2.3.0`](https://github.com/Zushah/Chalkboard/compare/v2.2.0...v2.3.0)
 - Added `I` which calculates the number i.
 - Added boolean algebra functionalities with the new `bool` category containing 23 commands, which are mentioned below.
 - Added `bool.AND`, `bool.OR`, `bool.XOR`, `bool.COND`, `bool.CONV`, `bool.BICOND`, `bool.NOT`, `bool.NAND`, `bool.NOR`, `bool.NCOND`, `bool.NCONV`, and `bool.NBICOND` which are boolean operations that act on two or more values.
@@ -124,9 +129,9 @@ Commits: [`v2.2.0...v2.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Fixed `comp.pow`, `matr.norm`, `matr.normsq`, `plot.definition`, and `stat.regression` which were throwing type errors because of the updated `real.pow` function which can now handle not only numbers but also functions.
 - Fixed `comp.zero`, `quat.zero`, and `vect.zero` which were unnecessarily using erasing operations.
 
-## [v2.2.0 Galois](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.2.0) - 04/07/2025
+## [v2.2.0 Galois](https://github.com/Zushah/Chalkboard/releases/tag/v2.2.0) | 2025-04-07
 The twelfth release of Chalkboard.
-Commits: [`v2.1.0...v2.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.1.0...v2.2.0)
+Commits: [`v2.1.0...v2.2.0`](https://github.com/Zushah/Chalkboard/compare/v2.1.0...v2.2.0)
 - Added abstract algebra functionalities with the new `abal` category containing 76 commands, so only a few notable ones are mentioned below.
 - Added `abal.set` which defines a mathematical set, as well as `abal.Z` which defines the set of integers or the set of integers modulo n, `abal.Q` which defines the set of rational numbers, `abal.R` which defines the set of real numbers, and `abal.C` which defines the set of complex numbers or the set of nth roots of unity.
 - Added `abal.union`, `abal.intersection`, `abal.complement`, `abal.difference`, `abal.symmetricDifference`, `abal.Cartesian`, `abal.powerSet`, `abal.isSubset`, and `abal.isSuperset` which respectively calculate the union of two sets, the intersection of two sets, the complement of a set, the difference of two sets, the symmetric difference of two sets, the Cartesian product of two sets, the power set of a set, whether or not a set is a subset of another set, and whether or not a set is a superset of another set.
@@ -167,9 +172,9 @@ Commits: [`v2.1.0...v2.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Fixed `tens.init` which had an expression assigned to itself.
 - Fixed `geom.rectangularprismA` thanks to @gyang0's contribution [here](https://github.com/Zushah/Chalkboard/pull/5).
 
-## [v2.1.0 Seki](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.1.0) - 01/22/2024
+## [v2.1.0 Seki](https://github.com/Zushah/Chalkboard/releases/tag/v2.1.0) | 2024-01-22
 The eleventh release of Chalkboard.
-Commits: [`v2.0.0...v2.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v2.0.0...v2.1.0)
+Commits: [`v2.0.0...v2.1.0`](https://github.com/Zushah/Chalkboard/compare/v2.0.0...v2.1.0)
 - Added a total of 26 `.isFoo` commands in the `matr`, `tens`, and `vect` categories that check if a matrix, tensor, or vector fulfills a particular property (for example, `matr.isDiagonal` checks if a matrix is a diagonal matrix).
 - Added `matr.norm`, `matr.normsq`, and `matr.normalize` to calculate the norm of a matrix or normalize a matrix.
 - Added `matr.eigenvalue` and `matr.eigenvector` to calculate the dominant eigenvalue and eigenvector of a matrix.
@@ -193,9 +198,9 @@ Commits: [`v2.0.0...v2.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v2
 - Changed `tens.empty`, `tens.fill`, `tens.random`, and `tens.resize` to use a ternary operator instead of an `if` statement to check whether a sequence of arguments or an array is inputted into their `size` parameters.
 - Changed `numb.Bernoullian` to not have an unnecessary `if` statement for its optional parameter.
 
-## [v2.0.0 al-Khwarizmi](https://www.github.com/Zushah/Chalkboard/releases/tag/v2.0.0) - 01/08/2024
+## [v2.0.0 al-Khwarizmi](https://github.com/Zushah/Chalkboard/releases/tag/v2.0.0) | 2024-01-08
 The tenth release of Chalkboard.
-Commits: [`v1.7.0...v2.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.7.0...v2.0.0)
+Commits: [`v1.7.0...v2.0.0`](https://github.com/Zushah/Chalkboard/compare/v1.7.0...v2.0.0)
 - Rewrote everything in TypeScript, applied ESLint and Prettier, and remade the website with TypeDoc.
 - Added `APPLY` which applies a callback function in an element-wise manner on a complex number, matrix, quaternion, tensor, or vector.
 - Added the `vect` category which merges the `vec2`, `vec3`, and `vec4` categories into one.
@@ -211,9 +216,9 @@ Commits: [`v1.7.0...v2.0.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Fixed `matr.mulVector` which didn't work when the rows of the matrix equaled the dimension of the vector.
 - Discontinued the Processsing.js edition of the library, meaning it will no longer be updated and it will only be available on the Khan Academy release (it will no longer be available on GitHub).
 
-## [v1.7.0 Descartes](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.7.0) - 01/01/2024
+## [v1.7.0 Descartes](https://github.com/Zushah/Chalkboard/releases/tag/v1.7.0) | 2024-01-01
 The ninth release of Chalkboard.
-Commits: [`v1.6.0...v1.7.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.6.0...v1.7.0)
+Commits: [`v1.6.0...v1.7.0`](https://github.com/Zushah/Chalkboard/compare/v1.6.0...v1.7.0)
 - Added tensors (multidimensional multidimensional matrices, or n-dimensional arrays) with 29 commands in the new `tens` category.
 - Added 12 more matrix commands: copying, resizing, five new primitive matrices (exchange, shift, binomial, Hilbert, Lehmer), concatenating, multiplying with vectors, Kronecker sum, Kronecker product, and converting to a tensor.
 - Added `.copy` commands for complex numbers, quaternions, and vectors.
@@ -238,11 +243,11 @@ Commits: [`v1.6.0...v1.7.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed `matr.LUdecomp` and `matr.QRdecomp` to use `matr.fill` instead of `matr.zero` composed with `matr.empty`.
 - Fixed `plot.matr` which hadn't been working for who knows how long because of a critical misspelling (`vec2.plot` instead of `plot.vec2`).
 - Fixed (rewrote) `numb.binomial` which kept giving "callstack size exceeded" errors for some reason.
-- Fixed (rewrote) `matr.QRdecomp` thanks to [@JentGent](https://www.github.com/JentGent)'s [implementation](https://www.github.com/JentGent/linalg/blob/main/linalg.js#L519).
+- Fixed (rewrote) `matr.QRdecomp` thanks to [@JentGent](https://github.com/JentGent)'s [implementation](https://github.com/JentGent/linalg/blob/main/linalg.js#L519).
 
-## [v1.6.0 Fermat](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.6.0) - 12/25/2023
+## [v1.6.0 Fermat](https://github.com/Zushah/Chalkboard/releases/tag/v1.6.0) | 2023-12-25
 The eighth release of Chalkboard.
-Commits: [`v1.5.0...v1.6.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.5.0...v1.6.0)
+Commits: [`v1.5.0...v1.6.0`](https://github.com/Zushah/Chalkboard/compare/v1.5.0...v1.6.0)
 - Added a new type of function: the inverse function (`type` of `"inve"`).
 - Added `stat.regression` to calculate different types of statistical regression models (linear, polynomial, exponential, etc.).
 - Added `plot.CONTEXT` which determines the `CanvasRenderingContext2D` to use for plots.
@@ -265,9 +270,9 @@ Commits: [`v1.5.0...v1.6.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Fixed `real.pow` which returned `NaN` for 0 raised to the power of 0.
 - Fixed the default domain for `plot.function` which was incorrectly using the domain for domain colorings instead of normal graphs.
 
-## [v1.5.0 Cauchy](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.5.0) - 12/18/2023
+## [v1.5.0 Cauchy](https://github.com/Zushah/Chalkboard/releases/tag/v1.5.0) | 2023-12-18
 The seventh release of Chalkboard.
-Commits: [`v1.4.0...v1.5.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.4.0...v1.5.0)
+Commits: [`v1.4.0...v1.5.0`](https://github.com/Zushah/Chalkboard/compare/v1.4.0...v1.5.0)
 - Added Chalkboard as an npm package, so now it can be used on the server-side just like the client side.
 - Added `comp.function`, `comp.parse`, and `comp.val` to define, parse, and evaluate complex functions.
 - Added `calc.dfdz`, `calc.d2fdz2`, and `calc.fzdz` to calculate the first derivatives, second derivatives, and antiderivatives of complex functions.
@@ -287,9 +292,9 @@ Commits: [`v1.4.0...v1.5.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Fixed the error messages in `calc.dfdrt` which were misspelled.
 - Fixed `plot.field` to include the upper bounds in its domain.
 
-## [v1.4.0 Herschel](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.4.0) - 12/11/2023
+## [v1.4.0 Herschel](https://github.com/Zushah/Chalkboard/releases/tag/v1.4.0) | 2023-12-11
 The sixth release of Chalkboard.
-Commits: [`v1.3.1...v1.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.3.1...v1.4.0)
+Commits: [`v1.3.1...v1.4.0`](https://github.com/Zushah/Chalkboard/compare/v1.3.1...v1.4.0)
 - Added many new commands for arrays: creating an array of random numbers, calculating different types of the norm (and the squared norm) of an array, calculating the normalized array, calculating the array that has the numbers that are equal to, greater than (or equal to), less than (or equal to), or some compound inequality of another number or array, calculating the skewness and kurtosis of an array, calculating the different quartiles of an array, and converting an array to a vector, matrix, object, string, or printing it in the console.
 - Added `plot.barplot`, `plot.lineplot`, and `plot.scatterplot` to plot arrays of data.
 - Added `.constrain` commands for numbers, arrays, complex numbers, quaternions, vectors, and matrices to constrain their values within a range.
@@ -307,16 +312,16 @@ Commits: [`v1.3.1...v1.4.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed `calc.frdt` to also work for three-dimensional (instead of only two-dimensional) vector fields and parametric curves.
 - Fixed `calc.dfrdt` which didn't work due to a slight misspelling in an `if()` statement.
 
-## [v1.3.1 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.1) - 12/04/2023
+## [v1.3.1 Heaviside](https://github.com/Zushah/Chalkboard/releases/tag/v1.3.1) | 2023-12-04
 The fifth release of Chalkboard.
-Commits: [`v1.3.0...v1.3.1`](https://www.github.com/Zushah/Chalkboard/compare/v1.3.0...v1.3.1)
+Commits: [`v1.3.0...v1.3.1`](https://github.com/Zushah/Chalkboard/compare/v1.3.0...v1.3.1)
 - Fixed `matr.translator` which was misspelled.
 - Fixed `matr.rotator` which didn't work for two-dimensional rotations and was also misspelled.
 - Fixed `calc.grad` which didn't work for vector fields because of another misspelling.
 
-## [v1.3.0 Heaviside](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.3.0) - 12/04/2023
+## [v1.3.0 Heaviside](https://github.com/Zushah/Chalkboard/releases/tag/v1.3.0) | 2023-12-04
 The fourth release of Chalkboard.
-Commits: [`v1.2.0...v1.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.2.0...v1.3.0)
+Commits: [`v1.2.0...v1.3.0`](https://github.com/Zushah/Chalkboard/compare/v1.2.0...v1.3.0)
 - Added multivariable calculus, with commands for directional differentiation, multivariable chain rule, gradient (partial differentiation), double gradient (second-order partial differentiation), divergence, curl, double integration, line/surface integration, arc length, surface area, and curvature.
 - Added second-order differentiation with `calc.d2fdx2`, unit tangent vectors for parametric curves with `calc.tangent`, unit normal vectors with `calc.normal`, and unit binormal vectors with `calc.binormal`.
 - Functions that previously had the `type` property of `"para"` should now be changed to `"curv"`.
@@ -335,11 +340,11 @@ Commits: [`v1.2.0...v1.3.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed all `plot` commands so they can now optionally have their opacity changed with the `rgba` parameter (which previously used to only be `rgb`).
 - Changed `numb.Gaussian` to use `for(;;)` instead of `while(typeof x === "undefined")`.
 - Changed the name of `calc.average` to `calc.mean`.
-- Fixed `matr.invert` returning `NaN` values when `0` is on the diagonal of a matrix, thanks to [@bhavjitChauhan](https://www.github.com/bhavjitChauhan).
+- Fixed `matr.invert` returning `NaN` values when `0` is on the diagonal of a matrix, thanks to [@bhavjitChauhan](https://github.com/bhavjitChauhan).
 
-## [v1.2.0 Cayley](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.2.0) - 11/27/2023
+## [v1.2.0 Cayley](https://github.com/Zushah/Chalkboard/releases/tag/v1.2.0) | 2023-11-27
 The third release of Chalkboard.
-Commits: [`v1.1.0...v1.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.1.0...v1.2.0)
+Commits: [`v1.1.0...v1.2.0`](https://github.com/Zushah/Chalkboard/compare/v1.1.0...v1.2.0)
 - Added new matrix commands for the trace of a matrix, the row space of a matrix, the column space, and null space, the exponentation, the row Echelon form (Gaussian elimination), solving systems of linear equations, and conversion of a matrix to an object.
 - Added `plot.comp`, `plot.vec2`, `plot.vec3`, and `plot.matr` to replace `comp.display`, `vec2.display`, `vec3.display`, and `matr.display`.
 - Added `numb.binomial` to calculate binomial coefficients.
@@ -351,9 +356,9 @@ Commits: [`v1.1.0...v1.2.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed `numb.Gaussian` to use `while(typeof x === "undefined")` instead of `while(true)`.
 - Fixed the `vec2.magset` and `vec3.magset` commands which would return vectors in the wrong dimensions.
 
-## [v1.1.0 Riemann](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.1.0) - 11/13/2023
+## [v1.1.0 Riemann](https://github.com/Zushah/Chalkboard/releases/tag/v1.1.0) | 2023-11-13
 The second release of Chalkboard.
-Commits: [`v1.0.0...v1.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v1.0.0...v1.1.0)
+Commits: [`v1.0.0...v1.1.0`](https://github.com/Zushah/Chalkboard/compare/v1.0.0...v1.1.0)
 - Added `numb.prime` to calculate the nth prime number, `numb.nextPrime` to calculate the next prime number, and `numb.primeGap` to calculate the prime gap with an interval.
 - Added `numb.factors` to calculate the prime factorization of a number and `numb.divisors` to calculate the divisors of a number.
 - Added `numb.Gaussian` to calculate a random number based on a Gaussian distribution.
@@ -370,6 +375,6 @@ Commits: [`v1.0.0...v1.1.0`](https://www.github.com/Zushah/Chalkboard/compare/v1
 - Changed the name of the `position` parameter in `stat.Gaussian` to `mean`.
 - Changed the name of `numb.prime` (the command that checks if a number is prime) to `numb.isPrime`, so parts of `numb.primeArr` and `prime.compositeArr` had to be changed, too.
 
-## [v1.0.0 Euclid](https://www.github.com/Zushah/Chalkboard/releases/tag/v1.0.0) - 11/06/2023
+## [v1.0.0 Euclid](https://github.com/Zushah/Chalkboard/releases/tag/v1.0.0) | 2023-11-06
 The first release of Chalkboard.
-Commits: [`v1.0.0...main`](https://www.github.com/Zushah/Chalkboard/compare/v1.0.0...main)
+Commits: [`v1.0.0...main`](https://github.com/Zushah/Chalkboard/compare/v1.0.0...main)

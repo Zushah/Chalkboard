@@ -1,10 +1,16 @@
 /*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Test: Chalkboard Namespace
-*/
+ * Chalkboard v3.0.5
+ * Released on Monday, September 7, 2026
+ * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
+ * Copyright (c) Zushah and contributors
+ * SPDX-License-Identifier: MPL-2.0
+ * Source: https://github.com/Zushah/Chalkboard
+ * Website: https://zushah.github.io/Chalkboard
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ */
 
 import assert from "assert";
 import cb from "@zushah/chalkboard";
@@ -26,11 +32,11 @@ import vm from "node:vm";
     assert.strictEqual(typeof cb.comp.init, "function");
     assert.strictEqual(typeof cb.vect.init, "function");
     const adapter = readFileSync(new URL("../dist/Chalkboard.mjs", import.meta.url), "utf8");
-    assert.strictEqual(adapter.replace(/\/\*[\s\S]*?\*\//g, "").trim(), 'import "./Chalkboard.js";\n\nexport default globalThis.Chalkboard;');
+    assert.strictEqual(adapter.replace(/\/\*[\s\S]*?\*\//g, "").trim(), 'import "./Chalkboard.js";\nexport default globalThis.Chalkboard;');
     assert.deepStrictEqual(readdirSync(new URL("../dist/", import.meta.url)).sort(), ["Chalkboard.d.ts", "Chalkboard.js", "Chalkboard.min.js", "Chalkboard.mjs"]);
     for (const name of ["Chalkboard.js", "Chalkboard.min.js", "Chalkboard.d.ts", "Chalkboard.mjs"]) {
         const code = readFileSync(new URL(`../dist/${name}`, import.meta.url), "utf8");
-        assert.ok(code.startsWith("/*!\n * Chalkboard v3.0.4\n * Released on Monday, July 20, 2026\n"));
+        assert.ok(code.startsWith("/*!\n * Chalkboard v3.0.5\n * Released on Monday, September 7, 2026\n"));
         assert.ok(code.includes("SPDX-License-Identifier: MPL-2.0"));
         assert.match(code, /^\/\*![\s\S]*?\*\/\n\n\S/, `${name}: exactly one blank line after the banner`);
         if (name.endsWith(".mjs") || name.endsWith(".d.ts")) continue;
@@ -48,7 +54,7 @@ import vm from "node:vm";
 
 // VERSION, VERSIONALIAS
 {
-    assert.strictEqual(cb.VERSION, "3.0.4");
+    assert.strictEqual(cb.VERSION, "3.0.5");
     assert.strictEqual(cb.VERSIONALIAS, "Euler");
 }
 

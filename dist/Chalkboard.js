@@ -1,17 +1,13 @@
-/*
-    Chalkboard
-    Version 3.0.4 Euler
-    Released July 20th, 2026
-    Authored by Zushah: https://www.github.com/Zushah
-    Licensed under MPL-2.0: https://opensource.org/license/mpl-2-0
-    Repository: https://www.github.com/Zushah/Chalkboard
-    Website: https://zushah.github.io/Chalkboard
-*/
-/*
-    This Source Code Form is subject to the terms of the
-    Mozilla Public License, v. 2.0. If a copy of the MPL was not distributed
-    with this file, You can obtain one at http://mozilla.org/MPL/2.0/.
-*/
+/*!
+ * Chalkboard v3.0.5
+ * Released on Monday, September 7, 2026
+ * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
+ * Copyright (c) Zushah and contributors
+ * SPDX-License-Identifier: MPL-2.0
+ * Source: https://github.com/Zushah/Chalkboard
+ * Website: https://zushah.github.io/Chalkboard
+ */
+
 "use strict";
 var Chalkboard;
 (function (Chalkboard) {
@@ -165,13 +161,11 @@ var Chalkboard;
         Chalkboard.REGISTRY[name] = func;
     };
     Chalkboard.REGISTRY = {};
-    Chalkboard.VERSION = "3.0.4";
+    Chalkboard.VERSION = "3.0.5";
     Chalkboard.VERSIONALIAS = "Euler";
 })(Chalkboard || (Chalkboard = {}));
-if (typeof window === "undefined")
-    module.exports = Chalkboard;
-else
-    window.Chalkboard = Chalkboard;
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let abal;
@@ -1826,6 +1820,8 @@ var Chalkboard;
         };
     })(abal = Chalkboard.abal || (Chalkboard.abal = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let bool;
@@ -2808,6 +2804,8 @@ var Chalkboard;
         };
     })(bool = Chalkboard.bool || (Chalkboard.bool = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let calc;
@@ -3629,6 +3627,8 @@ var Chalkboard;
         };
     })(calc = Chalkboard.calc || (Chalkboard.calc = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let comp;
@@ -5150,6 +5150,8 @@ var Chalkboard;
         };
     })(comp = Chalkboard.comp || (Chalkboard.comp = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let diff;
@@ -6024,6 +6026,8 @@ var Chalkboard;
         };
     })(diff = Chalkboard.diff || (Chalkboard.diff = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let geom;
@@ -6341,6 +6345,8 @@ var Chalkboard;
         };
     })(geom = Chalkboard.geom || (Chalkboard.geom = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let matr;
@@ -8196,6 +8202,8 @@ var Chalkboard;
         };
     })(matr = Chalkboard.matr || (Chalkboard.matr = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let numb;
@@ -8917,6 +8925,8 @@ var Chalkboard;
         };
     })(numb = Chalkboard.numb || (Chalkboard.numb = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let plot;
@@ -9668,6 +9678,8 @@ var Chalkboard;
         };
     })(plot = Chalkboard.plot || (Chalkboard.plot = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let quat;
@@ -9963,6 +9975,8 @@ var Chalkboard;
         };
     })(quat = Chalkboard.quat || (Chalkboard.quat = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let real;
@@ -11704,6 +11718,8 @@ var Chalkboard;
         };
     })(real = Chalkboard.real || (Chalkboard.real = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let stat;
@@ -12831,6 +12847,8 @@ var Chalkboard;
         };
     })(stat = Chalkboard.stat || (Chalkboard.stat = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let tens;
@@ -13448,6 +13466,8 @@ var Chalkboard;
         };
     })(tens = Chalkboard.tens || (Chalkboard.tens = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let trig;
@@ -13770,6 +13790,8 @@ var Chalkboard;
         };
     })(trig = Chalkboard.trig || (Chalkboard.trig = {}));
 })(Chalkboard || (Chalkboard = {}));
+
+"use strict";
 var Chalkboard;
 (function (Chalkboard) {
     let vect;
@@ -14659,4 +14681,5 @@ var Chalkboard;
         };
     })(vect = Chalkboard.vect || (Chalkboard.vect = {}));
 })(Chalkboard || (Chalkboard = {}));
-//# sourceMappingURL=Chalkboard.js.map
+
+globalThis.Chalkboard = Chalkboard;
