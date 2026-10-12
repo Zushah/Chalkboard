@@ -32,9 +32,12 @@ import cb from "@zushah/chalkboard";
     const t1 = cb.tens.init([1, 2], [3, 4]);
     const t2 = cb.tens.init([5, 6], [7, 8]);
     assert.deepStrictEqual(cb.tens.add(t1, t2), [[6, 8], [10, 12]]);
+    assert.deepStrictEqual(cb.tens.add(t1, 1), [[2, 3], [4, 5]]);
     assert.deepStrictEqual(cb.tens.mul(t1, t2), [[[[5, 6], [10, 12]], [[7, 8], [14, 16]]], [[[15, 18], [20, 24]], [[21, 24], [28, 32]]]]);
+    assert.deepStrictEqual(cb.tens.mul(2, t1), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.scl(t1, 2), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.sub(t1, t2), [[-4, -4], [-4, -4]]);
+    assert.deepStrictEqual(cb.tens.sub(10, t1), [[9, 8], [7, 6]]);
 }
 
 // tens.empty, tens.fill, tens.random, tens.zero
@@ -58,6 +61,7 @@ import cb from "@zushah/chalkboard";
     const t2 = cb.tens.init([[5, 6], [7, 8]]);
     assert.strictEqual(cb.tens.isApproxEqual(t1, cb.tens.init([[1.000000000000001, 2.000000000000001], [3.000000000001, 4.0]])), true);
     assert.strictEqual(cb.tens.isEqual(t1, cb.tens.init([[1, 2], [3, 4]])), true);
+    assert.strictEqual(cb.tens.isEqual(3, 4), false);
     assert.strictEqual(cb.tens.isRankEqual(t1, t2), true);
     assert.strictEqual(cb.tens.isRankOf(t1, 2), true);
     assert.strictEqual(cb.tens.isSizeEqual(t1, t2), true);
@@ -71,6 +75,7 @@ import cb from "@zushah/chalkboard";
     const t1 = cb.tens.init([1, 2]);
     const t2 = cb.tens.init([3, 4]);
     assert.deepStrictEqual(cb.tens.concat(t1, t2, 1), [1, 2, 3, 4]);
+    assert.deepStrictEqual(cb.tens.concat(cb.tens.init([[1, 2]]), cb.tens.init([[3, 4]]), 2), [[1, 2, 3, 4]]);
     assert.deepStrictEqual(cb.tens.constrain(cb.tens.init([-1, 2]), [0, 1]), [0, 1]);
     assert.strictEqual(cb.tens.contract(cb.tens.init([[1, 2], [3, 4]])), 5);
     const t3 = cb.tens.init([[1, 2], [3, 4]]);

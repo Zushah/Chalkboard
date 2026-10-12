@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Monday, September 7, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Monday, October 12, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Friday, September 4, 2026, [**`4799dcc`**](https://github.com/Zushah/Chalkboard/commit/4799dcc).
+Previous commit: Monday, September 7, 2026, [**`6cd356a`**](https://github.com/Zushah/Chalkboard/commit/6cd356a).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -456,7 +456,7 @@ Uniqueness and set-related helpers are used by `abal`. Array ownership is operat
 
 `./src/Chalkboard.tens.ts` uses recursive arrays with numeric leaves. There is no separate shape buffer, stride model, typed storage backend, or symbolic index notation. `size` follows the first branch of nested arrays, and `rank` follows that inferred size. `isSizeUniform` compares axis sizes; it is not a comprehensive rectangularity validator for every branch.
 
-Tensor addition and subtraction recurse across arrays and pad missing positions with zero. This is not a general broadcasting specification for mixed ranks. Multiplication recursively forms pairwise products at each nested level; for equal-rank operands, axes are interleaved by the recursion rather than simply concatenated as in a conventional tensor-product shape rule. Mixed scalar/array cases require inspection of the particular operation rather than assuming NumPy-like semantics.
+Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction recurse across arrays and pad missing positions with zero. This is not a general broadcasting specification for mixed ranks. Multiplication recursively forms pairwise products at each nested level; for equal-rank operands, axes are interleaved by the recursion rather than simply concatenated as in a conventional tensor-product shape rule. Mixed array ranks require inspection of the particular operation rather than assuming NumPy-like semantics.
 
 Several names have implementation-specific behavior that materially affects callers:
 

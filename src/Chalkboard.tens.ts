@@ -50,6 +50,16 @@ namespace Chalkboard {
                     result[i] = Chalkboard.tens.add(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
                 }
                 return result;
+            } else if (Array.isArray(tens1)) {
+                for (let i = 0; i < tens1.length; i++) {
+                    result[i] = Chalkboard.tens.add(tens1[i], tens2);
+                }
+                return result;
+            } else if (Array.isArray(tens2)) {
+                for (let i = 0; i < tens2.length; i++) {
+                    result[i] = Chalkboard.tens.add(tens1, tens2[i]);
+                }
+                return result;
             } else {
                 return (tens1 as number) + (tens2 as number);
             }
@@ -68,12 +78,14 @@ namespace Chalkboard {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.concat: Parameter "tens1" must be a tensor.`);
             if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2)) throw new Error(`Chalkboard.tens.concat: Parameter "tens2" must be a tensor.`);
             if (!Number.isInteger(rank) || rank < 1 || rank > Math.min(Chalkboard.tens.rank(tens1), Chalkboard.tens.rank(tens2))) throw new Error(`Chalkboard.tens.concat: Parameter "rank" must be a positive integer less than or equal to both tensor ranks.`);
+            const size1 = Chalkboard.tens.size(tens1), size2 = Chalkboard.tens.size(tens2);
+            if (size1.length !== size2.length || size1.some((n, i) => i !== rank - 1 && n !== size2[i])) throw new Error(`Chalkboard.tens.concat: Parameters "tens1" and "tens2" must have equal sizes except along the concatenated rank.`);
             const concatAtRank = function (arr1: ChalkboardTensor, arr2: ChalkboardTensor, currentRank: number): ChalkboardTensor {
                 if (currentRank === rank) {
                     return Chalkboard.tens.init((arr1 as ChalkboardTensor[]).concat(arr2));
                 }
                 return (arr1 as ChalkboardTensor[]).map(function (element, index) {
-                    return concatAtRank(element, (arr2 as ChalkboardTensor[])[index], currentRank);
+                    return concatAtRank(element, (arr2 as ChalkboardTensor[])[index], currentRank + 1);
                 });
             };
             return concatAtRank(tens1, tens2, 1);
@@ -241,6 +253,9 @@ namespace Chalkboard {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens1" must be a tensor.`);
             if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2)) throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens2" must be a tensor.`);
             if (precision !== undefined && (!Number.isFinite(precision))) throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "precision" must be a finite number.`);
+            if (typeof tens1 === "number" || typeof tens2 === "number") {
+                return typeof tens1 === "number" && typeof tens2 === "number" && Chalkboard.numb.isApproxEqual(tens1, tens2, precision);
+            }
             if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
                 (tens1 = tens1 as ChalkboardTensor[]), (tens2 = tens2 as ChalkboardTensor[]);
                 for (let i = 0; i < tens1.length; i++) {
@@ -267,6 +282,9 @@ namespace Chalkboard {
         export const isEqual = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): boolean => {
             if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1)) throw new Error(`Chalkboard.tens.isEqual: Parameter "tens1" must be a tensor.`);
             if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2)) throw new Error(`Chalkboard.tens.isEqual: Parameter "tens2" must be a tensor.`);
+            if (typeof tens1 === "number" || typeof tens2 === "number") {
+                return typeof tens1 === "number" && typeof tens2 === "number" && tens1 === tens2;
+            }
             if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
                 (tens1 = tens1 as ChalkboardTensor[]), (tens2 = tens2 as ChalkboardTensor[]);
                 for (let i = 0; i < tens1.length; i++) {
@@ -401,6 +419,16 @@ namespace Chalkboard {
                         subarr[j] = Chalkboard.tens.mul(tens1[i], tens2[j]);
                     }
                     result.push(subarr);
+                }
+                return result;
+            } else if (Array.isArray(tens1)) {
+                for (let i = 0; i < tens1.length; i++) {
+                    result[i] = Chalkboard.tens.mul(tens1[i], tens2);
+                }
+                return result;
+            } else if (Array.isArray(tens2)) {
+                for (let i = 0; i < tens2.length; i++) {
+                    result[i] = Chalkboard.tens.mul(tens1, tens2[i]);
                 }
                 return result;
             } else {
@@ -662,6 +690,16 @@ namespace Chalkboard {
                     result[i] = Chalkboard.tens.sub(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
                 }
                 return result;
+            } else if (Array.isArray(tens1)) {
+                for (let i = 0; i < tens1.length; i++) {
+                    result[i] = Chalkboard.tens.sub(tens1[i], tens2);
+                }
+                return result;
+            } else if (Array.isArray(tens2)) {
+                for (let i = 0; i < tens2.length; i++) {
+                    result[i] = Chalkboard.tens.sub(tens1, tens2[i]);
+                }
+                return result;
             } else {
                 return (tens1 as number) - (tens2 as number);
             }
@@ -760,7 +798,9 @@ namespace Chalkboard {
         export const toString = (tens: ChalkboardTensor, indentation: number = 0): string => {
             if (tens === null || typeof tens !== "number" && !Array.isArray(tens)) throw new Error(`Chalkboard.tens.toString: Parameter "tens" must be a tensor.`);
             if (!Number.isInteger(indentation) || indentation < 0) throw new Error(`Chalkboard.tens.toString: Parameter "indentation" must be a non-negative integer.`);
-            if (Array.isArray((tens as ChalkboardTensor[])[0])) {
+            if (typeof tens === "number") {
+                return "\t".repeat(indentation) + String(tens) + "\n";
+            } else if (Array.isArray((tens as ChalkboardTensor[])[0])) {
                 let result = "\t".repeat(indentation) + "[\n";
                 for (let i = 0; i < (tens as ChalkboardTensor[]).length; i++) {
                     result += Chalkboard.tens.toString((tens as ChalkboardTensor[])[i], indentation + 1);
@@ -770,7 +810,7 @@ namespace Chalkboard {
             } else {
                 let result = "\t".repeat(indentation) + "[ ";
                 for (let i = 0; i < (tens as ChalkboardTensor[]).length; i++) {
-                    result += (tens as ChalkboardTensor[])[i].toString() + " ";
+                    result += String((tens as ChalkboardTensor[])[i]) + " ";
                 }
                 result += "]\n";
                 return result;
