@@ -22,6 +22,7 @@ import cb from "@zushah/chalkboard";
     const t = cb.tens.init([[-1.6, 2.4], [3.1, -4.8]]);
     assert.deepStrictEqual(cb.tens.absolute(t), [[1.6, 2.4], [3.1, 4.8]]);
     const tcopy = cb.tens.copy(t); assert.deepStrictEqual(tcopy, [[-1.6, 2.4], [3.1, -4.8]]);
+    assert.deepStrictEqual(cb.tens.copy(cb.tens.empty(2, 2)), [[null, null], [null, null]]);
     assert.deepStrictEqual(cb.tens.negate(t), [[1.6, -2.4], [-3.1, 4.8]]);
     assert.deepStrictEqual(cb.tens.reciprocate(cb.tens.init([[2, 4], [8, 10]])), [[0.5, 0.25], [0.125, 0.1]]);
     assert.deepStrictEqual(cb.tens.round(t), [[-2, 2], [3, -5]]);
@@ -33,9 +34,11 @@ import cb from "@zushah/chalkboard";
     const t2 = cb.tens.init([5, 6], [7, 8]);
     assert.deepStrictEqual(cb.tens.add(t1, t2), [[6, 8], [10, 12]]);
     assert.deepStrictEqual(cb.tens.add(t1, 1), [[2, 3], [4, 5]]);
+    assert.throws(() => cb.tens.add(cb.tens.empty(2, 2), 1));
     assert.deepStrictEqual(cb.tens.mul(t1, t2), [[[[5, 6], [10, 12]], [[7, 8], [14, 16]]], [[[15, 18], [20, 24]], [[21, 24], [28, 32]]]]);
     assert.deepStrictEqual(cb.tens.mul(2, t1), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.scl(t1, 2), [[2, 4], [6, 8]]);
+    assert.deepStrictEqual(cb.tens.scl(cb.tens.init([1, -1]), Infinity), [Infinity, -Infinity]);
     assert.deepStrictEqual(cb.tens.sub(t1, t2), [[-4, -4], [-4, -4]]);
     assert.deepStrictEqual(cb.tens.sub(10, t1), [[9, 8], [7, 6]]);
 }
@@ -53,6 +56,7 @@ import cb from "@zushah/chalkboard";
     const t = cb.tens.init([[[1, 2], [3, 4]]]);
     assert.strictEqual(cb.tens.rank(t), 3);
     assert.deepStrictEqual(cb.tens.size(t), [1, 2, 2]);
+    assert.throws(() => cb.tens.size([[1], [2, 3]]));
 }
 
 // tens.isApproxEqual, tens.isEqual, tens.isRankEqual, tens.isRankOf, tens.isSizeEqual, tens.isSizeOf, tens.isSizeUniform, tens.isZero
@@ -60,8 +64,10 @@ import cb from "@zushah/chalkboard";
     const t1 = cb.tens.init([[1, 2], [3, 4]]);
     const t2 = cb.tens.init([[5, 6], [7, 8]]);
     assert.strictEqual(cb.tens.isApproxEqual(t1, cb.tens.init([[1.000000000000001, 2.000000000000001], [3.000000000001, 4.0]])), true);
+    assert.strictEqual(cb.tens.isApproxEqual([Infinity], [Infinity]), true);
     assert.strictEqual(cb.tens.isEqual(t1, cb.tens.init([[1, 2], [3, 4]])), true);
     assert.strictEqual(cb.tens.isEqual(3, 4), false);
+    assert.strictEqual(cb.tens.isEqual([NaN], [NaN]), false);
     assert.strictEqual(cb.tens.isRankEqual(t1, t2), true);
     assert.strictEqual(cb.tens.isRankOf(t1, 2), true);
     assert.strictEqual(cb.tens.isSizeEqual(t1, t2), true);
