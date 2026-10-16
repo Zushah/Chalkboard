@@ -14,6 +14,47 @@ namespace Chalkboard {
      */
     export namespace tens {
         /** @ignore */
+        const $broadcast = (tens1: ChalkboardTensor, size1: number[], tens2: ChalkboardTensor, size2: number[], callback: (a: number, b: number) => number, caller: string): ChalkboardTensor => {
+            const n = Math.max(size1.length, size2.length), size: number[] = [], pad1: number[] = [], pad2: number[] = [];
+            for (let k = 0; k < n; k++) {
+                const a = size1[size1.length - n + k] ?? 1, b = size2[size2.length - n + k] ?? 1;
+                if (a !== b && a !== 1 && b !== 1) throw new Error(`Chalkboard.tens.${caller}: Parameters "tens1" and "tens2" must have broadcastable sizes.`);
+                size.push(a === 1 ? b : a);
+                pad1.push(a);
+                pad2.push(b);
+            }
+            const walk = (arr1: ChalkboardTensor[], arr2: ChalkboardTensor[], depth: number): ChalkboardTensor[] => {
+                const result: ChalkboardTensor[] = [];
+                if (depth === n - 1) {
+                    if (pad1[depth] === 1) {
+                        const a = arr1[0] as number;
+                        for (let i = 0; i < size[depth]; i++) {
+                            result[i] = callback(a, (pad2[depth] === 1 ? arr2[0] : arr2[i]) as number);
+                        }
+                    } else if (pad2[depth] === 1) {
+                        const b = arr2[0] as number;
+                        for (let i = 0; i < size[depth]; i++) {
+                            result[i] = callback(arr1[i] as number, b);
+                        }
+                    } else {
+                        for (let i = 0; i < size[depth]; i++) {
+                            result[i] = callback(arr1[i] as number, arr2[i] as number);
+                        }
+                    }
+                } else {
+                    for (let i = 0; i < size[depth]; i++) {
+                        result[i] = walk((pad1[depth] === 1 ? arr1[0] : arr1[i]) as ChalkboardTensor[], (pad2[depth] === 1 ? arr2[0] : arr2[i]) as ChalkboardTensor[], depth + 1);
+                    }
+                }
+                return result;
+            };
+            let wrap1 = tens1, wrap2 = tens2;
+            for (let i = size1.length; i < n; i++) wrap1 = [wrap1];
+            for (let i = size2.length; i < n; i++) wrap2 = [wrap2];
+            return walk(wrap1 as ChalkboardTensor[], wrap2 as ChalkboardTensor[], 0);
+        };
+
+        /** @ignore */
         const $copy = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (!Array.isArray(tens)) return tens;
             if (!Array.isArray(tens[0])) return tens.slice();
@@ -201,16 +242,17 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the addition of two tensors, which must have equal sizes unless one of them is a number.
+         * Calculates the addition of two tensors, which are broadcast together as in NumPy (their sizes are aligned from the right, and axes of length 1 or missing axes are stretched).
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
          * @example
          * const result = Chalkboard.tens.add([[1, 2], [3, 4]], [[4, 3], [2, 1]]); // Returns [[5, 5], [5, 5]]
+         * const broadcast = Chalkboard.tens.add([[1, 2, 3], [4, 5, 6]], [10, 20, 30]); // Returns [[11, 22, 33], [14, 25, 36]]
          */
         export const add = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             const size1 = $shape(tens1, true, "add", "tens1"), size2 = $shape(tens2, true, "add", "tens2");
-            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isSizeEqual(size1, size2)) throw new Error(`Chalkboard.tens.add: Parameters "tens1" and "tens2" must have equal sizes, or one of them must be a number.`);
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isSizeEqual(size1, size2)) return $broadcast(tens1, size1, tens2, size2, (a, b) => a + b, "add");
             return $zip(tens1, tens2, (a, b) => a + b);
         };
 
@@ -682,16 +724,17 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the subtraction of two tensors, which must have equal sizes unless one of them is a number.
+         * Calculates the subtraction of two tensors, which are broadcast together as in NumPy (their sizes are aligned from the right, and axes of length 1 or missing axes are stretched).
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
          * @example
          * const result = Chalkboard.tens.sub([[5, 8], [13, 21]], [[2, 3], [5, 8]]); // Returns [[3, 5], [8, 13]]
+         * const broadcast = Chalkboard.tens.sub([10], [[1], [2]]); // Returns [[9], [8]]
          */
         export const sub = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             const size1 = $shape(tens1, true, "sub", "tens1"), size2 = $shape(tens2, true, "sub", "tens2");
-            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isSizeEqual(size1, size2)) throw new Error(`Chalkboard.tens.sub: Parameters "tens1" and "tens2" must have equal sizes, or one of them must be a number.`);
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isSizeEqual(size1, size2)) return $broadcast(tens1, size1, tens2, size2, (a, b) => a - b, "sub");
             return $zip(tens1, tens2, (a, b) => a - b);
         };
 

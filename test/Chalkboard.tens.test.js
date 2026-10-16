@@ -35,12 +35,16 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.add(t1, t2), [[6, 8], [10, 12]]);
     assert.deepStrictEqual(cb.tens.add(t1, 1), [[2, 3], [4, 5]]);
     assert.throws(() => cb.tens.add(cb.tens.empty(2, 2), 1));
+    assert.deepStrictEqual(cb.tens.add([[1, 2, 3], [4, 5, 6]], [10, 20, 30]), [[11, 22, 33], [14, 25, 36]]);
+    assert.deepStrictEqual(cb.tens.add([[1], [2]], [[10, 20, 30]]), [[11, 21, 31], [12, 22, 32]]);
+    assert.throws(() => cb.tens.add([[1, 2, 3], [4, 5, 6]], [1, 2]));
     assert.deepStrictEqual(cb.tens.mul(t1, t2), [[[[5, 6], [10, 12]], [[7, 8], [14, 16]]], [[[15, 18], [20, 24]], [[21, 24], [28, 32]]]]);
     assert.deepStrictEqual(cb.tens.mul(2, t1), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.scl(t1, 2), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.scl(cb.tens.init([1, -1]), Infinity), [Infinity, -Infinity]);
     assert.deepStrictEqual(cb.tens.sub(t1, t2), [[-4, -4], [-4, -4]]);
     assert.deepStrictEqual(cb.tens.sub(10, t1), [[9, 8], [7, 6]]);
+    assert.deepStrictEqual(cb.tens.sub([10], [[1], [2]]), [[9], [8]]);
 }
 
 // tens.empty, tens.fill, tens.random, tens.zero
