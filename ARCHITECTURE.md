@@ -2,7 +2,7 @@
 
 Latest commit: Saturday, October 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Saturday, October 17, 2026, [**`b275fe5`**](https://github.com/Zushah/Chalkboard/commit/b275fe5).
+Previous commit: Saturday, October 17, 2026, [**`75a03f0`**](https://github.com/Zushah/Chalkboard/commit/75a03f0).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -462,12 +462,12 @@ Several names have implementation-specific behavior that materially affects call
 
 | Operation | Current behavior |
 | --- | --- |
-| `resize` | Flattens entries in traversal order and refills the requested shape, truncating or padding with zeros. Equal element counts are not required. |
+| `reshape`, `resize` | Refill a requested shape in row-major traversal order. `reshape` requires equal entry counts, while `resize` truncates or pads with zeros. |
 | `permute`, `transpose` | Move entries by index: `permute` places input axis `axes[k]` at result axis `k`, and `transpose` reverses all axes, matching matrix transposition at rank two. Neither accepts or performs reshaping. |
 | `contract` | Sums entries whose indices along `axis1` and `axis2` are equal, removing both axes and keeping the others in order. At rank two this is the matrix trace. Both axes must have the same length, and ranks below two are rejected. |
-| `push`, `pull` | Modify nested arrays at the requested depth. |
+| `push`, `pull` | Insert or remove a slice along a 0-based `axis`, modifying and returning the given tensor. |
 
-For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the sizes of the axes after it.
+For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `reshape` and `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the sizes of the axes after it.
 
 Tensors provide recursive numerical manipulation and conversions, but the current implementation is not a general tensor-calculus engine. In particular, dense matrices, short coordinate vectors, and arbitrary ODE state arrays retain their own operational contracts even when their JavaScript shapes overlap with tensors.
 

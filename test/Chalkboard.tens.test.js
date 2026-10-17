@@ -82,12 +82,13 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.tens.isZero(cb.tens.zero(2, 2)), true);
 }
 
-// tens.concat, tens.constrain, tens.contract, tens.permute, tens.pull, tens.push, tens.resize, tens.transpose
+// tens.concat, tens.constrain, tens.contract, tens.permute, tens.pull, tens.push, tens.reshape, tens.resize, tens.transpose
 {
     const t1 = cb.tens.init([1, 2]);
     const t2 = cb.tens.init([3, 4]);
-    assert.deepStrictEqual(cb.tens.concat(t1, t2, 1), [1, 2, 3, 4]);
-    assert.deepStrictEqual(cb.tens.concat(cb.tens.init([[1, 2]]), cb.tens.init([[3, 4]]), 2), [[1, 2, 3, 4]]);
+    assert.deepStrictEqual(cb.tens.concat(t1, t2, 0), [1, 2, 3, 4]);
+    assert.deepStrictEqual(cb.tens.concat(cb.tens.init([[1, 2]]), cb.tens.init([[3, 4]]), 1), [[1, 2, 3, 4]]);
+    assert.deepStrictEqual(cb.tens.concat([[1, 2]], [[3, 4]]), [[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.tens.constrain(cb.tens.init([-1, 2]), [0, 1]), [0, 1]);
     assert.strictEqual(cb.tens.contract(cb.tens.init([[1, 2], [3, 4]])), 5);
     assert.deepStrictEqual(cb.tens.contract([[[1, 2], [3, 4], [5, 6]], [[7, 8], [9, 10], [11, 12]]], 0, 2), [9, 13, 17]);
@@ -96,6 +97,8 @@ import cb from "@zushah/chalkboard";
     const t3 = cb.tens.init([[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.tens.pull(cb.tens.copy(t3), 1, 0), [[2], [4]]);
     assert.deepStrictEqual(cb.tens.push(cb.tens.copy(t3), 1, 0, [5, 6]), [[5, 1, 2], [6, 3, 4]]);
+    assert.deepStrictEqual(cb.tens.reshape([1, 2, 3, 4, 5, 6], 2, 3), [[1, 2, 3], [4, 5, 6]]);
+    assert.throws(() => cb.tens.reshape([1, 2, 3, 4], 3));
     assert.deepStrictEqual(cb.tens.resize(cb.tens.init([1, 2, 3, 4]), 2, 2), [[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.tens.transpose(cb.tens.init([[1, 2, 3], [4, 5, 6]])), [[1, 4], [2, 5], [3, 6]]);
     assert.deepStrictEqual(cb.tens.transpose([[[1, 2, 3]], [[4, 5, 6]]]), [[[1, 4]], [[2, 5]], [[3, 6]]]);
