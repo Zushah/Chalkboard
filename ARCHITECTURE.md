@@ -2,7 +2,7 @@
 
 Latest commit: Saturday, October 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Friday, October 16, 2026, [**`7a8973e`**](https://github.com/Zushah/Chalkboard/commit/7a8973e).
+Previous commit: Saturday, October 17, 2026, [**`0d1e7ea`**](https://github.com/Zushah/Chalkboard/commit/0d1e7ea).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -464,7 +464,7 @@ Several names have implementation-specific behavior that materially affects call
 | --- | --- |
 | `resize` | Flattens entries in traversal order and refills the requested shape, truncating or padding with zeros. Equal element counts are not required. |
 | `permute`, `transpose` | Move entries by index: `permute` places input axis `axes[k]` at result axis `k`, and `transpose` reverses all axes, matching matrix transposition at rank two. Neither accepts or performs reshaping. |
-| `contract` | Returns a matrix trace for rank two; for higher rank, reshapes using the first dimension and the product of the remaining dimensions. It is not arbitrary indexed contraction. |
+| `contract` | Sums entries whose indices along `axis1` and `axis2` are equal, removing both axes and keeping the others in order. At rank two this is the matrix trace. Both axes must have the same length, and ranks below two are rejected. |
 | `push`, `pull` | Modify nested arrays at the requested depth. |
 
 For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the sizes of the axes after it.
@@ -519,7 +519,7 @@ The contracts contributors must preserve are concrete:
 - Finite enumeration and canonical metadata support abstract algebra and logic. They do not provide general proofs over infinite structures.
 - Plotting consumes computation and host resources. Mathematical operations remain usable without creating a canvas or starting an application loop.
 
-Current implementation limitations, including tensor reshaping semantics and incomplete handling of some public type cases, must be distinguished from intended mathematical generalizations. Correcting such behavior can be valuable, but requires an explicit API decision with corresponding source, test, and documentation changes.
+Current implementation limitations, including incomplete handling of some public type cases, must be distinguished from intended mathematical generalizations. Correcting such behavior can be valuable, but requires an explicit API decision with corresponding source, test, and documentation changes.
 
 ## 2. Codebase
 

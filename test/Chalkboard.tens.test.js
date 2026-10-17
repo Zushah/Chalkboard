@@ -88,6 +88,8 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.concat(cb.tens.init([[1, 2]]), cb.tens.init([[3, 4]]), 2), [[1, 2, 3, 4]]);
     assert.deepStrictEqual(cb.tens.constrain(cb.tens.init([-1, 2]), [0, 1]), [0, 1]);
     assert.strictEqual(cb.tens.contract(cb.tens.init([[1, 2], [3, 4]])), 5);
+    assert.deepStrictEqual(cb.tens.contract([[[1, 2], [3, 4], [5, 6]], [[7, 8], [9, 10], [11, 12]]], 0, 2), [9, 13, 17]);
+    assert.deepStrictEqual(cb.tens.contract([[[1, 2, 3], [4, 5, 6]], [[7, 8, 9], [10, 11, 12]]]), [11, 13, 15]);
     assert.deepStrictEqual(cb.tens.permute([[[1, 2, 3]], [[4, 5, 6]]], 2, 0, 1), [[[1], [4]], [[2], [5]], [[3], [6]]]);
     const t3 = cb.tens.init([[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.tens.pull(cb.tens.copy(t3), 1, 0), [[2], [4]]);

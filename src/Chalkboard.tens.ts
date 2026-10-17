@@ -55,6 +55,30 @@ namespace Chalkboard {
         };
 
         /** @ignore */
+        const $contract = (tens: ChalkboardTensor, size: number[], axis1: number, axis2: number): ChalkboardTensor | number => {
+            const flat = $flatten(tens), n = size.length, stride: number[] = new Array(n);
+            stride[n - 1] = 1;
+            for (let k = n - 2; k >= 0; k--) stride[k] = stride[k + 1] * size[k + 1];
+            const keep: number[] = [];
+            for (let k = 0; k < n; k++) if (k !== axis1 && k !== axis2) keep.push(k);
+            const diag = stride[axis1] + stride[axis2], m = size[axis1];
+            const sum = (offset: number): number => {
+                let result = 0;
+                for (let i = 0; i < m; i++) result += flat[offset + i * diag];
+                return result;
+            };
+            if (keep.length === 0) return sum(0);
+            const build = (depth: number, offset: number): ChalkboardTensor[] => {
+                const result: ChalkboardTensor[] = [], axis = keep[depth];
+                for (let j = 0; j < size[axis]; j++) {
+                    result[j] = depth === keep.length - 1 ? sum(offset + j * stride[axis]) : build(depth + 1, offset + j * stride[axis]);
+                }
+                return result;
+            };
+            return build(0, 0);
+        };
+
+        /** @ignore */
         const $copy = (tens: ChalkboardTensor): ChalkboardTensor => {
             if (!Array.isArray(tens)) return tens;
             if (!Array.isArray(tens[0])) return tens.slice();
@@ -313,23 +337,22 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the contraction of a tensor.
+         * Calculates the contraction of a tensor over two of its axes, which sums the entries whose indices along both axes are equal and removes those axes (as in NumPy's trace with axis arguments).
          * @param {ChalkboardTensor} tens - The tensor
+         * @param {number} [axis1=0] - The first axis
+         * @param {number} [axis2=1] - The second axis, which must have the same length as the first axis
          * @returns {ChalkboardTensor | number}
          * @example
-         * const result = Chalkboard.tens.contract([[1, 2], [3, 4]]); // Contracts the tensor along its outer indices
+         * const result = Chalkboard.tens.contract([[[1, 2], [3, 4], [5, 6]], [[7, 8], [9, 10], [11, 12]]], 0, 2); // Returns [9, 13, 17]
          */
-        export const contract = (tens: ChalkboardTensor): ChalkboardTensor | number => {
+        export const contract = (tens: ChalkboardTensor, axis1: number = 0, axis2: number = 1): ChalkboardTensor | number => {
             const size = $shape(tens, true, "contract", "tens");
-            if (size.length > 2) {
-                const cols = size.slice(1).reduce((a, b) => a * b) / size[0];
-                if (!Number.isInteger(cols)) throw new Error(`Chalkboard.tens.contract: Parameter "tens" must have a rank of at most two, or a first axis size that divides the product of its other axis sizes.`);
-                return $resize(tens, [size[0], cols]);
-            } else if (size.length === 2) {
-                return Chalkboard.matr.trace(tens as number[][]);
-            } else {
-                return tens;
-            }
+            if (size.length < 2) throw new Error(`Chalkboard.tens.contract: Parameter "tens" must have a rank of at least two.`);
+            if (!Number.isInteger(axis1) || axis1 < 0 || axis1 >= size.length) throw new Error(`Chalkboard.tens.contract: Parameter "axis1" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(axis2) || axis2 < 0 || axis2 >= size.length) throw new Error(`Chalkboard.tens.contract: Parameter "axis2" must be a non-negative integer less than the tensor rank.`);
+            if (axis1 === axis2) throw new Error(`Chalkboard.tens.contract: Parameters "axis1" and "axis2" must be different axes.`);
+            if (size[axis1] !== size[axis2]) throw new Error(`Chalkboard.tens.contract: Parameters "axis1" and "axis2" must be axes of equal length.`);
+            return $contract(tens, size, axis1, axis2);
         };
 
         /**
