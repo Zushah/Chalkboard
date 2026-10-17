@@ -133,6 +133,24 @@ namespace Chalkboard {
         };
 
         /** @ignore */
+        const $permute = (tens: ChalkboardTensor, size: number[], axes: number[]): ChalkboardTensor => {
+            const n = size.length;
+            if (n === 0) return tens;
+            const flat = $flatten(tens), stride: number[] = new Array(n);
+            stride[n - 1] = 1;
+            for (let k = n - 2; k >= 0; k--) stride[k] = stride[k + 1] * size[k + 1];
+            const outSize = axes.map((a) => size[a]), outStride = axes.map((a) => stride[a]);
+            const build = (depth: number, offset: number): ChalkboardTensor[] => {
+                const result: ChalkboardTensor[] = [];
+                for (let j = 0; j < outSize[depth]; j++) {
+                    result[j] = depth === n - 1 ? flat[offset + j * outStride[depth]] : build(depth + 1, offset + j * outStride[depth]);
+                }
+                return result;
+            };
+            return build(0, 0);
+        };
+
+        /** @ignore */
         const $resize = (tens: ChalkboardTensor, size: number[]): ChalkboardTensor => {
             if (size.length === 0) return 0;
             const entries = $flatten(tens);
@@ -557,6 +575,21 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the permutation of the axes of a tensor, so that axis k of the result is axis axes[k] of the tensor (as in NumPy's transpose with an axes argument).
+         * @param {ChalkboardTensor} tens - The tensor
+         * @param {number[]} axes - The order of the axes, as a permutation of the integers from 0 to the tensor rank minus one, either as a sequence of arguments or one array
+         * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.permute([[[1, 2, 3]], [[4, 5, 6]]], 2, 0, 1); // Returns [[[1], [4]], [[2], [5]], [[3], [6]]]
+         */
+        export const permute = (tens: ChalkboardTensor, ...axes: number[]): ChalkboardTensor => {
+            const size = $shape(tens, false, "permute", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length !== size.length || new Set(axes).size !== size.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= size.length)) throw new Error(`Chalkboard.tens.permute: Parameter "axes" must be a permutation of the integers from 0 to the tensor rank minus one.`);
+            return $permute(tens, size, axes);
+        };
+
+        /**
          * Prints a tensor in the console.
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {void}
@@ -869,14 +902,15 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the transpose of a tensor.
+         * Calculates the transpose of a tensor by reversing the order of its axes, so that the entry at index (i, j, ..., k) moves to (k, ..., j, i).
          * @param {ChalkboardTensor} tens - The tensor
          * @returns {ChalkboardTensor}
          * @example
-         * const result = Chalkboard.tens.transpose([[[1, 2]], [[3, 4]]]); // Reverses the tensor axes
+         * const result = Chalkboard.tens.transpose([[1, 2, 3], [4, 5, 6]]); // Returns [[1, 4], [2, 5], [3, 6]]
          */
         export const transpose = (tens: ChalkboardTensor): ChalkboardTensor => {
-            return $resize(tens, $shape(tens, false, "transpose", "tens").reverse());
+            const size = $shape(tens, false, "transpose", "tens");
+            return $permute(tens, size, size.map((_, k) => size.length - 1 - k));
         };
 
         /**
