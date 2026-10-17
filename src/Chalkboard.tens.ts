@@ -547,42 +547,35 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the multiplication of two tensors.
+         * Calculates the tensor (outer) product of two tensors, whose axes are the axes of the first tensor followed by the axes of the second tensor, so that the entry at index (i, ..., j, ...) is the product of the entries at (i, ...) and (j, ...); a number operand multiplies every entry of the other operand.
          * @param {ChalkboardTensor} tens1 - The first tensor
          * @param {ChalkboardTensor} tens2 - The second tensor
          * @returns {ChalkboardTensor}
          * @example
-         * const result = Chalkboard.tens.mul([[1, 2], [3, 4]], [[2, 3], [4, 5]]); // Returns the elementwise product
+         * const result = Chalkboard.tens.mul([1, 2], [3, 4]); // Returns [[3, 4], [6, 8]]
          */
         export const mul = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
             $shape(tens1, true, "mul", "tens1");
             $shape(tens2, true, "mul", "tens2");
-            const multiply = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
-                const result: ChalkboardTensor[] = [];
-                if (Array.isArray(tens1) && Array.isArray(tens2)) {
-                    for (let i = 0; i < tens1.length; i++) {
-                        const subarr: ChalkboardTensor[] = [];
-                        for (let j = 0; j < tens2.length; j++) {
-                            subarr[j] = multiply(tens1[i], tens2[j]);
-                        }
-                        result.push(subarr);
-                    }
-                    return result;
-                } else if (Array.isArray(tens1)) {
-                    for (let i = 0; i < tens1.length; i++) {
-                        result[i] = multiply(tens1[i], tens2);
-                    }
-                    return result;
-                } else if (Array.isArray(tens2)) {
-                    for (let i = 0; i < tens2.length; i++) {
-                        result[i] = multiply(tens1, tens2[i]);
-                    }
-                    return result;
-                } else {
-                    return tens1 * tens2;
-                }
-            };
-            return multiply(tens1, tens2);
+            if (!Array.isArray(tens1)) return $map(tens2, (b) => tens1 * b);
+            const result: ChalkboardTensor[] = [];
+            for (let i = 0; i < tens1.length; i++) result[i] = Chalkboard.tens.mul(tens1[i], tens2);
+            return result;
+        };
+
+        /**
+         * Calculates the Hadamard (elementwise) product of two tensors, which are broadcast together as in NumPy (their sizes are aligned from the right, and axes of length 1 or missing axes are stretched).
+         * @param {ChalkboardTensor} tens1 - The first tensor
+         * @param {ChalkboardTensor} tens2 - The second tensor
+         * @returns {ChalkboardTensor}
+         * @example
+         * const result = Chalkboard.tens.mulHadamard([[1, 2], [3, 4]], [[5, 6], [7, 8]]); // Returns [[5, 12], [21, 32]]
+         * const broadcast = Chalkboard.tens.mulHadamard([[1, 2], [3, 4]], [10, 100]); // Returns [[10, 200], [30, 400]]
+         */
+        export const mulHadamard = (tens1: ChalkboardTensor, tens2: ChalkboardTensor): ChalkboardTensor => {
+            const size1 = $shape(tens1, true, "mulHadamard", "tens1"), size2 = $shape(tens2, true, "mulHadamard", "tens2");
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isSizeEqual(size1, size2)) return $broadcast(tens1, size1, tens2, size2, (a, b) => a * b, "mulHadamard");
+            return $zip(tens1, tens2, (a, b) => a * b);
         };
 
         /**

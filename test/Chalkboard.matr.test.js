@@ -27,13 +27,14 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.matr.round(m), [[2, -2], [-3, 5]]);
 }
 
-// matr.add, matr.addKronecker, matr.mul, matr.mulKronecker, matr.mulVector, matr.pow, matr.scl, matr.sub
+// matr.add, matr.addKronecker, matr.mul, matr.mulHadamard, matr.mulKronecker, matr.mulVector, matr.pow, matr.scl, matr.sub
 {
     const m1 = cb.matr.init([1, 2], [3, 4]);
     const m2 = cb.matr.init([5, 6], [7, 8]);
     assert.deepStrictEqual(cb.matr.add(m1, m2), [[6, 8], [10, 12]]);
     assert.deepStrictEqual(cb.matr.addKronecker(cb.matr.identity(2), cb.matr.identity(2)), cb.matr.scl(cb.matr.identity(4), 2));
     assert.deepStrictEqual(cb.matr.mul(m1, m2), [[19, 22], [43, 50]]);
+    assert.deepStrictEqual(cb.matr.mulHadamard(m1, m2), [[5, 12], [21, 32]]);
     assert.deepStrictEqual(cb.matr.mulKronecker(m1, m2), [[5, 6, 10, 12], [7, 8, 14, 16], [15, 18, 20, 24], [21, 24, 28, 32]]);
     assert.deepStrictEqual(cb.matr.mulVector(m1, cb.vect.init(1, 2)), { x: 5, y: 11 });
     cb.vect.modeConfig("array");

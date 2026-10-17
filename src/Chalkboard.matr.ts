@@ -1297,6 +1297,48 @@ namespace Chalkboard {
         };
 
         /**
+         * Calculates the Hadamard multiplication of two matrices.
+         * @param {ChalkboardMatrix} matr1 - The first matrix
+         * @param {ChalkboardMatrix} matr2 - The second matrix
+         * @returns {ChalkboardMatrix}
+         * @example
+         * const result = Chalkboard.matr.mulHadamard([[1, 2], [3, 4]], [[0, 1], [1, 0]]); // Returns [[0, 2], [3, 0]]
+         */
+        export const mulHadamard = (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix): ChalkboardMatrix => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0])) throw new Error(`Chalkboard.matr.mulHadamard: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0])) throw new Error(`Chalkboard.matr.mulHadamard: Parameter "matr2" must be a matrix.`);
+            if (!Chalkboard.matr.isSizeEqual(matr1, matr2)) throw new Error(`Chalkboard.matr.mulHadamard: Parameters "matr1" and "matr2" must have the same number of rows and columns.`);
+            if (Chalkboard.matr.isSizeOf(matr1, 2)) {
+                return Chalkboard.matr.init(
+                    [matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1]],
+                    [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1]]
+                );
+            } else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
+                return Chalkboard.matr.init(
+                    [matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][2] * matr2[0][2]],
+                    [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][2] * matr2[1][2]],
+                    [matr1[2][0] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][2] * matr2[2][2]]
+                );
+            } else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
+                return Chalkboard.matr.init(
+                    [matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][2] * matr2[0][2], matr1[0][3] * matr2[0][3]],
+                    [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][2] * matr2[1][2], matr1[1][3] * matr2[1][3]],
+                    [matr1[2][0] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][2] * matr2[2][2], matr1[2][3] * matr2[2][3]],
+                    [matr1[3][0] * matr2[3][0], matr1[3][1] * matr2[3][1], matr1[3][2] * matr2[3][2], matr1[3][3] * matr2[3][3]]
+                );
+            } else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        result[i][j] = matr1[i][j] * matr2[i][j];
+                    }
+                }
+                return result;
+            }
+        };
+
+        /**
          * Calculates the Kronecker multiplication of two matrices.
          * @param {ChalkboardMatrix} matr1 - The first matrix
          * @param {ChalkboardMatrix} matr2 - The second matrix

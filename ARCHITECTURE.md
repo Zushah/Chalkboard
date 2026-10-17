@@ -2,7 +2,7 @@
 
 Latest commit: Saturday, October 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Saturday, October 17, 2026, [**`0d1e7ea`**](https://github.com/Zushah/Chalkboard/commit/0d1e7ea).
+Previous commit: Saturday, October 17, 2026, [**`b275fe5`**](https://github.com/Zushah/Chalkboard/commit/b275fe5).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -456,7 +456,7 @@ Uniqueness and set-related helpers are used by `abal`. Array ownership is operat
 
 `./src/Chalkboard.tens.ts` uses recursive arrays whose leaves are numbers, including `NaN` and infinities, or `null` placeholders. There is no separate shape buffer, stride model, typed storage backend, or symbolic index notation. Each public operation validates its tensor arguments once per call, requiring a rectangular shape, in which every branch at a given depth has the same length, and valid leaves; private workers then recurse without validating again. Structural operations, such as `size`, `copy`, `concat`, and `toString`, accept `null` leaves, while arithmetic, numeric comparisons, and numeric conversions reject them. A zero-length axis cannot record the sizes of later axes, so `tens.zero(0, 3)` is `[]`, whose size is `[0]` rather than `[0, 3]`.
 
-Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction broadcast as in NumPy: sizes are aligned from the right, each pair of axes must be equal or include a length of 1, a missing leading axis counts as length 1, and length-1 axes are stretched; any other pair of sizes throws. A number operand is the rank-0 case of this rule. Multiplication recursively forms pairwise products at each nested level; for equal-rank operands, axes are interleaved by the recursion rather than simply concatenated as in a conventional tensor-product shape rule. Mixed array ranks in multiplication require inspection of the particular operation rather than assuming NumPy-like semantics. Equality comparisons never treat `NaN` as equal to anything; approximate comparisons, including `isZero`, treat infinities of the same sign as equal and never treat a finite value as approximately equal to an infinity.
+Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction broadcast as in NumPy: sizes are aligned from the right, each pair of axes must be equal or include a length of 1, a missing leading axis counts as length 1, and length-1 axes are stretched; any other pair of sizes throws. A number operand is the rank-0 case of this rule. `mul` is the outer product, whose axes are those of the first operand followed by those of the second. `mulHadamard` is the elementwise product and broadcasts under the same rule as addition and subtraction. Equality comparisons never treat `NaN` as equal to anything; approximate comparisons, including `isZero`, treat infinities of the same sign as equal and never treat a finite value as approximately equal to an infinity.
 
 Several names have implementation-specific behavior that materially affects callers:
 

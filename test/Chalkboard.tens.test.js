@@ -28,7 +28,7 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.round(t), [[-2, 2], [3, -5]]);
 }
 
-// tens.add, tens.mul, tens.scl, tens.sub
+// tens.add, tens.mul, tens.mulHadamard, tens.scl, tens.sub
 {
     const t1 = cb.tens.init([1, 2], [3, 4]);
     const t2 = cb.tens.init([5, 6], [7, 8]);
@@ -38,8 +38,10 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.add([[1, 2, 3], [4, 5, 6]], [10, 20, 30]), [[11, 22, 33], [14, 25, 36]]);
     assert.deepStrictEqual(cb.tens.add([[1], [2]], [[10, 20, 30]]), [[11, 21, 31], [12, 22, 32]]);
     assert.throws(() => cb.tens.add([[1, 2, 3], [4, 5, 6]], [1, 2]));
-    assert.deepStrictEqual(cb.tens.mul(t1, t2), [[[[5, 6], [10, 12]], [[7, 8], [14, 16]]], [[[15, 18], [20, 24]], [[21, 24], [28, 32]]]]);
+    assert.deepStrictEqual(cb.tens.mul(t1, t2), [[[[5, 6], [7, 8]], [[10, 12], [14, 16]]], [[[15, 18], [21, 24]], [[20, 24], [28, 32]]]]);
     assert.deepStrictEqual(cb.tens.mul(2, t1), [[2, 4], [6, 8]]);
+    assert.deepStrictEqual(cb.tens.mulHadamard(t1, t2), [[5, 12], [21, 32]]);
+    assert.deepStrictEqual(cb.tens.mulHadamard(t1, [10, 100]), [[10, 200], [30, 400]]);
     assert.deepStrictEqual(cb.tens.scl(t1, 2), [[2, 4], [6, 8]]);
     assert.deepStrictEqual(cb.tens.scl(cb.tens.init([1, -1]), Infinity), [Infinity, -Infinity]);
     assert.deepStrictEqual(cb.tens.sub(t1, t2), [[-4, -4], [-4, -4]]);
