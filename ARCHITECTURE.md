@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Saturday, October 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Sunday, October 25, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Saturday, October 17, 2026, [**`75a03f0`**](https://github.com/Zushah/Chalkboard/commit/75a03f0).
+Previous commit: Saturday, October 17, 2026, [**`5623438`**](https://github.com/Zushah/Chalkboard/commit/5623438).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -458,6 +458,10 @@ Uniqueness and set-related helpers are used by `abal`. Array ownership is operat
 
 Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction broadcast as in NumPy: sizes are aligned from the right, each pair of axes must be equal or include a length of 1, a missing leading axis counts as length 1, and length-1 axes are stretched; any other pair of sizes throws. A number operand is the rank-0 case of this rule. `mul` is the outer product, whose axes are those of the first operand followed by those of the second. `mulHadamard` is the elementwise product and broadcasts under the same rule as addition and subtraction. Equality comparisons never treat `NaN` as equal to anything; approximate comparisons, including `isZero`, treat infinities of the same sign as equal and never treat a finite value as approximately equal to an infinity.
 
+`identity` and `LeviCivita` construct the Kronecker delta and the permutation symbol from a `dimension`, the length of every axis. `mulContract` contracts paired axes as NumPy's `tensordot` does, keeping the remaining axes of the first tensor followed by those of the second. `einsum` accepts letter subscripts, commas, and an optional `->`, with NumPy's implicit-output rule and no ellipsis. Symmetrization averages over the k! orderings of the chosen axes, with permutation signs for antisymmetrization. The symmetry predicates compare entries exactly.
+
+`get`, `slice`, and `stack` return fresh tensors, while `set` modifies and returns the given tensor, copying the stored value. Reductions act on all entries or along one axis. `NaN` propagates through `max` and `min`; an empty sum is zero, while empty `mean`, `max`, and `min` reductions are rejected. `norm` acts entrywise, and its `LInfinity` type is the largest absolute entry.
+
 Several names have implementation-specific behavior that materially affects callers:
 
 | Operation | Current behavior |
@@ -465,7 +469,7 @@ Several names have implementation-specific behavior that materially affects call
 | `reshape`, `resize` | Refill a requested shape in row-major traversal order. `reshape` requires equal entry counts, while `resize` truncates or pads with zeros. |
 | `permute`, `transpose` | Move entries by index: `permute` places input axis `axes[k]` at result axis `k`, and `transpose` reverses all axes, matching matrix transposition at rank two. Neither accepts or performs reshaping. |
 | `contract` | Sums entries whose indices along `axis1` and `axis2` are equal, removing both axes and keeping the others in order. At rank two this is the matrix trace. Both axes must have the same length, and ranks below two are rejected. |
-| `push`, `pull` | Insert or remove a slice along a 0-based `axis`, modifying and returning the given tensor. |
+| `push`, `pull`, `set` | Insert or remove a slice along a 0-based `axis`, or replace an indexed value, modifying and returning the given tensor. |
 
 For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `reshape` and `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the sizes of the axes after it.
 
@@ -541,7 +545,7 @@ Current implementation limitations, including incomplete handling of some public
 | `./src/Chalkboard.quat.ts` | Quaternion arithmetic, rotations, and conversions. |
 | `./src/Chalkboard.real.ts` | Real function records, parser, and numerical helpers. |
 | `./src/Chalkboard.stat.ts` | Numeric sequences, statistics, interpolation, and regression. |
-| `./src/Chalkboard.tens.ts` | Recursive tensor operations, shape changes, and conversions. |
+| `./src/Chalkboard.tens.ts` | Recursive tensor operations, tensor algebra, indexing, reductions, shape changes, and conversions. |
 | `./src/Chalkboard.trig.ts` | Trigonometric and hyperbolic functions and angle conversion. |
 | `./src/Chalkboard.vect.ts` | Coordinate vectors, normalization, output modes, and vector fields. |
 

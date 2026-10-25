@@ -116,3 +116,50 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.toTypedArray(t, "float32"), new Float32Array([1, 2, 3, 4]));
     assert.deepStrictEqual(cb.tens.toVector(t, 2, 0), { x: 1, y: 2 });
 }
+
+// tens.antisymmetrize, tens.einsum, tens.identity, tens.isAntisymmetric, tens.isSymmetric, tens.LeviCivita, tens.mulContract, tens.symmetrize
+{
+    assert.deepStrictEqual(cb.tens.identity(3), cb.matr.identity(3));
+    assert.deepStrictEqual(cb.tens.identity(2, 3), [[[1, 0], [0, 0]], [[0, 0], [0, 1]]]);
+    assert.deepStrictEqual(cb.tens.LeviCivita(2), [[0, 1], [-1, 0]]);
+    const epsilon = cb.tens.LeviCivita(3);
+    assert.strictEqual(epsilon[0][1][2], 1);
+    assert.strictEqual(epsilon[1][0][2], -1);
+    assert.deepStrictEqual(cb.tens.mulContract([[1, 2], [3, 4]], [[5, 6], [7, 8]]), [[19, 22], [43, 50]]);
+    assert.strictEqual(cb.tens.mulContract([1, 2, 3], [4, 5, 6]), 32);
+    assert.deepStrictEqual(cb.tens.einsum("ij,jk->ik", [[1, 2], [3, 4]], [[5, 6], [7, 8]]), [[19, 22], [43, 50]]);
+    assert.strictEqual(cb.tens.einsum("ii", [[1, 2], [3, 4]]), 5);
+    assert.deepStrictEqual(cb.tens.einsum("ijk,j,k->i", epsilon, [1, 2, 3], [4, 5, 6]), [-3, 6, -3]);
+    assert.deepStrictEqual(cb.tens.symmetrize([[1, 2], [4, 3]]), [[1, 3], [3, 3]]);
+    assert.deepStrictEqual(cb.tens.antisymmetrize([[1, 2], [4, 3]]), [[0, -1], [1, 0]]);
+    assert.strictEqual(cb.tens.isSymmetric([[1, 2], [2, 1]]), true);
+    assert.strictEqual(cb.tens.isSymmetric([[1, 2], [3, 4]]), false);
+    assert.strictEqual(cb.tens.isAntisymmetric(epsilon), true);
+}
+
+// tens.get, tens.set, tens.slice, tens.stack
+{
+    const t = [[1, 2, 3], [4, 5, 6]];
+    assert.strictEqual(cb.tens.get(t, 1, 2), 6);
+    assert.deepStrictEqual(cb.tens.get(t, 1), [4, 5, 6]);
+    assert.deepStrictEqual(cb.tens.set(cb.tens.copy([[1, 2], [3, 4]]), [0, 1], 9), [[1, 9], [3, 4]]);
+    assert.deepStrictEqual(cb.tens.slice([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12]], [1, 3], [0, 2]), [[5, 6], [9, 10]]);
+    assert.deepStrictEqual(cb.tens.stack([[1, 2], [3, 4]]), [[1, 2], [3, 4]]);
+    assert.deepStrictEqual(cb.tens.stack([[1, 2], [3, 4]], 1), [[1, 3], [2, 4]]);
+}
+
+// tens.dot, tens.max, tens.mean, tens.min, tens.norm, tens.normalize, tens.normsq, tens.sum
+{
+    const t = [[1, 2, 3], [4, 5, 6]];
+    assert.strictEqual(cb.tens.sum(t), 21);
+    assert.deepStrictEqual(cb.tens.sum(t, 0), [5, 7, 9]);
+    assert.deepStrictEqual(cb.tens.mean(t, 1), [2, 5]);
+    assert.deepStrictEqual(cb.tens.max(t, 1), [3, 6]);
+    assert.deepStrictEqual(cb.tens.min(t, 0), [1, 2, 3]);
+    assert.strictEqual(cb.tens.dot([[1, 2], [3, 4]], [[1, 2], [3, 4]]), 30);
+    assert.strictEqual(cb.tens.norm([[3, 4]]), 5);
+    assert.strictEqual(cb.tens.norm([[3, -4]], "L1"), 7);
+    assert.strictEqual(cb.tens.norm([[-5, 1]], "LInfinity"), 5);
+    assert.strictEqual(cb.tens.normsq([[3, 4]]), 25);
+    assert.deepStrictEqual(cb.tens.normalize([3, 4]), [0.6, 0.8]);
+}
