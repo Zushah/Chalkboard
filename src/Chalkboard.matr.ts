@@ -2197,16 +2197,16 @@ namespace Chalkboard {
         /**
          * Converts a matrix to a tensor.
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {number[]} size - The number of rows, columns, tubes, etc. of the tensor represented as a single array or a sequence of arguments
+         * @param {number[]} shape - The shape of the tensor, as the lengths of its axes, represented as a single array or a sequence of arguments
          * @returns {ChalkboardTensor}
          * @example
          * const result = Chalkboard.matr.toTensor([[1, 2], [3, 4]], 2, 2); // Returns an equivalent rank-2 tensor
          */
-        export const toTensor = (matr: ChalkboardMatrix, ...size: number[]): ChalkboardTensor => {
+        export const toTensor = (matr: ChalkboardMatrix, ...shape: number[]): ChalkboardTensor => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.toTensor: Parameter "matr" must be a matrix.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0)) throw new Error(`Chalkboard.matr.toTensor: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.resize(matr, ...size);
+            shape = Array.isArray(shape[0]) ? shape[0] : shape;
+            if (shape.length > 0 && (!Number.isInteger(shape[0]) || shape[0] < 0) || shape.length > 1 && (!Number.isInteger(shape[shape.length - 1]) || shape[shape.length - 1] < 0)) throw new Error(`Chalkboard.matr.toTensor: Parameter "shape" must begin and end with non-negative integers.`);
+            return Chalkboard.tens.resize(matr, ...shape);
         };
 
         /**

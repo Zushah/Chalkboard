@@ -1469,18 +1469,16 @@ namespace Chalkboard {
         /**
          * Converts an array to a tensor.
          * @param {number[]} arr - The array
-         * @param {number[]} size - The size of the tensor
+         * @param {number[]} shape - The shape of the tensor
          * @returns {ChalkboardTensor}
          * @example
          * const result = Chalkboard.stat.toTensor([1, 2, 3, 4], 2, 2); // Returns [[1, 2], [3, 4]]
          */
-        export const toTensor = (arr: number[], ...size: number[]): ChalkboardTensor => {
+        export const toTensor = (arr: number[], ...shape: number[]): ChalkboardTensor => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.toTensor: Parameter "arr" must be an array of finite numbers.`);
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0)) throw new Error(`Chalkboard.stat.toTensor: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.resize(arr, ...size);
+            if (Array.isArray(shape[0])) shape = shape[0];
+            if (shape.length > 0 && (!Number.isInteger(shape[0]) || shape[0] < 0) || shape.length > 1 && (!Number.isInteger(shape[shape.length - 1]) || shape[shape.length - 1] < 0)) throw new Error(`Chalkboard.stat.toTensor: Parameter "shape" must begin and end with non-negative integers.`);
+            return Chalkboard.tens.resize(arr, ...shape);
         };
 
         /**

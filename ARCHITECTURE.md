@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Sunday, October 25, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Monday, October 26, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Saturday, October 17, 2026, [**`5623438`**](https://github.com/Zushah/Chalkboard/commit/5623438).
+Previous commit: Sunday, October 25, 2026, [**`d27a571`**](https://github.com/Zushah/Chalkboard/commit/d27a571).
 
 Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
 
@@ -454,9 +454,9 @@ Uniqueness and set-related helpers are used by `abal`. Array ownership is operat
 
 ### 1.18. tens
 
-`./src/Chalkboard.tens.ts` uses recursive arrays whose leaves are numbers, including `NaN` and infinities, or `null` placeholders. There is no separate shape buffer, stride model, typed storage backend, or symbolic index notation. Each public operation validates its tensor arguments once per call, requiring a rectangular shape, in which every branch at a given depth has the same length, and valid leaves; private workers then recurse without validating again. Structural operations, such as `size`, `copy`, `concat`, and `toString`, accept `null` leaves, while arithmetic, numeric comparisons, and numeric conversions reject them. A zero-length axis cannot record the sizes of later axes, so `tens.zero(0, 3)` is `[]`, whose size is `[0]` rather than `[0, 3]`.
+`./src/Chalkboard.tens.ts` uses recursive arrays whose leaves are numbers, including `NaN` and infinities, or `null` placeholders. A tensor's shape is the array of its axis lengths, its size is its number of entries, and its rank is its number of axes. `tens.rank` therefore differs from `matr.rank`, the rank of a matrix in the linear-algebra sense, and `matr` keeps describing a matrix's rows and columns as its size. There is no separate shape buffer, stride model, typed storage backend, or symbolic index notation. Each public operation validates its tensor arguments once per call, requiring a rectangular shape, in which every branch at a given depth has the same length, and valid leaves; private workers then recurse without validating again. Structural operations, such as `shape`, `size`, `copy`, `concat`, and `toString`, accept `null` leaves, while arithmetic, numeric comparisons, and numeric conversions reject them. A zero-length axis cannot record the lengths of later axes, so `tens.zero(0, 3)` is `[]`, whose shape is `[0]` rather than `[0, 3]`.
 
-Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction broadcast as in NumPy: sizes are aligned from the right, each pair of axes must be equal or include a length of 1, a missing leading axis counts as length 1, and length-1 axes are stretched; any other pair of sizes throws. A number operand is the rank-0 case of this rule. `mul` is the outer product, whose axes are those of the first operand followed by those of the second. `mulHadamard` is the elementwise product and broadcasts under the same rule as addition and subtraction. Equality comparisons never treat `NaN` as equal to anything; approximate comparisons, including `isZero`, treat infinities of the same sign as equal and never treat a finite value as approximately equal to an infinity.
+Tensor addition, subtraction, and multiplication apply a number operand to every entry of the other operand. For two array operands, addition and subtraction broadcast as in NumPy: shapes are aligned from the right, each pair of axes must be equal or include a length of 1, a missing leading axis counts as length 1, and length-1 axes are stretched; any other pair of lengths throws. A number operand is the rank-0 case of this rule. `mul` is the outer product, whose axes are those of the first operand followed by those of the second. `mulHadamard` is the elementwise product and broadcasts under the same rule as addition and subtraction. Equality comparisons never treat `NaN` as equal to anything; approximate comparisons, including `isZero`, treat infinities of the same sign as equal and never treat a finite value as approximately equal to an infinity.
 
 `identity` and `LeviCivita` construct the Kronecker delta and the permutation symbol from a `dimension`, the length of every axis. `mulContract` contracts paired axes as NumPy's `tensordot` does, keeping the remaining axes of the first tensor followed by those of the second. `einsum` accepts letter subscripts, commas, and an optional `->`, with NumPy's implicit-output rule and no ellipsis. Symmetrization averages over the k! orderings of the chosen axes, with permutation signs for antisymmetrization. The symmetry predicates compare entries exactly.
 
@@ -466,12 +466,12 @@ Several names have implementation-specific behavior that materially affects call
 
 | Operation | Current behavior |
 | --- | --- |
-| `reshape`, `resize` | Refill a requested shape in row-major traversal order. `reshape` requires equal entry counts, while `resize` truncates or pads with zeros. |
+| `reshape`, `resize` | Refill a requested shape in row-major traversal order. `reshape` requires equal sizes, while `resize` truncates or pads with zeros. |
 | `permute`, `transpose` | Move entries by index: `permute` places input axis `axes[k]` at result axis `k`, and `transpose` reverses all axes, matching matrix transposition at rank two. Neither accepts or performs reshaping. |
 | `contract` | Sums entries whose indices along `axis1` and `axis2` are equal, removing both axes and keeping the others in order. At rank two this is the matrix trace. Both axes must have the same length, and ranks below two are rejected. |
 | `push`, `pull`, `set` | Insert or remove a slice along a 0-based `axis`, or replace an indexed value, modifying and returning the given tensor. |
 
-For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `reshape` and `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the sizes of the axes after it.
+For example, `tens.transpose([[1, 2, 3], [4, 5, 6]])` produces `[[1, 4], [2, 5], [3, 6]]`, the same as matrix transposition. Reshaping without moving entries by index remains the job of `reshape` and `resize`. Under the zero-length-axis limitation, a permutation that moves a zero-length axis earlier discards the lengths of the axes after it.
 
 Tensors provide recursive numerical manipulation and conversions, but the current implementation is not a general tensor-calculus engine. In particular, dense matrices, short coordinate vectors, and arbitrary ODE state arrays retain their own operational contracts even when their JavaScript shapes overlap with tensors.
 

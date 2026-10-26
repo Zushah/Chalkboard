@@ -2336,17 +2336,17 @@ namespace Chalkboard {
         /**
          * Converts a set or algebraic structure to a tensor.
          * @param {ChalkboardSet<number> | ChalkboardStructure<number>} struc - The set or structure
-         * @param {number[]} size - The size of the tensor
+         * @param {number[]} shape - The shape of the tensor
          * @returns {ChalkboardTensor}
          * @example
          * const set = Chalkboard.abal.set([1, 2, 3, 4]);
          * const tensor = Chalkboard.abal.toTensor(set, 2, 2); // Returns [[1, 2], [3, 4]]
          */
-        export const toTensor = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...size: number[]): ChalkboardTensor => {
+        export const toTensor = (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...shape: number[]): ChalkboardTensor => {
             const result = "set" in struc ? struc.set : struc;
             if (!result.elements) throw new Error(`Chalkboard.abal.toTensor: Cannot convert infinite set to tensor.`);
-            if (Array.isArray(size[0])) size = size[0];
-            return Chalkboard.tens.resize(result.elements, ...size);
+            if (Array.isArray(shape[0])) shape = shape[0];
+            return Chalkboard.tens.resize(result.elements, ...shape);
         };
 
         /**

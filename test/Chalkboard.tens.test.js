@@ -57,15 +57,16 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.tens.zero(2, 2), [[0, 0], [0, 0]]);
 }
 
-// tens.rank, tens.size
+// tens.rank, tens.shape, tens.size
 {
     const t = cb.tens.init([[[1, 2], [3, 4]]]);
     assert.strictEqual(cb.tens.rank(t), 3);
-    assert.deepStrictEqual(cb.tens.size(t), [1, 2, 2]);
-    assert.throws(() => cb.tens.size([[1], [2, 3]]));
+    assert.deepStrictEqual(cb.tens.shape(t), [1, 2, 2]);
+    assert.strictEqual(cb.tens.size(t), 4);
+    assert.throws(() => cb.tens.shape([[1], [2, 3]]));
 }
 
-// tens.isApproxEqual, tens.isEqual, tens.isRankEqual, tens.isRankOf, tens.isSizeEqual, tens.isSizeOf, tens.isSizeUniform, tens.isZero
+// tens.isApproxEqual, tens.isEqual, tens.isRankEqual, tens.isRankOf, tens.isShapeEqual, tens.isShapeOf, tens.isShapeUniform, tens.isZero
 {
     const t1 = cb.tens.init([[1, 2], [3, 4]]);
     const t2 = cb.tens.init([[5, 6], [7, 8]]);
@@ -76,9 +77,9 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.tens.isEqual([NaN], [NaN]), false);
     assert.strictEqual(cb.tens.isRankEqual(t1, t2), true);
     assert.strictEqual(cb.tens.isRankOf(t1, 2), true);
-    assert.strictEqual(cb.tens.isSizeEqual(t1, t2), true);
-    assert.strictEqual(cb.tens.isSizeOf(t1, 2, 2), true);
-    assert.strictEqual(cb.tens.isSizeUniform(t1), true);
+    assert.strictEqual(cb.tens.isShapeEqual(t1, t2), true);
+    assert.strictEqual(cb.tens.isShapeOf(t1, 2, 2), true);
+    assert.strictEqual(cb.tens.isShapeUniform(t1), true);
     assert.strictEqual(cb.tens.isZero(cb.tens.zero(2, 2)), true);
 }
 
