@@ -86,6 +86,8 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.stat.norm([3, 4]), 5);
     assert.strictEqual(cb.stat.norm([3, 4], "L1"), 7);
     assert.strictEqual(cb.stat.norm([3, 4], "LInfinity"), 4);
+    assert.strictEqual(cb.stat.norm([3, -4], "LInfinity"), 4);
+    assert.strictEqual(cb.stat.normsq([3, -4], "LInfinity"), 16);
     assert.strictEqual(cb.stat.normsq([3, 4]), 25);
 }
 
@@ -133,7 +135,7 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.stat.expected([0, 1], [0.25, 0.75]), 0.75);
     assert.strictEqual(cb.stat.expected([0, 1]), 0.5);
     assert.strictEqual(cb.stat.skewness([1, 2, 3, 4, 5]), 0);
-    assert.strictEqual(cb.stat.kurtosis([1, 2, 3, 4, 5]), 5.5000000000000036);
+    assert.strictEqual(cb.stat.kurtosis([1, 2, 3, 4, 5]), -1.2999999999999994);
 }
 
 // stat.regression

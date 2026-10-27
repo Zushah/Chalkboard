@@ -344,8 +344,9 @@ namespace Chalkboard {
         export const deviation = (arr: number[]): number => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.deviation: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
+                result += (arr[i] - mean) * (arr[i] - mean);
             }
             return Chalkboard.real.sqrt(result / arr.length);
         };
@@ -655,11 +656,11 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the kurtosis of an array.
+         * Calculates the excess kurtosis of an array (its kurtosis minus 3, so that a normal distribution has 0), using population normalization like variance.
          * @param {number[]} arr - The array
          * @returns {number}
          * @example
-         * const result = Chalkboard.stat.kurtosis([1, 2, 3, 4, 5]); // Returns the sample's kurtosis
+         * const result = Chalkboard.stat.kurtosis([1, 2, 3, 4, 5]); // Returns the sample's excess kurtosis
          */
         export const kurtosis = (arr: number[]): number => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.kurtosis: Parameter "arr" must be an array of finite numbers.`);
@@ -669,7 +670,7 @@ namespace Chalkboard {
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
-            return result / (deviation * deviation * deviation * deviation) - 3;
+            return result / (arr.length * deviation * deviation * deviation * deviation) - 3;
         };
 
         /**
@@ -727,8 +728,9 @@ namespace Chalkboard {
         export const mad = (arr: number[]): number => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.mad: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += Math.abs(arr[i] - Chalkboard.stat.mean(arr));
+                result += Math.abs(arr[i] - mean);
             }
             return result / arr.length;
         };
@@ -941,7 +943,10 @@ namespace Chalkboard {
                 }
                 return Chalkboard.real.sqrt(result);
             } else if (type === "LInfinity") {
-                return Math.abs(Chalkboard.stat.max(arr));
+                for (let i = 0; i < arr.length; i++) {
+                    result = Math.max(result, Math.abs(arr[i]));
+                }
+                return result;
             } else {
                 throw new Error(`Chalkboard.stat.norm: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
@@ -1009,7 +1014,10 @@ namespace Chalkboard {
                 }
                 return result;
             } else if (type === "LInfinity") {
-                return Math.abs(Chalkboard.stat.max(arr)) * Math.abs(Chalkboard.stat.max(arr));
+                for (let i = 0; i < arr.length; i++) {
+                    result = Math.max(result, Math.abs(arr[i]));
+                }
+                return result * result;
             } else {
                 throw new Error(`Chalkboard.stat.normsq: Parameter "type" must be L0, L1, L2, or LInfinity.`);
             }
@@ -1321,7 +1329,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the skewness of an array.
+         * Calculates the skewness of an array, using population normalization like variance.
          * @param {number[]} arr - The array
          * @returns {number}
          * @example
@@ -1335,7 +1343,7 @@ namespace Chalkboard {
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
-            return result / ((arr.length - 1) * (deviation * deviation * deviation));
+            return result / (arr.length * deviation * deviation * deviation);
         };
 
         /**
@@ -1551,8 +1559,9 @@ namespace Chalkboard {
         export const variance = (arr: number[]): number => {
             if (!Array.isArray(arr)) throw new Error(`Chalkboard.stat.variance: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
+                result += (arr[i] - mean) * (arr[i] - mean);
             }
             return result / arr.length;
         };
