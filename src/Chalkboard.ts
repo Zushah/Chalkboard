@@ -1,6 +1,6 @@
 /*
- * Chalkboard v3.0.5
- * Released on Monday, September 7, 2026
+ * Chalkboard v3.1.0 Ricci
+ * Released on Monday, November 2, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0
@@ -349,19 +349,19 @@ namespace Chalkboard {
 
     /**
      * The version of Chalkboard.
-     * @type {"3.0.5"}
+     * @type {"3.1.0"}
      * @example
-     * // Returns "3.0.5"
+     * // Returns "3.1.0"
      * const version = Chalkboard.VERSION;
      */
-    export const VERSION: "3.0.5" = "3.0.5";
+    export const VERSION: "3.1.0" = "3.1.0";
 
     /**
      * The alias of the version of Chalkboard.
-     * @type {"Euler"}
+     * @type {"Ricci"}
      * @example
-     * // Returns "Euler"
+     * // Returns "Ricci"
      * const versionalias = Chalkboard.VERSIONALIAS;
      */
-    export const VERSIONALIAS: "Euler" = "Euler";
+    export const VERSIONALIAS: "Ricci" = "Ricci";
 }

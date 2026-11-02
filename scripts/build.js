@@ -33,8 +33,8 @@ const sources = [
 ];
 
 const banner = `/*!
- * Chalkboard v3.0.5
- * Released on Monday, September 7, 2026
+ * Chalkboard v3.1.0 Ricci
+ * Released on Monday, November 2, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0

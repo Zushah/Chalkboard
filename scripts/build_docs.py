@@ -17,10 +17,10 @@ DOCS_EXAMPLES_DIR = DOCS_DIR / "examples"
 EXAMPLES_DIR = ROOT_DIR / "examples"
 ASSETS_DIR = ROOT_DIR / "assets"
 PACKAGE_PATH = ROOT_DIR / "package.json"
-EXAMPLE_TITLE_PATTERN = re.compile(r"^\s*\*\s+Chalkboard - (.+?) Example\s*$", re.MULTILINE)
+EXAMPLE_TITLE_PATTERN = re.compile(r"^\s*\*\s+Chalkboard v\d+\.\d+\.\d+ \S+ - (.+?) Example\s*$", re.MULTILINE)
 EXAMPLE_BANNER_PATTERN = re.compile(
     r"^/\*\r?\n"
-    r" \* Chalkboard - .+? Example\r?\n"
+    r" \* Chalkboard v\d+\.\d+\.\d+ \S+ - .+? Example\r?\n"
     r" \*\r?\n"
     r" \* This Source Code Form is subject to the terms of the Mozilla Public\r?\n"
     r" \* License, v\. 2\.0\. If a copy of the MPL was not distributed with this\r?\n"

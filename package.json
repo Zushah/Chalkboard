@@ -1,6 +1,6 @@
 {
   "name": "@zushah/chalkboard",
-  "version": "3.0.5",
+  "version": "3.1.0",
   "description": "Hundreds of functions for the manifestation and manipulation of mathematical structures and systems.",
   "main": "./dist/Chalkboard.mjs",
   "types": "./dist/Chalkboard.d.ts",
@@ -23,7 +23,7 @@
   },
   "scripts": {
     "build": "node ./scripts/build.js",
-    "test": "node --test ./test/*.test.js",
+    "test": "node --test ./tests/*.test.js",
     "dev": "npm run build && npm run test && npm run restore",
     "restore": "git restore dist",
     "docs": "python ./scripts/build_docs.py"

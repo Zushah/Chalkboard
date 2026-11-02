@@ -1,6 +1,6 @@
 /*!
- * Chalkboard v3.0.5
- * Released on Monday, September 7, 2026
+ * Chalkboard v3.1.0 Ricci
+ * Released on Monday, November 2, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0
@@ -161,8 +161,8 @@ var Chalkboard;
         Chalkboard.REGISTRY[name] = func;
     };
     Chalkboard.REGISTRY = {};
-    Chalkboard.VERSION = "3.0.5";
-    Chalkboard.VERSIONALIAS = "Euler";
+    Chalkboard.VERSION = "3.1.0";
+    Chalkboard.VERSIONALIAS = "Ricci";
 })(Chalkboard || (Chalkboard = {}));
 
 "use strict";
@@ -1743,13 +1743,13 @@ var Chalkboard;
                 throw new Error(`Chalkboard.abal.toString: Cannot convert infinite set to string.`);
             return Chalkboard.stat.toString(result.elements);
         };
-        abal.toTensor = (struc, ...size) => {
+        abal.toTensor = (struc, ...shape) => {
             const result = "set" in struc ? struc.set : struc;
             if (!result.elements)
                 throw new Error(`Chalkboard.abal.toTensor: Cannot convert infinite set to tensor.`);
-            if (Array.isArray(size[0]))
-                size = size[0];
-            return Chalkboard.tens.resize(result.elements, ...size);
+            if (Array.isArray(shape[0]))
+                shape = shape[0];
+            return Chalkboard.tens.resize(result.elements, ...shape);
         };
         abal.toTypedArray = (struc, type = "float32") => {
             const result = "set" in struc ? struc.set : struc;
@@ -7322,6 +7322,33 @@ var Chalkboard;
                 throw new Error(`Chalkboard.matr.mul: Parameters "matr1" and "matr2" must be of type ChalkboardMatrix where the numbers of columns of "matr1" must be equivalent to the number of rows of "matr2".`);
             }
         };
+        matr_1.mulHadamard = (matr1, matr2) => {
+            if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
+                throw new Error(`Chalkboard.matr.mulHadamard: Parameter "matr1" must be a matrix.`);
+            if (!Array.isArray(matr2) || matr2.length > 0 && !Array.isArray(matr2[0]))
+                throw new Error(`Chalkboard.matr.mulHadamard: Parameter "matr2" must be a matrix.`);
+            if (!Chalkboard.matr.isSizeEqual(matr1, matr2))
+                throw new Error(`Chalkboard.matr.mulHadamard: Parameters "matr1" and "matr2" must have the same number of rows and columns.`);
+            if (Chalkboard.matr.isSizeOf(matr1, 2)) {
+                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1]], [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr1, 3)) {
+                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][2] * matr2[0][2]], [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][2] * matr2[1][2]], [matr1[2][0] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][2] * matr2[2][2]]);
+            }
+            else if (Chalkboard.matr.isSizeOf(matr1, 4)) {
+                return Chalkboard.matr.init([matr1[0][0] * matr2[0][0], matr1[0][1] * matr2[0][1], matr1[0][2] * matr2[0][2], matr1[0][3] * matr2[0][3]], [matr1[1][0] * matr2[1][0], matr1[1][1] * matr2[1][1], matr1[1][2] * matr2[1][2], matr1[1][3] * matr2[1][3]], [matr1[2][0] * matr2[2][0], matr1[2][1] * matr2[2][1], matr1[2][2] * matr2[2][2], matr1[2][3] * matr2[2][3]], [matr1[3][0] * matr2[3][0], matr1[3][1] * matr2[3][1], matr1[3][2] * matr2[3][2], matr1[3][3] * matr2[3][3]]);
+            }
+            else {
+                const result = Chalkboard.matr.init();
+                for (let i = 0; i < Chalkboard.matr.rows(matr1); i++) {
+                    result[i] = [];
+                    for (let j = 0; j < Chalkboard.matr.cols(matr1); j++) {
+                        result[i][j] = matr1[i][j] * matr2[i][j];
+                    }
+                }
+                return result;
+            }
+        };
         matr_1.mulKronecker = (matr1, matr2) => {
             if (!Array.isArray(matr1) || matr1.length > 0 && !Array.isArray(matr1[0]))
                 throw new Error(`Chalkboard.matr.mulKronecker: Parameter "matr1" must be a matrix.`);
@@ -7965,13 +7992,13 @@ var Chalkboard;
                 return result;
             }
         };
-        matr_1.toTensor = (matr, ...size) => {
+        matr_1.toTensor = (matr, ...shape) => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0]))
                 throw new Error(`Chalkboard.matr.toTensor: Parameter "matr" must be a matrix.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.matr.toTensor: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.resize(matr, ...size);
+            shape = Array.isArray(shape[0]) ? shape[0] : shape;
+            if (shape.length > 0 && (!Number.isInteger(shape[0]) || shape[0] < 0) || shape.length > 1 && (!Number.isInteger(shape[shape.length - 1]) || shape[shape.length - 1] < 0))
+                throw new Error(`Chalkboard.matr.toTensor: Parameter "shape" must begin and end with non-negative integers.`);
+            return Chalkboard.tens.resize(matr, ...shape);
         };
         matr_1.toTypedArray = (matr, type = "float32") => {
             const arr = Chalkboard.matr.toArray(matr);
@@ -11925,8 +11952,9 @@ var Chalkboard;
             if (!Array.isArray(arr))
                 throw new Error(`Chalkboard.stat.deviation: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
+                result += (arr[i] - mean) * (arr[i] - mean);
             }
             return Chalkboard.real.sqrt(result / arr.length);
         };
@@ -12187,7 +12215,7 @@ var Chalkboard;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
-            return result / (deviation * deviation * deviation * deviation) - 3;
+            return result / (arr.length * deviation * deviation * deviation * deviation) - 3;
         };
         stat.lt = (arr, arrORnum, includeEnd = false) => {
             if (!Array.isArray(arr))
@@ -12235,8 +12263,9 @@ var Chalkboard;
             if (!Array.isArray(arr))
                 throw new Error(`Chalkboard.stat.mad: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += Math.abs(arr[i] - Chalkboard.stat.mean(arr));
+                result += Math.abs(arr[i] - mean);
             }
             return result / arr.length;
         };
@@ -12383,7 +12412,10 @@ var Chalkboard;
                 return Chalkboard.real.sqrt(result);
             }
             else if (type === "LInfinity") {
-                return Math.abs(Chalkboard.stat.max(arr));
+                for (let i = 0; i < arr.length; i++) {
+                    result = Math.max(result, Math.abs(arr[i]));
+                }
+                return result;
             }
             else {
                 throw new Error(`Chalkboard.stat.norm: Parameter "type" must be L0, L1, L2, or LInfinity.`);
@@ -12433,7 +12465,10 @@ var Chalkboard;
                 return result;
             }
             else if (type === "LInfinity") {
-                return Math.abs(Chalkboard.stat.max(arr)) * Math.abs(Chalkboard.stat.max(arr));
+                for (let i = 0; i < arr.length; i++) {
+                    result = Math.max(result, Math.abs(arr[i]));
+                }
+                return result * result;
             }
             else {
                 throw new Error(`Chalkboard.stat.normsq: Parameter "type" must be L0, L1, L2, or LInfinity.`);
@@ -12683,7 +12718,7 @@ var Chalkboard;
             for (let i = 0; i < arr.length; i++) {
                 result += (arr[i] - mean) * (arr[i] - mean) * (arr[i] - mean);
             }
-            return result / ((arr.length - 1) * (deviation * deviation * deviation));
+            return result / (arr.length * deviation * deviation * deviation);
         };
         stat.sub = (arr1, arr2) => {
             if (arr1.length !== arr2.length)
@@ -12764,15 +12799,14 @@ var Chalkboard;
                 throw new Error(`Chalkboard.stat.toString: Parameter "arr" must be an array.`);
             return "[" + arr.join(", ") + "]";
         };
-        stat.toTensor = (arr, ...size) => {
+        stat.toTensor = (arr, ...shape) => {
             if (!Array.isArray(arr))
                 throw new Error(`Chalkboard.stat.toTensor: Parameter "arr" must be an array of finite numbers.`);
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.stat.toTensor: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.resize(arr, ...size);
+            if (Array.isArray(shape[0]))
+                shape = shape[0];
+            if (shape.length > 0 && (!Number.isInteger(shape[0]) || shape[0] < 0) || shape.length > 1 && (!Number.isInteger(shape[shape.length - 1]) || shape[shape.length - 1] < 0))
+                throw new Error(`Chalkboard.stat.toTensor: Parameter "shape" must begin and end with non-negative integers.`);
+            return Chalkboard.tens.resize(arr, ...shape);
         };
         stat.toVector = (arr, dimension, index = 0) => {
             if (!Array.isArray(arr))
@@ -12829,8 +12863,9 @@ var Chalkboard;
             if (!Array.isArray(arr))
                 throw new Error(`Chalkboard.stat.variance: Parameter "arr" must be an array of finite numbers.`);
             let result = 0;
+            const mean = Chalkboard.stat.mean(arr);
             for (let i = 0; i < arr.length; i++) {
-                result += (arr[i] - Chalkboard.stat.mean(arr)) * (arr[i] - Chalkboard.stat.mean(arr));
+                result += (arr[i] - mean) * (arr[i] - mean);
             }
             return result / arr.length;
         };
@@ -12853,136 +12888,476 @@ var Chalkboard;
 (function (Chalkboard) {
     let tens;
     (function (tens_1) {
-        tens_1.absolute = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.absolute: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.absolute(tens[i]);
+        const $broadcast = (tens1, shape1, tens2, shape2, callback, caller) => {
+            const n = Math.max(shape1.length, shape2.length), shape = [], pad1 = [], pad2 = [];
+            for (let k = 0; k < n; k++) {
+                const a = shape1[shape1.length - n + k] ?? 1, b = shape2[shape2.length - n + k] ?? 1;
+                if (a !== b && a !== 1 && b !== 1)
+                    throw new Error(`Chalkboard.tens.${caller}: Parameters "tens1" and "tens2" must have broadcastable shapes.`);
+                shape.push(a === 1 ? b : a);
+                pad1.push(a);
+                pad2.push(b);
+            }
+            const walk = (arr1, arr2, depth) => {
+                const result = [];
+                if (depth === n - 1) {
+                    if (pad1[depth] === 1) {
+                        const a = arr1[0];
+                        for (let i = 0; i < shape[depth]; i++)
+                            result[i] = callback(a, (pad2[depth] === 1 ? arr2[0] : arr2[i]));
+                    }
+                    else if (pad2[depth] === 1) {
+                        const b = arr2[0];
+                        for (let i = 0; i < shape[depth]; i++)
+                            result[i] = callback(arr1[i], b);
+                    }
+                    else {
+                        for (let i = 0; i < shape[depth]; i++)
+                            result[i] = callback(arr1[i], arr2[i]);
+                    }
                 }
+                else
+                    for (let i = 0; i < shape[depth]; i++)
+                        result[i] = walk((pad1[depth] === 1 ? arr1[0] : arr1[i]), (pad2[depth] === 1 ? arr2[0] : arr2[i]), depth + 1);
+                return result;
+            };
+            let wrap1 = tens1, wrap2 = tens2;
+            for (let i = shape1.length; i < n; i++)
+                wrap1 = [wrap1];
+            for (let i = shape2.length; i < n; i++)
+                wrap2 = [wrap2];
+            return walk(wrap1, wrap2, 0);
+        };
+        const $contract = (tens, shape, axis1, axis2) => {
+            const flat = $flatten(tens), n = shape.length, stride = new Array(n);
+            stride[n - 1] = 1;
+            for (let k = n - 2; k >= 0; k--)
+                stride[k] = stride[k + 1] * shape[k + 1];
+            const keep = [];
+            for (let k = 0; k < n; k++)
+                if (k !== axis1 && k !== axis2)
+                    keep.push(k);
+            const diag = stride[axis1] + stride[axis2], m = shape[axis1];
+            const sum = (offset) => {
+                let result = 0;
+                for (let i = 0; i < m; i++)
+                    result += flat[offset + i * diag];
+                return result;
+            };
+            if (keep.length === 0)
+                return sum(0);
+            const build = (depth, offset) => {
+                const result = [], axis = keep[depth];
+                for (let j = 0; j < shape[axis]; j++)
+                    result[j] = depth === keep.length - 1 ? sum(offset + j * stride[axis]) : build(depth + 1, offset + j * stride[axis]);
+                return result;
+            };
+            return build(0, 0);
+        };
+        const $copy = (tens) => {
+            if (!Array.isArray(tens))
+                return tens;
+            if (!Array.isArray(tens[0]))
+                return tens.slice();
+            const result = [];
+            for (let i = 0; i < tens.length; i++)
+                result[i] = $copy(tens[i]);
+            return result;
+        };
+        const $flatten = (tens) => {
+            if (!Array.isArray(tens))
+                return [tens];
+            const result = [];
+            const flatten = (tens) => {
+                for (let i = 0; i < tens.length; i++) {
+                    const t = tens[i];
+                    if (Array.isArray(t))
+                        flatten(t);
+                    else
+                        result.push(t);
+                }
+            };
+            flatten(tens);
+            return result;
+        };
+        const $isApproxEqual = (tens1, tens2, precision, numeric, caller) => {
+            const shape = $shape(tens1, numeric, caller, "tens1");
+            let result = true;
+            const walk = (arr1, arr2, depth) => {
+                if (!Array.isArray(arr2) || arr2.length !== shape[depth])
+                    return false;
+                if (depth === shape.length - 1) {
+                    for (let i = 0; i < arr2.length; i++) {
+                        const a = arr1[i], b = arr2[i];
+                        if (typeof b !== "number" && (numeric || b !== null))
+                            return false;
+                        if (result && a !== b && !(Math.abs(a - b) < precision))
+                            result = false;
+                    }
+                }
+                else
+                    for (let i = 0; i < arr2.length; i++)
+                        if (!walk(arr1[i], arr2[i], depth + 1))
+                            return false;
+                return true;
+            };
+            if (shape.length === 0) {
+                const a = tens1, b = tens2;
+                return $shape(tens2, numeric, caller, "tens2").length === 0 && (a === b || Math.abs(a - b) < precision);
+            }
+            if (walk(tens1, tens2, 0))
+                return result;
+            $shape(tens2, numeric, caller, "tens2");
+            return false;
+        };
+        const $isShapeEqual = (shape1, shape2) => {
+            return shape1.length === shape2.length && shape1.every((n, i) => n === shape2[i]);
+        };
+        const $map = (tens, callback) => {
+            if (!Array.isArray(tens))
+                return callback(tens);
+            const result = [];
+            if (Array.isArray(tens[0]))
+                for (let i = 0; i < tens.length; i++)
+                    result[i] = $map(tens[i], callback);
+            else
+                for (let i = 0; i < tens.length; i++)
+                    result[i] = callback(tens[i]);
+            return result;
+        };
+        const $outer = (tens1, tens2) => {
+            if (!Array.isArray(tens1))
+                return $map(tens2, (b) => tens1 * b);
+            const result = [];
+            for (let i = 0; i < tens1.length; i++)
+                result[i] = $outer(tens1[i], tens2);
+            return result;
+        };
+        const $permute = (tens, shape, axes) => {
+            const n = shape.length;
+            if (n === 0)
+                return tens;
+            const flat = $flatten(tens), stride = new Array(n);
+            stride[n - 1] = 1;
+            for (let k = n - 2; k >= 0; k--)
+                stride[k] = stride[k + 1] * shape[k + 1];
+            const outShape = axes.map((a) => shape[a]), outStride = axes.map((a) => stride[a]);
+            const build = (depth, offset) => {
+                const result = [];
+                for (let j = 0; j < outShape[depth]; j++)
+                    result[j] = depth === n - 1 ? flat[offset + j * outStride[depth]] : build(depth + 1, offset + j * outStride[depth]);
+                return result;
+            };
+            return build(0, 0);
+        };
+        const $resize = (tens, shape) => {
+            if (shape.length === 0)
+                return 0;
+            const entries = $flatten(tens);
+            let index = 0;
+            const refill = (depth) => {
+                const result = [];
+                for (let i = 0; i < shape[depth]; i++) {
+                    if (depth === shape.length - 1)
+                        result[i] = index < entries.length ? entries[index++] : 0;
+                    else
+                        result[i] = refill(depth + 1);
+                }
+                return result;
+            };
+            return refill(0);
+        };
+        const $shape = (tens, numeric, caller, name) => {
+            if (typeof tens === "number")
+                return [];
+            if (!Array.isArray(tens))
+                throw new Error(`Chalkboard.tens.${caller}: Parameter "${name}" must be a tensor.`);
+            const shape = [];
+            const seen = new Set();
+            for (let t = tens; Array.isArray(t); t = t[0]) {
+                if (seen.has(t))
+                    throw new Error(`Chalkboard.tens.${caller}: Parameter "${name}" must be a tensor.`);
+                seen.add(t);
+                shape.push(t.length);
+            }
+            const walk = (t, depth) => {
+                if (!Array.isArray(t) || t.length !== shape[depth])
+                    throw new Error(`Chalkboard.tens.${caller}: Parameter "${name}" must be a rectangular tensor.`);
+                if (depth === shape.length - 1) {
+                    for (let i = 0; i < t.length; i++)
+                        if (typeof t[i] !== "number" && (numeric || t[i] !== null))
+                            throw new Error(`Chalkboard.tens.${caller}: Parameter "${name}" must be a tensor whose leaves are ${numeric ? "numbers" : "numbers or null"}.`);
+                }
+                else
+                    for (let i = 0; i < t.length; i++)
+                        walk(t[i], depth + 1);
+            };
+            walk(tens, 0);
+            return shape;
+        };
+        const $shapeArgs = (shape, caller) => {
+            shape = Array.isArray(shape[0]) ? shape[0] : shape;
+            for (let i = 0; i < shape.length; i++)
+                if (!Number.isInteger(shape[i]) || shape[i] < 0)
+                    throw new Error(`Chalkboard.tens.${caller}: Parameter "shape" must contain only non-negative integers.`);
+            return shape;
+        };
+        const $string = (tens, indentation) => {
+            if (typeof tens === "number") {
+                return "\t".repeat(indentation) + String(tens) + "\n";
+            }
+            else if (Array.isArray(tens[0])) {
+                let result = "\t".repeat(indentation) + "[\n";
+                for (let i = 0; i < tens.length; i++)
+                    result += $string(tens[i], indentation + 1);
+                result += "\t".repeat(indentation) + "]\n";
                 return result;
             }
             else {
-                return Math.abs(tens);
+                let result = "\t".repeat(indentation) + "[ ";
+                for (let i = 0; i < tens.length; i++)
+                    result += String(tens[i]) + " ";
+                result += "]\n";
+                return result;
             }
+        };
+        const $zip = (tens1, tens2, callback) => {
+            if (Array.isArray(tens1)) {
+                const result = [];
+                for (let i = 0; i < tens1.length; i++) {
+                    const a = tens1[i], b = Array.isArray(tens2) ? tens2[i] : tens2;
+                    result[i] = Array.isArray(a) ? $zip(a, b, callback) : callback(a, b);
+                }
+                return result;
+            }
+            else if (Array.isArray(tens2)) {
+                const result = [];
+                for (let i = 0; i < tens2.length; i++) {
+                    const b = tens2[i];
+                    result[i] = Array.isArray(b) ? $zip(tens1, b, callback) : callback(tens1, b);
+                }
+                return result;
+            }
+            else
+                return callback(tens1, tens2);
+        };
+        tens_1.absolute = (tens) => {
+            $shape(tens, true, "absolute", "tens");
+            return $map(tens, (x) => Math.abs(x));
         };
         tens_1.add = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.add: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.add: Parameter "tens2" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens1) && Array.isArray(tens2)) {
-                for (let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
-                    result[i] = Chalkboard.tens.add(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
-                }
-                return result;
-            }
-            else {
-                return tens1 + tens2;
-            }
+            const shape1 = $shape(tens1, true, "add", "tens1"), shape2 = $shape(tens2, true, "add", "tens2");
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isShapeEqual(shape1, shape2))
+                return $broadcast(tens1, shape1, tens2, shape2, (a, b) => a + b, "add");
+            return $zip(tens1, tens2, (a, b) => a + b);
         };
-        tens_1.concat = (tens1, tens2, rank = 1) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.concat: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.concat: Parameter "tens2" must be a tensor.`);
-            if (!Number.isInteger(rank) || rank < 1 || rank > Math.min(Chalkboard.tens.rank(tens1), Chalkboard.tens.rank(tens2)))
-                throw new Error(`Chalkboard.tens.concat: Parameter "rank" must be a positive integer less than or equal to both tensor ranks.`);
-            const concatAtRank = function (arr1, arr2, currentRank) {
-                if (currentRank === rank) {
-                    return Chalkboard.tens.init(arr1.concat(arr2));
+        tens_1.antisymmetrize = (tens, ...axes) => {
+            const shape = $shape(tens, true, "antisymmetrize", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length === 0)
+                axes = shape.map((_, i) => i);
+            if (new Set(axes).size !== axes.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= shape.length))
+                throw new Error(`Chalkboard.tens.antisymmetrize: Parameter "axes" must contain distinct non-negative integers less than the tensor rank.`);
+            if (axes.some((a) => shape[a] !== shape[axes[0]]))
+                throw new Error(`Chalkboard.tens.antisymmetrize: Parameter "axes" must contain axes of equal length.`);
+            if (axes.length < 2)
+                return $copy(tens);
+            const result = new Array($flatten(tens).length).fill(0);
+            const permutation = axes.slice();
+            let count = 0;
+            const walk = (depth, sign) => {
+                if (depth === permutation.length) {
+                    const order = shape.map((_, i) => i);
+                    for (let i = 0; i < axes.length; i++)
+                        order[axes[i]] = permutation[i];
+                    const flat = $flatten($permute(tens, shape, order));
+                    for (let i = 0; i < flat.length; i++)
+                        result[i] += sign * flat[i];
+                    count++;
+                    return;
                 }
-                return arr1.map(function (element, index) {
-                    return concatAtRank(element, arr2[index], currentRank);
-                });
+                for (let i = depth; i < permutation.length; i++) {
+                    [permutation[depth], permutation[i]] = [permutation[i], permutation[depth]];
+                    walk(depth + 1, i === depth ? sign : -sign);
+                    [permutation[depth], permutation[i]] = [permutation[i], permutation[depth]];
+                }
             };
-            return concatAtRank(tens1, tens2, 1);
+            walk(0, 1);
+            for (let i = 0; i < result.length; i++)
+                result[i] /= count;
+            return $resize(result, shape);
+        };
+        tens_1.concat = (tens1, tens2, axis = 0) => {
+            const shape1 = $shape(tens1, false, "concat", "tens1"), shape2 = $shape(tens2, false, "concat", "tens2");
+            if (!Number.isInteger(axis) || axis < 0 || axis >= Math.min(shape1.length, shape2.length))
+                throw new Error(`Chalkboard.tens.concat: Parameter "axis" must be a non-negative integer less than both tensor ranks.`);
+            if (shape1.length !== shape2.length || shape1.some((n, i) => i !== axis && n !== shape2[i]))
+                throw new Error(`Chalkboard.tens.concat: Parameters "tens1" and "tens2" must have equal shapes except along the concatenated axis.`);
+            const concatAtAxis = (arr1, arr2, currentAxis) => {
+                if (currentAxis === axis)
+                    return $copy(arr1.concat(arr2));
+                return arr1.map((element, index) => concatAtAxis(element, arr2[index], currentAxis + 1));
+            };
+            return concatAtAxis(tens1, tens2, 0);
         };
         tens_1.constrain = (tens, range = [0, 1]) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.constrain: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.constrain(tens[i], range);
-                }
-                return result;
-            }
-            else {
-                return Chalkboard.numb.constrain(tens, range);
-            }
+            $shape(tens, true, "constrain", "tens");
+            if (!Array.isArray(range) || range.length !== 2 || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[0] > range[1])
+                throw new Error(`Chalkboard.tens.constrain: Parameter "range" must be an array of two finite numbers whose first element is less than or equal to its second element.`);
+            return $map(tens, (x) => Math.max(Math.min(x, range[1]), range[0]));
         };
-        tens_1.contract = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.contract: Parameter "tens" must be a tensor.`);
-            if (Chalkboard.tens.rank(tens) > 2) {
-                return Chalkboard.tens.resize(tens, Chalkboard.tens.size(tens)[0], Chalkboard.tens
-                    .size(tens)
-                    .slice(1)
-                    .reduce(function (a, b) {
-                    return a * b;
-                }) / Chalkboard.tens.size(tens)[0]);
-            }
-            else if (Chalkboard.tens.rank(tens) === 2) {
-                return Chalkboard.matr.trace(tens);
-            }
-            else {
-                return tens;
-            }
+        tens_1.contract = (tens, axis1 = 0, axis2 = 1) => {
+            const shape = $shape(tens, true, "contract", "tens");
+            if (shape.length < 2)
+                throw new Error(`Chalkboard.tens.contract: Parameter "tens" must have a rank of at least two.`);
+            if (!Number.isInteger(axis1) || axis1 < 0 || axis1 >= shape.length)
+                throw new Error(`Chalkboard.tens.contract: Parameter "axis1" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(axis2) || axis2 < 0 || axis2 >= shape.length)
+                throw new Error(`Chalkboard.tens.contract: Parameter "axis2" must be a non-negative integer less than the tensor rank.`);
+            if (axis1 === axis2)
+                throw new Error(`Chalkboard.tens.contract: Parameters "axis1" and "axis2" must be different axes.`);
+            if (shape[axis1] !== shape[axis2])
+                throw new Error(`Chalkboard.tens.contract: Parameters "axis1" and "axis2" must be axes of equal length.`);
+            return $contract(tens, shape, axis1, axis2);
         };
         tens_1.copy = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.copy: Parameter "tens" must be a tensor.`);
-            if (Array.isArray(tens)) {
-                const result = Chalkboard.tens.init();
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.copy(tens[i]);
+            $shape(tens, false, "copy", "tens");
+            return $copy(tens);
+        };
+        tens_1.dot = (tens1, tens2) => {
+            const shape1 = $shape(tens1, true, "dot", "tens1");
+            const shape2 = $shape(tens2, true, "dot", "tens2");
+            if (!$isShapeEqual(shape1, shape2))
+                throw new Error(`Chalkboard.tens.dot: Parameters "tens1" and "tens2" must have equal shapes.`);
+            const a = $flatten(tens1);
+            const b = $flatten(tens2);
+            let result = 0;
+            for (let i = 0; i < a.length; i++)
+                result += a[i] * b[i];
+            return result;
+        };
+        tens_1.einsum = (subscripts, ...tensors) => {
+            const shapes = tensors.map((t) => $shape(t, true, "einsum", "tensors"));
+            if (typeof subscripts !== "string" || !/^[a-zA-Z]*(,[a-zA-Z]*)*(->[a-zA-Z]*)?$/.test(subscripts.replace(/\s/g, "")))
+                throw new Error(`Chalkboard.tens.einsum: Parameter "subscripts" must be comma-separated axis letters, optionally followed by "->" and the output axis letters.`);
+            const parts = subscripts.replace(/\s/g, "").split("->");
+            const terms = parts[0].split(",");
+            if (tensors.length === 0 || terms.length !== tensors.length)
+                throw new Error(`Chalkboard.tens.einsum: Parameter "subscripts" must have one term for each tensor.`);
+            const lengths = new Map();
+            const counts = new Map();
+            const strides = shapes.map((shape) => {
+                const result = new Array(shape.length);
+                let stride = 1;
+                for (let i = shape.length - 1; i >= 0; i--) {
+                    result[i] = stride;
+                    stride *= shape[i];
                 }
                 return result;
+            });
+            const letterStrides = new Map();
+            for (let t = 0; t < tensors.length; t++) {
+                if (terms[t].length !== shapes[t].length)
+                    throw new Error(`Chalkboard.tens.einsum: Parameter "subscripts" must have as many letters in each term as the rank of the corresponding tensor.`);
+                for (let a = 0; a < terms[t].length; a++) {
+                    const letter = terms[t][a];
+                    const length = shapes[t][a];
+                    if (lengths.has(letter) && lengths.get(letter) !== length)
+                        throw new Error(`Chalkboard.tens.einsum: Parameter "subscripts" must label axes of equal length with the same letter.`);
+                    lengths.set(letter, length);
+                    counts.set(letter, (counts.get(letter) ?? 0) + 1);
+                    if (!letterStrides.has(letter))
+                        letterStrides.set(letter, new Array(tensors.length).fill(0));
+                    letterStrides.get(letter)[t] += strides[t][a];
+                }
             }
-            else {
-                return tens;
-            }
+            const output = parts.length === 2 ? parts[1].split("") : Array.from(counts.keys()).filter((l) => counts.get(l) === 1).sort();
+            if (new Set(output).size !== output.length || output.some((l) => !lengths.has(l)))
+                throw new Error(`Chalkboard.tens.einsum: Parameter "subscripts" must have distinct output letters that each appear in an input term.`);
+            const letters = output.concat(Array.from(lengths.keys()).filter((l) => !output.includes(l)));
+            const steps = letters.map((l) => letterStrides.get(l));
+            const limits = letters.map((l) => lengths.get(l));
+            const flat = tensors.map((t) => $flatten(t));
+            const offsets = new Array(tensors.length).fill(0);
+            const result = [];
+            const walk = (depth) => {
+                if (depth === letters.length) {
+                    let product = 1;
+                    for (let t = 0; t < flat.length; t++)
+                        product *= flat[t][offsets[t]];
+                    return product;
+                }
+                let sum = 0;
+                const step = steps[depth];
+                for (let i = 0; i < limits[depth]; i++) {
+                    const value = walk(depth + 1);
+                    if (depth === output.length - 1)
+                        result.push(0 + value);
+                    else
+                        sum += value;
+                    for (let t = 0; t < offsets.length; t++)
+                        offsets[t] += step[t];
+                }
+                for (let t = 0; t < offsets.length; t++)
+                    offsets[t] -= limits[depth] * step[t];
+                return sum;
+            };
+            const scalar = walk(0);
+            return output.length === 0 ? 0 + scalar : $resize(result, output.map((l) => lengths.get(l)));
         };
-        tens_1.empty = (...size) => {
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.empty: Parameter "size" must begin and end with non-negative integers.`);
-            const newNDArray = function (size) {
-                if (size.length === 0) {
+        tens_1.empty = (...shape) => {
+            shape = $shapeArgs(shape, "empty");
+            const newNDArray = (shape) => {
+                if (shape.length === 0)
                     return null;
-                }
-                const curr = size[0];
-                const rest = size.slice(1);
+                const curr = shape[0];
+                const rest = shape.slice(1);
                 const result = [];
-                for (let i = 0; i < curr; i++) {
+                for (let i = 0; i < curr; i++)
                     result[i] = newNDArray(rest);
-                }
                 return result;
             };
-            return newNDArray(size);
+            return newNDArray(shape);
         };
-        tens_1.fill = (element, ...size) => {
-            if (!Number.isFinite(element))
-                throw new Error(`Chalkboard.tens.fill: Parameter "element" must be a finite number.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.fill: Parameter "size" must begin and end with non-negative integers.`);
-            const newNDArray = function (size) {
-                if (size.length === 0) {
+        tens_1.fill = (element, ...shape) => {
+            if (typeof element !== "number")
+                throw new Error(`Chalkboard.tens.fill: Parameter "element" must be a number.`);
+            shape = $shapeArgs(shape, "fill");
+            const newNDArray = (shape) => {
+                if (shape.length === 0)
                     return element;
-                }
-                const curr = size[0];
-                const rest = size.slice(1);
+                const curr = shape[0];
+                const rest = shape.slice(1);
                 const result = [];
-                for (let i = 0; i < curr; i++) {
+                for (let i = 0; i < curr; i++)
                     result[i] = newNDArray(rest);
-                }
                 return result;
             };
-            return newNDArray(size);
+            return newNDArray(shape);
+        };
+        tens_1.get = (tens, ...index) => {
+            const shape = $shape(tens, false, "get", "tens");
+            index = Array.isArray(index[0]) ? index[0] : index;
+            if (index.length > shape.length || Array.from(index).some((i, a) => !Number.isInteger(i) || i < 0 || i >= shape[a]))
+                throw new Error(`Chalkboard.tens.get: Parameter "index" must contain at most as many integers as the tensor rank, each within its axis bounds.`);
+            for (let a = 0; a < index.length; a++)
+                tens = tens[index[a]];
+            return $copy(tens);
+        };
+        tens_1.identity = (dimension, rank = 2) => {
+            if (!Number.isInteger(dimension) || dimension < 0)
+                throw new Error(`Chalkboard.tens.identity: Parameter "dimension" must be a non-negative integer.`);
+            if (!Number.isInteger(rank) || rank < 0)
+                throw new Error(`Chalkboard.tens.identity: Parameter "rank" must be a non-negative integer.`);
+            const build = (depth, first, equal) => {
+                if (depth === rank)
+                    return equal ? 1 : 0;
+                const result = [];
+                for (let i = 0; i < dimension; i++)
+                    result[i] = build(depth + 1, depth === 0 ? i : first, equal && (depth === 0 || i === first));
+                return result;
+            };
+            return build(0, 0, true);
         };
         tens_1.init = (...tensor) => {
             if (tensor.length === 0) {
@@ -12991,415 +13366,606 @@ var Chalkboard;
             else if (tensor.length === 1 && Array.isArray(tensor[0])) {
                 tensor = tensor[0];
             }
-            const newNDArray = function (arr) {
-                return arr.map(function (subarr) {
-                    if (Array.isArray(subarr)) {
-                        return newNDArray(subarr);
-                    }
-                    else {
-                        return subarr;
-                    }
-                });
-            };
-            return newNDArray(tensor);
+            $shape(tensor, false, "init", "tensor");
+            return $copy(tensor);
+        };
+        tens_1.isAntisymmetric = (tens, ...axes) => {
+            const shape = $shape(tens, true, "isAntisymmetric", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length === 0)
+                axes = shape.map((_, i) => i);
+            if (new Set(axes).size !== axes.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= shape.length))
+                throw new Error(`Chalkboard.tens.isAntisymmetric: Parameter "axes" must contain distinct non-negative integers less than the tensor rank.`);
+            if (axes.some((a) => shape[a] !== shape[axes[0]]))
+                return false;
+            if (axes.length < 2)
+                return true;
+            const flat = $flatten(tens);
+            for (let k = 1; k < axes.length; k++) {
+                const order = shape.map((_, i) => i);
+                order[axes[k - 1]] = axes[k];
+                order[axes[k]] = axes[k - 1];
+                const swapped = $flatten($permute(tens, shape, order));
+                for (let i = 0; i < flat.length; i++)
+                    if (flat[i] !== -swapped[i])
+                        return false;
+            }
+            return true;
         };
         tens_1.isApproxEqual = (tens1, tens2, precision = 0.000001) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "tens2" must be a tensor.`);
-            if (precision !== undefined && (!Number.isFinite(precision)))
-                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "precision" must be a finite number.`);
-            if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
-                (tens1 = tens1), (tens2 = tens2);
-                for (let i = 0; i < tens1.length; i++) {
-                    if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
-                        if (!Chalkboard.tens.isApproxEqual(tens1[i], tens2[i], precision))
-                            return false;
-                    }
-                    else {
-                        if (!Chalkboard.numb.isApproxEqual(tens1[i], tens2[i], precision))
-                            return false;
-                    }
-                }
-                return true;
-            }
-            else {
-                return false;
-            }
+            if (!Number.isFinite(precision) || precision <= 0)
+                throw new Error(`Chalkboard.tens.isApproxEqual: Parameter "precision" must be a positive finite number.`);
+            return $isApproxEqual(tens1, tens2, precision, true, "isApproxEqual");
         };
         tens_1.isEqual = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.isEqual: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.isEqual: Parameter "tens2" must be a tensor.`);
-            if (Chalkboard.tens.isSizeEqual(tens1, tens2)) {
-                (tens1 = tens1), (tens2 = tens2);
-                for (let i = 0; i < tens1.length; i++) {
-                    if (Array.isArray(tens1[i]) && Array.isArray(tens2[i])) {
-                        if (!Chalkboard.tens.isEqual(tens1[i], tens2[i]))
-                            return false;
-                    }
-                    else {
-                        if (tens1[i] !== tens2[i])
-                            return false;
-                    }
-                }
-                return true;
-            }
-            else {
-                return false;
-            }
+            return $isApproxEqual(tens1, tens2, 0, false, "isEqual");
         };
         tens_1.isRankEqual = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.isRankEqual: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.isRankEqual: Parameter "tens2" must be a tensor.`);
-            return Chalkboard.tens.rank(tens1) === Chalkboard.tens.rank(tens2);
+            return $shape(tens1, false, "isRankEqual", "tens1").length === $shape(tens2, false, "isRankEqual", "tens2").length;
         };
         tens_1.isRankOf = (tens, rank) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.isRankOf: Parameter "tens" must be a tensor.`);
+            const shape = $shape(tens, false, "isRankOf", "tens");
             if (!Number.isInteger(rank) || rank < 0)
                 throw new Error(`Chalkboard.tens.isRankOf: Parameter "rank" must be a non-negative integer.`);
-            return Chalkboard.tens.rank(tens) === rank;
+            return shape.length === rank;
         };
-        tens_1.isSizeEqual = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.isSizeEqual: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.isSizeEqual: Parameter "tens2" must be a tensor.`);
-            if (Chalkboard.tens.isRankEqual(tens1, tens2)) {
-                let score = 0;
-                for (let i = 0; i < Chalkboard.tens.rank(tens1); i++) {
-                    if (Chalkboard.tens.size(tens1)[i] !== Chalkboard.tens.size(tens2)[i])
-                        score++;
-                }
-                return score === 0;
-            }
-            else {
+        tens_1.isShapeEqual = (tens1, tens2) => {
+            return $isShapeEqual($shape(tens1, false, "isShapeEqual", "tens1"), $shape(tens2, false, "isShapeEqual", "tens2"));
+        };
+        tens_1.isShapeOf = (tens, ...shape) => {
+            return $isShapeEqual($shape(tens, false, "isShapeOf", "tens"), $shapeArgs(shape, "isShapeOf"));
+        };
+        tens_1.isShapeUniform = (tens) => {
+            const shape = $shape(tens, false, "isShapeUniform", "tens");
+            return shape.every((n) => n === shape[0]);
+        };
+        tens_1.isSymmetric = (tens, ...axes) => {
+            const shape = $shape(tens, true, "isSymmetric", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length === 0)
+                axes = shape.map((_, i) => i);
+            if (new Set(axes).size !== axes.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= shape.length))
+                throw new Error(`Chalkboard.tens.isSymmetric: Parameter "axes" must contain distinct non-negative integers less than the tensor rank.`);
+            if (axes.some((a) => shape[a] !== shape[axes[0]]))
                 return false;
+            if (axes.length < 2)
+                return true;
+            const flat = $flatten(tens);
+            for (let k = 1; k < axes.length; k++) {
+                const order = shape.map((_, i) => i);
+                order[axes[k - 1]] = axes[k];
+                order[axes[k]] = axes[k - 1];
+                const swapped = $flatten($permute(tens, shape, order));
+                for (let i = 0; i < flat.length; i++)
+                    if (flat[i] !== swapped[i])
+                        return false;
             }
-        };
-        tens_1.isSizeOf = (tens, ...size) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.isSizeOf: Parameter "tens" must be a tensor.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.isSizeOf: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.isSizeEqual(tens, Chalkboard.tens.empty(...size));
-        };
-        tens_1.isSizeUniform = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.isSizeUniform: Parameter "tens" must be a tensor.`);
-            let score = 0;
-            for (let i = 0; i < Chalkboard.tens.rank(tens); i++) {
-                if (Chalkboard.tens.size(tens)[i] !== Chalkboard.tens.size(tens)[0])
-                    score++;
-            }
-            return score === 0;
+            return true;
         };
         tens_1.isZero = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.isZero: Parameter "tens" must be a tensor.`);
-            if (Array.isArray(tens)) {
+            $shape(tens, true, "isZero", "tens");
+            const check = (tens) => {
+                if (!Array.isArray(tens))
+                    return Math.abs(tens) < 0.000001;
                 for (let i = 0; i < tens.length; i++) {
-                    if (!Chalkboard.tens.isZero(tens[i]))
+                    const t = tens[i];
+                    if (Array.isArray(t) ? !check(t) : !(Math.abs(t) < 0.000001))
                         return false;
                 }
                 return true;
-            }
-            else {
-                return Chalkboard.numb.isApproxEqual(tens, 0);
-            }
+            };
+            return check(tens);
+        };
+        tens_1.LeviCivita = (dimension) => {
+            if (!Number.isInteger(dimension) || dimension < 0)
+                throw new Error(`Chalkboard.tens.LeviCivita: Parameter "dimension" must be a non-negative integer.`);
+            if (dimension === 0)
+                return 1;
+            const result = $resize([], new Array(dimension).fill(dimension));
+            const order = Array.from({ length: dimension }, (_, i) => i);
+            const walk = (depth, sign) => {
+                if (depth === dimension) {
+                    let target = result;
+                    for (let i = 0; i < dimension - 1; i++)
+                        target = target[order[i]];
+                    target[order[dimension - 1]] = sign;
+                    return;
+                }
+                for (let i = depth; i < dimension; i++) {
+                    [order[depth], order[i]] = [order[i], order[depth]];
+                    walk(depth + 1, i === depth ? sign : -sign);
+                    [order[depth], order[i]] = [order[i], order[depth]];
+                }
+            };
+            walk(0, 1);
+            return result;
+        };
+        tens_1.max = (tens, axis) => {
+            const shape = $shape(tens, true, "max", "tens");
+            if (axis !== undefined && (!Number.isInteger(axis) || axis < 0 || axis >= shape.length))
+                throw new Error(`Chalkboard.tens.max: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            const flat = new Array(shape.reduce((a, b) => a * b, 1));
+            let index = 0;
+            const flatten = (t) => {
+                if (!Array.isArray(t))
+                    flat[index++] = t;
+                else if (Array.isArray(t[0]))
+                    for (let i = 0; i < t.length; i++)
+                        flatten(t[i]);
+                else
+                    for (let i = 0; i < t.length; i++)
+                        flat[index++] = t[i];
+            };
+            flatten(tens);
+            const count = axis === undefined ? flat.length : shape[axis];
+            if (count === 0)
+                throw new Error(`Chalkboard.tens.max: Parameter "tens" must have at least one entry to reduce.`);
+            const stride = axis === undefined ? 1 : shape.slice(axis + 1).reduce((a, b) => a * b, 1);
+            const reduce = (offset) => {
+                let result = -Infinity;
+                for (let j = 0; j < count; j++) {
+                    const x = flat[offset + j * stride];
+                    result = Math.max(result, x);
+                }
+                return result;
+            };
+            if (axis === undefined)
+                return reduce(0);
+            const outShape = shape.filter((_, i) => i !== axis);
+            const result = [];
+            const outer = shape.slice(0, axis).reduce((a, b) => a * b, 1);
+            for (let i = 0; i < outer; i++)
+                for (let j = 0; j < stride; j++)
+                    result.push(reduce(i * count * stride + j));
+            return outShape.length === 0 ? result[0] : $resize(result, outShape);
+        };
+        tens_1.mean = (tens, axis) => {
+            const shape = $shape(tens, true, "mean", "tens");
+            if (axis !== undefined && (!Number.isInteger(axis) || axis < 0 || axis >= shape.length))
+                throw new Error(`Chalkboard.tens.mean: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            const flat = new Array(shape.reduce((a, b) => a * b, 1));
+            let index = 0;
+            const flatten = (t) => {
+                if (!Array.isArray(t))
+                    flat[index++] = t;
+                else if (Array.isArray(t[0]))
+                    for (let i = 0; i < t.length; i++)
+                        flatten(t[i]);
+                else
+                    for (let i = 0; i < t.length; i++)
+                        flat[index++] = t[i];
+            };
+            flatten(tens);
+            const count = axis === undefined ? flat.length : shape[axis];
+            if (count === 0)
+                throw new Error(`Chalkboard.tens.mean: Parameter "tens" must have at least one entry to reduce.`);
+            const stride = axis === undefined ? 1 : shape.slice(axis + 1).reduce((a, b) => a * b, 1);
+            const reduce = (offset) => {
+                let result = 0;
+                for (let j = 0; j < count; j++) {
+                    const x = flat[offset + j * stride];
+                    result += x;
+                }
+                return result / count;
+            };
+            if (axis === undefined)
+                return reduce(0);
+            const outShape = shape.filter((_, i) => i !== axis);
+            const result = [];
+            const outer = shape.slice(0, axis).reduce((a, b) => a * b, 1);
+            for (let i = 0; i < outer; i++)
+                for (let j = 0; j < stride; j++)
+                    result.push(reduce(i * count * stride + j));
+            return outShape.length === 0 ? result[0] : $resize(result, outShape);
+        };
+        tens_1.min = (tens, axis) => {
+            const shape = $shape(tens, true, "min", "tens");
+            if (axis !== undefined && (!Number.isInteger(axis) || axis < 0 || axis >= shape.length))
+                throw new Error(`Chalkboard.tens.min: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            const flat = new Array(shape.reduce((a, b) => a * b, 1));
+            let index = 0;
+            const flatten = (t) => {
+                if (!Array.isArray(t))
+                    flat[index++] = t;
+                else if (Array.isArray(t[0]))
+                    for (let i = 0; i < t.length; i++)
+                        flatten(t[i]);
+                else
+                    for (let i = 0; i < t.length; i++)
+                        flat[index++] = t[i];
+            };
+            flatten(tens);
+            const count = axis === undefined ? flat.length : shape[axis];
+            if (count === 0)
+                throw new Error(`Chalkboard.tens.min: Parameter "tens" must have at least one entry to reduce.`);
+            const stride = axis === undefined ? 1 : shape.slice(axis + 1).reduce((a, b) => a * b, 1);
+            const reduce = (offset) => {
+                let result = Infinity;
+                for (let j = 0; j < count; j++) {
+                    const x = flat[offset + j * stride];
+                    result = Math.min(result, x);
+                }
+                return result;
+            };
+            if (axis === undefined)
+                return reduce(0);
+            const outShape = shape.filter((_, i) => i !== axis);
+            const result = [];
+            const outer = shape.slice(0, axis).reduce((a, b) => a * b, 1);
+            for (let i = 0; i < outer; i++)
+                for (let j = 0; j < stride; j++)
+                    result.push(reduce(i * count * stride + j));
+            return outShape.length === 0 ? result[0] : $resize(result, outShape);
         };
         tens_1.mul = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.mul: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.mul: Parameter "tens2" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens1) && Array.isArray(tens2)) {
-                for (let i = 0; i < tens1.length; i++) {
-                    const subarr = Chalkboard.tens.init();
-                    for (let j = 0; j < tens2.length; j++) {
-                        subarr[j] = Chalkboard.tens.mul(tens1[i], tens2[j]);
-                    }
-                    result.push(subarr);
+            $shape(tens1, true, "mul", "tens1");
+            $shape(tens2, true, "mul", "tens2");
+            return $outer(tens1, tens2);
+        };
+        tens_1.mulContract = (tens1, tens2, axes1, axes2 = [0]) => {
+            const shape1 = $shape(tens1, true, "mulContract", "tens1");
+            const shape2 = $shape(tens2, true, "mulContract", "tens2");
+            axes1 = axes1 === undefined ? [shape1.length - 1] : Array.isArray(axes1) ? axes1 : [axes1];
+            axes2 = Array.isArray(axes2) ? axes2 : [axes2];
+            if (new Set(axes1).size !== axes1.length || Array.from(axes1).some((a) => !Number.isInteger(a) || a < 0 || a >= shape1.length))
+                throw new Error(`Chalkboard.tens.mulContract: Parameter "axes1" must contain distinct non-negative integers less than the rank of "tens1".`);
+            if (new Set(axes2).size !== axes2.length || Array.from(axes2).some((a) => !Number.isInteger(a) || a < 0 || a >= shape2.length))
+                throw new Error(`Chalkboard.tens.mulContract: Parameter "axes2" must contain distinct non-negative integers less than the rank of "tens2".`);
+            if (axes1.length !== axes2.length || axes1.some((a, i) => shape1[a] !== shape2[axes2[i]]))
+                throw new Error(`Chalkboard.tens.mulContract: Parameters "axes1" and "axes2" must contain the same number of axes, pairing axes of equal length.`);
+            const keep1 = shape1.map((_, i) => i).filter((i) => !axes1.includes(i));
+            const keep2 = shape2.map((_, i) => i).filter((i) => !axes2.includes(i));
+            const a = $flatten($permute(tens1, shape1, keep1.concat(axes1)));
+            const b = $flatten($permute(tens2, shape2, axes2.concat(keep2)));
+            const m = keep1.reduce((p, i) => p * shape1[i], 1);
+            const n = keep2.reduce((p, i) => p * shape2[i], 1);
+            const k = axes1.reduce((p, i) => p * shape1[i], 1);
+            const result = new Array(m * n).fill(0);
+            for (let i = 0; i < m; i++) {
+                for (let p = 0; p < k; p++) {
+                    const value = a[i * k + p];
+                    for (let j = 0; j < n; j++)
+                        result[i * n + j] += value * b[p * n + j];
                 }
-                return result;
             }
-            else {
-                return tens1 * tens2;
-            }
+            const outShape = keep1.map((i) => shape1[i]).concat(keep2.map((i) => shape2[i]));
+            return outShape.length === 0 ? result[0] : $resize(result, outShape);
+        };
+        tens_1.mulHadamard = (tens1, tens2) => {
+            const shape1 = $shape(tens1, true, "mulHadamard", "tens1"), shape2 = $shape(tens2, true, "mulHadamard", "tens2");
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isShapeEqual(shape1, shape2))
+                return $broadcast(tens1, shape1, tens2, shape2, (a, b) => a * b, "mulHadamard");
+            return $zip(tens1, tens2, (a, b) => a * b);
         };
         tens_1.negate = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.negate: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.negate(tens[i]);
-                }
-                return result;
+            $shape(tens, true, "negate", "tens");
+            return $map(tens, (x) => -x);
+        };
+        tens_1.norm = (tens, type = "L2") => {
+            $shape(tens, true, "norm", "tens");
+            if (type !== "L0" && type !== "L1" && type !== "L2" && type !== "LInfinity")
+                throw new Error(`Chalkboard.tens.norm: Parameter "type" must be L0, L1, L2, or LInfinity.`);
+            const flat = $flatten(tens);
+            let result = 0;
+            for (let i = 0; i < flat.length; i++) {
+                const x = flat[i];
+                if (type === "L0")
+                    result += x !== 0 ? 1 : 0;
+                else if (type === "L1")
+                    result += Math.abs(x);
+                else if (type === "L2")
+                    result += x * x;
+                else
+                    result = Math.max(result, Math.abs(x));
             }
-            else {
-                return -tens;
+            return type === "L2" ? Math.sqrt(result) : result;
+        };
+        tens_1.normalize = (tens, type = "L2") => {
+            $shape(tens, true, "normalize", "tens");
+            if (type !== "L0" && type !== "L1" && type !== "L2" && type !== "LInfinity")
+                throw new Error(`Chalkboard.tens.normalize: Parameter "type" must be L0, L1, L2, or LInfinity.`);
+            const flat = $flatten(tens);
+            let result = 0;
+            for (let i = 0; i < flat.length; i++) {
+                const x = flat[i];
+                if (type === "L0")
+                    result += x !== 0 ? 1 : 0;
+                else if (type === "L1")
+                    result += Math.abs(x);
+                else if (type === "L2")
+                    result += x * x;
+                else
+                    result = Math.max(result, Math.abs(x));
             }
+            const norm = type === "L2" ? Math.sqrt(result) : result;
+            return $map(tens, (x) => x / norm);
+        };
+        tens_1.normsq = (tens, type = "L2") => {
+            $shape(tens, true, "normsq", "tens");
+            if (type !== "L0" && type !== "L1" && type !== "L2" && type !== "LInfinity")
+                throw new Error(`Chalkboard.tens.normsq: Parameter "type" must be L0, L1, L2, or LInfinity.`);
+            const flat = $flatten(tens);
+            let result = 0;
+            for (let i = 0; i < flat.length; i++) {
+                const x = flat[i];
+                if (type === "L0")
+                    result += x !== 0 ? 1 : 0;
+                else if (type === "L1")
+                    result += Math.abs(x);
+                else if (type === "L2")
+                    result += x * x;
+                else
+                    result = Math.max(result, Math.abs(x));
+            }
+            return type === "L2" ? result : result * result;
+        };
+        tens_1.permute = (tens, ...axes) => {
+            const shape = $shape(tens, false, "permute", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length !== shape.length || new Set(axes).size !== shape.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= shape.length))
+                throw new Error(`Chalkboard.tens.permute: Parameter "axes" must be a permutation of the integers from 0 to the tensor rank minus one.`);
+            return $permute(tens, shape, axes);
         };
         tens_1.print = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.print: Parameter "tens" must be a tensor.`);
-            console.log(Chalkboard.tens.toString(tens));
+            $shape(tens, false, "print", "tens");
+            console.log($string(tens, 0));
         };
-        tens_1.pull = (tens, rank, index) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.pull: Parameter "tens" must be a tensor.`);
-            const size = Chalkboard.tens.size(tens);
-            if (!Number.isInteger(rank) || rank < 0 || rank >= size.length)
-                throw new Error(`Chalkboard.tens.pull: Parameter "rank" must be a non-negative integer less than the tensor rank.`);
-            if (!Number.isInteger(index) || index < 0 || index >= size[rank])
-                throw new Error(`Chalkboard.tens.pull: Parameter "index" must be an integer within the selected rank bounds.`);
-            tens = tens;
-            if (rank === 0) {
-                tens.splice(index, 1);
-                return tens;
-            }
-            else {
-                for (let i = 0; i < tens.length; i++) {
-                    Chalkboard.tens.pull(tens[i], rank - 1, index);
+        tens_1.pull = (tens, axis, index) => {
+            const shape = $shape(tens, false, "pull", "tens");
+            if (!Number.isInteger(axis) || axis < 0 || axis >= shape.length)
+                throw new Error(`Chalkboard.tens.pull: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(index) || index < 0 || index >= shape[axis])
+                throw new Error(`Chalkboard.tens.pull: Parameter "index" must be an integer within the selected axis bounds.`);
+            const remove = (tensor, currentAxis) => {
+                if (currentAxis === 0) {
+                    tensor.splice(index, 1);
                 }
-                return tens;
-            }
+                else {
+                    for (let i = 0; i < tensor.length; i++)
+                        remove(tensor[i], currentAxis - 1);
+                }
+            };
+            remove(tens, axis);
+            return tens;
         };
-        tens_1.push = (tens, rank, index, elements) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.push: Parameter "tens" must be a tensor.`);
-            const size = Chalkboard.tens.size(tens);
-            if (!Number.isInteger(rank) || rank < 0 || rank >= size.length)
-                throw new Error(`Chalkboard.tens.push: Parameter "rank" must be a non-negative integer less than the tensor rank.`);
-            if (!Number.isInteger(index) || index < 0 || index > size[rank])
-                throw new Error(`Chalkboard.tens.push: Parameter "index" must be an integer within the selected rank insertion bounds.`);
-            if (!Array.isArray(elements))
-                throw new Error(`Chalkboard.tens.push: Parameter "elements" must be an array.`);
-            tens = tens;
-            const insert = (tensor, currentRank, currentElements) => {
-                if (currentRank === 0) {
+        tens_1.push = (tens, axis, index, elements) => {
+            const shape = $shape(tens, false, "push", "tens");
+            if (!Number.isInteger(axis) || axis < 0 || axis >= shape.length)
+                throw new Error(`Chalkboard.tens.push: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            if (!Number.isInteger(index) || index < 0 || index > shape[axis])
+                throw new Error(`Chalkboard.tens.push: Parameter "index" must be an integer within the selected axis insertion bounds.`);
+            if (!$isShapeEqual($shape(elements, false, "push", "elements"), shape.slice(0, axis).concat(shape.slice(axis + 1))))
+                throw new Error(`Chalkboard.tens.push: Parameter "elements" must be a tensor whose shape equals the shape of "tens" without the selected axis.`);
+            const insert = (tensor, currentAxis, currentElements) => {
+                if (currentAxis === 0) {
                     tensor.splice(index, 0, currentElements);
                 }
                 else {
-                    for (let i = 0; i < tensor.length; i++) {
-                        insert(tensor[i], currentRank - 1, currentElements[i]);
-                    }
+                    for (let i = 0; i < tensor.length; i++)
+                        insert(tensor[i], currentAxis - 1, currentElements[i]);
                 }
                 return tensor;
             };
-            return insert(tens, rank, elements);
+            return insert(tens, axis, elements);
         };
-        tens_1.random = (inf, sup, ...size) => {
+        tens_1.random = (inf, sup, ...shape) => {
             if (!Number.isFinite(inf))
                 throw new Error(`Chalkboard.tens.random: Parameter "inf" must be a finite number.`);
             if (!Number.isFinite(sup))
                 throw new Error(`Chalkboard.tens.random: Parameter "sup" must be a finite number.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.random: Parameter "size" must begin and end with non-negative integers.`);
-            const newNDArray = function (size) {
-                if (size.length === 0) {
+            shape = $shapeArgs(shape, "random");
+            const newNDArray = (shape) => {
+                if (shape.length === 0)
                     return Chalkboard.numb.random(inf, sup);
-                }
-                const curr = size[0];
-                const rest = size.slice(1);
+                const curr = shape[0];
+                const rest = shape.slice(1);
                 const result = [];
-                for (let i = 0; i < curr; i++) {
+                for (let i = 0; i < curr; i++)
                     result[i] = newNDArray(rest);
-                }
                 return result;
             };
-            return newNDArray(size);
+            return newNDArray(shape);
         };
         tens_1.rank = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.rank: Parameter "tens" must be a tensor.`);
-            return Chalkboard.tens.size(tens).length;
+            return $shape(tens, false, "rank", "tens").length;
         };
         tens_1.reciprocate = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.reciprocate: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.reciprocate(tens[i]);
-                }
-                return result;
-            }
-            else {
-                return 1 / tens;
-            }
+            $shape(tens, true, "reciprocate", "tens");
+            return $map(tens, (x) => 1 / x);
         };
-        tens_1.resize = (tens, ...size) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.resize: Parameter "tens" must be a tensor.`);
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.resize: Parameter "size" must begin and end with non-negative integers.`);
-            const result = Chalkboard.tens.fill(0, ...size);
-            const refill = function (arr1, arr2) {
-                for (let i = 0; i < arr2.length; i++) {
-                    if (Array.isArray(arr2[i])) {
-                        refill(arr1, arr2[i]);
-                    }
-                    else {
-                        arr2[i] = arr1.length > 0 ? arr1.shift() : 0;
-                    }
-                }
-            };
-            refill(Chalkboard.tens.toArray(tens), result);
-            return result;
+        tens_1.reshape = (tens, ...shape) => {
+            const current = $shape(tens, false, "reshape", "tens");
+            shape = $shapeArgs(shape, "reshape");
+            if (shape.reduce((a, b) => a * b, 1) !== current.reduce((a, b) => a * b, 1))
+                throw new Error(`Chalkboard.tens.reshape: Parameter "shape" must have a product equal to the size of "tens".`);
+            if (shape.length === 0)
+                return $flatten(tens)[0];
+            return $resize(tens, shape);
+        };
+        tens_1.resize = (tens, ...shape) => {
+            $shape(tens, false, "resize", "tens");
+            return $resize(tens, $shapeArgs(shape, "resize"));
         };
         tens_1.round = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.round: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.round(tens[i]);
-                }
-                return result;
-            }
-            else {
-                return Math.round(tens);
-            }
+            $shape(tens, true, "round", "tens");
+            return $map(tens, (x) => Math.round(x));
         };
         tens_1.scl = (tens, num) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.scl: Parameter "tens" must be a tensor.`);
-            if (!Number.isFinite(num))
-                throw new Error(`Chalkboard.tens.scl: Parameter "num" must be a finite number.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens)) {
-                for (let i = 0; i < tens.length; i++) {
-                    result[i] = Chalkboard.tens.scl(tens[i], num);
-                }
-                return result;
-            }
-            else {
-                return tens * num;
-            }
+            $shape(tens, true, "scl", "tens");
+            if (typeof num !== "number")
+                throw new Error(`Chalkboard.tens.scl: Parameter "num" must be a number.`);
+            return $map(tens, (x) => x * num);
+        };
+        tens_1.set = (tens, index, value) => {
+            const shape = $shape(tens, false, "set", "tens");
+            if (!Array.isArray(index) || index.length === 0 || index.length > shape.length || Array.from(index).some((i, a) => !Number.isInteger(i) || i < 0 || i >= shape[a]))
+                throw new Error(`Chalkboard.tens.set: Parameter "index" must contain between one and as many integers as the tensor rank, each within its axis bounds.`);
+            const valueShape = value === null ? [] : $shape(value, false, "set", "value");
+            if (!$isShapeEqual(valueShape, shape.slice(index.length)))
+                throw new Error(`Chalkboard.tens.set: Parameter "value" must be a tensor whose shape equals the shape of "tens" after the indexed axes.`);
+            let target = tens;
+            for (let a = 0; a < index.length - 1; a++)
+                target = target[index[a]];
+            target[index[index.length - 1]] = $copy(value);
+            return tens;
+        };
+        tens_1.shape = (tens) => {
+            return $shape(tens, false, "shape", "tens");
         };
         tens_1.size = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.size: Parameter "tens" must be a tensor.`);
-            if (Array.isArray(tens)) {
-                let result = [tens.length];
-                if (Array.isArray(tens[0])) {
-                    result = result.concat(Chalkboard.tens.size(tens[0]));
-                }
+            return $shape(tens, false, "size", "tens").reduce((a, b) => a * b, 1);
+        };
+        tens_1.slice = (tens, ...ranges) => {
+            if (ranges.length === 1 && Array.isArray(ranges[0]) && (ranges[0].length === 0 || Array.isArray(ranges[0][0])))
+                ranges = ranges[0];
+            const shape = $shape(tens, false, "slice", "tens");
+            if (ranges.length > shape.length || Array.from(ranges).some((r, a) => !Array.isArray(r) || r.length !== 2 || !Number.isInteger(r[0]) || !Number.isInteger(r[1]) || r[0] < 0 || r[0] > r[1] || r[1] > shape[a]))
+                throw new Error(`Chalkboard.tens.slice: Parameter "ranges" must contain at most as many [start, end] pairs as the tensor rank, with integers such that 0 <= start <= end <= the axis length.`);
+            const walk = (t, depth) => {
+                if (depth === ranges.length)
+                    return $copy(t);
+                const result = [];
+                const range = ranges[depth];
+                for (let i = range[0]; i < range[1]; i++)
+                    result.push(walk(t[i], depth + 1));
                 return result;
-            }
-            else {
-                return [];
-            }
+            };
+            return walk(tens, 0);
+        };
+        tens_1.stack = (tensors, axis = 0) => {
+            if (!Array.isArray(tensors) || tensors.length === 0)
+                throw new Error(`Chalkboard.tens.stack: Parameter "tensors" must be a non-empty array of tensors with equal shapes.`);
+            const shapes = Array.from(tensors, (t) => $shape(t, false, "stack", "tensors"));
+            const shape = shapes[0];
+            if (shapes.some((s) => !$isShapeEqual(s, shape)))
+                throw new Error(`Chalkboard.tens.stack: Parameter "tensors" must be a non-empty array of tensors with equal shapes.`);
+            if (!Number.isInteger(axis) || axis < 0 || axis > shape.length)
+                throw new Error(`Chalkboard.tens.stack: Parameter "axis" must be a non-negative integer less than or equal to the rank of the tensors.`);
+            const order = shape.map((_, i) => i + 1);
+            order.splice(axis, 0, 0);
+            return $permute(tensors.map((t) => $copy(t)), [tensors.length].concat(shape), order);
         };
         tens_1.sub = (tens1, tens2) => {
-            if (tens1 === null || typeof tens1 !== "number" && !Array.isArray(tens1))
-                throw new Error(`Chalkboard.tens.sub: Parameter "tens1" must be a tensor.`);
-            if (tens2 === null || typeof tens2 !== "number" && !Array.isArray(tens2))
-                throw new Error(`Chalkboard.tens.sub: Parameter "tens2" must be a tensor.`);
-            const result = Chalkboard.tens.init();
-            if (Array.isArray(tens1) && Array.isArray(tens2)) {
-                for (let i = 0; i < Math.max(tens1.length, tens2.length); i++) {
-                    result[i] = Chalkboard.tens.sub(tens1[i] !== undefined ? tens1[i] : 0, tens2[i] !== undefined ? tens2[i] : 0);
-                }
-                return result;
-            }
-            else {
-                return tens1 - tens2;
-            }
+            const shape1 = $shape(tens1, true, "sub", "tens1"), shape2 = $shape(tens2, true, "sub", "tens2");
+            if (Array.isArray(tens1) && Array.isArray(tens2) && !$isShapeEqual(shape1, shape2))
+                return $broadcast(tens1, shape1, tens2, shape2, (a, b) => a - b, "sub");
+            return $zip(tens1, tens2, (a, b) => a - b);
         };
-        tens_1.toArray = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toArray: Parameter "tens" must be a tensor.`);
-            const result = [];
-            const flatten = function (tens) {
-                for (let i = 0; i < tens.length; i++) {
-                    if (Array.isArray(tens[i])) {
-                        flatten(tens[i]);
-                    }
-                    else {
-                        result.push(tens[i]);
-                    }
-                }
+        tens_1.sum = (tens, axis) => {
+            const shape = $shape(tens, true, "sum", "tens");
+            if (axis !== undefined && (!Number.isInteger(axis) || axis < 0 || axis >= shape.length))
+                throw new Error(`Chalkboard.tens.sum: Parameter "axis" must be a non-negative integer less than the tensor rank.`);
+            const flat = new Array(shape.reduce((a, b) => a * b, 1));
+            let index = 0;
+            const flatten = (t) => {
+                if (!Array.isArray(t))
+                    flat[index++] = t;
+                else if (Array.isArray(t[0]))
+                    for (let i = 0; i < t.length; i++)
+                        flatten(t[i]);
+                else
+                    for (let i = 0; i < t.length; i++)
+                        flat[index++] = t[i];
             };
             flatten(tens);
-            return result;
+            const count = axis === undefined ? flat.length : shape[axis];
+            const stride = axis === undefined ? 1 : shape.slice(axis + 1).reduce((a, b) => a * b, 1);
+            const reduce = (offset) => {
+                let result = 0;
+                for (let j = 0; j < count; j++) {
+                    const x = flat[offset + j * stride];
+                    result += x;
+                }
+                return result;
+            };
+            if (axis === undefined)
+                return reduce(0);
+            const outShape = shape.filter((_, i) => i !== axis);
+            const result = [];
+            const outer = shape.slice(0, axis).reduce((a, b) => a * b, 1);
+            for (let i = 0; i < outer; i++)
+                for (let j = 0; j < stride; j++)
+                    result.push(reduce(i * count * stride + j));
+            return outShape.length === 0 ? result[0] : $resize(result, outShape);
         };
-        tens_1.toMatrix = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toMatrix: Parameter "tens" must be a tensor.`);
-            const result = Chalkboard.matr.init();
-            const flatten = function (tens, result) {
-                for (let i = 0; i < tens.length; i++) {
-                    if (Array.isArray(tens[i])) {
-                        flatten(tens[i], result);
-                    }
-                    else {
-                        result.push(tens[i]);
-                    }
+        tens_1.symmetrize = (tens, ...axes) => {
+            const shape = $shape(tens, true, "symmetrize", "tens");
+            axes = Array.isArray(axes[0]) ? axes[0] : axes;
+            if (axes.length === 0)
+                axes = shape.map((_, i) => i);
+            if (new Set(axes).size !== axes.length || Array.from(axes).some((a) => !Number.isInteger(a) || a < 0 || a >= shape.length))
+                throw new Error(`Chalkboard.tens.symmetrize: Parameter "axes" must contain distinct non-negative integers less than the tensor rank.`);
+            if (axes.some((a) => shape[a] !== shape[axes[0]]))
+                throw new Error(`Chalkboard.tens.symmetrize: Parameter "axes" must contain axes of equal length.`);
+            if (axes.length < 2)
+                return $copy(tens);
+            const result = new Array($flatten(tens).length).fill(0), permutation = axes.slice();
+            let count = 0;
+            const walk = (depth) => {
+                if (depth === permutation.length) {
+                    const order = shape.map((_, i) => i);
+                    for (let i = 0; i < axes.length; i++)
+                        order[axes[i]] = permutation[i];
+                    const flat = $flatten($permute(tens, shape, order));
+                    for (let i = 0; i < flat.length; i++)
+                        result[i] += flat[i];
+                    count++;
+                    return;
+                }
+                for (let i = depth; i < permutation.length; i++) {
+                    [permutation[depth], permutation[i]] = [permutation[i], permutation[depth]];
+                    walk(depth + 1);
+                    [permutation[depth], permutation[i]] = [permutation[i], permutation[depth]];
                 }
             };
-            const matr = Chalkboard.matr.init();
-            flatten(tens, matr);
+            walk(0);
+            for (let i = 0; i < result.length; i++)
+                result[i] /= count;
+            return $resize(result, shape);
+        };
+        tens_1.toArray = (tens) => {
+            $shape(tens, false, "toArray", "tens");
+            return $flatten(tens);
+        };
+        tens_1.toMatrix = (tens) => {
+            $shape(tens, false, "toMatrix", "tens");
+            const result = Chalkboard.matr.init();
+            const arr = $flatten(tens);
             const rows = tens.length || 1;
             for (let j = 0; j < rows; j++) {
-                result.push(matr.slice((j * matr.length) / rows, ((j + 1) * matr.length) / rows));
+                result.push(arr.slice((j * arr.length) / rows, ((j + 1) * arr.length) / rows));
             }
             return result;
         };
         tens_1.toObject = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toObject: Parameter "tens" must be a tensor.`);
-            if (Array.isArray(tens)) {
-                const result = {};
-                for (let i = 0; i < tens.length; i++) {
-                    result["_" + (i + 1)] = Chalkboard.tens.toObject(tens[i]);
+            $shape(tens, false, "toObject", "tens");
+            const objectify = (tens) => {
+                if (Array.isArray(tens)) {
+                    const result = {};
+                    for (let i = 0; i < tens.length; i++) {
+                        result["_" + (i + 1)] = objectify(tens[i]);
+                    }
+                    return result;
                 }
-                return result;
-            }
-            else {
-                return tens;
-            }
+                else {
+                    return tens;
+                }
+            };
+            return objectify(tens);
         };
         tens_1.toSet = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toSet: Parameter "tens" must be a tensor.`);
-            return Chalkboard.abal.set(Chalkboard.tens.toArray(tens));
+            $shape(tens, true, "toSet", "tens");
+            return Chalkboard.abal.set($flatten(tens));
         };
         tens_1.toString = (tens, indentation = 0) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toString: Parameter "tens" must be a tensor.`);
+            $shape(tens, false, "toString", "tens");
             if (!Number.isInteger(indentation) || indentation < 0)
                 throw new Error(`Chalkboard.tens.toString: Parameter "indentation" must be a non-negative integer.`);
-            if (Array.isArray(tens[0])) {
-                let result = "\t".repeat(indentation) + "[\n";
-                for (let i = 0; i < tens.length; i++) {
-                    result += Chalkboard.tens.toString(tens[i], indentation + 1);
-                }
-                result += "\t".repeat(indentation) + "]\n";
-                return result;
-            }
-            else {
-                let result = "\t".repeat(indentation) + "[ ";
-                for (let i = 0; i < tens.length; i++) {
-                    result += tens[i].toString() + " ";
-                }
-                result += "]\n";
-                return result;
-            }
+            return $string(tens, indentation);
         };
         tens_1.toTypedArray = (tens, type = "float32") => {
-            const arr = Chalkboard.tens.toArray(tens);
+            $shape(tens, true, "toTypedArray", "tens");
+            const arr = $flatten(tens);
             if (type === "int8") {
                 return new Int8Array(arr);
             }
@@ -13421,11 +13987,10 @@ var Chalkboard;
             throw new Error(`Chalkboard.tens.toTypedArray: Parameter "type" must be int8, int16, int32, float32, float64, or bigint64.`);
         };
         tens_1.toVector = (tens, dimension, index = 0) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.toVector: Parameter "tens" must be a tensor.`);
+            $shape(tens, true, "toVector", "tens");
             if (dimension !== 2 && dimension !== 3 && dimension !== 4)
                 throw new Error(`Chalkboard.tens.toVector: Parameter "dimension" must be 2, 3, or 4.`);
-            const arr = Chalkboard.tens.toArray(tens);
+            const arr = $flatten(tens);
             if (!Number.isInteger(index) || index < 0 || index + dimension > arr.length)
                 throw new Error(`Chalkboard.tens.toVector: Parameter "index" and parameter "dimension" must fit within the flattened tensor bounds.`);
             if (dimension === 2) {
@@ -13442,27 +14007,22 @@ var Chalkboard;
             }
         };
         tens_1.transpose = (tens) => {
-            if (tens === null || typeof tens !== "number" && !Array.isArray(tens))
-                throw new Error(`Chalkboard.tens.transpose: Parameter "tens" must be a tensor.`);
-            return Chalkboard.tens.resize(tens, ...Chalkboard.tens.size(tens).reverse());
+            const shape = $shape(tens, false, "transpose", "tens");
+            return $permute(tens, shape, shape.map((_, k) => shape.length - 1 - k));
         };
-        tens_1.zero = (...size) => {
-            size = Array.isArray(size[0]) ? size[0] : size;
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.tens.zero: Parameter "size" must begin and end with non-negative integers.`);
-            const newNDArray = function (size) {
-                if (size.length === 0) {
+        tens_1.zero = (...shape) => {
+            shape = $shapeArgs(shape, "zero");
+            const newNDArray = (shape) => {
+                if (shape.length === 0)
                     return 0;
-                }
-                const curr = size[0];
-                const rest = size.slice(1);
+                const curr = shape[0];
+                const rest = shape.slice(1);
                 const result = [];
-                for (let i = 0; i < curr; i++) {
+                for (let i = 0; i < curr; i++)
                     result[i] = newNDArray(rest);
-                }
                 return result;
             };
-            return newNDArray(size);
+            return newNDArray(shape);
         };
     })(tens = Chalkboard.tens || (Chalkboard.tens = {}));
 })(Chalkboard || (Chalkboard = {}));
@@ -14620,14 +15180,13 @@ var Chalkboard;
                 throw new Error(`Chalkboard.vect.toString: Parameter "vect" must be of type ChalkboardVector with 2, 3, or 4 dimensions.`);
             }
         };
-        vect_1.toTensor = (vect, ...size) => {
+        vect_1.toTensor = (vect, ...shape) => {
             vect = $(vect, "Chalkboard.vect.toTensor");
-            if (Array.isArray(size[0])) {
-                size = size[0];
-            }
-            if (size.length > 0 && (!Number.isInteger(size[0]) || size[0] < 0) || size.length > 1 && (!Number.isInteger(size[size.length - 1]) || size[size.length - 1] < 0))
-                throw new Error(`Chalkboard.vect.toTensor: Parameter "size" must begin and end with non-negative integers.`);
-            return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), ...size);
+            if (Array.isArray(shape[0]))
+                shape = shape[0];
+            if (shape.length > 0 && (!Number.isInteger(shape[0]) || shape[0] < 0) || shape.length > 1 && (!Number.isInteger(shape[shape.length - 1]) || shape[shape.length - 1] < 0))
+                throw new Error(`Chalkboard.vect.toTensor: Parameter "shape" must begin and end with non-negative integers.`);
+            return Chalkboard.tens.resize(Chalkboard.vect.toMatrix(vect), ...shape);
         };
         vect_1.toTypedArray = (vect, type = "float32") => {
             vect = $(vect, "Chalkboard.vect.toTypedArray");

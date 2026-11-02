@@ -1,6 +1,6 @@
 /*!
- * Chalkboard v3.0.5
- * Released on Monday, September 7, 2026
+ * Chalkboard v3.1.0 Ricci
+ * Released on Monday, November 2, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0
@@ -77,8 +77,8 @@ namespace Chalkboard {
     const PI: (coefficient?: number) => number;
     const REGISTER: (name: string, func: (...x: number[]) => number) => void;
     const REGISTRY: Record<string, (...x: number[]) => number>;
-    const VERSION: "3.0.5";
-    const VERSIONALIAS: "Euler";
+    const VERSION: "3.1.0";
+    const VERSIONALIAS: "Ricci";
 }
 
 namespace Chalkboard {
@@ -160,7 +160,7 @@ namespace Chalkboard {
         const toMatrix: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, rows: number, cols?: number) => ChalkboardMatrix;
         const toObject: (struc: ChalkboardSet<number> | ChalkboardStructure<number>) => object;
         const toString: (struc: ChalkboardSet<number> | ChalkboardStructure<number>) => string;
-        const toTensor: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...size: number[]) => ChalkboardTensor;
+        const toTensor: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, ...shape: number[]) => ChalkboardTensor;
         const toTypedArray: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, type?: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64") => Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array;
         const toVector: (struc: ChalkboardSet<number> | ChalkboardStructure<number>, dimension: 2 | 3 | 4, index?: number) => ChalkboardVector;
         const union: <T>(set1: ChalkboardSet<T>, set2: ChalkboardSet<T>) => ChalkboardSet<T>;
@@ -514,6 +514,7 @@ namespace Chalkboard {
             U: ChalkboardMatrix;
         };
         const mul: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
+        const mulHadamard: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const mulKronecker: (matr1: ChalkboardMatrix, matr2: ChalkboardMatrix) => ChalkboardMatrix;
         const mulVector: (matr: ChalkboardMatrix, vect: ChalkboardVector) => ChalkboardMatrix | ChalkboardVector;
         const negate: (matr: ChalkboardMatrix) => ChalkboardMatrix;
@@ -547,7 +548,7 @@ namespace Chalkboard {
         const toObject: (matr: ChalkboardMatrix) => object;
         const toSet: (matr: ChalkboardMatrix) => ChalkboardSet<number>;
         const toString: (matr: ChalkboardMatrix) => string;
-        const toTensor: (matr: ChalkboardMatrix, ...size: number[]) => ChalkboardTensor;
+        const toTensor: (matr: ChalkboardMatrix, ...shape: number[]) => ChalkboardTensor;
         const toTypedArray: (matr: ChalkboardMatrix, type?: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64") => Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array;
         const toVector: (matr: ChalkboardMatrix, dimension: 2 | 3 | 4, index?: number, axis?: 0 | 1) => ChalkboardVector;
         const trace: (matr: ChalkboardMatrix) => number;
@@ -962,7 +963,7 @@ namespace Chalkboard {
         const toObject: (arr: number[]) => object;
         const toSet: (arr: number[]) => ChalkboardSet<number>;
         const toString: (arr: number[]) => string;
-        const toTensor: (arr: number[], ...size: number[]) => ChalkboardTensor;
+        const toTensor: (arr: number[], ...shape: number[]) => ChalkboardTensor;
         const toVector: (arr: number[], dimension: 2 | 3 | 4, index?: number) => ChalkboardVector;
         const unique: <T>(arr: T[]) => T[];
         const variance: (arr: number[]) => number;
@@ -974,34 +975,58 @@ namespace Chalkboard {
     namespace tens {
         const absolute: (tens: ChalkboardTensor) => ChalkboardTensor;
         const add: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
-        const concat: (tens1: ChalkboardTensor, tens2: ChalkboardTensor, rank?: number) => ChalkboardTensor;
+        const antisymmetrize: (tens: ChalkboardTensor, ...axes: number[]) => ChalkboardTensor;
+        const concat: (tens1: ChalkboardTensor, tens2: ChalkboardTensor, axis?: number) => ChalkboardTensor;
         const constrain: (tens: ChalkboardTensor, range?: [number, number]) => ChalkboardTensor;
-        const contract: (tens: ChalkboardTensor) => ChalkboardTensor | number;
+        const contract: (tens: ChalkboardTensor, axis1?: number, axis2?: number) => ChalkboardTensor | number;
         const copy: (tens: ChalkboardTensor) => ChalkboardTensor;
-        const empty: (...size: number[]) => ChalkboardTensor;
-        const fill: (element: number, ...size: number[]) => ChalkboardTensor;
+        const dot: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => number;
+        const einsum: (subscripts: string, ...tensors: ChalkboardTensor[]) => ChalkboardTensor;
+        const empty: (...shape: number[]) => ChalkboardTensor;
+        const fill: (element: number, ...shape: number[]) => ChalkboardTensor;
+        const get: (tens: ChalkboardTensor, ...index: number[]) => ChalkboardTensor | null;
+        const identity: (dimension: number, rank?: number) => ChalkboardTensor;
         const init: (...tensor: ChalkboardTensor[]) => ChalkboardTensor;
+        const isAntisymmetric: (tens: ChalkboardTensor, ...axes: number[]) => boolean;
         const isApproxEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor, precision?: number) => boolean;
         const isEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
         const isRankEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
         const isRankOf: (tens: ChalkboardTensor, rank: number) => boolean;
-        const isSizeEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
-        const isSizeOf: (tens: ChalkboardTensor, ...size: number[]) => boolean;
-        const isSizeUniform: (tens: ChalkboardTensor) => boolean;
+        const isShapeEqual: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => boolean;
+        const isShapeOf: (tens: ChalkboardTensor, ...shape: number[]) => boolean;
+        const isShapeUniform: (tens: ChalkboardTensor) => boolean;
+        const isSymmetric: (tens: ChalkboardTensor, ...axes: number[]) => boolean;
         const isZero: (tens: ChalkboardTensor) => boolean;
+        const LeviCivita: (dimension: number) => ChalkboardTensor;
+        const max: (tens: ChalkboardTensor, axis?: number) => ChalkboardTensor;
+        const mean: (tens: ChalkboardTensor, axis?: number) => ChalkboardTensor;
+        const min: (tens: ChalkboardTensor, axis?: number) => ChalkboardTensor;
         const mul: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
+        const mulContract: (tens1: ChalkboardTensor, tens2: ChalkboardTensor, axes1?: number | number[], axes2?: number | number[]) => ChalkboardTensor;
+        const mulHadamard: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
         const negate: (tens: ChalkboardTensor) => ChalkboardTensor;
+        const norm: (tens: ChalkboardTensor, type?: "L0" | "L1" | "L2" | "LInfinity") => number;
+        const normalize: (tens: ChalkboardTensor, type?: "L0" | "L1" | "L2" | "LInfinity") => ChalkboardTensor;
+        const normsq: (tens: ChalkboardTensor, type?: "L0" | "L1" | "L2" | "LInfinity") => number;
+        const permute: (tens: ChalkboardTensor, ...axes: number[]) => ChalkboardTensor;
         const print: (tens: ChalkboardTensor) => void;
-        const pull: (tens: ChalkboardTensor, rank: number, index: number) => ChalkboardTensor;
-        const push: (tens: ChalkboardTensor, rank: number, index: number, elements: number[]) => ChalkboardTensor;
-        const random: (inf: number, sup: number, ...size: number[]) => ChalkboardTensor;
+        const pull: (tens: ChalkboardTensor, axis: number, index: number) => ChalkboardTensor;
+        const push: (tens: ChalkboardTensor, axis: number, index: number, elements: ChalkboardTensor) => ChalkboardTensor;
+        const random: (inf: number, sup: number, ...shape: number[]) => ChalkboardTensor;
         const rank: (tens: ChalkboardTensor) => number;
         const reciprocate: (tens: ChalkboardTensor) => ChalkboardTensor;
-        const resize: (tens: ChalkboardTensor, ...size: number[]) => ChalkboardTensor;
+        const reshape: (tens: ChalkboardTensor, ...shape: number[]) => ChalkboardTensor;
+        const resize: (tens: ChalkboardTensor, ...shape: number[]) => ChalkboardTensor;
         const round: (tens: ChalkboardTensor) => ChalkboardTensor;
         const scl: (tens: ChalkboardTensor, num: number) => ChalkboardTensor;
-        const size: (tens: ChalkboardTensor) => number[];
+        const set: (tens: ChalkboardTensor, index: number[], value: ChalkboardTensor | null) => ChalkboardTensor;
+        const shape: (tens: ChalkboardTensor) => number[];
+        const size: (tens: ChalkboardTensor) => number;
+        const slice: (tens: ChalkboardTensor, ...ranges: [number, number][]) => ChalkboardTensor;
+        const stack: (tensors: ChalkboardTensor[], axis?: number) => ChalkboardTensor;
         const sub: (tens1: ChalkboardTensor, tens2: ChalkboardTensor) => ChalkboardTensor;
+        const sum: (tens: ChalkboardTensor, axis?: number) => ChalkboardTensor;
+        const symmetrize: (tens: ChalkboardTensor, ...axes: number[]) => ChalkboardTensor;
         const toArray: (tens: ChalkboardTensor) => number[];
         const toMatrix: (tens: ChalkboardTensor) => ChalkboardMatrix;
         const toObject: (tens: ChalkboardTensor) => object | number;
@@ -1010,7 +1035,7 @@ namespace Chalkboard {
         const toTypedArray: (tens: ChalkboardTensor, type?: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64") => Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array;
         const toVector: (tens: ChalkboardTensor, dimension: number, index?: number) => ChalkboardVector;
         const transpose: (tens: ChalkboardTensor) => ChalkboardTensor;
-        const zero: (...size: number[]) => ChalkboardTensor;
+        const zero: (...shape: number[]) => ChalkboardTensor;
     }
 }
 
@@ -1102,7 +1127,7 @@ namespace Chalkboard {
         const toMatrix: (vect: ChalkboardVector, axis?: 0 | 1) => ChalkboardMatrix;
         const toQuaternion: (vect: ChalkboardVector) => ChalkboardQuaternion;
         const toString: (vect: ChalkboardVector) => string;
-        const toTensor: (vect: ChalkboardVector, ...size: number[]) => ChalkboardTensor;
+        const toTensor: (vect: ChalkboardVector, ...shape: number[]) => ChalkboardTensor;
         const toTypedArray: (vect: ChalkboardVector, type?: "int8" | "int16" | "int32" | "float32" | "float64" | "bigint64") => Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array;
         const vectorQuadruple: (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector, vect4: ChalkboardVector) => ChalkboardVector;
         const vectorTriple: (vect1: ChalkboardVector, vect2: ChalkboardVector, vect3: ChalkboardVector) => ChalkboardVector;

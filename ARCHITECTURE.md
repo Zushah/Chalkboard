@@ -1,10 +1,10 @@
 # Chalkboard Architecture
 
-Latest commit: Tuesday, October 27, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Monday, November 2, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Monday, October 26, 2026, [**`8563f8f`**](https://github.com/Zushah/Chalkboard/commit/8563f8f).
+Previous commit: Tuesday, October 27, 2026, [**`8b63379`**](https://github.com/Zushah/Chalkboard/commit/8b63379).
 
-Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5).
+Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
 ## Contents
 
@@ -60,7 +60,7 @@ Latest release: Monday, September 7, 2026, [**`v3.0.5`**](https://github.com/Zus
 flowchart TB
     APP["User Application"]
     subgraph LIBRARY[" "]
-        CB["Chalkboard v3.0.5"]
+        CB["Chalkboard v3.1.0"]
         ABAL["abal"]
         BOOL["bool"]
         CALC["calc"]
@@ -153,7 +153,7 @@ flowchart TB
     APP --> CB
 ```
 
-The application enters through the shared `Chalkboard` API, which exposes all fifteen namespaces. The subgraph encloses the library, leaving the user application outside. The `Chalkboard v3.0.5` node also represents root members such as `APPLY`, `REGISTRY`, `PI`, `E`, and `CONTEXT`. It has one outward arrow to each namespace, and inward arrows represent namespace dependencies on root members. Between namespace nodes, an arrow points from the calling namespace to the namespace it uses, and bidirectional arrows indicate calls in both directions. These are possible runtime dependencies visible in the source, not a fixed execution sequence. Application-mediated data transfers are separate, for example, an application can pass a solved ODE to `plot` without `plot` calling `diff`.
+The application enters through the shared `Chalkboard` API, which exposes all fifteen namespaces. The `Chalkboard v3.1.0` node in the diagram represents not only the library in general but also the root members such as `APPLY`, `REGISTRY`, `PI`, `E`, and `CONTEXT`. It has one outward arrow to each namespace, and inward arrows represent namespace dependencies on root members. Between namespace nodes, an arrow points from the calling namespace to the namespace it uses, and bidirectional arrows indicate calls in both directions. These are possible runtime dependencies visible in the source, not a fixed execution sequence. Application-mediated data transfers are separate, for example, an application can pass a solved ODE to `plot` without `plot` calling `diff`.
 
 ### 1.2. Shared namespace and public API
 
@@ -198,8 +198,8 @@ Shapes also overlap. A matrix is structurally a tensor and can represent a row o
 | `PI(coefficient = 1)` | Computes a Gauss–Legendre approximation to pi and multiplies it by the coefficient. |
 | `REGISTER(name, func)` | Adds or replaces a numeric callback in `REGISTRY`. |
 | `REGISTRY` | Mutable object of named numeric callbacks consulted by expression parsers. |
-| `VERSION` | Current literal `"3.0.5"`. |
-| `VERSIONALIAS` | Current literal `"Euler"`. |
+| `VERSION` | Current literal `"3.1.0"`. |
+| `VERSIONALIAS` | Current literal `"Ricci"`. |
 
 `APPLY` handles complex and quaternion components, object-form vectors, arrays interpreted as matrices or recursive tensors, scalars, and finite sets or structures. Applying it to a finite set or structure returns an array of mapped elements; it does not reconstruct operations or a membership predicate. An unenumerated set cannot be mapped this way. Its shape dispatcher does not implement every input coercion accepted by `vect`, including typed-array and string vector inputs.
 
@@ -238,7 +238,7 @@ Morphisms explicitly carry their domain in `struc1`, codomain in `struc2`, and e
 
 Images, preimages, and kernels return set representations. Inverting a finite morphism uses its enumeration to build a reverse correspondence. Quotient constructions form cosets and operations on representatives, with subgroup or ideal checks where implemented. These mechanisms depend on the same enumeration, membership, and equality conventions as the underlying structures; a predicate alone does not provide an algorithm for enumerating an infinite image or finding arbitrary inverse images.
 
-Extension records carry supplied degree, basis, and classification flags, with limited canonical-case configuration. They are not a general field-extension computation engine. The current `fieldExtension` validation calls `isSubfield(base, extension.set)`, although `isSubfield` treats its second argument as the proposed subfield carrier. Consequently, `./test/Chalkboard.abal.test.js` expects the real-base/complex-extension call to throw and accepts the reversed pair with explicit metadata. Changing this containment boundary requires an explicit semantic correction, not only a documentation relabeling.
+Extension records carry supplied degree, basis, and classification flags, with limited canonical-case configuration. They are not a general field-extension computation engine. The current `fieldExtension` validation calls `isSubfield(base, extension.set)`, although `isSubfield` treats its second argument as the proposed subfield carrier. Consequently, `./tests/Chalkboard.abal.test.js` expects the real-base/complex-extension call to throw and accepts the reversed pair with explicit metadata. Changing this containment boundary requires an explicit semantic correction, not only a documentation relabeling.
 
 ### 1.7. bool
 
@@ -553,9 +553,9 @@ Private helpers and parser implementations live alongside their public operation
 
 ### 2.2. Public API tests
 
-`./test/Chalkboard.test.js` checks root behavior and package/distribution compatibility: package self-resolution, the sole default export, global identity, exact distribution filenames, release banners, and execution of both full and minified bundles in classic-script and module contexts.
+`./tests/Chalkboard.test.js` checks root behavior and package/distribution compatibility: package self-resolution, the sole default export, global identity, exact distribution filenames, release banners, and execution of both full and minified bundles in classic-script and module contexts.
 
-The remaining files mirror namespace ownership: `./test/Chalkboard.abal.test.js`, `./test/Chalkboard.bool.test.js`, `./test/Chalkboard.calc.test.js`, `./test/Chalkboard.comp.test.js`, `./test/Chalkboard.diff.test.js`, `./test/Chalkboard.geom.test.js`, `./test/Chalkboard.matr.test.js`, `./test/Chalkboard.numb.test.js`, `./test/Chalkboard.plot.test.js`, `./test/Chalkboard.quat.test.js`, `./test/Chalkboard.real.test.js`, `./test/Chalkboard.stat.test.js`, `./test/Chalkboard.tens.test.js`, `./test/Chalkboard.trig.test.js`, and `./test/Chalkboard.vect.test.js`.
+The remaining files mirror namespace ownership: `./tests/Chalkboard.abal.test.js`, `./tests/Chalkboard.bool.test.js`, `./tests/Chalkboard.calc.test.js`, `./tests/Chalkboard.comp.test.js`, `./tests/Chalkboard.diff.test.js`, `./tests/Chalkboard.geom.test.js`, `./tests/Chalkboard.matr.test.js`, `./tests/Chalkboard.numb.test.js`, `./tests/Chalkboard.plot.test.js`, `./tests/Chalkboard.quat.test.js`, `./tests/Chalkboard.real.test.js`, `./tests/Chalkboard.stat.test.js`, `./tests/Chalkboard.tens.test.js`, `./tests/Chalkboard.trig.test.js`, and `./tests/Chalkboard.vect.test.js`.
 
 Tests import `@zushah/chalkboard`, which resolves to the local package's distribution, rather than importing TypeScript source. They use Node assertions for values, metadata, exceptions, approximate numerical comparisons, parser output, and representation modes. Plot tests supply a Canvas-like context stub. Passing existing tests does not establish untested mathematical identities or browser rendering correctness; source/test discrepancies require focused investigation.
 
@@ -576,6 +576,7 @@ Tests import `@zushah/chalkboard`, which resolves to the local package's distrib
 | `./examples/newton.js` | Numerical root-finding visualization. |
 | `./examples/ode-study.js` | Interactive ODE models, solver controls, solution analysis, and plots. |
 | `./examples/quat-donut.js` | Quaternion-based rotation and projected animation. |
+| `./examples/ricci.js` | Tensor calculus of surface curvature and the Gauss–Bonnet theorem. |
 | `./examples/telemetry.js` | Sampled signals, numerical processing, and visualization. |
 | `./examples/threebody.js` | Coupled gravitational state integration and animated trajectories. |
 
@@ -636,7 +637,7 @@ Identify the mathematical producer, its return representation, and each downstre
 
 Keep public operations in their owning mathematical namespace and follow adjacent TypeScript formatting, naming, overload, and TypeDoc conventions. Distinguish public exports from private helpers. Changes to return types, accepted dimensions, exceptions, mutation, or output modes are API changes even when the exported name stays the same.
 
-For a new shared representation, update `./src/Chalkboard.ts` and its consumers together. For a namespace addition or rename, account for the source file, build manifest in `./scripts/build.js`, root/package compatibility assertions in `./test/Chalkboard.test.js`, namespace tests, API documentation, and this source map. Do not introduce source-level module imports/exports casually: they would change the shared-script compilation model.
+For a new shared representation, update `./src/Chalkboard.ts` and its consumers together. For a namespace addition or rename, account for the source file, build manifest in `./scripts/build.js`, root/package compatibility assertions in `./tests/Chalkboard.test.js`, namespace tests, API documentation, and this source map. Do not introduce source-level module imports/exports casually: they would change the shared-script compilation model.
 
 ### 3.3. Preserve representation and metadata contracts
 

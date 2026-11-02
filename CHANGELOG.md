@@ -1,10 +1,38 @@
 # Chalkboard changelog
 All notable changes for every update of Chalkboard are recorded in this file.
 
+## [v3.1.0 Ricci](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0) | 2026-11-02
+The twenty-first release of Chalkboard.
+Commits: [`v3.0.5...v3.1.0`](https://github.com/Zushah/Chalkboard/compare/v3.0.5...v3.1.0)
+- Added `tens.get`, `tens.set`, `tens.slice`, and `tens.stack` which respectively get an indexed subtensor or entry of a tensor, set an indexed subtensor or entry of a tensor, slice a tensor along its leading axes, and stack tensors along a new axis, and added `tens.sum`, `tens.mean`, `tens.max`, and `tens.min` which reduce either all of a tensor's entries to a number or only those along a given axis, added `tens.norm`, `tens.normsq`, and `tens.normalize` which calculate the L0, L1, L2, or LInfinity norms of tensors entrywise, and added `tens.permute` which permutes the axes of a tensor (like NumPy's `transpose` with an axes argument), and added `tens.reshape` which changes the shape of a tensor while requiring it to keep the same number of entries (unlike `tens.resize`, which truncates or pads with zeros).
+- Added `tens.mulContract` which calculates the contraction between paired axes of two tensors (like NumPy's `tensordot`), added `tens.dot` which calculates the dot product (Frobenius inner product) of two tensors, added `tens.mulHadamard` and `matr.mulHadamard` which calculate the Hadamard (elementwise) products of two tensors or two matrices, respectively.
+- Added `tens.symmetrize` and `tens.antisymmetrize` which calculate the symmetric and antisymmetric parts of a tensor over any of its axes, and added `tens.isSymmetric` and `tens.isAntisymmetric` which check if a tensor has those symmetries.
+- Added `tens.identity` which initializes the identity tensor (the Kronecker delta generalized to any rank) and `tens.LeviCivita` which initializes the Levi-Civita tensor (the permutation symbol) of any dimension.
+- Added `tens.einsum` which calculates Einstein summations of tensors from subscript strings (for example, `"ij,jk->ik"` for matrix multiplication, `"ii"` for a trace, or `"ijk,j,k->i"` for a cross product with the Levi-Civita tensor).
+- Added `tens.shape` which returns the shape of a tensor (the array of its axis lengths), and added `tens.isShapeEqual`, `tens.isShapeOf`, and `tens.isShapeUniform`.
+- Removed `tens.isSizeEqual`, `tens.isSizeOf`, and `tens.isSizeUniform` because they were replaced by `tens.isShapeEqual`, `tens.isShapeOf`, and `tens.isShapeUniform`, respectively.
+- Changed `tens.size` to return the size of a tensor as its number of entries rather than the array of its axis lengths (which is now returned by `tens.shape`), so that the shape, size, and rank of tensors follow their standard definitions, and accordingly renamed the `size` parameters of `tens.empty`, `tens.fill`, `tens.random`, `tens.reshape`, `tens.resize`, `tens.zero`, `abal.toTensor`, `matr.toTensor`, `stat.toTensor`, and `vect.toTensor` to `shape`.
+- Changed every function in the `tens` namespace to validate its tensor arguments once per call so that ragged tensors and invalid entries are rejected, where entries can be numbers (including `NaN` and infinities) or `null` placeholders, which structural functions like `tens.copy` and `tens.toString` accept and arithmetic functions reject.
+- Changed `tens.add` and `tens.sub` to broadcast like NumPy (shapes are aligned from the right, and axes of length 1 or missing axes are stretched) instead of padding mismatched positions with zeros, so tensors that cannot be broadcast together now throw an error.
+- Changed `tens.mul` to calculate the conventional tensor (outer) product, whose axes are those of the first tensor followed by those of the second tensor, instead of interleaving the axes of the two tensors.
+- Changed `tens.transpose` to reverse the order of the axes of a tensor by moving its entries by their indices (so it now matches `matr.transpose` for rank-2 tensors) instead of reshaping the tensor with its axis lengths reversed.
+- Changed `tens.contract` to contract a tensor over any two of its axes (specified by the new `axis1` and `axis2` parameters, which default to the first two axes) instead of only calculating traces of rank-2 tensors and reshaping tensors of higher ranks.
+- Changed `tens.concat` to use a 0-based `axis` parameter instead of a 1-based `rank` parameter, and renamed the `rank` parameters of `tens.push` and `tens.pull` to `axis`, so that every function in the `tens` namespace counts axes from 0.
+- Changed `tens.resize` to be about 98.72% faster (20785.1ms → 266.1ms for a hundred calls on a 50x50x20 tensor), which also speeds up `abal.toTensor`, `matr.toTensor`, `stat.toTensor`, and `vect.toTensor`.
+- Changed `stat.deviation` to be about 99.98% faster (137424.7ms → 26.7ms for a thousand calls on a ten-thousand-element array), `stat.variance` to be about 99.98% faster (140074.4ms → 23.7ms for a thousand calls on a ten-thousand-element array), and `stat.mad` to be about 99.97% faster (71022.9ms → 23.3ms for a thousand calls on a ten-thousand-element array) by calculating the mean of the array once instead of once for every element.
+- Fixed `tens.add`, `tens.sub`, and `tens.mul` which were returning nonsensical results, such as strings or `null`, when one operand was a number and the other was a tensor.
+- Fixed `tens.concat` which was throwing an error when concatenating along any axis other than the outermost one.
+- Fixed `tens.isEqual` and `tens.isApproxEqual` which were returning `true` for any two numbers (rank-0 tensors), and fixed `tens.isApproxEqual` and `tens.isZero` which were throwing errors for tensors with `NaN` or infinite entries.
+- Fixed `tens.push` which was not checking the shape of the inserted elements and could silently create ragged tensors.
+- Fixed `tens.toString` and `tens.print` which were not able to handle numbers (rank-0 tensors) or `null` entries.
+- Fixed `stat.norm` and `stat.normsq` which were calculating the LInfinity norm from the largest entry of the array rather than the largest absolute value.
+- Fixed `stat.kurtosis` which was missing a division by the length of the array (for example, it was returning 5.5 instead of -1.3 for `[1, 2, 3, 4, 5]`), and fixed `stat.skewness` which was dividing by one less than the length of the array, so that both now consistently use population normalization like `stat.variance`.
+
 ## [v3.0.5 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.5) | 2026-09-07
 The twentieth release of Chalkboard.
 Commits: [`v3.0.4...v3.0.5`](https://github.com/Zushah/Chalkboard/compare/v3.0.4...v3.0.5)
 - Changed the build toolchain to use TypeScript v7.0.2, Terser v5.51.2, and a custom script.
+- Changed the docs toolchain to use TypeScript v6.0.3, TypeDoc v0.28.20, and a custom script.
 
 ## [v3.0.4 Euler](https://github.com/Zushah/Chalkboard/releases/tag/v3.0.4) | 2026-07-20
 The nineteenth release of Chalkboard.

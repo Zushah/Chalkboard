@@ -1,6 +1,6 @@
 /*
- * Chalkboard v3.0.5
- * Released on Monday, September 7, 2026
+ * Chalkboard v3.1.0 Ricci
+ * Released on Monday, November 2, 2026
  * Hundreds of functions for the manifestation and manipulation of mathematical structures and systems
  * Copyright (c) Zushah and contributors
  * SPDX-License-Identifier: MPL-2.0
@@ -36,7 +36,7 @@ import vm from "node:vm";
     assert.deepStrictEqual(readdirSync(new URL("../dist/", import.meta.url)).sort(), ["Chalkboard.d.ts", "Chalkboard.js", "Chalkboard.min.js", "Chalkboard.mjs"]);
     for (const name of ["Chalkboard.js", "Chalkboard.min.js", "Chalkboard.d.ts", "Chalkboard.mjs"]) {
         const code = readFileSync(new URL(`../dist/${name}`, import.meta.url), "utf8");
-        assert.ok(code.startsWith("/*!\n * Chalkboard v3.0.5\n * Released on Monday, September 7, 2026\n"));
+        assert.ok(code.startsWith("/*!\n * Chalkboard v3.1.0 Ricci\n * Released on Monday, November 2, 2026\n"));
         assert.ok(code.includes("SPDX-License-Identifier: MPL-2.0"));
         assert.match(code, /^\/\*![\s\S]*?\*\/\n\n\S/, `${name}: exactly one blank line after the banner`);
         if (name.endsWith(".mjs") || name.endsWith(".d.ts")) continue;
@@ -54,8 +54,8 @@ import vm from "node:vm";
 
 // VERSION, VERSIONALIAS
 {
-    assert.strictEqual(cb.VERSION, "3.0.5");
-    assert.strictEqual(cb.VERSIONALIAS, "Euler");
+    assert.strictEqual(cb.VERSION, "3.1.0");
+    assert.strictEqual(cb.VERSIONALIAS, "Ricci");
 }
 
 // PI, E
