@@ -79,6 +79,59 @@ namespace Chalkboard {
             throw new Error(`${caller}: Parameter "vect" must be a vector with 2, 3, or 4 finite components.`);
         };
 
+        /** @ignore */
+        const $minor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
+            return matr.slice(0, row).concat(matr.slice(row + 1)).map((r) => r.slice(0, col).concat(r.slice(col + 1)));
+        };
+
+        /** @ignore */
+        const $reduce = (matr: ChalkboardMatrix): { result: ChalkboardMatrix; pivots: number[] } => {
+            const result = matr.map((r) => r.slice());
+            const rows = result.length, cols = rows > 0 ? result[0].length : 0;
+            let scale = 0;
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (Math.abs(result[i][j]) > scale) scale = Math.abs(result[i][j]);
+                }
+            }
+            const tolerance = Math.max(rows, cols) * Number.EPSILON * scale;
+            const pivots: number[] = [];
+            let row = 0;
+            for (let col = 0; col < cols && row < rows; col++) {
+                let max = row;
+                for (let i = row + 1; i < rows; i++) {
+                    if (Math.abs(result[i][col]) > Math.abs(result[max][col])) max = i;
+                }
+                if (Math.abs(result[max][col]) <= tolerance) {
+                    for (let i = row; i < rows; i++) result[i][col] = 0;
+                    continue;
+                }
+                const temp = result[max];
+                result[max] = result[row];
+                result[row] = temp;
+                const pivot = result[row][col];
+                for (let j = 0; j < cols; j++) result[row][j] /= pivot;
+                result[row][col] = 1;
+                for (let i = 0; i < rows; i++) {
+                    if (i !== row) {
+                        const coeff = result[i][col];
+                        if (coeff !== 0) {
+                            for (let j = 0; j < cols; j++) result[i][j] -= coeff * result[row][j];
+                        }
+                        result[i][col] = 0;
+                    }
+                }
+                pivots.push(col);
+                row++;
+            }
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (Math.abs(result[i][j]) <= tolerance) result[i][j] = 0;
+                }
+            }
+            return { result: result, pivots: pivots };
+        };
+
         /**
          * Calculates the absolute value of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
@@ -169,19 +222,16 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the adjugate matrix of a matrix at a row and column.
+         * Calculates the adjugate matrix of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {number} row - The row
-         * @param {number} col - The column
          * @returns {ChalkboardMatrix}
          * @example
-         * const result = Chalkboard.matr.adjugate([[1, 2, 3], [0, 4, 5], [1, 0, 6]], 0, 0); // Returns the selected minor
+         * const result = Chalkboard.matr.adjugate([[1, 2], [3, 4]]); // Returns [[4, -2], [-3, 1]]
          */
-        export const adjugate = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
+        export const adjugate = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.adjugate: Parameter "matr" must be a matrix.`);
-            if (!Number.isInteger(row) || row < 0 || row >= matr.length) throw new Error(`Chalkboard.matr.adjugate: Parameter "row" must be an integer within the matrix bounds.`);
-            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.adjugate: Parameter "col" must be an integer within the matrix bounds.`);
-            return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr, row, col));
+            if (!Chalkboard.matr.isSquare(matr)) throw new Error(`Chalkboard.matr.adjugate: Parameter "matr" must be a square matrix.`);
+            return Chalkboard.matr.transpose(Chalkboard.matr.cofactor(matr));
         };
 
         /**
@@ -193,7 +243,7 @@ namespace Chalkboard {
          */
         export const Cholesky = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (!Chalkboard.matr.isSquare(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a square matrix.`);
-            if (!Chalkboard.matr.isSymmetric(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be symmetric.`);
+            if (!Chalkboard.matr.isSymmetric(matr)) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a symmetric matrix.`);
             const n = Chalkboard.matr.rows(matr);
             const L = Chalkboard.matr.fill(0, n);
             for (let i = 0; i < n; i++) {
@@ -203,7 +253,7 @@ namespace Chalkboard {
                         sum -= L[i][k] * L[j][k];
                     }
                     if (i === j) {
-                        if (sum <= 0) throw new Error(`Chalkboard.matr.Cholesky: Matrix is not positive definite.`);
+                        if (sum <= 0) throw new Error(`Chalkboard.matr.Cholesky: Parameter "matr" must be a positive definite matrix.`);
                         L[i][j] = Chalkboard.real.sqrt(sum);
                     } else {
                         L[i][j] = sum / L[j][j];
@@ -214,19 +264,26 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the cofactor matrix of a matrix at a row and column.
+         * Calculates the cofactor matrix of a matrix.
          * @param {ChalkboardMatrix} matr - The matrix
-         * @param {number} row - The row
-         * @param {number} col - The column
          * @returns {ChalkboardMatrix}
          * @example
-         * const result = Chalkboard.matr.cofactor([[1, 2, 3], [0, 4, 5], [1, 0, 6]], 0, 1); // Returns the signed minor
+         * const result = Chalkboard.matr.cofactor([[1, 2], [3, 4]]); // Returns [[4, -3], [-2, 1]]
          */
-        export const cofactor = (matr: ChalkboardMatrix, row: number, col: number): ChalkboardMatrix => {
+        export const cofactor = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cofactor: Parameter "matr" must be a matrix.`);
-            if (!Number.isInteger(row) || row < 0 || row >= matr.length) throw new Error(`Chalkboard.matr.cofactor: Parameter "row" must be an integer within the matrix bounds.`);
-            if (!Number.isInteger(col) || col < 0 || col >= Chalkboard.matr.cols(matr)) throw new Error(`Chalkboard.matr.cofactor: Parameter "col" must be an integer within the matrix bounds.`);
-            return matr.slice(0, row).concat(matr.slice(row + 1)).map((row) => row.slice(0, col).concat(row.slice(col + 1)));
+            if (!Chalkboard.matr.isSquare(matr)) throw new Error(`Chalkboard.matr.cofactor: Parameter "matr" must be a square matrix.`);
+            const n = Chalkboard.matr.rows(matr);
+            if (n === 1) return Chalkboard.matr.init([1]);
+            const result = Chalkboard.matr.fill(0, n);
+            for (let i = 0; i < n; i++) {
+                for (let j = 0; j < n; j++) {
+                    const minor = Chalkboard.matr.det($minor(matr, i, j));
+                    const signed = (i + j) % 2 === 0 ? minor : -minor;
+                    result[i][j] = signed === 0 ? 0 : signed;
+                }
+            }
+            return result;
         };
 
         /**
@@ -238,7 +295,7 @@ namespace Chalkboard {
          */
         export const cols = (matr: ChalkboardMatrix): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.cols: Parameter "matr" must be a matrix.`);
-            return matr[0].length;
+            return matr.length === 0 ? 0 : matr[0].length;
         };
 
         /**
@@ -250,7 +307,9 @@ namespace Chalkboard {
          */
         export const colspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.colspace: Parameter "matr" must be a matrix.`);
-            return Chalkboard.matr.transpose(Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr)));
+            const basis = Chalkboard.matr.rowspace(Chalkboard.matr.transpose(matr));
+            if (basis.length === 0) return Chalkboard.matr.init();
+            return Chalkboard.matr.transpose(basis);
         };
 
         /**
@@ -415,11 +474,37 @@ namespace Chalkboard {
                     return matr[0][0] * (matr[1][1] * matr[2][2] - matr[1][2] * matr[2][1]) - matr[0][1] * (matr[1][0] * matr[2][2] - matr[1][2] * matr[2][0]) + matr[0][2] * (matr[1][0] * matr[2][1] - matr[1][1] * matr[2][0]);
                 } else if (Chalkboard.matr.rows(matr) === 4) {
                     return matr[0][0] * (matr[1][1] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) + matr[1][3] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1])) - matr[0][1] * (matr[1][0] * (matr[2][2] * matr[3][3] - matr[2][3] * matr[3][2]) - matr[1][2] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0])) + matr[0][2] * (matr[1][0] * (matr[2][1] * matr[3][3] - matr[2][3] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][3] - matr[2][3] * matr[3][0]) + matr[1][3] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0])) - matr[0][3] * (matr[1][0] * (matr[2][1] * matr[3][2] - matr[2][2] * matr[3][1]) - matr[1][1] * (matr[2][0] * matr[3][2] - matr[2][2] * matr[3][0]) + matr[1][2] * (matr[2][0] * matr[3][1] - matr[2][1] * matr[3][0]));
-                } else {
+                } else if (Chalkboard.matr.rows(matr) <= 8) {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        const cofactor = matr[0][i] * Chalkboard.matr.det(Chalkboard.matr.cofactor(matr, 0, i));
+                        const cofactor = matr[0][i] * Chalkboard.matr.det($minor(matr, 0, i));
                         result += i % 2 === 0 ? cofactor : -cofactor;
+                    }
+                    return result;
+                } else {
+                    const n = Chalkboard.matr.rows(matr);
+                    const reduced = Chalkboard.matr.copy(matr);
+                    let result = 1;
+                    for (let j = 0; j < n; j++) {
+                        let max = j;
+                        for (let i = j + 1; i < n; i++) {
+                            if (Math.abs(reduced[i][j]) > Math.abs(reduced[max][j])) max = i;
+                        }
+                        if (reduced[max][j] === 0) return 0;
+                        if (max !== j) {
+                            const temp = reduced[max];
+                            reduced[max] = reduced[j];
+                            reduced[j] = temp;
+                            result = -result;
+                        }
+                        const pivot = reduced[j][j];
+                        result *= pivot;
+                        for (let i = j + 1; i < n; i++) {
+                            const coeff = reduced[i][j] / pivot;
+                            if (coeff !== 0) {
+                                for (let k = j + 1; k < n; k++) reduced[i][k] -= coeff * reduced[j][k];
+                            }
+                        }
                     }
                     return result;
                 }
@@ -471,6 +556,7 @@ namespace Chalkboard {
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
                 const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                if (max === 0) break;
                 v = Chalkboard.stat.toMatrix(
                     Chalkboard.matr.toArray(matrv).map((i) => i / max),
                     Chalkboard.matr.rows(matr),
@@ -505,6 +591,7 @@ namespace Chalkboard {
             for (let i = 0; i < maxIterations; i++) {
                 const matrv = Chalkboard.matr.mul(matr, v);
                 const max = Chalkboard.stat.max(Chalkboard.matr.toArray(Chalkboard.matr.absolute(matrv)));
+                if (max === 0) break;
                 v = Chalkboard.stat.toMatrix(Chalkboard.matr.toArray(matrv).map((i) => i / max), Chalkboard.matr.rows(matr), 1 );
             }
             const result = Chalkboard.matr.toArray(v);
@@ -601,48 +688,15 @@ namespace Chalkboard {
         };
 
         /**
-         * Calculates the row echelon form of a matrix (performs Gaussian elimination on it).
+         * Calculates the reduced row echelon form of a matrix by Gaussian elimination.
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
          * @example
-         * const result = Chalkboard.matr.Gaussian([[1, 2, 1], [2, 4, 0], [3, 6, 3]]); // Returns its row-echelon form
+         * const result = Chalkboard.matr.Gaussian([[1, 2, 1], [2, 4, 0], [3, 6, 3]]); // Returns [[1, 2, 0], [0, 0, 1], [0, 0, 0]]
          */
         export const Gaussian = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.Gaussian: Parameter "matr" must be a matrix.`);
-            let lead = 0;
-            for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
-                if (lead >= Chalkboard.matr.cols(matr)) {
-                    break;
-                }
-                let i = row;
-                while (matr[i][lead] === 0) {
-                    i++;
-                    if (i === Chalkboard.matr.rows(matr)) {
-                        i = row;
-                        lead++;
-                        if (Chalkboard.matr.cols(matr) === lead) {
-                            return matr;
-                        }
-                    }
-                }
-                const temp = matr[i];
-                matr[i] = matr[row];
-                matr[row] = temp;
-                const scl = matr[row][lead];
-                for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                    matr[row][j] /= scl;
-                }
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    if (i !== row) {
-                        const coeff = matr[i][lead];
-                        for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                            matr[i][j] -= coeff * matr[row][j];
-                        }
-                    }
-                }
-                lead++;
-            }
-            return matr;
+            return $reduce(matr).result;
         };
 
         /**
@@ -771,19 +825,18 @@ namespace Chalkboard {
                         augmented[i][Chalkboard.matr.cols(matr) + i] = 1;
                     }
                     for (let row = 0; row < Chalkboard.matr.rows(matr); row++) {
-                        let diagonal = augmented[row][row];
-                        if (diagonal === 0) {
-                            let max = row;
-                            for (let i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
-                                if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
-                                    max = i;
-                                }
+                        let max = row;
+                        for (let i = row + 1; i < Chalkboard.matr.rows(matr); i++) {
+                            if (Math.abs(augmented[i][row]) > Math.abs(augmented[max][row])) {
+                                max = i;
                             }
+                        }
+                        if (max !== row) {
                             const temp = augmented[row];
                             augmented[row] = augmented[max];
                             augmented[max] = temp;
-                            diagonal = augmented[row][row];
                         }
+                        const diagonal = augmented[row][row];
                         for (let col = 0; col < 2 * Chalkboard.matr.cols(matr); col++) {
                             augmented[row][col] /= diagonal;
                         }
@@ -802,7 +855,7 @@ namespace Chalkboard {
                     return result;
                 }
             } else {
-                throw new Error(`Chalkboard.matr.invert: Parameter "matr" must be of type ChalkboardMatrix that is square and has a non-zero determinant.`);
+                throw new Error(`Chalkboard.matr.invert: Parameter "matr" must be of type ChalkboardMatrix that is square and invertible.`);
             }
         };
 
@@ -926,7 +979,7 @@ namespace Chalkboard {
          */
         export const isInvertible = (matr: ChalkboardMatrix): boolean => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.isInvertible: Parameter "matr" must be a matrix.`);
-            return Chalkboard.matr.isSquare(matr) && Chalkboard.matr.det(matr) !== 0;
+            return Chalkboard.matr.isSquare(matr) && $reduce(matr).pivots.length === Chalkboard.matr.rows(matr);
         };
 
         /**
@@ -1208,8 +1261,16 @@ namespace Chalkboard {
          */
         export const LUdecomp = (matr: ChalkboardMatrix): { L: ChalkboardMatrix; U: ChalkboardMatrix } => {
             if (Chalkboard.matr.isSquare(matr)) {
-                const L = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
-                    U = Chalkboard.matr.fill(0, Chalkboard.matr.rows(matr));
+                const n = Chalkboard.matr.rows(matr);
+                const L = Chalkboard.matr.identity(n),
+                    U = Chalkboard.matr.fill(0, n);
+                let scale = 0;
+                for (let i = 0; i < n; i++) {
+                    for (let j = 0; j < n; j++) {
+                        if (Math.abs(matr[i][j]) > scale) scale = Math.abs(matr[i][j]);
+                    }
+                }
+                const tolerance = n * Number.EPSILON * scale;
                 for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
                     for (let i = 0; i <= j; i++) {
                         let sum = 0;
@@ -1218,6 +1279,7 @@ namespace Chalkboard {
                         }
                         U[i][j] = matr[i][j] - sum;
                     }
+                    if (j < n - 1 && Math.abs(U[j][j]) <= tolerance) throw new Error(`Chalkboard.matr.LUdecomp: Parameter "matr" must have nonzero leading pivots because the decomposition does not exchange rows.`);
                     for (let i = j + 1; i < Chalkboard.matr.rows(matr); i++) {
                         let sum = 0;
                         for (let k = 0; k < j; k++) {
@@ -1489,7 +1551,7 @@ namespace Chalkboard {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     let rowResult = 0;
                     for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        rowResult += Chalkboard.real.pow(matr[i][j], p) as number;
+                        rowResult += Chalkboard.real.pow(Math.abs(matr[i][j]), p) as number;
                     }
                     result += Chalkboard.real.pow(rowResult, q / p) as number;
                 }
@@ -1510,34 +1572,8 @@ namespace Chalkboard {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.normalize: Parameter "matr" must be a matrix.`);
             if (!Number.isFinite(p) || p <= 0) throw new Error(`Chalkboard.matr.normalize: Parameter "p" must be greater than 0.`);
             if (!Number.isFinite(q) || q <= 0) throw new Error(`Chalkboard.matr.normalize: Parameter "q" must be greater than 0.`);
-            if (Chalkboard.matr.isSizeOf(matr, 2)) {
-                return Chalkboard.matr.init(
-                    [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q)]
-                );
-            } else if (Chalkboard.matr.isSizeOf(matr, 3)) {
-                return Chalkboard.matr.init(
-                    [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q)]
-                );
-            } else if (Chalkboard.matr.isSizeOf(matr, 4)) {
-                return Chalkboard.matr.init(
-                    [matr[0][0] / Chalkboard.matr.norm(matr, p, q), matr[0][1] / Chalkboard.matr.norm(matr, p, q), matr[0][2] / Chalkboard.matr.norm(matr, p, q), matr[0][3] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[1][0] / Chalkboard.matr.norm(matr, p, q), matr[1][1] / Chalkboard.matr.norm(matr, p, q), matr[1][2] / Chalkboard.matr.norm(matr, p, q), matr[1][3] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[2][0] / Chalkboard.matr.norm(matr, p, q), matr[2][1] / Chalkboard.matr.norm(matr, p, q), matr[2][2] / Chalkboard.matr.norm(matr, p, q), matr[2][3] / Chalkboard.matr.norm(matr, p, q)],
-                    [matr[3][0] / Chalkboard.matr.norm(matr, p, q), matr[3][1] / Chalkboard.matr.norm(matr, p, q), matr[3][2] / Chalkboard.matr.norm(matr, p, q), matr[3][3] / Chalkboard.matr.norm(matr, p, q)]
-                );
-            } else {
-                const result = Chalkboard.matr.init();
-                for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                    result[i] = [];
-                    for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        result[i][j] = matr[i][j] / Chalkboard.matr.norm(matr, p, q);
-                    }
-                }
-                return result;
-            }
+            const norm = Chalkboard.matr.norm(matr, p, q);
+            return matr.map((row) => row.map((x) => x / norm));
         };
 
         /**
@@ -1564,7 +1600,7 @@ namespace Chalkboard {
                 for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
                     let rowResult = 0;
                     for (let j = 0; j < Chalkboard.matr.cols(matr); j++) {
-                        rowResult += Chalkboard.real.pow(matr[i][j], p) as number;
+                        rowResult += Chalkboard.real.pow(Math.abs(matr[i][j]), p) as number;
                     }
                     result += Chalkboard.real.pow(rowResult, q / p) as number;
                 }
@@ -1577,13 +1613,27 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {ChalkboardMatrix}
          * @example
-         * const result = Chalkboard.matr.nullspace([[1, 2, 3], [2, 4, 6]]); // Returns a basis for the null space
+         * const result = Chalkboard.matr.nullspace([[1, 2, 3], [2, 4, 6]]); // Returns [[-2, -3], [1, 0], [0, 1]]
          */
         export const nullspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.nullspace: Parameter "matr" must be a matrix.`);
-            const augmented = matr.map((row) => row.slice().concat(Array(Chalkboard.matr.rows(matr)).fill(0)));
-            const rowEchelonForm = Chalkboard.matr.Gaussian(augmented);
-            return rowEchelonForm.filter((row: number[]) => row.slice(0, Chalkboard.matr.rows(matr)).every((element) => element === 0)).map((row: number[]) => row.slice(Chalkboard.matr.rows(matr)));
+            const reduced = $reduce(matr);
+            const cols = Chalkboard.matr.cols(matr);
+            const free: number[] = [];
+            for (let j = 0; j < cols; j++) {
+                if (reduced.pivots.indexOf(j) === -1) free.push(j);
+            }
+            if (free.length === 0) return Chalkboard.matr.init();
+            const basis = Chalkboard.matr.fill(0, cols, free.length);
+            for (let k = 0; k < free.length; k++) {
+                const f = free[k];
+                basis[f][k] = 1;
+                for (let r = 0; r < reduced.pivots.length; r++) {
+                    const entry = reduced.result[r][f];
+                    basis[reduced.pivots[r]][k] = entry === 0 ? 0 : -entry;
+                }
+            }
+            return basis;
         };
 
         /**
@@ -1591,7 +1641,7 @@ namespace Chalkboard {
          * @param {ChalkboardMatrix} matr - The matrix
          * @returns {number}
          * @example
-         * const result = Chalkboard.matr.perm([[0, 1], [1, 0]]); // Returns -1
+         * const result = Chalkboard.matr.perm([[0, 1], [1, 0]]); // Returns 1
          */
         export const perm = (matr: ChalkboardMatrix): number => {
             if (Chalkboard.matr.isSquare(matr)) {
@@ -1606,8 +1656,7 @@ namespace Chalkboard {
                 } else {
                     let result = 0;
                     for (let i = 0; i < Chalkboard.matr.rows(matr); i++) {
-                        const cofactor = matr[0][i] * Chalkboard.matr.perm(Chalkboard.matr.cofactor(matr, 0, i));
-                        result += Math.abs(cofactor);
+                        result += matr[0][i] * Chalkboard.matr.perm($minor(matr, 0, i));
                     }
                     return result;
                 }
@@ -1630,9 +1679,13 @@ namespace Chalkboard {
                 if (num === 0) {
                     return Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
                 } else {
-                    let result = matr;
-                    for (let i = 1; i < num; i++) {
-                        result = Chalkboard.matr.mul(matr, result);
+                    let result = Chalkboard.matr.identity(Chalkboard.matr.rows(matr));
+                    let base = Chalkboard.matr.copy(matr);
+                    let exponent = num;
+                    while (exponent > 0) {
+                        if (exponent % 2 === 1) result = Chalkboard.matr.mul(result, base);
+                        exponent = Math.floor(exponent / 2);
+                        if (exponent > 0) base = Chalkboard.matr.mul(base, base);
                     }
                     return result;
                 }
@@ -1717,47 +1770,69 @@ namespace Chalkboard {
          */
         export const QRdecomp = (matr: ChalkboardMatrix): { Q: ChalkboardMatrix; R: ChalkboardMatrix } => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.QRdecomp: Parameter "matr" must be a matrix.`);
-            const Q = Chalkboard.matr.identity(Chalkboard.matr.rows(matr)),
+            const rows = Chalkboard.matr.rows(matr), cols = Chalkboard.matr.cols(matr);
+            const Q = Chalkboard.matr.identity(rows),
                 R = Chalkboard.matr.copy(matr);
-            for (let j = 0; j < Math.min(Chalkboard.matr.rows(matr), Chalkboard.matr.cols(matr)) - (Chalkboard.matr.rows(matr) > Chalkboard.matr.cols(matr) ? 0 : 1); j++) {
+            for (let j = 0; j < Math.min(rows - 1, cols); j++) {
+                let reduced = true;
+                for (let i = j + 1; i < rows; i++) {
+                    if (R[i][j] !== 0) {
+                        reduced = false;
+                        break;
+                    }
+                }
+                if (reduced) continue;
+                let scale = 0;
+                for (let i = j; i < rows; i++) {
+                    if (Math.abs(R[i][j]) > scale) scale = Math.abs(R[i][j]);
+                }
+                const v: number[] = [];
+                for (let i = j; i < rows; i++) {
+                    v.push(R[i][j] / scale);
+                }
                 let norm = 0;
-                for (let i = j; i < Chalkboard.matr.rows(matr); i++) {
-                    norm += R[i][j] * R[i][j];
+                for (let i = 0; i < v.length; i++) {
+                    norm += v[i] * v[i];
                 }
                 norm = Chalkboard.real.sqrt(norm);
-                const v = [];
-                v[0] = norm - R[j][j];
-                let normalizer = v[0] * v[0];
-                for (let i = 1; i < Chalkboard.matr.rows(matr) - j; i++) {
-                    v[i] = -R[i + j][j];
-                    normalizer += v[i] * v[i];
-                }
-                normalizer = 1 / Chalkboard.real.sqrt(normalizer);
+                const alpha = v[0] > 0 ? -norm : norm;
+                v[0] -= alpha;
+                let vv = 0;
                 for (let i = 0; i < v.length; i++) {
-                    v[i] *= normalizer;
+                    vv += v[i] * v[i];
                 }
-                R[j][j] = norm;
-                for (let i = j + 1; i < Chalkboard.matr.rows(R); i++) {
-                    R[i][j] = 0;
-                }
-                for (let k = j + 1; k < Chalkboard.matr.cols(R); k++) {
+                for (let k = j + 1; k < cols; k++) {
                     let dot = 0;
                     for (let i = 0; i < v.length; i++) {
                         dot += v[i] * R[i + j][k];
                     }
-                    dot *= 2;
+                    const f = 2 * dot / vv;
                     for (let i = 0; i < v.length; i++) {
-                        R[i + j][k] -= dot * v[i];
+                        R[i + j][k] -= f * v[i];
                     }
                 }
-                for (let k = 0; k < Chalkboard.matr.cols(Q); k++) {
+                for (let k = 0; k < rows; k++) {
                     let dot = 0;
                     for (let i = 0; i < v.length; i++) {
                         dot += v[i] * Q[k][i + j];
                     }
-                    dot *= 2;
+                    const f = 2 * dot / vv;
                     for (let i = 0; i < v.length; i++) {
-                        Q[k][i + j] -= dot * v[i];
+                        Q[k][i + j] -= f * v[i];
+                    }
+                }
+                R[j][j] = alpha * scale;
+                for (let i = j + 1; i < rows; i++) {
+                    R[i][j] = 0;
+                }
+            }
+            for (let j = 0; j < Math.min(rows, cols); j++) {
+                if (R[j][j] < 0) {
+                    for (let k = 0; k < cols; k++) {
+                        R[j][k] = 0 - R[j][k];
+                    }
+                    for (let k = 0; k < rows; k++) {
+                        Q[k][j] = 0 - Q[k][j];
                     }
                 }
             }
@@ -1806,7 +1881,7 @@ namespace Chalkboard {
          */
         export const rank = (matr: ChalkboardMatrix): number => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rank: Parameter "matr" must be a matrix.`);
-            return Chalkboard.matr.Gaussian(matr).filter((row: number[]) => row.some((element) => element !== 0)).length;
+            return $reduce(matr).pivots.length;
         };
 
         /**
@@ -1932,7 +2007,8 @@ namespace Chalkboard {
          */
         export const rowspace = (matr: ChalkboardMatrix): ChalkboardMatrix => {
             if (!Array.isArray(matr) || matr.length > 0 && !Array.isArray(matr[0])) throw new Error(`Chalkboard.matr.rowspace: Parameter "matr" must be a matrix.`);
-            return Chalkboard.matr.Gaussian(matr).filter((row: number[]) => row.some((element: number) => element !== 0));
+            const reduced = $reduce(matr);
+            return reduced.result.slice(0, reduced.pivots.length);
         };
 
         /**
@@ -2001,16 +2077,16 @@ namespace Chalkboard {
         export const solve = (matrA: ChalkboardMatrix, matrB: ChalkboardMatrix): ChalkboardMatrix => {
             if (Chalkboard.matr.isSquare(matrA)) {
                 if (Chalkboard.matr.rows(matrA) === Chalkboard.matr.rows(matrB)) {
-                    if (Chalkboard.matr.det(matrA) !== 0) {
+                    if (Chalkboard.matr.isInvertible(matrA)) {
                         return Chalkboard.matr.mul(Chalkboard.matr.invert(matrA), matrB);
                     } else {
-                        throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that has a non-zero determinant.`);
+                        throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be an invertible matrix.`);
                     }
                 } else {
-                    throw new Error(`Chalkboard.matr.solve: Parameters "matrA" and "matrB" must be of type ChalkboardMatrix with equivalent numbers of rows.`);
+                    throw new Error(`Chalkboard.matr.solve: Parameters "matrA" and "matrB" must be a matrix with equivalent numbers of rows.`);
                 }
             } else {
-                throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be of type ChalkboardMatrix that is square.`);
+                throw new Error(`Chalkboard.matr.solve: Parameter "matrA" must be a square matrix.`);
             }
         };
 

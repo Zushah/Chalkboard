@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Monday, November 2, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Tuesday, November 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Tuesday, October 27, 2026, [**`8b63379`**](https://github.com/Zushah/Chalkboard/commit/8b63379).
+Previous commit: Monday, November 2, 2026, [**`9c4c002`**](https://github.com/Zushah/Chalkboard/commit/9c4c002).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -343,9 +343,10 @@ Elementwise addition and subtraction require matching dimensions. Matrix multipl
 
 Linear algebra includes determinants, inverses, row reduction, rank and subspace helpers, LU, QR, Cholesky, linear systems, and iterative eigenvalue/eigenvector estimates. These are concrete algorithms with different limits:
 
-- `Gaussian` performs in-place row operations. `copy` clones rows, while `push` and `pull` also mutate array structure.
-- General inversion uses augmented elimination; pivot replacement searches when the current diagonal pivot is exactly zero. It is not a uniformly pivoted, condition-estimating solver.
-- LU is unpivoted; QR uses Householder transformations; Cholesky returns factor matrices for its supported input class.
+- Row reduction uses partial pivoting and treats entries within a tolerance relative to the matrix's largest entry as zero. `Gaussian` returns a new reduced row echelon form, and rank, row/column/null space bases, and invertibility come from the same reduction, so they agree with one another. `copy` clones rows, while `push` and `pull` mutate array structure.
+- Column and null space bases are returned as columns, while row space bases are returned as rows; `cofactor` and `adjugate` return whole matrices.
+- Determinants use closed forms and exact cofactor expansion for small matrices and pivoted elimination for larger ones, so large integer matrices can have non-integer results. General inversion uses pivoted augmented elimination; it is not a condition-estimating solver.
+- LU is unpivoted and rejects matrices that would need row exchanges; QR uses Householder transformations and returns a triangular factor with a nonnegative diagonal; Cholesky returns factor matrices for its supported input class.
 - `solve` computes through matrix inversion and multiplication. It is not a least-squares interface.
 - Eigenvalue/eigenvector routines use power iteration for a dominant estimate, with a default finite iteration count. They do not return a complete eigensystem.
 

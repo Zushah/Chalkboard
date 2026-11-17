@@ -78,11 +78,19 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.matr.trace(m), 5);
     assert.strictEqual(cb.matr.perm(m), 10);
     assert.strictEqual(cb.matr.rank(m), 2);
+    assert.deepStrictEqual(m, [[1, 2], [3, 4]]);
+    assert.strictEqual(cb.matr.rank(cb.matr.init([0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9])), 2);
+    const m5 = cb.matr.init([1, -2, 3, 0, 1], [2, 1, -1, 4, 0], [0, 3, 1, -2, 2], [1, 0, 2, 1, -3], [-1, 2, 0, 3, 1]);
+    assert.strictEqual(cb.matr.perm(m5), 176);
+    assert.strictEqual(cb.matr.det(cb.matr.init([2, 0, 1, 3, 1], [1, 1, 0, 2, 4], [0, 3, 1, 1, 0], [4, 1, 2, 0, 1], [1, 0, 3, 1, 2])), -384);
+    assert.strictEqual(cb.matr.det(cb.matr.scl(cb.matr.identity(9), 2)), 512);
     assert.strictEqual(cb.matr.norm(cb.matr.init([1, 2], [3, 4])), 5.477225575051661);
     assert.strictEqual(cb.matr.normsq(cb.matr.init([1, 2], [3, 4])), 30);
+    assert.strictEqual(cb.matr.norm(cb.matr.init([-1, 2], [3, -4]), 1, 1), 10);
     const em = cb.matr.init([2, 0], [0, 3]);
     assert.ok(cb.matr.eigenvalue(em) > 2.9);
     assert.ok(cb.matr.eigenvector(em).length === 2);
+    assert.strictEqual(cb.matr.eigenvalue(cb.matr.init([0, 1], [0, 0])), 0);
 }
 
 // matr.isApproxEqual, matr.isDiagonal, matr.isEqual, matr.isIdentity, matr.isInvertible, matr.isLowerTriangular, matr.isOrthogonal, matr.isSizeEqual, matr.isSizeOf, matr.isSkewSymmetric, matr.isSquare, matr.isSymmetric, matr.isUpperTriangular, matr.isZero
@@ -94,6 +102,7 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(cb.matr.isEqual(m1, cb.matr.init([1, 2], [3, 4])), true);
     assert.strictEqual(cb.matr.isIdentity(i), true);
     assert.strictEqual(cb.matr.isInvertible(m1), true);
+    assert.strictEqual(cb.matr.isInvertible(cb.matr.init([0.1, 0.2, 0.3], [0.4, 0.5, 0.6], [0.7, 0.8, 0.9])), false);
     assert.strictEqual(cb.matr.isLowerTriangular(cb.matr.init([1, 0], [2, 3])), true);
     assert.strictEqual(cb.matr.isOrthogonal(i), true);
     assert.strictEqual(cb.matr.isSizeEqual(m1, i), true);
@@ -108,18 +117,19 @@ import cb from "@zushah/chalkboard";
 // matr.adjugate, matr.Cholesky, matr.cofactor, matr.colspace, matr.concat, matr.constrain, matr.Gaussian, matr.invert, matr.LUdecomp, matr.normalize, matr.nullspace, matr.pull, matr.push, matr.QRdecomp, matr.resize, matr.rowspace, matr.solve, matr.transpose
 {
     const m1 = cb.matr.init([1, 2], [3, 4]);
-    assert.deepStrictEqual(cb.matr.adjugate(m1, 0, 0), [[4]]);
-    assert.deepStrictEqual(cb.matr.cofactor(m1, 0, 0), [[4]]);
-    assert.deepStrictEqual(cb.matr.colspace(m1), [[1, -0], [0, 1]]);
+    assert.deepStrictEqual(cb.matr.adjugate(m1), [[4, -2], [-3, 1]]);
+    assert.deepStrictEqual(cb.matr.cofactor(m1), [[4, -3], [-2, 1]]);
+    assert.deepStrictEqual(cb.matr.colspace(m1), [[1, 0], [0, 1]]);
     assert.deepStrictEqual(cb.matr.concat(m1, m1, 1), [[1, 2, 1, 2], [3, 4, 3, 4]]);
     assert.deepStrictEqual(cb.matr.constrain(m1, [0, 2]), [[1, 2], [2, 2]]);
-    assert.deepStrictEqual(cb.matr.Gaussian(cb.matr.copy(m1)), [[1, 0], [-0, 1]]);
+    assert.deepStrictEqual(cb.matr.Gaussian(m1), [[1, 0], [0, 1]]);
     assert.deepStrictEqual(cb.matr.invert(m1), [[-2, 1], [1.5, -0.5]]);
     assert.deepStrictEqual(cb.matr.normalize(cb.matr.init([3, 4], [0, 0])), [[0.6, 0.8], [0, 0]]);
     assert.deepStrictEqual(cb.matr.pull(cb.matr.copy(m1), 0, 0), [[3, 4]]);
     assert.deepStrictEqual(cb.matr.push(cb.matr.copy(m1), 0, 0, [5, 6]), [[5, 6], [1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.matr.resize(m1, 3, 3), [[1, 2, 0], [3, 4, 0], [0, 0, 0]]);
-    assert.deepStrictEqual(cb.matr.rowspace(cb.matr.copy(m1)), [[1, 0], [-0, 1]]);
+    assert.deepStrictEqual(cb.matr.rowspace(m1), [[1, 0], [0, 1]]);
+    assert.deepStrictEqual(m1, [[1, 2], [3, 4]]);
     assert.deepStrictEqual(cb.matr.solve(m1, cb.matr.init([5], [11])), [[1], [2]]);
     assert.deepStrictEqual(cb.matr.transpose(m1), [[1, 3], [2, 4]]);
     const pdm = cb.matr.init([4, 12, -16], [12, 37, -43], [-16, -43, 98]);
@@ -128,9 +138,14 @@ import cb from "@zushah/chalkboard";
     const lu = cb.matr.LUdecomp(m1);
     assert.deepStrictEqual(lu.L, [[1, 0], [3, 1]]);
     assert.deepStrictEqual(lu.U, [[1, 2], [0, -2]]);
-    assert.ok(Array.isArray(cb.matr.nullspace(cb.matr.init([1, -1], [-2, 2]))));
-    const qr = cb.matr.QRdecomp(cb.matr.init([12, -51, 4], [6, 167, -68], [-4, 24, -41]));
-    assert.ok(qr.Q && qr.R);
+    assert.deepStrictEqual(cb.matr.nullspace(cb.matr.init([1, 2, 3], [4, 5, 6])), [[1], [-2], [1]]);
+    assert.deepStrictEqual(cb.matr.nullspace(m1), []);
+    const qa = cb.matr.init([12, -51, 4], [6, 167, -68], [-4, 24, -41]);
+    const qr = cb.matr.QRdecomp(qa);
+    assert.ok(cb.matr.isApproxEqual(cb.matr.mul(qr.Q, qr.R), qa));
+    assert.ok(cb.matr.isApproxEqual(cb.matr.mul(cb.matr.transpose(qr.Q), qr.Q), cb.matr.identity(3)));
+    assert.ok(cb.matr.isApproxEqual(qr.R, [[14, 21, -14], [0, 175, -70], [0, 0, 35]]));
+    assert.deepStrictEqual(cb.matr.QRdecomp(cb.matr.identity(3)), { Q: cb.matr.identity(3), R: cb.matr.identity(3) });
 }
 
 // matr.print, matr.toArray, matr.toObject, matr.toSet, matr.toString, matr.toTensor, matr.toTypedArray, matr.toVector
