@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Tuesday, November 17, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Wednesday, November 18, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Monday, November 2, 2026, [**`9c4c002`**](https://github.com/Zushah/Chalkboard/commit/9c4c002).
+Previous commit: Tuesday, November 17, 2026, [**`c366459`**](https://github.com/Zushah/Chalkboard/commit/c366459).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -449,7 +449,7 @@ Symbolic and numerical computation coexist through explicit APIs. Parsing produc
 
 Variance and covariance use population normalization by the number of samples. `percentile(arr, num)` computes the percentage of observations at or below a supplied value; it is not a quantile lookup. Distribution helpers distinguish density or inverse-distribution evaluation from random sampling: `stat.Gaussian` produces a real function record, while `numb.Gaussian` samples a random value.
 
-Regression consumes point pairs and returns a `ChalkboardFunction` for linear, polynomial, power, exponential, or logarithmic models. Polynomial regression constructs a Vandermonde-style system and normal equations and uses matrix inversion. Rank deficiency and conditioning therefore affect it; the presence of QR elsewhere in the library does not mean regression uses QR least squares.
+Regression consumes point pairs and returns a `ChalkboardFunction` for linear, polynomial, power, exponential, or logarithmic models. Polynomial regression rescales inputs to a centered interval and solves the least-squares problem through QR, rejecting data with fewer distinct inputs than the model needs.
 
 Uniqueness and set-related helpers are used by `abal`. Array ownership is operation-specific: for example, subset generation sorts its input array. Numerical sequence APIs should not be described as uniformly immutable or as coordinate vectors restricted to four entries.
 

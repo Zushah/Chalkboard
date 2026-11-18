@@ -1162,30 +1162,47 @@ namespace Chalkboard {
                 const b = y / data.length - (a * x) / data.length;
                 return Chalkboard.real.define((x) => a * x + b);
             } else if (type === "polynomial") {
+                if (data.length < degree + 1) throw new Error(`Chalkboard.stat.regression: Parameter "data" must contain at least degree + 1 points for polynomial regression.`);
+                let center = 0;
+                for (let i = 0; i < data.length; i++) {
+                    center += data[i][0];
+                }
+                center /= data.length;
+                let spread = 0;
+                for (let i = 0; i < data.length; i++) {
+                    if (Math.abs(data[i][0] - center) > spread) spread = Math.abs(data[i][0] - center);
+                }
+                if (spread === 0) spread = 1;
                 const A = Chalkboard.matr.init();
                 for (let i = 0; i < data.length; i++) {
+                    const u = (data[i][0] - center) / spread;
                     A.push([]);
                     for (let j = 0; j <= degree; j++) {
-                        A[i].push(Chalkboard.real.pow(data[i][0], j) as number);
+                        A[i].push(Chalkboard.real.pow(u, j) as number);
                     }
                 }
-                const AT = Chalkboard.matr.transpose(A);
-                const B = Chalkboard.matr.init();
-                for (let i = 0; i < data.length; i++) {
-                    B.push([data[i][1]]);
+                const QR = Chalkboard.matr.QRdecomp(A);
+                let scale = 0;
+                for (let i = 0; i <= degree; i++) {
+                    if (Math.abs(QR.R[i][i]) > scale) scale = Math.abs(QR.R[i][i]);
                 }
-                const ATA = Chalkboard.matr.mul(AT, A);
-                const ATAI = Chalkboard.matr.invert(ATA);
-                const x = Chalkboard.matr.mul(Chalkboard.matr.mul(ATAI, AT), B);
                 const coeff: number[] = [];
-                for (let i = 0; i < x.length; i++) {
-                    coeff.push(x[i][0]);
+                for (let i = degree; i >= 0; i--) {
+                    if (Math.abs(QR.R[i][i]) <= data.length * Number.EPSILON * scale) throw new Error(`Chalkboard.stat.regression: Parameter "data" must contain at least degree + 1 distinct x-values for polynomial regression.`);
+                    let sum = 0;
+                    for (let k = 0; k < data.length; k++) {
+                        sum += QR.Q[k][i] * data[k][1];
+                    }
+                    for (let j = i + 1; j <= degree; j++) {
+                        sum -= QR.R[i][j] * coeff[j];
+                    }
+                    coeff[i] = sum / QR.R[i][i];
                 }
                 return Chalkboard.real.define((x) => {
-                    let result = coeff[0];
-                    result += coeff[1] * x;
-                    for (let i = 2; i <= degree; i++) {
-                        result += coeff[i] * Math.pow(x, i);
+                    const u = (x - center) / spread;
+                    let result = coeff[degree];
+                    for (let i = degree - 1; i >= 0; i--) {
+                        result = result * u + coeff[i];
                     }
                     return result;
                 });

@@ -141,7 +141,9 @@ import cb from "@zushah/chalkboard";
 // stat.regression
 {
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 1], [1, 3], [2, 5]], "linear"), 2), 5);
-    assert.strictEqual(cb.real.val(cb.stat.regression([[0, 0], [1, 1], [2, 4]], "polynomial", 2), 3), 9);
+    assert.ok(Math.abs(cb.real.val(cb.stat.regression([[0, 0], [1, 1], [2, 4]], "polynomial", 2), 3) - 9) < 1e-12);
+    const years = Array.from({ length: 11 }, (_, i) => [2000 + i, (i - 5) * (i - 5) * (i - 5)]);
+    assert.ok(Math.abs(cb.real.val(cb.stat.regression(years, "polynomial", 3), 2012) - 343) < 1e-8);
     assert.strictEqual(cb.real.val(cb.stat.regression([[1, 2], [2, 16], [3, 54]], "power"), 2), 16);
     assert.strictEqual(cb.real.val(cb.stat.regression([[0, 2], [1, 2*cb.E(0.5)], [2, 2*cb.E()]], "exponential"), 1), 3.2974425414002564);
     assert.strictEqual(cb.real.val(cb.stat.regression([[1, 1], [2, 1+2*cb.real.ln(2)], [4, 1+2*cb.real.ln(4)]], "logarithmic"), 2), 2.386294361119891);
