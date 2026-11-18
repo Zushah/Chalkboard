@@ -65,6 +65,7 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.comp.rotate(z, 1), { a: 2.2232442754839328, b: -0.23913362692838272 });
     assert.deepStrictEqual(cb.comp.sq(z), { a: -3, b: -4 });
     assert.deepStrictEqual(cb.comp.sqrt(z), { a: 1.272019649514069, b: -0.7861513777574234 });
+    assert.deepStrictEqual(cb.comp.sqrt(-4), { a: 0, b: 2 });
 }
 
 // comp.cos, comp.Euler, comp.exp, comp.ln, comp.sin, comp.tan

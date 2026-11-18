@@ -2,7 +2,7 @@
 
 Latest commit: Wednesday, November 18, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Tuesday, November 17, 2026, [**`c366459`**](https://github.com/Zushah/Chalkboard/commit/c366459).
+Previous commit: Wednesday, November 18, 2026, [**`de3bd2a`**](https://github.com/Zushah/Chalkboard/commit/de3bd2a).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 

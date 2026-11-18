@@ -1674,8 +1674,8 @@ namespace Chalkboard {
          * @param {ChalkboardComplex | number | ChalkboardFunction} comp - The complex number or function
          * @returns {ChalkboardComplex | ChalkboardFunction}
          * @example
-         * // Returns 2 + 0.5i
-         * const sqrt = Chalkboard.comp.sqrt(Chalkboard.comp.init(4, 2));
+         * // Returns 2 + i
+         * const sqrt = Chalkboard.comp.sqrt(Chalkboard.comp.init(3, 4));
          */
         export const sqrt = (comp: ChalkboardComplex | number | ChalkboardFunction): ChalkboardComplex | ChalkboardFunction => {
             if (typeof comp === "number") comp = Chalkboard.comp.init(comp, 0);
@@ -1684,7 +1684,7 @@ namespace Chalkboard {
                 const z = comp as ChalkboardComplex;
                 return Chalkboard.comp.init(
                     Chalkboard.real.sqrt((z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2),
-                    (Chalkboard.numb.sgn(z.b) as 0 | 1 | -1) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2)
+                    (z.b < 0 ? -1 : 1) * Chalkboard.real.sqrt((-z.a + Chalkboard.real.sqrt(z.a * z.a + z.b * z.b)) / 2)
                 );
             } else if (comp.hasOwnProperty("rule")) {
                 if ((comp as ChalkboardFunction).field !== "comp") throw new Error(`Chalkboard.comp.sqrt: Property "comp.field" must be comp.`);
@@ -1698,7 +1698,7 @@ namespace Chalkboard {
                     (a: number, b: number) => {
                         const re = f[0](a, b);
                         const im = f[1](a, b);
-                        return (Chalkboard.numb.sgn(im) as 0 | 1 | -1) * Chalkboard.real.sqrt((-re + Chalkboard.real.sqrt(re * re + im * im)) / 2);
+                        return (im < 0 ? -1 : 1) * Chalkboard.real.sqrt((-re + Chalkboard.real.sqrt(re * re + im * im)) / 2);
                     }
                 ];
                 return Chalkboard.comp.define(...g);
