@@ -2,7 +2,7 @@
 
 Latest commit: Wednesday, November 18, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Wednesday, November 18, 2026, [**`de3bd2a`**](https://github.com/Zushah/Chalkboard/commit/de3bd2a).
+Previous commit: Wednesday, November 18, 2026, [**`7c90401`**](https://github.com/Zushah/Chalkboard/commit/7c90401).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -325,7 +325,7 @@ Model constructors cover growth equations, linear equations, oscillators, pendul
 
 Initial conditions can be scalar for a one-dimensional state, arrays, supported second-order objects, or keyed objects. Generic keyed states use sorted key order, so property names affect component ordering. Optional object output adds `yObj` while retaining numerical `y` samples.
 
-Solutions expose paired sample arrays `{ t, y }`, with each `y[i]` corresponding to `t[i]`. `at` linearly interpolates stored samples and clamps outside their range; it is not the integrator's dense output. Its search assumes ascending time samples even though integration can run backward. `sample`, `component`, and `phase` derive further arrays from this data.
+Solutions expose paired sample arrays `{ t, y }`, with each `y[i]` corresponding to `t[i]`. `at` linearly interpolates stored samples in either time direction and clamps outside their range; it is not the integrator's dense output. `sample`, `component`, and `phase` derive further arrays from this data.
 
 `derivative` estimates derivatives of sampled solutions. `error` compares those estimates with the ODE rule and returns residual samples and summary statistics; this is neither an exact global solution error nor the adaptive solver's internal embedded error estimate. There is no stiff integrator, PDE discretization framework, event system, or automatic model scheduler.
 

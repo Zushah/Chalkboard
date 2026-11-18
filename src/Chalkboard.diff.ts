@@ -14,7 +14,7 @@ namespace Chalkboard {
      */
     export namespace diff {
         /**
-         * Samples a solution at a time using linear interpolation between the nearest grid points. (No extrapolation as it clamps to endpoints.)
+         * Samples a solution at a time using linear interpolation between the nearest grid points, with times that may be ascending or descending. (No extrapolation as it clamps to endpoints.)
          * @param {{ t: number[]; y: number[][] }} sol - The solution.
          * @param {number} time - The time to sample at.
          * @returns {number[]}
@@ -26,14 +26,25 @@ namespace Chalkboard {
             const t = sol.t;
             const y = sol.y;
             if (t.length !== y.length || t.length === 0) throw new Error(`Chalkboard.diff.at: Invalid solution object.`);
-            if (time <= t[0]) return y[0].slice();
-            if (time >= t[t.length - 1]) return y[y.length - 1].slice();
-            let i = 0;
-            while (i < t.length - 1 && !(t[i] <= time && time <= t[i + 1])) i++;
-            const t0 = t[i], t1 = t[i + 1];
-            const a = (time - t0) / (t1 - t0);
+            if (t.length > 1) {
+                const s = Math.sign(t[1] - t[0]);
+                for (let i = 1; i < t.length; i++) {
+                    if (s === 0 || Math.sign(t[i] - t[i - 1]) !== s) throw new Error(`Chalkboard.diff.at: Property "sol.t" must be strictly increasing or strictly decreasing.`);
+                }
+            }
+            const last = t.length - 1;
+            const descending = t[last] < t[0];
+            if (descending ? time >= t[0] : time <= t[0]) return y[0].slice();
+            if (descending ? time <= t[last] : time >= t[last]) return y[last].slice();
+            let lo = 0, hi = last;
+            while (hi - lo > 1) {
+                const mid = Math.floor((lo + hi) / 2);
+                if (descending ? t[mid] >= time : t[mid] <= time) lo = mid;
+                else hi = mid;
+            }
+            const a = (time - t[lo]) / (t[hi] - t[lo]);
             const result: number[] = [];
-            for (let k = 0; k < y[i].length; k++) result.push((1 - a) * y[i][k] + a * y[i + 1][k]);
+            for (let k = 0; k < y[lo].length; k++) result.push((1 - a) * y[lo][k] + a * y[hi][k]);
             return result;
         };
 
@@ -651,9 +662,39 @@ namespace Chalkboard {
             if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y)) throw new Error(`Chalkboard.diff.sample: Invalid solution object.`);
             if (!Array.isArray(times)) throw new Error(`Chalkboard.diff.sample: Parameter "times" must be an array.`);
             if (times.length > 0 && !Number.isFinite(times[0]) || times.length > 1 && !Number.isFinite(times[times.length - 1])) throw new Error(`Chalkboard.diff.sample: Parameter "times" must begin and end with finite numbers.`);
+            const t = sol.t;
+            const y = sol.y;
+            if (t.length !== y.length || t.length === 0) throw new Error(`Chalkboard.diff.sample: Invalid solution object.`);
+            if (t.length > 1) {
+                const s = Math.sign(t[1] - t[0]);
+                for (let i = 1; i < t.length; i++) {
+                    if (s === 0 || Math.sign(t[i] - t[i - 1]) !== s) throw new Error(`Chalkboard.diff.sample: Property "sol.t" must be strictly increasing or strictly decreasing.`);
+                }
+            }
+            const last = t.length - 1;
+            const descending = t[last] < t[0];
             const result: number[][] = [];
             for (let i = 0; i < times.length; i++) {
-                result.push(Chalkboard.diff.at(sol, times[i]));
+                const time = times[i];
+                if (!Number.isFinite(time)) throw new Error(`Chalkboard.diff.sample: Parameter "times" must contain finite numbers.`);
+                if (descending ? time >= t[0] : time <= t[0]) {
+                    result.push(y[0].slice());
+                    continue;
+                }
+                if (descending ? time <= t[last] : time >= t[last]) {
+                    result.push(y[last].slice());
+                    continue;
+                }
+                let lo = 0, hi = last;
+                while (hi - lo > 1) {
+                    const mid = Math.floor((lo + hi) / 2);
+                    if (descending ? t[mid] >= time : t[mid] <= time) lo = mid;
+                    else hi = mid;
+                }
+                const a = (time - t[lo]) / (t[hi] - t[lo]);
+                const row: number[] = [];
+                for (let k = 0; k < y[lo].length; k++) row.push((1 - a) * y[lo][k] + a * y[hi][k]);
+                result.push(row);
             }
             return result;
         };
@@ -1100,8 +1141,8 @@ namespace Chalkboard {
                 const yi = y[y.length - 1];
                 if ((sign > 0 && ti >= config.t1) || (sign < 0 && ti <= config.t1)) break;
                 const remaining = config.t1 - ti;
-                if (Math.abs(h) > Math.abs(remaining)) h = remaining;
                 h = clampAbs(h, hMin, hMax);
+                if (Math.abs(h) >= Math.abs(remaining)) h = remaining;
                 const k1 = f(ti, yi);
                 const y2 = add(yi, scl(k1, h * a21));
                 const k2 = f(ti + c2 * h, y2);
@@ -1123,7 +1164,7 @@ namespace Chalkboard {
                 const minFactor = 0.2;
                 const maxFactor = 5.0;
                 if (e <= 1) {
-                    const tNext = ti + h;
+                    const tNext = h === remaining ? config.t1 : ti + h;
                     t.push(tNext);
                     y.push(yNext5);
                     const factor = e === 0 ? maxFactor : Math.min(maxFactor, Math.max(minFactor, safety * Math.pow(1 / e, 1 / 5)));
@@ -1134,7 +1175,8 @@ namespace Chalkboard {
                     if (Math.abs(h) < hMin) throw new Error(`Chalkboard.diff.solveAdaptive: Step size became smaller than the minimum step size.`);
                 }
             }
-            if (iter >= maxSteps) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" cannot be exceeded; its value is ${maxSteps}.`);
+            const tEnd = t[t.length - 1];
+            if ((sign > 0 && tEnd < config.t1) || (sign < 0 && tEnd > config.t1)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" cannot be exceeded; its value is ${maxSteps}.`);
             const result: { t: number[]; y: number[][]; yObj?: { [key: string]: number }[] } = { t, y };
             if (config.returnObject && keys && keys.length === ode.dimension) {
                 result.yObj = y.map((row) => {

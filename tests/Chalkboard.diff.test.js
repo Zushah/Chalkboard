@@ -30,9 +30,12 @@ import cb from "@zushah/chalkboard";
 
 // diff.at, diff.sample
 {
-    const sol = { t: [0, 1, 2, 3], y: [[0, 10], [1, 11], [2, 12], [3, 13]] };
-    assert.deepStrictEqual(cb.diff.at(sol, 1.5), [1.5, 11.5]);
-    assert.deepStrictEqual(cb.diff.sample(sol, [0, 1.5, 3]), [[0, 10], [1.5, 11.5], [3, 13]]);
+    const sol1 = { t: [0, 1, 2, 3], y: [[0, 10], [1, 11], [2, 12], [3, 13]] };
+    assert.deepStrictEqual(cb.diff.at(sol1, 1.5), [1.5, 11.5]);
+    assert.deepStrictEqual(cb.diff.sample(sol1, [0, 1.5, 3]), [[0, 10], [1.5, 11.5], [3, 13]]);
+    const sol2 = { t: [3, 2, 1, 0], y: [[3, 13], [2, 12], [1, 11], [0, 10]] };
+    assert.deepStrictEqual(cb.diff.at(sol2, 1.5), [1.5, 11.5]);
+    assert.deepStrictEqual(cb.diff.sample(sol2, [0, 1.5, 3]), [[0, 10], [1.5, 11.5], [3, 13]]);
 }
 
 // diff.derivative, diff.phase
@@ -92,6 +95,8 @@ import cb from "@zushah/chalkboard";
     const solRK45 = cb.diff.solveAdaptive(ode, { t0: 0, t1: 1, y0: 1, h0: 0.1, tol: 1e-6 });
     const yEndA = solRK45.y[solRK45.y.length - 1][0];
     assert.ok(Math.abs(yEndA - Math.E) < 1e-4);
+    const solMin = cb.diff.solveAdaptive(ode, { t0: 0, t1: 1, y0: 1, h0: 0.3, hMin: 0.3, hMax: 0.3, rtol: 1, atol: 1 });
+    assert.strictEqual(solMin.t[solMin.t.length - 1], 1);
 
     const err = cb.diff.error(sol, ode, "LInfinity");
     assert.ok(Number.isFinite(err.max));
