@@ -15,6 +15,11 @@ import cb from "@zushah/chalkboard";
     assert.strictEqual(ode.order, 1);
     assert.strictEqual(ode.dimension, 1);
     assert.deepStrictEqual(ode.rule(0, [2]), [-2]);
+    const pde = cb.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+    assert.strictEqual(pde.type, "pde");
+    assert.strictEqual(pde.order, 1);
+    assert.strictEqual(pde.dimension, 1);
+    assert.strictEqual(pde.components, 1);
 }
 
 // diff.closestIndex, diff.component, diff.toScalarSeries
@@ -81,7 +86,7 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual(cb.diff.SIS(1, 0.5, 100).rule(0, [90]), [-8055]);
 }
 
-// diff.solve, diff.solveAdaptive, diff.error
+// diff.solve, diff.solveAdaptive, diff.error, diff.snapshot
 {
     const ode = cb.diff.exponential(1);
     const sol = cb.diff.solve(ode, { t0: 0, t1: 1, y0: 1, steps: 200, method: "rk4" });
@@ -101,4 +106,34 @@ import cb from "@zushah/chalkboard";
     const err = cb.diff.error(sol, ode, "LInfinity");
     assert.ok(Number.isFinite(err.max));
     assert.ok(err.max < 1);
+
+    const heat = cb.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+    const exact = (x, t) => Math.exp(-Math.PI * Math.PI * t) * Math.sin(Math.PI * x);
+    const solH = cb.diff.solve(heat, { t1: 0.1, h: 0.4 * 0.02 * 0.02, y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 51 }, boundary: { left: 0, right: 0 } });
+    assert.strictEqual(solH.t.length, 101);
+    assert.strictEqual(solH.t[100], 0.1);
+    assert.strictEqual(solH.grid.x.length, 51);
+    const u = cb.diff.snapshot(solH, 0.1);
+    assert.ok(Math.max(...u.map((v, i) => Math.abs(v - exact(solH.grid.x[i], 0.1)))) < 2e-4);
+    const solA = cb.diff.solveAdaptive(heat, { t1: 0.1, y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 51 }, boundary: { left: 0, right: 0 } });
+    assert.ok(Math.max(...cb.diff.snapshot(solA, 0.1).map((v, i) => Math.abs(v - exact(solA.grid.x[i], 0.1)))) < 2e-4);
+
+    const zero = { type: "neumann", value: 0 };
+    const solN = cb.diff.solve(heat, { t1: 0.05, h: 0.4 * 0.01 * 0.01, y0: (x) => Math.exp(-100 * (x - 0.3) * (x - 0.3)), grid: { x: [0, 1], nx: 101 }, boundary: { left: zero, right: zero } });
+    const mass = (row) => 0.01 * (row.reduce((s, v) => s + v, 0) - (row[0] + row[row.length - 1]) / 2);
+    assert.ok(Math.abs(mass(solN.y[solN.y.length - 1]) - mass(solN.y[0])) < 1e-12);
+
+    const wave = cb.diff.init((t, x, u, ux, uxx, ut) => uxx, { dimension: 1, order: 2 });
+    const solW = cb.diff.solve(wave, { t1: 1, h: 0.5 / 200, y0: { u: (x) => Math.sin(2 * Math.PI * x), ut: () => 0 }, grid: { x: [0, 1], nx: 200 }, boundary: "periodic" });
+    assert.strictEqual(solW.y[0].length, 400);
+    assert.ok(Math.max(...cb.diff.snapshot(solW, 1).map((v, i) => Math.abs(v - Math.sin(2 * Math.PI * solW.grid.x[i])))) < 1e-6);
+
+    const pair = cb.diff.init((t, x, u, ux, uxx) => [uxx[0], 0.5 * uxx[1]], { dimension: 1, components: 2 });
+    const solP = cb.diff.solve(pair, { t1: 0.1, h: 0.4 * 0.02 * 0.02, y0: (x) => [Math.sin(Math.PI * x), Math.sin(Math.PI * x)], grid: { x: [0, 1], nx: 51 }, boundary: { left: [0, 0], right: 0 } });
+    const v = cb.diff.snapshot(solP, 0.1, 1);
+    assert.ok(Math.max(...v.map((w, i) => Math.abs(w - Math.exp(-0.5 * Math.PI * Math.PI * 0.1) * Math.sin(Math.PI * solP.grid.x[i])))) < 2e-4);
+
+    const solF = cb.diff.solve(cb.diff.exponential(1), { t1: 1, y0: 1, steps: 100, frames: 11 });
+    assert.strictEqual(solF.t.length, 11);
+    assert.strictEqual(solF.t[10], 1);
 }

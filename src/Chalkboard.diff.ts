@@ -62,7 +62,7 @@ namespace Chalkboard {
             if (!Number.isFinite(n)) throw new Error(`Chalkboard.diff.Bernoulli: Parameter "n" must be a finite number.`);
             const P = (typeof p === "number") ? ((t: number) => p) : p;
             const Q = (typeof q === "number") ? ((t: number) => q) : q;
-            return Chalkboard.diff.init((t: number, y: number) => -P(t) * y + Q(t) * Math.pow(y, n));
+            return Chalkboard.diff.init((t: number, y: number) => -P(t) * y + Q(t) * Math.pow(y, n)) as ChalkboardODE;
         };
 
         /**
@@ -79,7 +79,7 @@ namespace Chalkboard {
                 if (t === 0) throw new Error(`Chalkboard.diff.BesselI: Singular at t = 0.`);
                 const x = t;
                 return -(1 / x) * dy + (1 + (nu * nu) / (x * x)) * y;
-            });
+            }) as ChalkboardODE;
         };
 
         /**
@@ -97,7 +97,7 @@ namespace Chalkboard {
                 const x = t;
                 const term = 1 - (nu * nu) / (x * x);
                 return -(1 / x) * dy - term * y;
-            });
+            }) as ChalkboardODE;
         };
 
         /**
@@ -185,7 +185,7 @@ namespace Chalkboard {
          */
         export const Duffing = (delta: number, alpha: number, beta: number, gamma: number, omega: number): ChalkboardODE => {
             if (!Number.isFinite(delta) || !Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(omega)) throw new Error(`Chalkboard.diff.Duffing: Parameters "delta", "alpha", "beta", "gamma", and "omega" must be finite numbers.`);
-            return Chalkboard.diff.init((t: number, x: number, v: number) => -delta * v - alpha * x - beta * x * x * x + gamma * Math.cos(omega * t));
+            return Chalkboard.diff.init((t: number, x: number, v: number) => -delta * v - alpha * x - beta * x * x * x + gamma * Math.cos(omega * t)) as ChalkboardODE;
         };
 
         /**
@@ -211,6 +211,7 @@ namespace Chalkboard {
             if (sol.t.length !== sol.y.length) throw new Error(`Chalkboard.diff.error: "sol.t" and "sol.y" must have the same length.`);
             if (sol.t.length < 2) throw new Error(`Chalkboard.diff.error: Need at least 2 samples to estimate derivative.`);
             if (!ode || typeof ode !== "object" || typeof ode.rule !== "function") throw new Error(`Chalkboard.diff.error: Parameter "ode" must be a ChalkboardODE.`);
+            if ((ode as { type: string }).type === "pde") throw new Error(`Chalkboard.diff.error: Parameter "ode" must be an ordinary differential equation.`);
             if (["L1", "L2", "LInfinity"].indexOf(norm) === -1) throw new Error(`Chalkboard.diff.error: Unknown norm type.`);
             const t = sol.t;
             const y = sol.y;
@@ -263,7 +264,7 @@ namespace Chalkboard {
          */
         export const exponential = (k: number = 1): ChalkboardODE => {
             if (!Number.isFinite(k)) throw new Error(`Chalkboard.diff.exponential: Parameter "k" must be a finite number.`);
-            return Chalkboard.diff.init((t: number, y: number) => k * y);
+            return Chalkboard.diff.init((t: number, y: number) => k * y) as ChalkboardODE;
         };
 
         /**
@@ -278,7 +279,7 @@ namespace Chalkboard {
         export const Gompertz = (a: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(a)) throw new Error(`Chalkboard.diff.Gompertz: Parameter "a" must be a finite number.`);
             if (!Number.isFinite(K) || K <= 0) throw new Error(`Chalkboard.diff.Gompertz: Parameter "K" must be greater than 0.`);
-            return Chalkboard.diff.init((t: number, y: number) => a * y * Math.log(K / y));
+            return Chalkboard.diff.init((t: number, y: number) => a * y * Math.log(K / y)) as ChalkboardODE;
         };
 
         /**
@@ -291,7 +292,7 @@ namespace Chalkboard {
          */
         export const harmonic = (w: number = 1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonic: Parameter "w" must be a finite number greater than or equal to 0.`);
-            return Chalkboard.diff.init((t: number, y: number, dy: number) => -(w * w) * y);
+            return Chalkboard.diff.init((t: number, y: number, dy: number) => -(w * w) * y) as ChalkboardODE;
         };
 
         /**
@@ -306,7 +307,7 @@ namespace Chalkboard {
         export const harmonicDamped = (w: number = 1, zeta: number = 0.1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "w" must be a finite number greater than or equal to 0.`);
             if (!Number.isFinite(zeta) || zeta < 0) throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "zeta" must be a finite number greater than or equal to 0.`);
-            return Chalkboard.diff.init((t: number, y: number, dy: number) => -2 * zeta * w * dy - (w * w) * y);
+            return Chalkboard.diff.init((t: number, y: number, dy: number) => -2 * zeta * w * dy - (w * w) * y) as ChalkboardODE;
         };
 
         /**
@@ -323,14 +324,14 @@ namespace Chalkboard {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicForced: Parameter "w" must be a finite number greater than or equal to 0.`);
             if (!Number.isFinite(zeta) || zeta < 0) throw new Error(`Chalkboard.diff.harmonicForced: Parameter "zeta" must be a finite number greater than or equal to 0.`);
             if (typeof F !== "function") throw new Error(`Chalkboard.diff.harmonicForced: Parameter "F" must be a function.`);
-            return Chalkboard.diff.init((t: number, y: number, dy: number) => F(t) - 2 * zeta * w * dy - (w * w) * y);
+            return Chalkboard.diff.init((t: number, y: number, dy: number) => F(t) - 2 * zeta * w * dy - (w * w) * y) as ChalkboardODE;
         };
 
         /**
-         * Defines an ordinary differential equation.
-         * @param {((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[])} rule - The differential equation rule function.
-         * @param {number} [dimension] - Optional, the dimension of the system only required for system equations.
-         * @returns {ChalkboardODE}
+         * Defines an ordinary differential equation or a partial differential equation.
+         * @param {((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[]) | ChalkboardPDE["rule"]} rule - The differential equation rule function.
+         * @param {number | { dimension: number; order?: number; components?: number }} [config] - Optional, the dimension of an ODE system, or an object `{ dimension, order, components }` defining a partial differential equation.
+         * @returns {ChalkboardODE | ChalkboardPDE}
          * @example
          * // First-order scalar ODE: y' = -2y
          * const ode1 = Chalkboard.diff.init((t, y) => -2 * y);
@@ -340,59 +341,75 @@ namespace Chalkboard {
          * 
          * // System ODE: dy/dt = [y2, -y1]  (2D system)
          * const odeSys = Chalkboard.diff.init((t, y) => [y[1], -y[0]], 2);
+         * 
+         * // Heat equation: u_t = 0.1 u_xx
+         * const pde = Chalkboard.diff.init((t, x, u, ux, uxx) => 0.1 * uxx, { dimension: 1 });
          */
         export const init = (
-            rule: ((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[]),
-            dimension?: number
-        ): ChalkboardODE => {
+            rule: ((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[]) | ChalkboardPDE["rule"],
+            config?: number | { dimension: 1; order?: 1 | 2; components?: number }
+        ): ChalkboardODE | ChalkboardPDE => {
             if (typeof rule !== "function") throw new Error(`Chalkboard.diff.init: Parameter "rule" must be a function.`);
-            if (typeof dimension === "number") {
-                if (!Number.isInteger(dimension) || dimension < 1) throw new Error(`Chalkboard.diff.init: Parameter "dimension" must be a positive integer.`);
-                const sys = rule as (t: number, y: number[]) => number[];
-                const ode: ChalkboardODE = {
-                    rule: (t: number, y: number[]) => {
-                        const out = sys(t, y);
-                        if (!Array.isArray(out)) throw new Error(`Chalkboard.diff.init: System rule must return an array of numbers.`);
-                        if (out.length !== dimension) throw new Error(`Chalkboard.diff.init: System rule must return an array of length ${dimension}.`);
-                        if (out.length > 0 && !Number.isFinite(out[0]) || out.length > 1 && !Number.isFinite(out[out.length - 1])) throw new Error(`Chalkboard.diff.init: System rule output must begin and end with finite numbers.`);
-                        return out;
-                    },
-                    type: "system",
-                    order: 1,
-                    dimension
-                };
-                return ode;
+            if (config === undefined || typeof config === "number") {
+                const dimension = config;
+                if (typeof dimension === "number") {
+                    if (!Number.isInteger(dimension) || dimension < 1) throw new Error(`Chalkboard.diff.init: Parameter "dimension" must be a positive integer.`);
+                    const sys = rule as (t: number, y: number[]) => number[];
+                    const ode: ChalkboardODE = {
+                        rule: (t: number, y: number[]) => {
+                            const out = sys(t, y);
+                            if (!Array.isArray(out)) throw new Error(`Chalkboard.diff.init: System rule must return an array of numbers.`);
+                            if (out.length !== dimension) throw new Error(`Chalkboard.diff.init: System rule must return an array of length ${dimension}.`);
+                            if (out.length > 0 && !Number.isFinite(out[0]) || out.length > 1 && !Number.isFinite(out[out.length - 1])) throw new Error(`Chalkboard.diff.init: System rule output must begin and end with finite numbers.`);
+                            return out;
+                        },
+                        type: "system",
+                        order: 1,
+                        dimension
+                    };
+                    return ode;
+                }
+                const arity = (rule as Function).length;
+                if (arity === 2) {
+                    const f = rule as (t: number, y: number) => number;
+                    return {
+                        rule: (t: number, y: number[]) => {
+                            if (y.length !== 1) throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 1).`);
+                            const dy = f(t, y[0]);
+                            if (!Number.isFinite(dy)) throw new Error(`Chalkboard.diff.init: Scalar rule must return a finite number.`);
+                            return [dy];
+                        },
+                        type: "single",
+                        order: 1,
+                        dimension: 1
+                    };
+                }
+                if (arity === 3) {
+                    const g = rule as (t: number, y: number, dy: number) => number;
+                    return {
+                        rule: (t: number, y: number[]) => {
+                            if (y.length !== 2) throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 2 for second-order scalar).`);
+                            const ddy = g(t, y[0], y[1]);
+                            if (!Number.isFinite(ddy)) throw new Error(`Chalkboard.diff.init: Second-order scalar rule must return a finite number.`);
+                            return [y[1], ddy];
+                        },
+                        type: "single",
+                        order: 2,
+                        dimension: 2
+                    };
+                }
+                throw new Error(`Chalkboard.diff.init: Invalid "rule" arity. Expected (t,y) or (t,y,dy), or provide dimension for systems.`);
             }
-            const arity = (rule as Function).length;
-            if (arity === 2) {
-                const f = rule as (t: number, y: number) => number;
-                return {
-                    rule: (t: number, y: number[]) => {
-                        if (y.length !== 1) throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 1).`);
-                        const dy = f(t, y[0]);
-                        if (!Number.isFinite(dy)) throw new Error(`Chalkboard.diff.init: Scalar rule must return a finite number.`);
-                        return [dy];
-                    },
-                    type: "single",
-                    order: 1,
-                    dimension: 1
-                };
+            if (config !== null && typeof config === "object" && !Array.isArray(config)) {
+                const dimension = config.dimension;
+                if (dimension !== 1) throw new Error(`Chalkboard.diff.init: Property "config.dimension" must be 1.`);
+                const order = config.order ?? 1;
+                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.init: Property "config.order" must be 1 or 2.`);
+                const components = config.components ?? 1;
+                if (!Number.isInteger(components) || components < 1) throw new Error(`Chalkboard.diff.init: Property "config.components" must be a positive integer.`);
+                return { rule: rule as ChalkboardPDE["rule"], order, dimension, components, type: "pde" };
             }
-            if (arity === 3) {
-                const g = rule as (t: number, y: number, dy: number) => number;
-                return {
-                    rule: (t: number, y: number[]) => {
-                        if (y.length !== 2) throw new Error(`Chalkboard.diff.init: Internal error (expected dimension 2 for second-order scalar).`);
-                        const ddy = g(t, y[0], y[1]);
-                        if (!Number.isFinite(ddy)) throw new Error(`Chalkboard.diff.init: Second-order scalar rule must return a finite number.`);
-                        return [y[1], ddy];
-                    },
-                    type: "single",
-                    order: 2,
-                    dimension: 2
-                };
-            }
-            throw new Error(`Chalkboard.diff.init: Invalid "rule" arity. Expected (t,y) or (t,y,dy), or provide dimension for systems.`);
+            throw new Error(`Chalkboard.diff.init: Parameter "config" must be a number or an object.`);
         };
 
         /**
@@ -414,7 +431,7 @@ namespace Chalkboard {
                 const ax = -mu * x * invr3;
                 const ay = -mu * yy * invr3;
                 return [vx, vy, ax, ay];
-            }, 4);
+            }, 4) as ChalkboardODE;
         };
 
         /**
@@ -438,7 +455,7 @@ namespace Chalkboard {
                 const ay = -mu * yy * invr3;
                 const az = -mu * z * invr3;
                 return [vx, vy, vz, ax, ay, az];
-            }, 6);
+            }, 6) as ChalkboardODE;
         };
 
         /**
@@ -455,7 +472,7 @@ namespace Chalkboard {
             if ((!Number.isFinite(b)) && typeof b !== "function") throw new Error(`Chalkboard.diff.linear1: Parameter "b" must be a finite number or a function.`);
             const A = typeof a === "number" ? (() => a) : a;
             const B = typeof b === "number" ? (() => b) : b;
-            return Chalkboard.diff.init((t: number, y: number) => A(t) * y + B(t));
+            return Chalkboard.diff.init((t: number, y: number) => A(t) * y + B(t)) as ChalkboardODE;
         };
 
         /**
@@ -475,7 +492,7 @@ namespace Chalkboard {
             const A = typeof a === "number" ? (() => a) : a;
             const B = typeof b === "number" ? (() => b) : b;
             const C = typeof c === "number" ? (() => c) : c;
-            return Chalkboard.diff.init((t: number, y: number, dy: number) => A(t) * dy + B(t) * y + C(t));
+            return Chalkboard.diff.init((t: number, y: number, dy: number) => A(t) * dy + B(t) * y + C(t)) as ChalkboardODE;
         };
 
         /**
@@ -490,7 +507,7 @@ namespace Chalkboard {
         export const logistic = (r: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(r)) throw new Error(`Chalkboard.diff.logistic: Parameter "r" must be a finite number.`);
             if (!Number.isFinite(K) || K === 0) throw new Error(`Chalkboard.diff.logistic: Parameter "K" must be a finite non-zero number.`);
-            return Chalkboard.diff.init((t: number, y: number) => r * y * (1 - y / K));
+            return Chalkboard.diff.init((t: number, y: number) => r * y * (1 - y / K)) as ChalkboardODE;
         };
 
         /**
@@ -512,7 +529,7 @@ namespace Chalkboard {
                     x * (rho - z) - yy,
                     x * yy - beta * z
                 ];
-            }, 3);
+            }, 3) as ChalkboardODE;
         };
 
         /**
@@ -531,7 +548,7 @@ namespace Chalkboard {
             return Chalkboard.diff.init((t: number, y: number[]) => {
                 const x = y[0], p = y[1];
                 return [alpha * x - beta * x * p, delta * x * p - gamma * p];
-            }, 2);
+            }, 2) as ChalkboardODE;
         };
 
         /**
@@ -548,7 +565,7 @@ namespace Chalkboard {
             if (!Number.isFinite(m) || m === 0) throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "m" must be finite and non-zero.`);
             if (!Number.isFinite(c)) throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "c" must be a finite number.`);
             if (!Number.isFinite(k)) throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "k" must be a finite number.`);
-            return Chalkboard.diff.init((t: number, x: number, v: number) => -(c / m) * v - (k / m) * x);
+            return Chalkboard.diff.init((t: number, x: number, v: number) => -(c / m) * v - (k / m) * x) as ChalkboardODE;
         };
 
         /**
@@ -572,7 +589,7 @@ namespace Chalkboard {
             if (!Number.isFinite(L) || L <= 0) throw new Error(`Chalkboard.diff.pendulum: Property "params.L" must be greater than 0.`);
             if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.diff.pendulum: Property "params.b" must be greater than or equal to 0.`);
             if (typeof tau !== "function") throw new Error(`Chalkboard.diff.pendulum: Property "params.tau" must be a function.`);
-            return Chalkboard.diff.init((t, theta, omega) => tau(t) - b * omega - (g / L) * Math.sin(theta));
+            return Chalkboard.diff.init((t: number, theta: number, omega: number) => tau(t) - b * omega - (g / L) * Math.sin(theta)) as ChalkboardODE;
         };
 
         /**
@@ -599,10 +616,10 @@ namespace Chalkboard {
             if (!Number.isFinite(b) || b < 0) throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.b" must be greater than or equal to 0.`);
             if (!Number.isFinite(c) || c < 0) throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.c" must be greater than or equal to 0.`);
             if (typeof tau !== "function") throw new Error(`Chalkboard.diff.pendulumDrag: Property "params.tau" must be a function.`);
-            return Chalkboard.diff.init((t, theta, omega) => {
+            return Chalkboard.diff.init((t: number, theta: number, omega: number) => {
                 const quad = c * Math.abs(omega) * omega;
                 return tau(t) - b * omega - quad - (g / L) * Math.sin(theta);
-            });
+            }) as ChalkboardODE;
         };
 
         /**
@@ -617,7 +634,7 @@ namespace Chalkboard {
          */
         export const pendulumDriven = (q: number = 0.5, A: number = 1.2, Omega: number = 2 / 3): ChalkboardODE => {
             if (!Number.isFinite(q) || !Number.isFinite(A) || !Number.isFinite(Omega)) throw new Error(`Chalkboard.diff.pendulumDriven: Parameters "q", "A", and "Omega" must be finite numbers.`);
-            return Chalkboard.diff.init((t, theta, omega) => A * Math.cos(Omega * t) - q * omega - Math.sin(theta));
+            return Chalkboard.diff.init((t: number, theta: number, omega: number) => A * Math.cos(Omega * t) - q * omega - Math.sin(theta)) as ChalkboardODE;
         };
 
         /**
@@ -710,7 +727,7 @@ namespace Chalkboard {
          */
         export const separable = (f: (t: number) => number, g: (y: number) => number): ChalkboardODE => {
             if (typeof f !== "function" || typeof g !== "function") throw new Error(`Chalkboard.diff.separable: Parameters "f" and "g" must be functions.`);
-            return Chalkboard.diff.init((t: number, y: number) => f(t) * g(y));
+            return Chalkboard.diff.init((t: number, y: number) => f(t) * g(y)) as ChalkboardODE;
         };
 
         /**
@@ -734,7 +751,7 @@ namespace Chalkboard {
                     sigma * E - gamma * I,
                     gamma * I
                 ];
-            }, 4);
+            }, 4) as ChalkboardODE;
         };
 
         /**
@@ -751,7 +768,7 @@ namespace Chalkboard {
             return Chalkboard.diff.init((t: number, y: number[]) => {
                 const S = y[0], I = y[1], R = y[2];
                 return [-beta * S * I, beta * S * I - gamma * I, gamma * I];
-            }, 3);
+            }, 3) as ChalkboardODE;
         };
 
         /**
@@ -765,20 +782,44 @@ namespace Chalkboard {
          */
         export const SIS = (beta: number = 1, gamma: number = 0.5): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SIS: Parameters "beta" and "gamma" must be finite numbers.`);
-            return Chalkboard.diff.init((t: number, I: number) => beta * I * (1 - I) - gamma * I);
+            return Chalkboard.diff.init((t: number, I: number) => beta * I * (1 - I) - gamma * I) as ChalkboardODE;
         };
 
         /**
-         * Solves an ordinary differential equation using an explicit method.
-         * @param {ChalkboardODE} ode - The ordinary differential equation to solve.
+         * Returns the values of one field of a partial differential equation solution at a time, shaped like the grid.
+         * @param {{ t: number[]; y: number[][]; grid: { x: number[]; y?: number[] } }} sol - The solution of the partial differential equation.
+         * @param {number} time - The time to sample at.
+         * @param {number} [component=0] - The field index. For second-order equations, the indices after the fields select their time derivatives.
+         * @returns {number[] | number[][]}
+         * @example
+         * const heat = Chalkboard.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+         * const sol = Chalkboard.diff.solve(heat, { t1: 0.1, h: 0.0001, y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 51 }, boundary: { left: 0, right: 0 } });
+         * const u = Chalkboard.diff.snapshot(sol, 0.1); // Returns the profile at t = 0.1 with one value per grid node
+         */
+        export const snapshot = (sol: { t: number[]; y: number[][]; grid: { x: number[]; y?: number[] } }, time: number, component: number = 0): number[] | number[][] => {
+            if (!sol || !Array.isArray(sol.t) || !Array.isArray(sol.y) || !sol.grid || !Array.isArray(sol.grid.x)) throw new Error(`Chalkboard.diff.snapshot: Parameter "sol" must have properties "t", "y", and "grid.x" as arrays.`);
+            if (!Number.isFinite(time)) throw new Error(`Chalkboard.diff.snapshot: Parameter "time" must be a finite number.`);
+            const N = sol.grid.x.length;
+            if (N === 0 || sol.y.length === 0 || !Array.isArray(sol.y[0]) || sol.y[0].length === 0 || !Number.isInteger(sol.y[0].length / N)) throw new Error(`Chalkboard.diff.snapshot: Property "sol.y" must contain a whole number of fields on the grid.`);
+            const fields = sol.y[0].length / N;
+            if (!Number.isInteger(component) || component < 0 || component >= fields) throw new Error(`Chalkboard.diff.snapshot: Parameter "component" must be an integer from 0 to ${fields - 1}.`);
+            return Chalkboard.diff.at(sol, time).slice(component * N, (component + 1) * N);
+        };
+
+        /**
+         * Solves an ordinary or partial differential equation using an explicit method.
+         * @param {ChalkboardODE | ChalkboardPDE} diff - The differential equation to solve.
          * @param {number} [config.t0=0] - The initial time.
          * @param {number} config.t1 - The final time.
          * @param {number} [config.h] - The time step size. Either this or `steps` must be provided.
          * @param {number} [config.steps] - The number of steps to take. Either this or `h` must be provided.
-         * @param {number | number[] | Object} config.y0 - The initial state.
+         * @param {number | number[] | Object | Function} config.y0 - The initial state. For partial differential equations, a function of position sampled at every grid node (returning an array for several fields), a flattened array, or for second-order equations an object `{ u, ut }` of such functions or arrays.
+         * @param {{ x: number[]; nx: number }} [config.grid] - The uniform grid of a partial differential equation: the interval `x: [a, b]` and the number of nodes `nx` (at least 3). A periodic grid leaves out the repeated endpoint.
+         * @param {string | Object} [config.boundary] - The boundary conditions of a partial differential equation: "periodic" or `{ left, right }`, where each side is "periodic", a fixed value (a number, an array with one value per field, or a function of time), or `{ type: "dirichlet" | "neumann", value }` with "neumann" prescribing the outward normal derivative.
          * @param {"euler" | "midpoint" | "heun" | "ralston" | "rk4"} [config.method="rk4"] - The integration method to use: "euler", "midpoint", "heun", "ralston", or "rk4".
-         * @param {boolean} [config.returnObject=false] - Whether to return the results as an array of objects (only if initial state was provided as an object).
-         * @returns {{ t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; }} The solution containing time points `t`, state array `y`, and optionally state objects `yObj`.
+         * @param {boolean} [config.returnObject=false] - Whether to return the results as an array of objects (only if initial state was provided as an object, and not for partial differential equations).
+         * @param {number} [config.frames] - The number of samples to store, evenly spaced over the steps and including both endpoints (an integer of at least 2). Defaults to every step for ordinary differential equations and 101 for partial differential equations, and never exceeds the number of steps plus one.
+         * @returns {{ t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } }} The solution containing time points `t`, state array `y`, optionally state objects `yObj`, and the grid coordinates `grid` for partial differential equations.
          * @example
          * // Solve first-order ODE using Euler's method:
          * const ode1 = Chalkboard.diff.init((t, y) => -2 * y);
@@ -803,22 +844,34 @@ namespace Chalkboard {
          *     t0: 0, t1: 10, steps: 100,
          *     y0: [1, 0]
          * });
+         * 
+         * // Solve the heat equation u_t = u_xx with fixed ends:
+         * const heat = Chalkboard.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+         * const solHeat = Chalkboard.diff.solve(heat, {
+         *     t0: 0, t1: 0.1, h: 0.0001,
+         *     y0: (x) => Math.sin(Math.PI * x),
+         *     grid: { x: [0, 1], nx: 51 },
+         *     boundary: { left: 0, right: 0 }
+         * });
          */
         export const solve = (
-            ode: ChalkboardODE,
+            diff: ChalkboardODE | ChalkboardPDE,
             config: {
                 t0?: number;
                 t1: number;
                 h?: number;
                 steps?: number;
-                y0: number | number[] | Record<string, any>;
+                y0: number | number[] | Record<string, any> | ((x: number) => number | number[]);
                 method?: "euler" | "midpoint" | "heun" | "ralston" | "rk4";
                 returnObject?: boolean;
+                grid?: { x: number[]; nx: number };
+                boundary?: "periodic" | { left: "periodic" | number | number[] | ((t: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number) => number | number[]) }; right: "periodic" | number | number[] | ((t: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number) => number | number[]) } };
+                frames?: number;
             }
-        ): { t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; } => {
-            if (!ode || typeof ode !== "object") throw new Error(`Chalkboard.diff.solve: Parameter "ode" must be a ChalkboardODE.`);
-            if (typeof ode.rule !== "function") throw new Error(`Chalkboard.diff.solve: "ode.rule" must be a function.`);
-            if (!Number.isInteger(ode.dimension) || ode.dimension < 1) throw new Error(`Chalkboard.diff.solve: Property "ode.dimension" must be a positive integer.`);
+        ): { t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } } => {
+            if (!diff || typeof diff !== "object") throw new Error(`Chalkboard.diff.solve: Parameter "diff" must be a ChalkboardODE or ChalkboardPDE.`);
+            if (typeof diff.rule !== "function") throw new Error(`Chalkboard.diff.solve: "diff.rule" must be a function.`);
+            if (!Number.isInteger(diff.dimension) || diff.dimension < 1) throw new Error(`Chalkboard.diff.solve: Property "diff.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null) throw new Error(`Chalkboard.diff.solve: Parameter "config" must be an object.`);
             if (typeof config.t1 !== "number" || !Number.isFinite(config.t1)) throw new Error(`Chalkboard.diff.solve: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
@@ -826,65 +879,253 @@ namespace Chalkboard {
             if (config.t1 === t0) throw new Error(`Chalkboard.diff.solve: "config.t1" must be different from "config.t0".`);
             const method: "euler" | "midpoint" | "heun" | "ralston" | "rk4" = (config.method ?? "rk4").toLowerCase() as "euler" | "midpoint" | "heun" | "ralston" | "rk4";
             if (["euler", "midpoint", "heun", "ralston", "rk4"].indexOf(method) === -1) throw new Error(`Chalkboard.diff.solve: Unknown method.`);
+            if (config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solve: Property "config.frames" must be an integer greater than or equal to 2.`);
+            let f: (t: number, y: number[]) => number[];
             let y0: number[];
             let keys: string[] | undefined;
-            if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
-                if (ode.dimension !== 1) throw new Error(`Chalkboard.diff.solve: Property "config.y0" can be a scalar only when property "ode.dimension" is equal to 1.`);
-                y0 = [config.y0];
-            } else if (Array.isArray(config.y0)) {
-                if (config.y0.length !== ode.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have length ${ode.dimension}.`);
-                if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numbers.`);
-                y0 = config.y0.slice();
+            let grid: { x: number[] } | undefined;
+            if (diff.type === "pde") {
+                if (config.returnObject) throw new Error(`Chalkboard.diff.solve: Property "config.returnObject" is not supported for partial differential equations.`);
+                const m = diff.components, order = diff.order;
+                if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solve: Property "diff.dimension" must be 1.`);
+                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.solve: Property "diff.order" must be 1 or 2.`);
+                if (!Number.isInteger(m) || m < 1) throw new Error(`Chalkboard.diff.solve: Property "diff.components" must be a positive integer.`);
+                const mesh = config.grid as any;
+                if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`Chalkboard.diff.solve: Property "config.grid" must be an object for partial differential equations.`);
+                if (!Array.isArray(mesh.x) || mesh.x.length !== 2 || !Number.isFinite(mesh.x[0]) || !Number.isFinite(mesh.x[1]) || mesh.x[1] <= mesh.x[0]) throw new Error(`Chalkboard.diff.solve: Property "config.grid.x" must be an array of two finite numbers in increasing order.`);
+                if (!Number.isInteger(mesh.nx) || mesh.nx < 3) throw new Error(`Chalkboard.diff.solve: Property "config.grid.nx" must be an integer greater than or equal to 3.`);
+                const boundary = config.boundary as any;
+                if (boundary !== "periodic" && (boundary === null || typeof boundary !== "object" || Array.isArray(boundary) || boundary.left === undefined || boundary.right === undefined)) throw new Error(`Chalkboard.diff.solve: Property "config.boundary" must be "periodic" or an object with properties "left" and "right".`);
+                const side = (spec: any, name: string): { type: "periodic" | "dirichlet" | "neumann"; value: any; name: string } => {
+                    if (spec === "periodic") return { type: "periodic", value: 0, name };
+                    if (typeof spec === "number" || Array.isArray(spec) || typeof spec === "function") return { type: "dirichlet", value: spec, name };
+                    if (spec !== null && typeof spec === "object" && (spec.type === "dirichlet" || spec.type === "neumann")) return { type: spec.type, value: spec.value ?? 0, name };
+                    throw new Error(`Chalkboard.diff.solve: Property "config.boundary.${name}" must be "periodic", a number, an array, a function, or an object with type "dirichlet" or "neumann".`);
+                };
+                const left = side(boundary === "periodic" ? "periodic" : boundary.left, "left");
+                const right = side(boundary === "periodic" ? "periodic" : boundary.right, "right");
+                const periodic = left.type === "periodic";
+                if (periodic !== (right.type === "periodic")) throw new Error(`Chalkboard.diff.solve: Properties "config.boundary.left" and "config.boundary.right" must both be periodic or both be non-periodic.`);
+                const fill = (s: { value: any; name: string }, t: number, out: Float64Array): void => {
+                    const v = typeof s.value === "function" ? s.value(t) : s.value;
+                    if (typeof v === "number" && Number.isFinite(v)) {
+                        for (let c = 0; c < m; c++) out[c] = v;
+                        return;
+                    }
+                    if (Array.isArray(v) && v.length === m) {
+                        let ok = true;
+                        for (let c = 0; c < m; c++) ok = ok && Number.isFinite(v[c]);
+                        if (ok) {
+                            for (let c = 0; c < m; c++) out[c] = v[c];
+                            return;
+                        }
+                    }
+                    throw new Error(`Chalkboard.diff.solve: Value of "config.boundary.${s.name}" must be a finite number, an array of ${m} finite numbers, or a function returning one of them.`);
+                };
+                const ahead = new Float64Array(m), behind = new Float64Array(m);
+                const rate = (s: { value: any; name: string }, t: number, out: Float64Array): void => {
+                    if (typeof s.value !== "function") {
+                        for (let c = 0; c < m; c++) out[c] = 0;
+                        return;
+                    }
+                    const eps = 1e-6 * Math.max(1, Math.abs(t));
+                    fill(s, t + eps, ahead);
+                    fill(s, t - eps, behind);
+                    for (let c = 0; c < m; c++) out[c] = (ahead[c] - behind[c]) / (2 * eps);
+                };
+                const valueL = new Float64Array(m), valueR = new Float64Array(m);
+                if (!periodic) {
+                    if (typeof left.value !== "function") fill(left, 0, valueL);
+                    if (typeof right.value !== "function") fill(right, 0, valueR);
+                }
+                const nx: number = mesh.nx, a: number = mesh.x[0], b: number = mesh.x[1];
+                const N = nx;
+                const dx = periodic ? (b - a) / nx : (b - a) / (nx - 1);
+                const x: number[] = new Array(nx);
+                for (let i = 0; i < nx; i++) x[i] = a + i * dx;
+                if (!periodic) x[nx - 1] = b;
+                const fixedL = left.type === "dirichlet", fixedR = right.type === "dirichlet";
+                const length = order * m * N;
+                const state: number[] = new Array(length).fill(0);
+                const sampled = (f: any, name: string, offset: number): void => {
+                    for (let p = 0; p < N; p++) {
+                        const v = f(x[p]);
+                        if (m === 1 && typeof v === "number" && Number.isFinite(v)) {
+                            state[offset + p] = v;
+                            continue;
+                        }
+                        if (!Array.isArray(v) || v.length !== m) throw new Error(`Chalkboard.diff.solve: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every mesh node.`);
+                        for (let c = 0; c < m; c++) {
+                            if (!Number.isFinite(v[c])) throw new Error(`Chalkboard.diff.solve: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every mesh node.`);
+                            state[offset + c * N + p] = v[c];
+                        }
+                    }
+                };
+                const copied = (arr: any[], name: string, offset: number, size: number): void => {
+                    if (arr.length !== size) throw new Error(`Chalkboard.diff.solve: Property "${name}" must have length ${size}.`);
+                    for (let i = 0; i < size; i++) {
+                        if (!Number.isFinite(arr[i])) throw new Error(`Chalkboard.diff.solve: Property "${name}" must contain only finite numbers.`);
+                        state[offset + i] = arr[i];
+                    }
+                };
+                const initial = config.y0 as any;
+                if (typeof initial === "function" && order === 1) {
+                    sampled(initial, "config.y0", 0);
+                } else if (Array.isArray(initial)) {
+                    copied(initial, "config.y0", 0, length);
+                } else if (order === 2 && initial !== null && typeof initial === "object" && ("u" in initial) && ("ut" in initial)) {
+                    const parts: [string, number][] = [["u", 0], ["ut", m * N]];
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = initial[parts[i][0]], name = `config.y0.${parts[i][0]}`;
+                        if (typeof part === "function") sampled(part, name, parts[i][1]);
+                        else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
+                        else throw new Error(`Chalkboard.diff.solve: Property "${name}" must be a function or an array of length ${m * N}.`);
+                    }
+                } else {
+                    throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
+                }
+                const sides: [boolean, { value: any; name: string }, number][] = [[fixedL, left, 0], [fixedR, right, nx - 1]];
+                for (let i = 0; i < sides.length; i++) {
+                    if (!sides[i][0]) continue;
+                    const p = sides[i][2], values = new Float64Array(m);
+                    fill(sides[i][1], t0, values);
+                    for (let c = 0; c < m; c++) state[c * N + p] = values[c];
+                    if (order === 2) {
+                        rate(sides[i][1], t0, values);
+                        for (let c = 0; c < m; c++) state[m * N + c * N + p] = values[c];
+                    }
+                }
+                const bufs: Float64Array[] = [];
+                for (let c = 0; c < m; c++) bufs.push(new Float64Array(nx + 2));
+                const U: number[] = new Array(m).fill(0), UX: number[] = new Array(m).fill(0), UXX: number[] = new Array(m).fill(0), UT: number[] = new Array(m).fill(0);
+                const rateL = new Float64Array(m), rateR = new Float64Array(m);
+                const single = diff.rule as (t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number;
+                const system = diff.rule as (t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[];
+                const unstable = `Chalkboard.diff.solve: Rule of a partial differential equation must return finite numbers; a smaller step size may be needed for stability.`;
+                const rule = (t: number, y: number[]): number[] => {
+                    const out: number[] = new Array(length);
+                    if (left.type === "neumann" && typeof left.value === "function") fill(left, t, valueL);
+                    if (right.type === "neumann" && typeof right.value === "function") fill(right, t, valueR);
+                    if (fixedL) rate(left, t, rateL);
+                    if (fixedR) rate(right, t, rateR);
+                    for (let c = 0; c < m; c++) {
+                        const g = bufs[c], base = c * N;
+                        for (let i = 0; i < nx; i++) g[i + 1] = y[base + i];
+                        if (periodic) {
+                            g[0] = g[nx];
+                            g[nx + 1] = g[1];
+                        } else {
+                            if (left.type === "neumann") g[0] = g[2] + 2 * dx * valueL[c];
+                            if (right.type === "neumann") g[nx + 1] = g[nx - 1] + 2 * dx * valueR[c];
+                        }
+                    }
+                    for (let p = 0; p < N; p++) {
+                        if ((p === 0 && fixedL) || (p === nx - 1 && fixedR)) {
+                            const r = p === 0 && fixedL ? rateL : rateR;
+                            for (let c = 0; c < m; c++) {
+                                out[c * N + p] = r[c];
+                                if (order === 2) out[m * N + c * N + p] = 0;
+                            }
+                            continue;
+                        }
+                        const k = p + 1;
+                        if (m === 1) {
+                            const g = bufs[0];
+                            const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                            const r = order === 1 ? single(t, x[p], u, ux, uxx) : single(t, x[p], u, ux, uxx, y[N + p]);
+                            if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `Chalkboard.diff.solve: Rule of a partial differential equation with one component must return a number.`);
+                            if (order === 1) {
+                                out[p] = r;
+                            } else {
+                                out[p] = y[N + p];
+                                out[N + p] = r;
+                            }
+                        } else {
+                            for (let c = 0; c < m; c++) {
+                                const g = bufs[c];
+                                U[c] = g[k];
+                                UX[c] = (g[k + 1] - g[k - 1]) / (2 * dx);
+                                UXX[c] = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                                if (order === 2) UT[c] = y[m * N + c * N + p];
+                            }
+                            const r = order === 1 ? system(t, x[p], U, UX, UXX) : system(t, x[p], U, UX, UXX, UT);
+                            if (!Array.isArray(r) || r.length !== m) throw new Error(`Chalkboard.diff.solve: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
+                            for (let c = 0; c < m; c++) {
+                                if (!Number.isFinite(r[c])) throw new Error(unstable);
+                                if (order === 1) {
+                                    out[c * N + p] = r[c];
+                                } else {
+                                    out[c * N + p] = UT[c];
+                                    out[m * N + c * N + p] = r[c];
+                                }
+                            }
+                        }
+                    }
+                    return out;
+                };
+                f = rule;
+                y0 = state;
+                grid = { x };
             } else {
-                if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be a number, number array, or object.`);
-                const y0obj = config.y0 as any;
-                if (ode.type === "single" && ode.order === 2) {
-                    if (("y0" in y0obj) && ("dy0" in y0obj)) {
-                        const a = y0obj.y0;
-                        const b = y0obj.dy0;
-                        if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
-                        y0 = [a, b];
-                        if (config.returnObject) keys = ["y", "dy"];
-                    } else if (("y" in y0obj) && ("dy" in y0obj)) {
-                        const a = y0obj.y;
-                        const b = y0obj.dy;
-                        if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
-                        y0 = [a, b];
-                        if (config.returnObject) keys = ["y", "dy"];
+                if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
+                    if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solve: Property "config.y0" can be a scalar only when property "diff.dimension" is equal to 1.`);
+                    y0 = [config.y0];
+                } else if (Array.isArray(config.y0)) {
+                    if (config.y0.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have length ${diff.dimension}.`);
+                    if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numbers.`);
+                    y0 = config.y0.slice();
+                } else {
+                    if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be a number, number array, or object.`);
+                    const y0obj = config.y0 as any;
+                    if (diff.type === "single" && diff.order === 2) {
+                        if (("y0" in y0obj) && ("dy0" in y0obj)) {
+                            const a = y0obj.y0;
+                            const b = y0obj.dy0;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else if (("y" in y0obj) && ("dy" in y0obj)) {
+                            const a = y0obj.y;
+                            const b = y0obj.dy;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else {
+                            throw new Error(`Chalkboard.diff.solve: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
+                        }
+                    } else if (diff.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
+                        y0 = [y0obj.y0];
+                        if (config.returnObject) keys = ["y"];
+                    } else if (diff.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
+                        y0 = [y0obj.y];
+                        if (config.returnObject) keys = ["y"];
+                    } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
+                        const arr = y0obj.y0 as number[];
+                        if (arr.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must have length ${diff.dimension}.`);
+                        if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must begin and end with finite numbers.`);
+                        y0 = arr.slice();
                     } else {
-                        throw new Error(`Chalkboard.diff.solve: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
+                        keys = Object.keys(config.y0).sort();
+                        if (keys.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have exactly ${diff.dimension} numeric properties, but it has ${keys.length}.`);
+                        if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numeric properties.`);
+                        const arr: number[] = [];
+                        for (let i = 0; i < keys.length; i++) {
+                            const v = (config.y0 as any)[keys[i]];
+                            arr.push(v);
+                        }
+                        y0 = arr;
                     }
-                } else if (ode.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
-                    y0 = [y0obj.y0];
-                    if (config.returnObject) keys = ["y"];
-                } else if (ode.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
-                    y0 = [y0obj.y];
-                    if (config.returnObject) keys = ["y"];
-                } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
-                    const arr = y0obj.y0 as number[];
-                    if (arr.length !== ode.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must have length ${ode.dimension}.`);
-                    if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must begin and end with finite numbers.`);
-                    y0 = arr.slice();
-                } else {
-                    keys = Object.keys(config.y0).sort();
-                    if (keys.length !== ode.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have exactly ${ode.dimension} numeric properties, but it has ${keys.length}.`);
-                    if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numeric properties.`);
-                    const arr: number[] = [];
-                    for (let i = 0; i < keys.length; i++) {
-                        const v = (config.y0 as any)[keys[i]];
-                        arr.push(v);
+                }
+                if (config.returnObject && !keys) {
+                    if (diff.type === "single" && diff.order === 2 && diff.dimension === 2) {
+                        keys = ["y", "dy"];
+                    } else if (diff.dimension === 1) {
+                        keys = ["y"];
+                    } else {
+                        keys = Array.from({ length: diff.dimension }, (_, i) => `y${i + 1}`);
                     }
-                    y0 = arr;
                 }
-            }
-            if (config.returnObject && !keys) {
-                if (ode.type === "single" && ode.order === 2 && ode.dimension === 2) {
-                    keys = ["y", "dy"];
-                } else if (ode.dimension === 1) {
-                    keys = ["y"];
-                } else {
-                    keys = Array.from({ length: ode.dimension }, (_, i) => `y${i + 1}`);
-                }
+                f = diff.rule;
             }
             let h: number;
             let steps: number;
@@ -902,11 +1143,9 @@ namespace Chalkboard {
             }
             const add = (a: number[], b: number[]): number[] => Chalkboard.stat.add(a, b);
             const scl = (a: number[], k: number): number[] => Chalkboard.stat.scl(a, k);
-            const f = ode.rule;
-            const t: number[] = new Array(steps + 1);
-            const y: number[][] = new Array(steps + 1);
-            t[0] = t0;
-            y[0] = y0.slice();
+            const frames = Math.min(config.frames ?? (grid ? 101 : steps + 1), steps + 1);
+            const t: number[] = [t0];
+            const y: number[][] = [y0.slice()];
             const stepper = (() => {
                 if (method === "euler") return (f: (t: number, y: number[]) => number[], t: number, y: number[], h: number): number[] => {
                     const k1 = f(t, y);
@@ -940,15 +1179,21 @@ namespace Chalkboard {
                     return add(y, scl(total, h / 6));
                 };
             })();
+            let yi = y[0];
+            let frame = 1;
+            let target = Math.round(steps / (frames - 1));
             for (let i = 0; i < steps; i++) {
-                const ti = t[i];
-                const yi = y[i];
-                const yNext = stepper(f, ti, yi, h);
-                t[i + 1] = ti + h;
-                y[i + 1] = yNext;
+                yi = stepper(f, t0 + i * h, yi, h);
+                if (i + 1 === target) {
+                    t.push(i + 1 === steps ? config.t1 : t0 + (i + 1) * h);
+                    y.push(yi);
+                    frame++;
+                    target = Math.round(frame * steps / (frames - 1));
+                }
             }
-            const result: { t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; } = { t, y };
-            if (config.returnObject && keys && keys.length === ode.dimension) {
+            const result: { t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } } = { t, y };
+            if (grid) result.grid = grid;
+            if (config.returnObject && keys && keys.length === diff.dimension) {
                 result.yObj = y.map((row) => {
                     const obj: { [key: string]: number } = {};
                     for (let i = 0; i < keys.length; i++) obj[keys[i]] = row[i];
@@ -959,11 +1204,13 @@ namespace Chalkboard {
         };
 
         /**
-         * Solves an ordinary differential equation using the adaptive Dormand–Prince (or Runge–Kutta–Fehlberg) method. Produces a variable-step solution.
-         * @param {ChalkboardODE} ode - The ordinary differential equation to solve.
+         * Solves an ordinary or partial differential equation using the adaptive Dormand–Prince (or Runge–Kutta–Fehlberg) method. Produces a variable-step solution.
+         * @param {ChalkboardODE | ChalkboardPDE} diff - The differential equation to solve.
          * @param {number} [config.t0=0] - Initial time.
          * @param {number} config.t1 - Final time.
-         * @param {number | number[] | Object} config.y0 - Initial state (same conventions as Chalkboard.diff.solve).
+         * @param {number | number[] | Object | Function} config.y0 - Initial state (same conventions as Chalkboard.diff.solve).
+         * @param {{ x: number[]; nx: number }} [config.grid] - Grid of a partial differential equation (same as Chalkboard.diff.solve).
+         * @param {string | Object} [config.boundary] - Boundary conditions of a partial differential equation (same as Chalkboard.diff.solve).
          * @param {number} [config.h0] - Initial step guess.
          * @param {number} [config.hMin] - Minimum step size magnitude.
          * @param {number} [config.hMax] - Maximum step size magnitude.
@@ -971,7 +1218,8 @@ namespace Chalkboard {
          * @param {number} [config.atol=1e-9] - Absolute tolerance.
          * @param {number} [config.maxSteps=100000] - Maximum accepted+rejected iterations.
          * @param {boolean} [config.returnObject=false] - Whether to return yObj (same as Chalkboard.diff.solve).
-         * @returns {{ t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; }}
+         * @param {number} [config.frames] - The number of samples to store at evenly spaced times including both endpoints (an integer of at least 2), interpolated linearly between accepted steps. Without it, ordinary differential equations store every accepted step and partial differential equations store 101 samples.
+         * @returns {{ t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } }}
          * @example
          * // Solve first-order ODE with adaptive RK45:
          * const ode1 = Chalkboard.diff.init((t, y) => -2 * y);
@@ -1005,11 +1253,11 @@ namespace Chalkboard {
          * });
          */
         export const solveAdaptive = (
-            ode: ChalkboardODE,
+            diff: ChalkboardODE | ChalkboardPDE,
             config: {
                 t0?: number;
                 t1: number;
-                y0: number | number[] | Record<string, any>;
+                y0: number | number[] | Record<string, any> | ((x: number) => number | number[]);
                 h0?: number;
                 hMin?: number;
                 hMax?: number;
@@ -1017,11 +1265,14 @@ namespace Chalkboard {
                 atol?: number;
                 maxSteps?: number;
                 returnObject?: boolean;
+                grid?: { x: number[]; nx: number };
+                boundary?: "periodic" | { left: "periodic" | number | number[] | ((t: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number) => number | number[]) }; right: "periodic" | number | number[] | ((t: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number) => number | number[]) } };
+                frames?: number;
             }
-        ): { t: number[]; y: number[][]; yObj?: { [key: string]: number }[] } => {
-            if (!ode || typeof ode !== "object") throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "ode" must be a ChalkboardODE.`);
-            if (typeof ode.rule !== "function") throw new Error(`Chalkboard.diff.solveAdaptive: "ode.rule" must be a function.`);
-            if (!Number.isInteger(ode.dimension) || ode.dimension < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "ode.dimension" must be a positive integer.`);
+        ): { t: number[]; y: number[][]; yObj?: { [key: string]: number }[]; grid?: { x: number[]; y?: number[] } } => {
+            if (!diff || typeof diff !== "object") throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "diff" must be a ChalkboardODE or ChalkboardPDE.`);
+            if (typeof diff.rule !== "function") throw new Error(`Chalkboard.diff.solveAdaptive: "diff.rule" must be a function.`);
+            if (!Number.isInteger(diff.dimension) || diff.dimension < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config" must be an object.`);
             if (typeof config.t1 !== "number" || !Number.isFinite(config.t1)) throw new Error(`Chalkboard.diff.solveAdaptive: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
@@ -1033,61 +1284,249 @@ namespace Chalkboard {
             if (!Number.isFinite(atol) || atol < 0) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.atol" must be greater than or equal to 0.`);
             const maxSteps = config.maxSteps ?? 100000;
             if (!Number.isInteger(maxSteps) || maxSteps < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" must be a positive integer.`);
+            if (config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.frames" must be an integer greater than or equal to 2.`);
+            let f: (t: number, y: number[]) => number[];
             let y0: number[];
             let keys: string[] | undefined;
-            if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
-                if (ode.dimension !== 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" can be a scalar only when property "ode.dimension" is equal to 1.`);
-                y0 = [config.y0];
-            } else if (Array.isArray(config.y0)) {
-                if (config.y0.length !== ode.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have length ${ode.dimension}.`);
-                if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numbers.`);
-                y0 = config.y0.slice();
-            } else {
-                if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be a number, number array, or object.`);
-                const y0obj = config.y0 as any;
-                if (ode.type === "single" && ode.order === 2) {
-                    if (("y0" in y0obj) && ("dy0" in y0obj)) {
-                        const a = y0obj.y0;
-                        const b = y0obj.dy0;
-                        if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
-                        y0 = [a, b];
-                        if (config.returnObject) keys = ["y", "dy"];
-                    } else if (("y" in y0obj) && ("dy" in y0obj)) {
-                        const a = y0obj.y;
-                        const b = y0obj.dy;
-                        if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
-                        y0 = [a, b];
-                        if (config.returnObject) keys = ["y", "dy"];
-                    } else {
-                        throw new Error(`Chalkboard.diff.solveAdaptive: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
+            let grid: { x: number[] } | undefined;
+            if (diff.type === "pde") {
+                if (config.returnObject) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.returnObject" is not supported for partial differential equations.`);
+                const m = diff.components, order = diff.order;
+                if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.dimension" must be 1.`);
+                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.order" must be 1 or 2.`);
+                if (!Number.isInteger(m) || m < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.components" must be a positive integer.`);
+                const mesh = config.grid as any;
+                if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid" must be an object for partial differential equations.`);
+                if (!Array.isArray(mesh.x) || mesh.x.length !== 2 || !Number.isFinite(mesh.x[0]) || !Number.isFinite(mesh.x[1]) || mesh.x[1] <= mesh.x[0]) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid.x" must be an array of two finite numbers in increasing order.`);
+                if (!Number.isInteger(mesh.nx) || mesh.nx < 3) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid.nx" must be an integer greater than or equal to 3.`);
+                const boundary = config.boundary as any;
+                if (boundary !== "periodic" && (boundary === null || typeof boundary !== "object" || Array.isArray(boundary) || boundary.left === undefined || boundary.right === undefined)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.boundary" must be "periodic" or an object with properties "left" and "right".`);
+                const side = (spec: any, name: string): { type: "periodic" | "dirichlet" | "neumann"; value: any; name: string } => {
+                    if (spec === "periodic") return { type: "periodic", value: 0, name };
+                    if (typeof spec === "number" || Array.isArray(spec) || typeof spec === "function") return { type: "dirichlet", value: spec, name };
+                    if (spec !== null && typeof spec === "object" && (spec.type === "dirichlet" || spec.type === "neumann")) return { type: spec.type, value: spec.value ?? 0, name };
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.boundary.${name}" must be "periodic", a number, an array, a function, or an object with type "dirichlet" or "neumann".`);
+                };
+                const left = side(boundary === "periodic" ? "periodic" : boundary.left, "left");
+                const right = side(boundary === "periodic" ? "periodic" : boundary.right, "right");
+                const periodic = left.type === "periodic";
+                if (periodic !== (right.type === "periodic")) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.boundary.left" and "config.boundary.right" must both be periodic or both be non-periodic.`);
+                const fill = (s: { value: any; name: string }, t: number, out: Float64Array): void => {
+                    const v = typeof s.value === "function" ? s.value(t) : s.value;
+                    if (typeof v === "number" && Number.isFinite(v)) {
+                        for (let c = 0; c < m; c++) out[c] = v;
+                        return;
                     }
-                } else if (ode.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
-                    y0 = [y0obj.y0];
-                    if (config.returnObject) keys = ["y"];
-                } else if (ode.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
-                    y0 = [y0obj.y];
-                    if (config.returnObject) keys = ["y"];
-                } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
-                    const arr = y0obj.y0 as number[];
-                    if (arr.length !== ode.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must have length ${ode.dimension}.`);
-                    if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must begin and end with finite numbers.`);
-                    y0 = arr.slice();
-                } else {
-                    keys = Object.keys(config.y0).sort();
-                    if (keys.length !== ode.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have exactly ${ode.dimension} numeric properties, but it has ${keys.length}.`);
-                    if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numeric properties.`);
-                    const arr: number[] = [];
-                    for (let i = 0; i < keys.length; i++) {
-                        const v = (config.y0 as any)[keys[i]];
-                        arr.push(v);
+                    if (Array.isArray(v) && v.length === m) {
+                        let ok = true;
+                        for (let c = 0; c < m; c++) ok = ok && Number.isFinite(v[c]);
+                        if (ok) {
+                            for (let c = 0; c < m; c++) out[c] = v[c];
+                            return;
+                        }
                     }
-                    y0 = arr;
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Value of "config.boundary.${s.name}" must be a finite number, an array of ${m} finite numbers, or a function returning one of them.`);
+                };
+                const ahead = new Float64Array(m), behind = new Float64Array(m);
+                const rate = (s: { value: any; name: string }, t: number, out: Float64Array): void => {
+                    if (typeof s.value !== "function") {
+                        for (let c = 0; c < m; c++) out[c] = 0;
+                        return;
+                    }
+                    const eps = 1e-6 * Math.max(1, Math.abs(t));
+                    fill(s, t + eps, ahead);
+                    fill(s, t - eps, behind);
+                    for (let c = 0; c < m; c++) out[c] = (ahead[c] - behind[c]) / (2 * eps);
+                };
+                const valueL = new Float64Array(m), valueR = new Float64Array(m);
+                if (!periodic) {
+                    if (typeof left.value !== "function") fill(left, 0, valueL);
+                    if (typeof right.value !== "function") fill(right, 0, valueR);
                 }
-            }
-            if (config.returnObject && !keys) {
-                if (ode.type === "single" && ode.order === 2 && ode.dimension === 2) keys = ["y", "dy"];
-                else if (ode.dimension === 1) keys = ["y"];
-                else keys = Array.from({ length: ode.dimension }, (_, i) => `y${i + 1}`);
+                const nx: number = mesh.nx, a: number = mesh.x[0], b: number = mesh.x[1];
+                const N = nx;
+                const dx = periodic ? (b - a) / nx : (b - a) / (nx - 1);
+                const x: number[] = new Array(nx);
+                for (let i = 0; i < nx; i++) x[i] = a + i * dx;
+                if (!periodic) x[nx - 1] = b;
+                const fixedL = left.type === "dirichlet", fixedR = right.type === "dirichlet";
+                const length = order * m * N;
+                const state: number[] = new Array(length).fill(0);
+                const sampled = (f: any, name: string, offset: number): void => {
+                    for (let p = 0; p < N; p++) {
+                        const v = f(x[p]);
+                        if (m === 1 && typeof v === "number" && Number.isFinite(v)) {
+                            state[offset + p] = v;
+                            continue;
+                        }
+                        if (!Array.isArray(v) || v.length !== m) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every mesh node.`);
+                        for (let c = 0; c < m; c++) {
+                            if (!Number.isFinite(v[c])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every mesh node.`);
+                            state[offset + c * N + p] = v[c];
+                        }
+                    }
+                };
+                const copied = (arr: any[], name: string, offset: number, size: number): void => {
+                    if (arr.length !== size) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must have length ${size}.`);
+                    for (let i = 0; i < size; i++) {
+                        if (!Number.isFinite(arr[i])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must contain only finite numbers.`);
+                        state[offset + i] = arr[i];
+                    }
+                };
+                const initial = config.y0 as any;
+                if (typeof initial === "function" && order === 1) {
+                    sampled(initial, "config.y0", 0);
+                } else if (Array.isArray(initial)) {
+                    copied(initial, "config.y0", 0, length);
+                } else if (order === 2 && initial !== null && typeof initial === "object" && ("u" in initial) && ("ut" in initial)) {
+                    const parts: [string, number][] = [["u", 0], ["ut", m * N]];
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = initial[parts[i][0]], name = `config.y0.${parts[i][0]}`;
+                        if (typeof part === "function") sampled(part, name, parts[i][1]);
+                        else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
+                        else throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must be a function or an array of length ${m * N}.`);
+                    }
+                } else {
+                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
+                }
+                const sides: [boolean, { value: any; name: string }, number][] = [[fixedL, left, 0], [fixedR, right, nx - 1]];
+                for (let i = 0; i < sides.length; i++) {
+                    if (!sides[i][0]) continue;
+                    const p = sides[i][2], values = new Float64Array(m);
+                    fill(sides[i][1], t0, values);
+                    for (let c = 0; c < m; c++) state[c * N + p] = values[c];
+                    if (order === 2) {
+                        rate(sides[i][1], t0, values);
+                        for (let c = 0; c < m; c++) state[m * N + c * N + p] = values[c];
+                    }
+                }
+                const bufs: Float64Array[] = [];
+                for (let c = 0; c < m; c++) bufs.push(new Float64Array(nx + 2));
+                const U: number[] = new Array(m).fill(0), UX: number[] = new Array(m).fill(0), UXX: number[] = new Array(m).fill(0), UT: number[] = new Array(m).fill(0);
+                const rateL = new Float64Array(m), rateR = new Float64Array(m);
+                const single = diff.rule as (t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number;
+                const system = diff.rule as (t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[];
+                const unstable = `Chalkboard.diff.solveAdaptive: Rule of a partial differential equation must return finite numbers; a smaller step size may be needed for stability.`;
+                const rule = (t: number, y: number[]): number[] => {
+                    const out: number[] = new Array(length);
+                    if (left.type === "neumann" && typeof left.value === "function") fill(left, t, valueL);
+                    if (right.type === "neumann" && typeof right.value === "function") fill(right, t, valueR);
+                    if (fixedL) rate(left, t, rateL);
+                    if (fixedR) rate(right, t, rateR);
+                    for (let c = 0; c < m; c++) {
+                        const g = bufs[c], base = c * N;
+                        for (let i = 0; i < nx; i++) g[i + 1] = y[base + i];
+                        if (periodic) {
+                            g[0] = g[nx];
+                            g[nx + 1] = g[1];
+                        } else {
+                            if (left.type === "neumann") g[0] = g[2] + 2 * dx * valueL[c];
+                            if (right.type === "neumann") g[nx + 1] = g[nx - 1] + 2 * dx * valueR[c];
+                        }
+                    }
+                    for (let p = 0; p < N; p++) {
+                        if ((p === 0 && fixedL) || (p === nx - 1 && fixedR)) {
+                            const r = p === 0 && fixedL ? rateL : rateR;
+                            for (let c = 0; c < m; c++) {
+                                out[c * N + p] = r[c];
+                                if (order === 2) out[m * N + c * N + p] = 0;
+                            }
+                            continue;
+                        }
+                        const k = p + 1;
+                        if (m === 1) {
+                            const g = bufs[0];
+                            const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                            const r = order === 1 ? single(t, x[p], u, ux, uxx) : single(t, x[p], u, ux, uxx, y[N + p]);
+                            if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `Chalkboard.diff.solveAdaptive: Rule of a partial differential equation with one component must return a number.`);
+                            if (order === 1) {
+                                out[p] = r;
+                            } else {
+                                out[p] = y[N + p];
+                                out[N + p] = r;
+                            }
+                        } else {
+                            for (let c = 0; c < m; c++) {
+                                const g = bufs[c];
+                                U[c] = g[k];
+                                UX[c] = (g[k + 1] - g[k - 1]) / (2 * dx);
+                                UXX[c] = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                                if (order === 2) UT[c] = y[m * N + c * N + p];
+                            }
+                            const r = order === 1 ? system(t, x[p], U, UX, UXX) : system(t, x[p], U, UX, UXX, UT);
+                            if (!Array.isArray(r) || r.length !== m) throw new Error(`Chalkboard.diff.solveAdaptive: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
+                            for (let c = 0; c < m; c++) {
+                                if (!Number.isFinite(r[c])) throw new Error(unstable);
+                                if (order === 1) {
+                                    out[c * N + p] = r[c];
+                                } else {
+                                    out[c * N + p] = UT[c];
+                                    out[m * N + c * N + p] = r[c];
+                                }
+                            }
+                        }
+                    }
+                    return out;
+                };
+                f = rule;
+                y0 = state;
+                grid = { x };
+            } else {
+                if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
+                    if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" can be a scalar only when property "diff.dimension" is equal to 1.`);
+                    y0 = [config.y0];
+                } else if (Array.isArray(config.y0)) {
+                    if (config.y0.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have length ${diff.dimension}.`);
+                    if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numbers.`);
+                    y0 = config.y0.slice();
+                } else {
+                    if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be a number, number array, or object.`);
+                    const y0obj = config.y0 as any;
+                    if (diff.type === "single" && diff.order === 2) {
+                        if (("y0" in y0obj) && ("dy0" in y0obj)) {
+                            const a = y0obj.y0;
+                            const b = y0obj.dy0;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else if (("y" in y0obj) && ("dy" in y0obj)) {
+                            const a = y0obj.y;
+                            const b = y0obj.dy;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else {
+                            throw new Error(`Chalkboard.diff.solveAdaptive: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
+                        }
+                    } else if (diff.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
+                        y0 = [y0obj.y0];
+                        if (config.returnObject) keys = ["y"];
+                    } else if (diff.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
+                        y0 = [y0obj.y];
+                        if (config.returnObject) keys = ["y"];
+                    } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
+                        const arr = y0obj.y0 as number[];
+                        if (arr.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must have length ${diff.dimension}.`);
+                        if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must begin and end with finite numbers.`);
+                        y0 = arr.slice();
+                    } else {
+                        keys = Object.keys(config.y0).sort();
+                        if (keys.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have exactly ${diff.dimension} numeric properties, but it has ${keys.length}.`);
+                        if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numeric properties.`);
+                        const arr: number[] = [];
+                        for (let i = 0; i < keys.length; i++) {
+                            const v = (config.y0 as any)[keys[i]];
+                            arr.push(v);
+                        }
+                        y0 = arr;
+                    }
+                }
+                if (config.returnObject && !keys) {
+                    if (diff.type === "single" && diff.order === 2 && diff.dimension === 2) keys = ["y", "dy"];
+                    else if (diff.dimension === 1) keys = ["y"];
+                    else keys = Array.from({ length: diff.dimension }, (_, i) => `y${i + 1}`);
+                }
+                f = diff.rule;
             }
             const sign = Math.sign(config.t1 - t0);
             let h = config.h0 ?? (config.t1 - t0) / 100;
@@ -1104,9 +1543,12 @@ namespace Chalkboard {
             };
             const add = (a: number[], b: number[]): number[] => Chalkboard.stat.add(a, b);
             const scl = (a: number[], k: number): number[] => Chalkboard.stat.scl(a, k);
-            const f = ode.rule;
+            const frames = config.frames ?? (grid ? 101 : undefined);
             const t: number[] = [t0];
             const y: number[][] = [y0.slice()];
+            let tCurr = t0;
+            let yCurr = y[0];
+            let frame = 1;
             const c2 = 1 / 5;
             const c3 = 3 / 10;
             const c4 = 4 / 5;
@@ -1137,8 +1579,8 @@ namespace Chalkboard {
             let iter = 0;
             while (iter < maxSteps) {
                 iter++;
-                const ti = t[t.length - 1];
-                const yi = y[y.length - 1];
+                const ti = tCurr;
+                const yi = yCurr;
                 if ((sign > 0 && ti >= config.t1) || (sign < 0 && ti <= config.t1)) break;
                 const remaining = config.t1 - ti;
                 h = clampAbs(h, hMin, hMax);
@@ -1165,8 +1607,27 @@ namespace Chalkboard {
                 const maxFactor = 5.0;
                 if (e <= 1) {
                     const tNext = h === remaining ? config.t1 : ti + h;
-                    t.push(tNext);
-                    y.push(yNext5);
+                    if (frames === undefined) {
+                        t.push(tNext);
+                        y.push(yNext5);
+                    } else {
+                        while (frame < frames) {
+                            const tau = frame === frames - 1 ? config.t1 : t0 + frame * (config.t1 - t0) / (frames - 1);
+                            if (tNext !== config.t1 && (sign > 0 ? tau > tNext : tau < tNext)) break;
+                            if (frame === frames - 1) {
+                                y.push(yNext5);
+                            } else {
+                                const a = (tau - ti) / (tNext - ti);
+                                const row: number[] = new Array(yi.length);
+                                for (let k = 0; k < yi.length; k++) row[k] = (1 - a) * yi[k] + a * yNext5[k];
+                                y.push(row);
+                            }
+                            t.push(tau);
+                            frame++;
+                        }
+                    }
+                    tCurr = tNext;
+                    yCurr = yNext5;
                     const factor = e === 0 ? maxFactor : Math.min(maxFactor, Math.max(minFactor, safety * Math.pow(1 / e, 1 / 5)));
                     h = h * factor;
                 } else {
@@ -1175,10 +1636,11 @@ namespace Chalkboard {
                     if (Math.abs(h) < hMin) throw new Error(`Chalkboard.diff.solveAdaptive: Step size became smaller than the minimum step size.`);
                 }
             }
-            const tEnd = t[t.length - 1];
+            const tEnd = tCurr;
             if ((sign > 0 && tEnd < config.t1) || (sign < 0 && tEnd > config.t1)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" cannot be exceeded; its value is ${maxSteps}.`);
-            const result: { t: number[]; y: number[][]; yObj?: { [key: string]: number }[] } = { t, y };
-            if (config.returnObject && keys && keys.length === ode.dimension) {
+            const result: { t: number[]; y: number[][]; yObj?: { [key: string]: number }[]; grid?: { x: number[]; y?: number[] } } = { t, y };
+            if (grid) result.grid = grid;
+            if (config.returnObject && keys && keys.length === diff.dimension) {
                 result.yObj = y.map((row) => {
                     const obj: { [key: string]: number } = {};
                     for (let i = 0; i < keys.length; i++) obj[keys[i]] = row[i];

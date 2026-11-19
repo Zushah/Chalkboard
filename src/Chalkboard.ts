@@ -64,6 +64,22 @@ type ChalkboardODE = {
 };
 
 /**
+ * The type for partial differential equations.
+ * @property {Function} rule - Pointwise rule returning the first or second time derivative of the fields from time, coordinates, the field values, and their spatial derivatives
+ * @property {number} order - Order of the equation in time (1 or 2)
+ * @property {number} dimension - Number of spatial dimensions
+ * @property {number} components - Number of fields
+ * @property {"pde"} type - Always "pde"
+ */
+type ChalkboardPDE = {
+    rule: ((t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number) | ((t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[]);
+    order: number;
+    dimension: number;
+    components: number;
+    type: "pde";
+};
+
+/**
  * The type for quaternions.
  * @property {number} a - The real part
  * @property {number} b - The first imaginary part
