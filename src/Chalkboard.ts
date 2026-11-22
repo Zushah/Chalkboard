@@ -72,7 +72,7 @@ type ChalkboardODE = {
  * @property {"pde"} type - Always "pde"
  */
 type ChalkboardPDE = {
-    rule: ((t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number) | ((t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[]);
+    rule: ((t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number) | ((t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[]) | ((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number, uxy: number, ut?: number) => number) | ((t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[], uxy: number[], ut?: number[]) => number[]);
     order: number;
     dimension: number;
     components: number;

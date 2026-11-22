@@ -136,4 +136,26 @@ import cb from "@zushah/chalkboard";
     const solF = cb.diff.solve(cb.diff.exponential(1), { t1: 1, y0: 1, steps: 100, frames: 11 });
     assert.strictEqual(solF.t.length, 11);
     assert.strictEqual(solF.t[10], 1);
+
+    const heat2 = cb.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy, { dimension: 2 });
+    const d = 1 / 30;
+    const sol2 = cb.diff.solve(heat2, { t1: 0.05, h: 0.2 * d * d, y0: (x, y) => Math.sin(Math.PI * x) * Math.sin(Math.PI * y), grid: { x: [0, 1], y: [0, 1], nx: 31, ny: 31 }, boundary: { left: 0, right: 0, bottom: 0, top: 0 } });
+    const U = cb.diff.snapshot(sol2, 0.05);
+    assert.strictEqual(U.length, 31);
+    assert.strictEqual(U[0].length, 31);
+    let e = 0;
+    for (let j = 0; j < 31; j++) for (let i = 0; i < 31; i++) e = Math.max(e, Math.abs(U[j][i] - Math.exp(-2 * Math.PI * Math.PI * 0.05) * Math.sin(Math.PI * i * d) * Math.sin(Math.PI * j * d)));
+    assert.ok(e < 5e-4);
+
+    const mixed = cb.diff.init((t, x, y, u, ux, uy, uxx, uyy, uxy) => uxx + uyy + uxy, { dimension: 2 });
+    const exact2 = (x, y, t) => x * x + y * y + x * y + 5 * t;
+    const N = (f) => ({ type: "neumann", value: f });
+    const solM = cb.diff.solve(mixed, { t1: 0.1, h: 0.002, y0: (x, y) => exact2(x, y, 0), grid: { x: [0, 1], y: [0, 1], nx: 11, ny: 11 }, boundary: { left: N((t, y) => -y), right: N((t, y) => 2 + y), bottom: N((t, x) => -x), top: N((t, x) => 2 + x) } });
+    const M = cb.diff.snapshot(solM, 0.1);
+    let eM = 0;
+    for (let j = 0; j < 11; j++) for (let i = 0; i < 11; i++) eM = Math.max(eM, Math.abs(M[j][i] - exact2(i / 10, j / 10, 0.1)));
+    assert.ok(eM < 1e-9);
+
+    const solC = cb.diff.solve(heat2, { t1: 0.001, steps: 1, y0: () => 0, grid: { x: [0, 1], y: [0, 1], nx: 5, ny: 5 }, boundary: { left: 0, right: 0, bottom: 0, top: 1 } });
+    assert.deepStrictEqual(cb.diff.snapshot(solC, 0)[4], [0.5, 1, 1, 1, 0.5]);
 }

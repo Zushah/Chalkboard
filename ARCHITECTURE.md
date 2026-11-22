@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Thursday, November 19, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Sunday, November 22, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Wednesday, November 18, 2026, [**`efb048f`**](https://github.com/Zushah/Chalkboard/commit/efb048f).
+Previous commit: Thursday, November 19, 2026, [**`492665a`**](https://github.com/Zushah/Chalkboard/commit/492665a).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -315,7 +315,7 @@ For registration, name handling, and shared symbolic boundaries, see [§1.16. re
 - A scalar `(t, y)` rule becomes an order-one, dimension-one equation returning `[dy]`.
 - A scalar `(t, y, dy)` rule becomes an order-two, dimension-two equation with state `[y, dy]` and derivative `[dy, ddy]`.
 - A system rule with an explicit positive dimension receives and returns the full state array and has type `"system"`.
-- A rule with a configuration object instead of a dimension becomes a partial differential equation of type `"pde"`. The rule receives time, a coordinate, and the local field values and spatial derivatives, and returns first or second time derivatives; it is stored as given, so solvers validate its output.
+- A rule with a configuration object instead of a dimension becomes a partial differential equation of type `"pde"`. The rule receives time, coordinates, and the local field values and spatial derivatives, and returns first or second time derivatives; it is stored as given, so solvers validate its output.
 
 Arity matters for scalar classification. System wrappers check output shape and selected finite values, but do not establish all mathematical domain or regularity conditions. In ODE records, `order` retains the original scalar order, while `dimension` describes the first-order state vector used by solvers; a partial differential equation's `dimension` is its number of spatial dimensions.
 
@@ -325,11 +325,11 @@ Model constructors cover growth equations, linear equations, oscillators, pendul
 
 `solveAdaptive` implements Dormand–Prince 5(4). It scales each component's estimated local error by `atol + rtol * max(abs(old), abs(new))`, uses the largest scaled error for acceptance, and adapts the step with bounded growth/shrink factors. Controls include `h0`, `hMin`, `hMax`, `rtol`, `atol`, and `maxSteps`; the defaults include relative tolerance `1e-6` and absolute tolerance `1e-9`. Step limits and an inability to satisfy tolerance at the minimum step can produce errors. A generic `tol` option is not a substitute for these controls.
 
-For partial differential equations, both solvers first discretize the rule with second-order central differences on the configuration's uniform grid. Each side has a fixed value, an outward normal derivative imposed through ghost values, or periodic wrapping. Boundary nodes remain in the state, so each stored state maps directly onto the grid, and fixed boundary values follow their time dependence through the state derivative. Explicit stepping is only conditionally stable, since diffusion limits steps to roughly the square of the grid spacing, and fixed-step solving does not choose a stable step.
+For partial differential equations, both solvers first discretize the rule with second-order central differences on the configuration's uniform grid. Each side has a fixed value, an outward normal derivative imposed through ghost values, or periodic wrapping. In two dimensions, a node on two fixed-value sides takes their average, and mixed derivatives at corners between derivative sides use boundary values extended one grid step past the corner. Boundary nodes remain in the state, so each stored state maps directly onto the grid, and fixed boundary values follow their time dependence through the state derivative. Explicit stepping is only conditionally stable, since diffusion limits steps to roughly the square of the grid spacing, and fixed-step solving does not choose a stable step.
 
 Initial conditions can be scalar for a one-dimensional state, arrays, supported second-order objects, or keyed objects. Generic keyed states use sorted key order, so property names affect component ordering. Optional object output adds `yObj` while retaining numerical `y` samples. Partial differential equations take functions sampled on the grid or flattened arrays.
 
-Solutions expose paired sample arrays `{ t, y }`, with each `y[i]` corresponding to `t[i]`. `at` linearly interpolates stored samples in either time direction and clamps outside their range; it is not the integrator's dense output. `sample`, `component`, and `phase` derive further arrays from this data. Partial differential equation solutions add `grid` coordinates, and each state is flattened field by field with x varying fastest, followed by the time derivatives of second-order equations, so the sampling helpers apply unchanged; `snapshot` reshapes one time into a grid profile. `frames` bounds the number of stored samples and has a finite default for partial differential equations.
+Solutions expose paired sample arrays `{ t, y }`, with each `y[i]` corresponding to `t[i]`. `at` linearly interpolates stored samples in either time direction and clamps outside their range; it is not the integrator's dense output. `sample`, `component`, and `phase` derive further arrays from this data. Partial differential equation solutions add `grid` coordinates, and each state is flattened field by field with x varying fastest, then y, followed by the time derivatives of second-order equations, so the sampling helpers apply unchanged; `snapshot` reshapes one time into a profile in one dimension or a matrix indexed by y and then x in two. `frames` bounds the number of stored samples and has a finite default for partial differential equations.
 
 `derivative` estimates derivatives of sampled solutions. `error` applies to ordinary differential equations: it compares those estimates with the ODE rule and returns residual samples and summary statistics; this is neither an exact global solution error nor the adaptive solver's internal embedded error estimate. There is no stiff integrator, event system, or automatic model scheduler.
 
