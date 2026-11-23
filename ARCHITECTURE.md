@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Sunday, November 22, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Monday, November 23, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Thursday, November 19, 2026, [**`492665a`**](https://github.com/Zushah/Chalkboard/commit/492665a).
+Previous commit: Sunday, November 22, 2026, [**`4cab840`**](https://github.com/Zushah/Chalkboard/commit/4cab840).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -321,17 +321,19 @@ Arity matters for scalar classification. System wrappers check output shape and 
 
 Model constructors cover growth equations, linear equations, oscillators, pendulums, Bessel equations, Kepler motion, Lorenz and population systems, and compartment models such as SIR and SEIR. They produce the same ODE record rather than special solver subclasses. Singular model terms, such as division by time in Bessel equations, remain the caller's domain concern.
 
-`solve` provides Euler, midpoint, Heun, Ralston, and default RK4 stepping. Configuration supplies an interval and initial state plus a step size or step count. If `h` is supplied it takes precedence; the implementation derives a step count and adjusts the actual step to cover the interval. All methods advance numeric arrays through shared sequence operations.
+`solve` provides Euler, midpoint, Heun, Ralston, and default RK4 stepping. Configuration supplies an interval and initial state plus a step size or step count. If `h` is supplied it takes precedence; the implementation derives a step count and adjusts the actual step to cover the interval. The explicit methods advance numeric arrays through shared sequence operations.
 
 `solveAdaptive` implements Dormand–Prince 5(4). It scales each component's estimated local error by `atol + rtol * max(abs(old), abs(new))`, uses the largest scaled error for acceptance, and adapts the step with bounded growth/shrink factors. Controls include `h0`, `hMin`, `hMax`, `rtol`, `atol`, and `maxSteps`; the defaults include relative tolerance `1e-6` and absolute tolerance `1e-9`. Step limits and an inability to satisfy tolerance at the minimum step can produce errors. A generic `tol` option is not a substitute for these controls.
 
 For partial differential equations, both solvers first discretize the rule with second-order central differences on the configuration's uniform grid. Each side has a fixed value, an outward normal derivative imposed through ghost values, or periodic wrapping. In two dimensions, a node on two fixed-value sides takes their average, and mixed derivatives at corners between derivative sides use boundary values extended one grid step past the corner. Boundary nodes remain in the state, so each stored state maps directly onto the grid, and fixed boundary values follow their time dependence through the state derivative. Explicit stepping is only conditionally stable, since diffusion limits steps to roughly the square of the grid spacing, and fixed-step solving does not choose a stable step.
 
+`solve` also offers implicit methods (backward Euler, Crank–Nicolson, and BDF2) for stiff equations. Each step solves its nonlinear equations with Newton's method, using a finite-difference Jacobian that for partial differential equations is assembled from the grid stencil into a banded matrix, and factorizations are reused while Newton's method converges. Crank–Nicolson is not L-stable, so very stiff or nonsmooth components may oscillate, and banded factorization cost grows quickly with two-dimensional grid size. `solveAdaptive` remains explicit.
+
 Initial conditions can be scalar for a one-dimensional state, arrays, supported second-order objects, or keyed objects. Generic keyed states use sorted key order, so property names affect component ordering. Optional object output adds `yObj` while retaining numerical `y` samples. Partial differential equations take functions sampled on the grid or flattened arrays.
 
 Solutions expose paired sample arrays `{ t, y }`, with each `y[i]` corresponding to `t[i]`. `at` linearly interpolates stored samples in either time direction and clamps outside their range; it is not the integrator's dense output. `sample`, `component`, and `phase` derive further arrays from this data. Partial differential equation solutions add `grid` coordinates, and each state is flattened field by field with x varying fastest, then y, followed by the time derivatives of second-order equations, so the sampling helpers apply unchanged; `snapshot` reshapes one time into a profile in one dimension or a matrix indexed by y and then x in two. `frames` bounds the number of stored samples and has a finite default for partial differential equations.
 
-`derivative` estimates derivatives of sampled solutions. `error` applies to ordinary differential equations: it compares those estimates with the ODE rule and returns residual samples and summary statistics; this is neither an exact global solution error nor the adaptive solver's internal embedded error estimate. There is no stiff integrator, event system, or automatic model scheduler.
+`derivative` estimates derivatives of sampled solutions. `error` applies to ordinary differential equations: it compares those estimates with the ODE rule and returns residual samples and summary statistics; this is neither an exact global solution error nor the adaptive solver's internal embedded error estimate. There is no event system or automatic model scheduler.
 
 ### 1.11. geom
 

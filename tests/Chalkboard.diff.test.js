@@ -159,3 +159,22 @@ import cb from "@zushah/chalkboard";
     const solC = cb.diff.solve(heat2, { t1: 0.001, steps: 1, y0: () => 0, grid: { x: [0, 1], y: [0, 1], nx: 5, ny: 5 }, boundary: { left: 0, right: 0, bottom: 0, top: 1 } });
     assert.deepStrictEqual(cb.diff.snapshot(solC, 0)[4], [0.5, 1, 1, 1, 0.5]);
 }
+
+// diff.solve (implicit methods)
+{
+    const heat = cb.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+    const exact = (x) => Math.exp(-Math.PI * Math.PI * 0.1) * Math.sin(Math.PI * x);
+    const base = { t1: 0.1, y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 201 }, boundary: { left: 0, right: 0 } };
+    const err = (sol) => Math.max(...cb.diff.snapshot(sol, 0.1).map((v, i) => Math.abs(v - exact(sol.grid.x[i]))));
+    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 10, method: "backwardeuler" }, base))) < 2.5e-2);
+    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 10, method: "cranknicolson" }, base))) < 5e-4);
+    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 20, method: "bdf2" }, base))) < 6e-4);
+    const step = cb.diff.solve(heat, { t1: 0.05, steps: 5, method: "bdf2", y0: (x) => (x > 0.4 && x < 0.6 ? 1 : 0), grid: { x: [0, 1], nx: 201 }, boundary: { left: 0, right: 0 } });
+    assert.ok(Math.min(...step.y[step.y.length - 1]) > -1e-12);
+    const wave = cb.diff.init((t, x, u, ux, uxx, ut) => uxx, { dimension: 1, order: 2 });
+    const solW = cb.diff.solve(wave, { t1: 1, steps: 100, method: "cranknicolson", y0: { u: (x) => Math.sin(2 * Math.PI * x), ut: () => 0 }, grid: { x: [0, 1], nx: 200 }, boundary: "periodic" });
+    assert.ok(Math.abs(Math.max(...cb.diff.snapshot(solW, 1)) - 1) < 1e-3);
+    const stiff = cb.diff.init((t, y) => [-1000 * y[0] + 999 * y[1], -y[1]], 2);
+    const solS = cb.diff.solve(stiff, { t1: 1, y0: [2, 1], steps: 20, method: "bdf2" });
+    assert.ok(Math.abs(solS.y[solS.y.length - 1][0] - Math.exp(-1)) < 1e-3);
+}

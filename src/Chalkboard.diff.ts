@@ -13,6 +13,338 @@ namespace Chalkboard {
      * @namespace
      */
     export namespace diff {
+        /** @ignore */
+        const $prepare = (diff: ChalkboardODE | ChalkboardPDE, config: any, caller: string): {
+            rule: (t: number, y: number[]) => number[];
+            y0: number[];
+            keys?: string[];
+            grid?: { x: number[]; y?: number[] };
+            mesh?: { nx: number; ny: number; fields: number; periodicX: boolean; periodicY: boolean };
+        } => {
+            const t0 = config.t0 ?? 0;
+            if (diff.type === "pde") {
+                if (config.returnObject) throw new Error(`${caller}: Property "config.returnObject" is not supported for partial differential equations.`);
+                const m = diff.components, order = diff.order, dim = diff.dimension;
+                if (dim !== 1 && dim !== 2) throw new Error(`${caller}: Property "diff.dimension" must be 1 or 2.`);
+                if (order !== 1 && order !== 2) throw new Error(`${caller}: Property "diff.order" must be 1 or 2.`);
+                if (!Number.isInteger(m) || m < 1) throw new Error(`${caller}: Property "diff.components" must be a positive integer.`);
+                const mesh = config.grid as any;
+                if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`${caller}: Property "config.grid" must be an object for partial differential equations.`);
+                const axis = (range: any, count: any, letter: string): void => {
+                    if (!Array.isArray(range) || range.length !== 2 || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[1] <= range[0]) throw new Error(`${caller}: Property "config.grid.${letter}" must be an array of two finite numbers in increasing order.`);
+                    if (!Number.isInteger(count) || count < 3) throw new Error(`${caller}: Property "config.grid.n${letter}" must be an integer greater than or equal to 3.`);
+                };
+                axis(mesh.x, mesh.nx, "x");
+                if (dim === 2) axis(mesh.y, mesh.ny, "y");
+                const names = dim === 1 ? ["left", "right"] : ["left", "right", "bottom", "top"];
+                const boundary = config.boundary as any;
+                if (boundary !== "periodic" && (boundary === null || typeof boundary !== "object" || Array.isArray(boundary) || names.some((name) => boundary[name] === undefined))) throw new Error(`${caller}: Property "config.boundary" must be "periodic" or an object with properties ${dim === 1 ? `"left" and "right"` : `"left", "right", "bottom", and "top"`}.`);
+                type Side = { type: "periodic" | "dirichlet" | "neumann"; value: any; name: string };
+                const side = (name: string): Side => {
+                    const spec = boundary === "periodic" ? "periodic" : boundary[name];
+                    if (spec === "periodic") return { type: "periodic", value: 0, name };
+                    if (typeof spec === "number" || Array.isArray(spec) || typeof spec === "function") return { type: "dirichlet", value: spec, name };
+                    if (spec !== null && typeof spec === "object" && (spec.type === "dirichlet" || spec.type === "neumann")) return { type: spec.type, value: spec.value ?? 0, name };
+                    throw new Error(`${caller}: Property "config.boundary.${name}" must be "periodic", a number, an array, a function, or an object with type "dirichlet" or "neumann".`);
+                };
+                const sides = names.map(side);
+                const left = sides[0], right = sides[1], bottom = sides[2], top = sides[3];
+                const periodicX = left.type === "periodic", periodicY = dim === 2 && bottom.type === "periodic";
+                if (periodicX !== (right.type === "periodic")) throw new Error(`${caller}: Properties "config.boundary.left" and "config.boundary.right" must both be periodic or both be non-periodic.`);
+                if (dim === 2 && periodicY !== (top.type === "periodic")) throw new Error(`${caller}: Properties "config.boundary.bottom" and "config.boundary.top" must both be periodic or both be non-periodic.`);
+                const fill = (s: Side, t: number, coord: number, out: Float64Array, offset: number = 0): void => {
+                    const v = typeof s.value === "function" ? (dim === 1 ? s.value(t) : s.value(t, coord)) : s.value;
+                    if (typeof v === "number" && Number.isFinite(v)) {
+                        for (let c = 0; c < m; c++) out[offset + c] = v;
+                        return;
+                    }
+                    if (Array.isArray(v) && v.length === m) {
+                        let ok = true;
+                        for (let c = 0; c < m; c++) ok = ok && Number.isFinite(v[c]);
+                        if (ok) {
+                            for (let c = 0; c < m; c++) out[offset + c] = v[c];
+                            return;
+                        }
+                    }
+                    throw new Error(`${caller}: Value of "config.boundary.${s.name}" must be a finite number, an array of ${m} finite numbers, or a function returning one of them.`);
+                };
+                const ahead = new Float64Array(m), behind = new Float64Array(m);
+                const rate = (s: Side, t: number, coord: number, out: Float64Array): void => {
+                    if (typeof s.value !== "function") {
+                        for (let c = 0; c < m; c++) out[c] = 0;
+                        return;
+                    }
+                    const eps = 1e-6 * Math.max(1, Math.abs(t));
+                    fill(s, t + eps, coord, ahead);
+                    fill(s, t - eps, coord, behind);
+                    for (let c = 0; c < m; c++) out[c] = (ahead[c] - behind[c]) / (2 * eps);
+                };
+                const coords = (lo: number, hi: number, n: number, periodic: boolean): [number[], number] => {
+                    const d = periodic ? (hi - lo) / n : (hi - lo) / (n - 1);
+                    const result: number[] = new Array(n);
+                    for (let i = 0; i < n; i++) result[i] = lo + i * d;
+                    if (!periodic) result[n - 1] = hi;
+                    return [result, d];
+                };
+                const nx: number = mesh.nx, ny: number = dim === 2 ? mesh.ny : 1, N = nx * ny;
+                const [x, dx] = coords(mesh.x[0], mesh.x[1], nx, periodicX);
+                const [yc, dy]: [number[], number] = dim === 2 ? coords(mesh.y[0], mesh.y[1], ny, periodicY) : [[0], 1];
+                const fixed = new Uint8Array(N);
+                const fixedNodes: number[] = [];
+                const fixedSides: { s: Side; coord: number }[][] = [];
+                for (let j = 0; j < ny; j++) {
+                    for (let i = 0; i < nx; i++) {
+                        const on: { s: Side; coord: number }[] = [];
+                        if (i === 0 && left.type === "dirichlet") on.push({ s: left, coord: yc[j] });
+                        if (i === nx - 1 && right.type === "dirichlet") on.push({ s: right, coord: yc[j] });
+                        if (dim === 2 && j === 0 && bottom.type === "dirichlet") on.push({ s: bottom, coord: x[i] });
+                        if (dim === 2 && j === ny - 1 && top.type === "dirichlet") on.push({ s: top, coord: x[i] });
+                        if (on.length === 0) continue;
+                        fixed[j * nx + i] = 1;
+                        fixedNodes.push(j * nx + i);
+                        fixedSides.push(on);
+                    }
+                }
+                const scratch = new Float64Array(m), sum = new Float64Array(m);
+                const average = (q: number, t: number, how: (s: Side, t: number, coord: number, out: Float64Array) => void): void => {
+                    const on = fixedSides[q];
+                    for (let c = 0; c < m; c++) sum[c] = 0;
+                    for (let r = 0; r < on.length; r++) {
+                        how(on[r].s, t, on[r].coord, scratch);
+                        for (let c = 0; c < m; c++) sum[c] += scratch[c];
+                    }
+                    for (let c = 0; c < m; c++) sum[c] /= on.length;
+                };
+                for (let r = 0; r < sides.length; r++) {
+                    if (sides[r].type !== "periodic" && typeof sides[r].value !== "function") fill(sides[r], 0, 0, scratch);
+                }
+                const length = order * m * N;
+                const state: number[] = new Array(length).fill(0);
+                const sampled = (f: any, name: string, offset: number): void => {
+                    for (let j = 0; j < ny; j++) {
+                        for (let i = 0; i < nx; i++) {
+                            const p = j * nx + i;
+                            const v = dim === 1 ? f(x[i]) : f(x[i], yc[j]);
+                            if (m === 1 && typeof v === "number" && Number.isFinite(v)) {
+                                state[offset + p] = v;
+                                continue;
+                            }
+                            if (!Array.isArray(v) || v.length !== m) throw new Error(`${caller}: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
+                            for (let c = 0; c < m; c++) {
+                                if (!Number.isFinite(v[c])) throw new Error(`${caller}: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
+                                state[offset + c * N + p] = v[c];
+                            }
+                        }
+                    }
+                };
+                const copied = (arr: any[], name: string, offset: number, size: number): void => {
+                    if (arr.length !== size) throw new Error(`${caller}: Property "${name}" must have length ${size}.`);
+                    for (let i = 0; i < size; i++) {
+                        if (!Number.isFinite(arr[i])) throw new Error(`${caller}: Property "${name}" must contain only finite numbers.`);
+                        state[offset + i] = arr[i];
+                    }
+                };
+                const initial = config.y0 as any;
+                if (typeof initial === "function" && order === 1) {
+                    sampled(initial, "config.y0", 0);
+                } else if (Array.isArray(initial)) {
+                    copied(initial, "config.y0", 0, length);
+                } else if (order === 2 && initial !== null && typeof initial === "object" && ("u" in initial) && ("ut" in initial)) {
+                    const parts: [string, number][] = [["u", 0], ["ut", m * N]];
+                    for (let i = 0; i < parts.length; i++) {
+                        const part = initial[parts[i][0]], name = `config.y0.${parts[i][0]}`;
+                        if (typeof part === "function") sampled(part, name, parts[i][1]);
+                        else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
+                        else throw new Error(`${caller}: Property "${name}" must be a function or an array of length ${m * N}.`);
+                    }
+                } else {
+                    throw new Error(`${caller}: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
+                }
+                for (let q = 0; q < fixedNodes.length; q++) {
+                    const p = fixedNodes[q];
+                    average(q, t0, fill);
+                    for (let c = 0; c < m; c++) state[c * N + p] = sum[c];
+                    if (order === 2) {
+                        average(q, t0, rate);
+                        for (let c = 0; c < m; c++) state[m * N + c * N + p] = sum[c];
+                    }
+                }
+                const W = nx + 2, pad = dim === 2 ? 1 : 0;
+                const bufs: Float64Array[] = [];
+                for (let c = 0; c < m; c++) bufs.push(new Float64Array(W * (ny + 2 * pad)));
+                const xt: number[] = new Array(W);
+                for (let i = 0; i < W; i++) xt[i] = i === 0 ? (periodicX ? x[nx - 1] : x[0] - dx) : i === W - 1 ? (periodicX ? x[0] : x[nx - 1] + dx) : x[i - 1];
+                const ghostL = new Float64Array(ny * m), ghostR = new Float64Array(ny * m), ghostB = new Float64Array(W * m), ghostT = new Float64Array(W * m);
+                const reflect = (t: number, constants: boolean): void => {
+                    if (left.type === "neumann" && (constants === (typeof left.value !== "function"))) for (let j = 0; j < ny; j++) fill(left, t, yc[j], ghostL, j * m);
+                    if (right.type === "neumann" && (constants === (typeof right.value !== "function"))) for (let j = 0; j < ny; j++) fill(right, t, yc[j], ghostR, j * m);
+                    if (dim === 1) return;
+                    if (bottom.type === "neumann" && (constants === (typeof bottom.value !== "function"))) for (let i = 0; i < W; i++) fill(bottom, t, xt[i], ghostB, i * m);
+                    if (top.type === "neumann" && (constants === (typeof top.value !== "function"))) for (let i = 0; i < W; i++) fill(top, t, xt[i], ghostT, i * m);
+                };
+                reflect(t0, true);
+                const U: number[] = new Array(m).fill(0), UX: number[] = new Array(m).fill(0), UY: number[] = new Array(m).fill(0), UXX: number[] = new Array(m).fill(0), UYY: number[] = new Array(m).fill(0), UXY: number[] = new Array(m).fill(0), UT: number[] = new Array(m).fill(0);
+                const single = diff.rule as (t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number;
+                const system = diff.rule as (t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[];
+                const planar = diff.rule as (t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number, uxy: number, ut?: number) => number;
+                const planarSystem = diff.rule as (t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[], uxy: number[], ut?: number[]) => number[];
+                const unstable = `${caller}: Rule of a partial differential equation must return finite numbers; a smaller step size may be needed for stability.`;
+                const rule = (t: number, y: number[]): number[] => {
+                    const out: number[] = new Array(length);
+                    reflect(t, false);
+                    for (let c = 0; c < m; c++) {
+                        const g = bufs[c], base = c * N;
+                        for (let j = 0; j < ny; j++) {
+                            const row = (j + pad) * W, src = base + j * nx;
+                            for (let i = 0; i < nx; i++) g[row + i + 1] = y[src + i];
+                            if (periodicX) {
+                                g[row] = g[row + nx];
+                                g[row + nx + 1] = g[row + 1];
+                            } else {
+                                if (left.type === "neumann") g[row] = g[row + 2] + 2 * dx * ghostL[j * m + c];
+                                if (right.type === "neumann") g[row + nx + 1] = g[row + nx - 1] + 2 * dx * ghostR[j * m + c];
+                            }
+                        }
+                        if (dim === 2) {
+                            const last = ny * W, beyond = (ny + 1) * W;
+                            if (periodicY) {
+                                for (let i = 0; i < W; i++) {
+                                    g[i] = g[last + i];
+                                    g[beyond + i] = g[W + i];
+                                }
+                            } else {
+                                if (bottom.type === "neumann") for (let i = 0; i < W; i++) g[i] = g[2 * W + i] + 2 * dy * ghostB[i * m + c];
+                                if (top.type === "neumann") for (let i = 0; i < W; i++) g[beyond + i] = g[(ny - 1) * W + i] + 2 * dy * ghostT[i * m + c];
+                            }
+                        }
+                    }
+                    for (let q = 0; q < fixedNodes.length; q++) {
+                        const p = fixedNodes[q];
+                        average(q, t, rate);
+                        for (let c = 0; c < m; c++) {
+                            out[c * N + p] = sum[c];
+                            if (order === 2) out[m * N + c * N + p] = 0;
+                        }
+                    }
+                    for (let j = 0; j < ny; j++) {
+                        for (let i = 0; i < nx; i++) {
+                            const p = j * nx + i;
+                            if (fixed[p]) continue;
+                            const k = (j + pad) * W + i + 1;
+                            if (m === 1) {
+                                const g = bufs[0];
+                                const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                                let r: number;
+                                if (dim === 1) {
+                                    r = order === 1 ? single(t, x[i], u, ux, uxx) : single(t, x[i], u, ux, uxx, y[N + p]);
+                                } else {
+                                    const uy = (g[k + W] - g[k - W]) / (2 * dy), uyy = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy), uxy = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
+                                    r = order === 1 ? planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy) : planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy, y[N + p]);
+                                }
+                                if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `${caller}: Rule of a partial differential equation with one component must return a number.`);
+                                if (order === 1) {
+                                    out[p] = r;
+                                } else {
+                                    out[p] = y[N + p];
+                                    out[N + p] = r;
+                                }
+                            } else {
+                                for (let c = 0; c < m; c++) {
+                                    const g = bufs[c];
+                                    U[c] = g[k];
+                                    UX[c] = (g[k + 1] - g[k - 1]) / (2 * dx);
+                                    UXX[c] = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
+                                    if (dim === 2) {
+                                        UY[c] = (g[k + W] - g[k - W]) / (2 * dy);
+                                        UYY[c] = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy);
+                                        UXY[c] = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
+                                    }
+                                    if (order === 2) UT[c] = y[m * N + c * N + p];
+                                }
+                                let r: number[];
+                                if (dim === 1) r = order === 1 ? system(t, x[i], U, UX, UXX) : system(t, x[i], U, UX, UXX, UT);
+                                else r = order === 1 ? planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY) : planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY, UT);
+                                if (!Array.isArray(r) || r.length !== m) throw new Error(`${caller}: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
+                                for (let c = 0; c < m; c++) {
+                                    if (!Number.isFinite(r[c])) throw new Error(unstable);
+                                    if (order === 1) {
+                                        out[c * N + p] = r[c];
+                                    } else {
+                                        out[c * N + p] = UT[c];
+                                        out[m * N + c * N + p] = r[c];
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    return out;
+                };
+                return { rule, y0: state, grid: dim === 2 ? { x, y: yc } : { x }, mesh: { nx, ny, fields: order * m, periodicX, periodicY } };
+            } else {
+                let y0: number[];
+                let keys: string[] | undefined;
+                if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
+                    if (diff.dimension !== 1) throw new Error(`${caller}: Property "config.y0" can be a scalar only when property "diff.dimension" is equal to 1.`);
+                    y0 = [config.y0];
+                } else if (Array.isArray(config.y0)) {
+                    if (config.y0.length !== diff.dimension) throw new Error(`${caller}: Property "config.y0" must have length ${diff.dimension}.`);
+                    if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`${caller}: Parameter "config.y0" must begin and end with finite numbers.`);
+                    y0 = config.y0.slice();
+                } else {
+                    if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`${caller}: Property "config.y0" must be a number, number array, or object.`);
+                    const y0obj = config.y0 as any;
+                    if (diff.type === "single" && diff.order === 2) {
+                        if (("y0" in y0obj) && ("dy0" in y0obj)) {
+                            const a = y0obj.y0;
+                            const b = y0obj.dy0;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`${caller}: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else if (("y" in y0obj) && ("dy" in y0obj)) {
+                            const a = y0obj.y;
+                            const b = y0obj.dy;
+                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`${caller}: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
+                            y0 = [a, b];
+                            if (config.returnObject) keys = ["y", "dy"];
+                        } else {
+                            throw new Error(`${caller}: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
+                        }
+                    } else if (diff.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
+                        y0 = [y0obj.y0];
+                        if (config.returnObject) keys = ["y"];
+                    } else if (diff.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
+                        y0 = [y0obj.y];
+                        if (config.returnObject) keys = ["y"];
+                    } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
+                        const arr = y0obj.y0 as number[];
+                        if (arr.length !== diff.dimension) throw new Error(`${caller}: Property "config.y0.y0" must have length ${diff.dimension}.`);
+                        if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`${caller}: Property "config.y0.y0" must begin and end with finite numbers.`);
+                        y0 = arr.slice();
+                    } else {
+                        keys = Object.keys(config.y0).sort();
+                        if (keys.length !== diff.dimension) throw new Error(`${caller}: Property "config.y0" must have exactly ${diff.dimension} numeric properties, but it has ${keys.length}.`);
+                        if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`${caller}: Parameter "config.y0" must begin and end with finite numeric properties.`);
+                        const arr: number[] = [];
+                        for (let i = 0; i < keys.length; i++) {
+                            const v = (config.y0 as any)[keys[i]];
+                            arr.push(v);
+                        }
+                        y0 = arr;
+                    }
+                }
+                if (config.returnObject && !keys) {
+                    if (diff.type === "single" && diff.order === 2 && diff.dimension === 2) {
+                        keys = ["y", "dy"];
+                    } else if (diff.dimension === 1) {
+                        keys = ["y"];
+                    } else {
+                        keys = Array.from({ length: diff.dimension }, (_, i) => `y${i + 1}`);
+                    }
+                }
+                return { rule: diff.rule, y0, keys };
+            }
+        };
+
         /**
          * Samples a solution at a time using linear interpolation between the nearest grid points, with times that may be ascending or descending. (No extrapolation as it clamps to endpoints.)
          * @param {{ t: number[]; y: number[][] }} sol - The solution.
@@ -820,7 +1152,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Solves an ordinary or partial differential equation using an explicit method.
+         * Solves an ordinary or partial differential equation using an explicit or implicit method with fixed steps.
          * @param {ChalkboardODE | ChalkboardPDE} diff - The differential equation to solve.
          * @param {number} [config.t0=0] - The initial time.
          * @param {number} config.t1 - The final time.
@@ -829,7 +1161,7 @@ namespace Chalkboard {
          * @param {number | number[] | Object | Function} config.y0 - The initial state. For partial differential equations, a function of position (x, or x and y in two dimensions) sampled at every grid node (returning an array for several fields), a flattened array, or for second-order equations an object `{ u, ut }` of such functions or arrays.
          * @param {{ x: number[]; nx: number; y?: number[]; ny?: number }} [config.grid] - The uniform grid of a partial differential equation: the interval `x: [a, b]` and the number of nodes `nx` (at least 3), plus `y: [c, d]` and `ny` in two dimensions. A periodic axis leaves out the repeated endpoint.
          * @param {string | Object} [config.boundary] - The boundary conditions of a partial differential equation: "periodic" or `{ left, right }`, plus `bottom` and `top` in two dimensions, where each side is "periodic", a fixed value (a number, an array with one value per field, or a function of time, which in two dimensions also receives y on the left and right and x on the bottom and top), or `{ type: "dirichlet" | "neumann", value }` with "neumann" prescribing the outward normal derivative. Both sides of an axis are periodic or neither is, and a node on two fixed-value sides takes their average.
-         * @param {"euler" | "midpoint" | "heun" | "ralston" | "rk4"} [config.method="rk4"] - The integration method to use: "euler", "midpoint", "heun", "ralston", or "rk4".
+         * @param {"euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2"} [config.method="rk4"] - The integration method to use: "euler", "midpoint", "heun", "ralston", "rk4", "backwardeuler", "cranknicolson", or "bdf2". The implicit methods ("backwardeuler", "cranknicolson", and "bdf2") apply Newton's method at every step and suit stiff problems, where explicit methods need very small steps. Crank–Nicolson may oscillate on very stiff or nonsmooth problems, where backward Euler and BDF2 do not. The cost of the implicit methods grows quickly with the size of two-dimensional grids.
          * @param {boolean} [config.returnObject=false] - Whether to return the results as an array of objects (only if initial state was provided as an object, and not for partial differential equations).
          * @param {number} [config.frames] - The number of samples to store, evenly spaced over the steps and including both endpoints (an integer of at least 2). Defaults to every step for ordinary differential equations and 101 for partial differential equations, and never exceeds the number of steps plus one.
          * @returns {{ t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } }} The solution containing time points `t`, state array `y`, optionally state objects `yObj`, and the grid coordinates `grid` for partial differential equations.
@@ -866,6 +1198,15 @@ namespace Chalkboard {
          *     grid: { x: [0, 1], nx: 51 },
          *     boundary: { left: 0, right: 0 }
          * });
+         * 
+         * // Solve the heat equation with the implicit BDF2 method and large steps:
+         * const solStiff = Chalkboard.diff.solve(heat, {
+         *     t0: 0, t1: 0.1, steps: 20,
+         *     y0: (x) => Math.sin(Math.PI * x),
+         *     grid: { x: [0, 1], nx: 201 },
+         *     boundary: { left: 0, right: 0 },
+         *     method: "bdf2"
+         * });
          */
         export const solve = (
             diff: ChalkboardODE | ChalkboardPDE,
@@ -875,7 +1216,7 @@ namespace Chalkboard {
                 h?: number;
                 steps?: number;
                 y0: number | number[] | Record<string, any> | ((x: number, y: number) => number | number[]);
-                method?: "euler" | "midpoint" | "heun" | "ralston" | "rk4";
+                method?: "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2";
                 returnObject?: boolean;
                 grid?: { x: number[]; nx: number; y?: number[]; ny?: number };
                 boundary?: "periodic" | { left: "periodic" | number | number[] | ((t: number, y: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number, y: number) => number | number[]) }; right: "periodic" | number | number[] | ((t: number, y: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number, y: number) => number | number[]) }; bottom?: "periodic" | number | number[] | ((t: number, x: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number, x: number) => number | number[]) }; top?: "periodic" | number | number[] | ((t: number, x: number) => number | number[]) | { type: "dirichlet" | "neumann"; value?: number | number[] | ((t: number, x: number) => number | number[]) } };
@@ -890,334 +1231,10 @@ namespace Chalkboard {
             const t0 = config.t0 ?? 0;
             if (!Number.isFinite(t0)) throw new Error(`Chalkboard.diff.solve: "config.t0" must be a finite number.`);
             if (config.t1 === t0) throw new Error(`Chalkboard.diff.solve: "config.t1" must be different from "config.t0".`);
-            const method: "euler" | "midpoint" | "heun" | "ralston" | "rk4" = (config.method ?? "rk4").toLowerCase() as "euler" | "midpoint" | "heun" | "ralston" | "rk4";
-            if (["euler", "midpoint", "heun", "ralston", "rk4"].indexOf(method) === -1) throw new Error(`Chalkboard.diff.solve: Unknown method.`);
+            const method: "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2" = (config.method ?? "rk4").toLowerCase() as "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2";
+            if (["euler", "midpoint", "heun", "ralston", "rk4", "backwardeuler", "cranknicolson", "bdf2"].indexOf(method) === -1) throw new Error(`Chalkboard.diff.solve: Unknown method.`);
             if (config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solve: Property "config.frames" must be an integer greater than or equal to 2.`);
-            let f: (t: number, y: number[]) => number[];
-            let y0: number[];
-            let keys: string[] | undefined;
-            let grid: { x: number[]; y?: number[] } | undefined;
-            if (diff.type === "pde") {
-                if (config.returnObject) throw new Error(`Chalkboard.diff.solve: Property "config.returnObject" is not supported for partial differential equations.`);
-                const m = diff.components, order = diff.order, dim = diff.dimension;
-                if (dim !== 1 && dim !== 2) throw new Error(`Chalkboard.diff.solve: Property "diff.dimension" must be 1 or 2.`);
-                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.solve: Property "diff.order" must be 1 or 2.`);
-                if (!Number.isInteger(m) || m < 1) throw new Error(`Chalkboard.diff.solve: Property "diff.components" must be a positive integer.`);
-                const mesh = config.grid as any;
-                if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`Chalkboard.diff.solve: Property "config.grid" must be an object for partial differential equations.`);
-                const axis = (range: any, count: any, letter: string): void => {
-                    if (!Array.isArray(range) || range.length !== 2 || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[1] <= range[0]) throw new Error(`Chalkboard.diff.solve: Property "config.grid.${letter}" must be an array of two finite numbers in increasing order.`);
-                    if (!Number.isInteger(count) || count < 3) throw new Error(`Chalkboard.diff.solve: Property "config.grid.n${letter}" must be an integer greater than or equal to 3.`);
-                };
-                axis(mesh.x, mesh.nx, "x");
-                if (dim === 2) axis(mesh.y, mesh.ny, "y");
-                const names = dim === 1 ? ["left", "right"] : ["left", "right", "bottom", "top"];
-                const boundary = config.boundary as any;
-                if (boundary !== "periodic" && (boundary === null || typeof boundary !== "object" || Array.isArray(boundary) || names.some((name) => boundary[name] === undefined))) throw new Error(`Chalkboard.diff.solve: Property "config.boundary" must be "periodic" or an object with properties ${dim === 1 ? `"left" and "right"` : `"left", "right", "bottom", and "top"`}.`);
-                type Side = { type: "periodic" | "dirichlet" | "neumann"; value: any; name: string };
-                const side = (name: string): Side => {
-                    const spec = boundary === "periodic" ? "periodic" : boundary[name];
-                    if (spec === "periodic") return { type: "periodic", value: 0, name };
-                    if (typeof spec === "number" || Array.isArray(spec) || typeof spec === "function") return { type: "dirichlet", value: spec, name };
-                    if (spec !== null && typeof spec === "object" && (spec.type === "dirichlet" || spec.type === "neumann")) return { type: spec.type, value: spec.value ?? 0, name };
-                    throw new Error(`Chalkboard.diff.solve: Property "config.boundary.${name}" must be "periodic", a number, an array, a function, or an object with type "dirichlet" or "neumann".`);
-                };
-                const sides = names.map(side);
-                const left = sides[0], right = sides[1], bottom = sides[2], top = sides[3];
-                const periodicX = left.type === "periodic", periodicY = dim === 2 && bottom.type === "periodic";
-                if (periodicX !== (right.type === "periodic")) throw new Error(`Chalkboard.diff.solve: Properties "config.boundary.left" and "config.boundary.right" must both be periodic or both be non-periodic.`);
-                if (dim === 2 && periodicY !== (top.type === "periodic")) throw new Error(`Chalkboard.diff.solve: Properties "config.boundary.bottom" and "config.boundary.top" must both be periodic or both be non-periodic.`);
-                const fill = (s: Side, t: number, coord: number, out: Float64Array, offset: number = 0): void => {
-                    const v = typeof s.value === "function" ? (dim === 1 ? s.value(t) : s.value(t, coord)) : s.value;
-                    if (typeof v === "number" && Number.isFinite(v)) {
-                        for (let c = 0; c < m; c++) out[offset + c] = v;
-                        return;
-                    }
-                    if (Array.isArray(v) && v.length === m) {
-                        let ok = true;
-                        for (let c = 0; c < m; c++) ok = ok && Number.isFinite(v[c]);
-                        if (ok) {
-                            for (let c = 0; c < m; c++) out[offset + c] = v[c];
-                            return;
-                        }
-                    }
-                    throw new Error(`Chalkboard.diff.solve: Value of "config.boundary.${s.name}" must be a finite number, an array of ${m} finite numbers, or a function returning one of them.`);
-                };
-                const ahead = new Float64Array(m), behind = new Float64Array(m);
-                const rate = (s: Side, t: number, coord: number, out: Float64Array): void => {
-                    if (typeof s.value !== "function") {
-                        for (let c = 0; c < m; c++) out[c] = 0;
-                        return;
-                    }
-                    const eps = 1e-6 * Math.max(1, Math.abs(t));
-                    fill(s, t + eps, coord, ahead);
-                    fill(s, t - eps, coord, behind);
-                    for (let c = 0; c < m; c++) out[c] = (ahead[c] - behind[c]) / (2 * eps);
-                };
-                const coords = (lo: number, hi: number, n: number, periodic: boolean): [number[], number] => {
-                    const d = periodic ? (hi - lo) / n : (hi - lo) / (n - 1);
-                    const result: number[] = new Array(n);
-                    for (let i = 0; i < n; i++) result[i] = lo + i * d;
-                    if (!periodic) result[n - 1] = hi;
-                    return [result, d];
-                };
-                const nx: number = mesh.nx, ny: number = dim === 2 ? mesh.ny : 1, N = nx * ny;
-                const [x, dx] = coords(mesh.x[0], mesh.x[1], nx, periodicX);
-                const [yc, dy]: [number[], number] = dim === 2 ? coords(mesh.y[0], mesh.y[1], ny, periodicY) : [[0], 1];
-                const fixed = new Uint8Array(N);
-                const fixedNodes: number[] = [];
-                const fixedSides: { s: Side; coord: number }[][] = [];
-                for (let j = 0; j < ny; j++) {
-                    for (let i = 0; i < nx; i++) {
-                        const on: { s: Side; coord: number }[] = [];
-                        if (i === 0 && left.type === "dirichlet") on.push({ s: left, coord: yc[j] });
-                        if (i === nx - 1 && right.type === "dirichlet") on.push({ s: right, coord: yc[j] });
-                        if (dim === 2 && j === 0 && bottom.type === "dirichlet") on.push({ s: bottom, coord: x[i] });
-                        if (dim === 2 && j === ny - 1 && top.type === "dirichlet") on.push({ s: top, coord: x[i] });
-                        if (on.length === 0) continue;
-                        fixed[j * nx + i] = 1;
-                        fixedNodes.push(j * nx + i);
-                        fixedSides.push(on);
-                    }
-                }
-                const scratch = new Float64Array(m), sum = new Float64Array(m);
-                const average = (q: number, t: number, how: (s: Side, t: number, coord: number, out: Float64Array) => void): void => {
-                    const on = fixedSides[q];
-                    for (let c = 0; c < m; c++) sum[c] = 0;
-                    for (let r = 0; r < on.length; r++) {
-                        how(on[r].s, t, on[r].coord, scratch);
-                        for (let c = 0; c < m; c++) sum[c] += scratch[c];
-                    }
-                    for (let c = 0; c < m; c++) sum[c] /= on.length;
-                };
-                for (let r = 0; r < sides.length; r++) {
-                    if (sides[r].type !== "periodic" && typeof sides[r].value !== "function") fill(sides[r], 0, 0, scratch);
-                }
-                const length = order * m * N;
-                const state: number[] = new Array(length).fill(0);
-                const sampled = (f: any, name: string, offset: number): void => {
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const p = j * nx + i;
-                            const v = dim === 1 ? f(x[i]) : f(x[i], yc[j]);
-                            if (m === 1 && typeof v === "number" && Number.isFinite(v)) {
-                                state[offset + p] = v;
-                                continue;
-                            }
-                            if (!Array.isArray(v) || v.length !== m) throw new Error(`Chalkboard.diff.solve: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
-                            for (let c = 0; c < m; c++) {
-                                if (!Number.isFinite(v[c])) throw new Error(`Chalkboard.diff.solve: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
-                                state[offset + c * N + p] = v[c];
-                            }
-                        }
-                    }
-                };
-                const copied = (arr: any[], name: string, offset: number, size: number): void => {
-                    if (arr.length !== size) throw new Error(`Chalkboard.diff.solve: Property "${name}" must have length ${size}.`);
-                    for (let i = 0; i < size; i++) {
-                        if (!Number.isFinite(arr[i])) throw new Error(`Chalkboard.diff.solve: Property "${name}" must contain only finite numbers.`);
-                        state[offset + i] = arr[i];
-                    }
-                };
-                const initial = config.y0 as any;
-                if (typeof initial === "function" && order === 1) {
-                    sampled(initial, "config.y0", 0);
-                } else if (Array.isArray(initial)) {
-                    copied(initial, "config.y0", 0, length);
-                } else if (order === 2 && initial !== null && typeof initial === "object" && ("u" in initial) && ("ut" in initial)) {
-                    const parts: [string, number][] = [["u", 0], ["ut", m * N]];
-                    for (let i = 0; i < parts.length; i++) {
-                        const part = initial[parts[i][0]], name = `config.y0.${parts[i][0]}`;
-                        if (typeof part === "function") sampled(part, name, parts[i][1]);
-                        else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
-                        else throw new Error(`Chalkboard.diff.solve: Property "${name}" must be a function or an array of length ${m * N}.`);
-                    }
-                } else {
-                    throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
-                }
-                for (let q = 0; q < fixedNodes.length; q++) {
-                    const p = fixedNodes[q];
-                    average(q, t0, fill);
-                    for (let c = 0; c < m; c++) state[c * N + p] = sum[c];
-                    if (order === 2) {
-                        average(q, t0, rate);
-                        for (let c = 0; c < m; c++) state[m * N + c * N + p] = sum[c];
-                    }
-                }
-                const W = nx + 2, pad = dim === 2 ? 1 : 0;
-                const bufs: Float64Array[] = [];
-                for (let c = 0; c < m; c++) bufs.push(new Float64Array(W * (ny + 2 * pad)));
-                const xt: number[] = new Array(W);
-                for (let i = 0; i < W; i++) xt[i] = i === 0 ? (periodicX ? x[nx - 1] : x[0] - dx) : i === W - 1 ? (periodicX ? x[0] : x[nx - 1] + dx) : x[i - 1];
-                const ghostL = new Float64Array(ny * m), ghostR = new Float64Array(ny * m), ghostB = new Float64Array(W * m), ghostT = new Float64Array(W * m);
-                const reflect = (t: number, constants: boolean): void => {
-                    if (left.type === "neumann" && (constants === (typeof left.value !== "function"))) for (let j = 0; j < ny; j++) fill(left, t, yc[j], ghostL, j * m);
-                    if (right.type === "neumann" && (constants === (typeof right.value !== "function"))) for (let j = 0; j < ny; j++) fill(right, t, yc[j], ghostR, j * m);
-                    if (dim === 1) return;
-                    if (bottom.type === "neumann" && (constants === (typeof bottom.value !== "function"))) for (let i = 0; i < W; i++) fill(bottom, t, xt[i], ghostB, i * m);
-                    if (top.type === "neumann" && (constants === (typeof top.value !== "function"))) for (let i = 0; i < W; i++) fill(top, t, xt[i], ghostT, i * m);
-                };
-                reflect(t0, true);
-                const U: number[] = new Array(m).fill(0), UX: number[] = new Array(m).fill(0), UY: number[] = new Array(m).fill(0), UXX: number[] = new Array(m).fill(0), UYY: number[] = new Array(m).fill(0), UXY: number[] = new Array(m).fill(0), UT: number[] = new Array(m).fill(0);
-                const single = diff.rule as (t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number;
-                const system = diff.rule as (t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[];
-                const planar = diff.rule as (t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number, uxy: number, ut?: number) => number;
-                const planarSystem = diff.rule as (t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[], uxy: number[], ut?: number[]) => number[];
-                const unstable = `Chalkboard.diff.solve: Rule of a partial differential equation must return finite numbers; a smaller step size may be needed for stability.`;
-                const rule = (t: number, y: number[]): number[] => {
-                    const out: number[] = new Array(length);
-                    reflect(t, false);
-                    for (let c = 0; c < m; c++) {
-                        const g = bufs[c], base = c * N;
-                        for (let j = 0; j < ny; j++) {
-                            const row = (j + pad) * W, src = base + j * nx;
-                            for (let i = 0; i < nx; i++) g[row + i + 1] = y[src + i];
-                            if (periodicX) {
-                                g[row] = g[row + nx];
-                                g[row + nx + 1] = g[row + 1];
-                            } else {
-                                if (left.type === "neumann") g[row] = g[row + 2] + 2 * dx * ghostL[j * m + c];
-                                if (right.type === "neumann") g[row + nx + 1] = g[row + nx - 1] + 2 * dx * ghostR[j * m + c];
-                            }
-                        }
-                        if (dim === 2) {
-                            const last = ny * W, beyond = (ny + 1) * W;
-                            if (periodicY) {
-                                for (let i = 0; i < W; i++) {
-                                    g[i] = g[last + i];
-                                    g[beyond + i] = g[W + i];
-                                }
-                            } else {
-                                if (bottom.type === "neumann") for (let i = 0; i < W; i++) g[i] = g[2 * W + i] + 2 * dy * ghostB[i * m + c];
-                                if (top.type === "neumann") for (let i = 0; i < W; i++) g[beyond + i] = g[(ny - 1) * W + i] + 2 * dy * ghostT[i * m + c];
-                            }
-                        }
-                    }
-                    for (let q = 0; q < fixedNodes.length; q++) {
-                        const p = fixedNodes[q];
-                        average(q, t, rate);
-                        for (let c = 0; c < m; c++) {
-                            out[c * N + p] = sum[c];
-                            if (order === 2) out[m * N + c * N + p] = 0;
-                        }
-                    }
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const p = j * nx + i;
-                            if (fixed[p]) continue;
-                            const k = (j + pad) * W + i + 1;
-                            if (m === 1) {
-                                const g = bufs[0];
-                                const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
-                                let r: number;
-                                if (dim === 1) {
-                                    r = order === 1 ? single(t, x[i], u, ux, uxx) : single(t, x[i], u, ux, uxx, y[N + p]);
-                                } else {
-                                    const uy = (g[k + W] - g[k - W]) / (2 * dy), uyy = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy), uxy = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
-                                    r = order === 1 ? planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy) : planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy, y[N + p]);
-                                }
-                                if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `Chalkboard.diff.solve: Rule of a partial differential equation with one component must return a number.`);
-                                if (order === 1) {
-                                    out[p] = r;
-                                } else {
-                                    out[p] = y[N + p];
-                                    out[N + p] = r;
-                                }
-                            } else {
-                                for (let c = 0; c < m; c++) {
-                                    const g = bufs[c];
-                                    U[c] = g[k];
-                                    UX[c] = (g[k + 1] - g[k - 1]) / (2 * dx);
-                                    UXX[c] = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
-                                    if (dim === 2) {
-                                        UY[c] = (g[k + W] - g[k - W]) / (2 * dy);
-                                        UYY[c] = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy);
-                                        UXY[c] = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
-                                    }
-                                    if (order === 2) UT[c] = y[m * N + c * N + p];
-                                }
-                                let r: number[];
-                                if (dim === 1) r = order === 1 ? system(t, x[i], U, UX, UXX) : system(t, x[i], U, UX, UXX, UT);
-                                else r = order === 1 ? planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY) : planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY, UT);
-                                if (!Array.isArray(r) || r.length !== m) throw new Error(`Chalkboard.diff.solve: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
-                                for (let c = 0; c < m; c++) {
-                                    if (!Number.isFinite(r[c])) throw new Error(unstable);
-                                    if (order === 1) {
-                                        out[c * N + p] = r[c];
-                                    } else {
-                                        out[c * N + p] = UT[c];
-                                        out[m * N + c * N + p] = r[c];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return out;
-                };
-                f = rule;
-                y0 = state;
-                grid = dim === 2 ? { x, y: yc } : { x };
-            } else {
-                if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
-                    if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solve: Property "config.y0" can be a scalar only when property "diff.dimension" is equal to 1.`);
-                    y0 = [config.y0];
-                } else if (Array.isArray(config.y0)) {
-                    if (config.y0.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have length ${diff.dimension}.`);
-                    if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numbers.`);
-                    y0 = config.y0.slice();
-                } else {
-                    if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must be a number, number array, or object.`);
-                    const y0obj = config.y0 as any;
-                    if (diff.type === "single" && diff.order === 2) {
-                        if (("y0" in y0obj) && ("dy0" in y0obj)) {
-                            const a = y0obj.y0;
-                            const b = y0obj.dy0;
-                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
-                            y0 = [a, b];
-                            if (config.returnObject) keys = ["y", "dy"];
-                        } else if (("y" in y0obj) && ("dy" in y0obj)) {
-                            const a = y0obj.y;
-                            const b = y0obj.dy;
-                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solve: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
-                            y0 = [a, b];
-                            if (config.returnObject) keys = ["y", "dy"];
-                        } else {
-                            throw new Error(`Chalkboard.diff.solve: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
-                        }
-                    } else if (diff.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
-                        y0 = [y0obj.y0];
-                        if (config.returnObject) keys = ["y"];
-                    } else if (diff.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
-                        y0 = [y0obj.y];
-                        if (config.returnObject) keys = ["y"];
-                    } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
-                        const arr = y0obj.y0 as number[];
-                        if (arr.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must have length ${diff.dimension}.`);
-                        if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solve: Property "config.y0.y0" must begin and end with finite numbers.`);
-                        y0 = arr.slice();
-                    } else {
-                        keys = Object.keys(config.y0).sort();
-                        if (keys.length !== diff.dimension) throw new Error(`Chalkboard.diff.solve: Property "config.y0" must have exactly ${diff.dimension} numeric properties, but it has ${keys.length}.`);
-                        if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solve: Parameter "config.y0" must begin and end with finite numeric properties.`);
-                        const arr: number[] = [];
-                        for (let i = 0; i < keys.length; i++) {
-                            const v = (config.y0 as any)[keys[i]];
-                            arr.push(v);
-                        }
-                        y0 = arr;
-                    }
-                }
-                if (config.returnObject && !keys) {
-                    if (diff.type === "single" && diff.order === 2 && diff.dimension === 2) {
-                        keys = ["y", "dy"];
-                    } else if (diff.dimension === 1) {
-                        keys = ["y"];
-                    } else {
-                        keys = Array.from({ length: diff.dimension }, (_, i) => `y${i + 1}`);
-                    }
-                }
-                f = diff.rule;
-            }
+            const { rule: f, y0, keys, grid, mesh } = $prepare(diff, config, "Chalkboard.diff.solve");
             let h: number;
             let steps: number;
             if (typeof config.h === "number") {
@@ -1270,16 +1287,243 @@ namespace Chalkboard {
                     return add(y, scl(total, h / 6));
                 };
             })();
-            let yi = y[0];
-            let frame = 1;
-            let target = Math.round(steps / (frames - 1));
-            for (let i = 0; i < steps; i++) {
-                yi = stepper(f, t0 + i * h, yi, h);
-                if (i + 1 === target) {
-                    t.push(i + 1 === steps ? config.t1 : t0 + (i + 1) * h);
-                    y.push(yi);
-                    frame++;
-                    target = Math.round(frame * steps / (frames - 1));
+            if (method === "backwardeuler" || method === "cranknicolson" || method === "bdf2") {
+                const M = y0.length, N = mesh ? mesh.nx * mesh.ny : M, F = mesh ? mesh.fields : 1;
+                const perm = new Int32Array(M);
+                const groups: number[][] = [];
+                let neighbors: number[][] | null = null;
+                let kl = M - 1;
+                if (!mesh) {
+                    for (let s = 0; s < M; s++) {
+                        perm[s] = s;
+                        groups.push([s]);
+                    }
+                } else {
+                    const nx = mesh.nx, ny = mesh.ny;
+                    const fold = (i: number, n: number, periodic: boolean): number => periodic ? (i < Math.ceil(n / 2) ? 2 * i : 2 * (n - 1 - i) + 1) : i;
+                    const rank = new Int32Array(N);
+                    for (let j = 0; j < ny; j++) {
+                        for (let i = 0; i < nx; i++) {
+                            const fi = fold(i, nx, mesh.periodicX), fj = fold(j, ny, mesh.periodicY);
+                            rank[j * nx + i] = ny === 1 || nx <= ny ? fj * nx + fi : fi * ny + fj;
+                        }
+                    }
+                    for (let phi = 0; phi < F; phi++) {
+                        for (let p = 0; p < N; p++) perm[phi * N + p] = rank[p] * F + phi;
+                    }
+                    const stencils: number[][] = [];
+                    const span = ny === 1 ? 0 : 1;
+                    let reach = 0;
+                    for (let j = 0; j < ny; j++) {
+                        for (let i = 0; i < nx; i++) {
+                            const p = j * nx + i;
+                            const near: number[] = [];
+                            for (let dj = -span; dj <= span; dj++) {
+                                let jj = j + dj;
+                                if (jj < 0 || jj >= ny) {
+                                    if (!mesh.periodicY) continue;
+                                    jj = (jj + ny) % ny;
+                                }
+                                for (let di = -1; di <= 1; di++) {
+                                    let ii = i + di;
+                                    if (ii < 0 || ii >= nx) {
+                                        if (!mesh.periodicX) continue;
+                                        ii = (ii + nx) % nx;
+                                    }
+                                    const q = jj * nx + ii;
+                                    if (near.indexOf(q) !== -1) continue;
+                                    near.push(q);
+                                    reach = Math.max(reach, Math.abs(rank[p] - rank[q]));
+                                }
+                            }
+                            stencils.push(near);
+                        }
+                    }
+                    const color = new Int32Array(N).fill(-1);
+                    const used: number[] = [];
+                    const members: number[][] = [];
+                    for (let p = 0; p < N; p++) {
+                        const near = stencils[p];
+                        for (let k = 0; k < near.length; k++) {
+                            const around = stencils[near[k]];
+                            for (let r = 0; r < around.length; r++) {
+                                if (color[around[r]] >= 0) used[color[around[r]]] = p;
+                            }
+                        }
+                        let c = 0;
+                        while (used[c] === p) c++;
+                        color[p] = c;
+                        if (c === members.length) members.push([]);
+                        members[c].push(p);
+                    }
+                    for (let c = 0; c < members.length; c++) {
+                        for (let phi = 0; phi < F; phi++) groups.push(members[c].map((p) => phi * N + p));
+                    }
+                    neighbors = stencils;
+                    kl = reach * F + F - 1;
+                }
+                const ku = kl, w = 2 * kl + ku + 1;
+                const piv = new Int32Array(M);
+                const b = new Float64Array(M);
+                const c: number[] = new Array(M), G: number[] = new Array(M), delta: number[] = new Array(M);
+                const perturbation = Math.sqrt(Number.EPSILON);
+                let a = new Float64Array(0);
+                let bandGamma = NaN, lastIterations = 0;
+                let yn = y0.slice(), yPrev = y0;
+                let frame = 1;
+                let target = Math.round(steps / (frames - 1));
+                for (let n = 0; n < steps; n++) {
+                    const tn = t0 + n * h, tn1 = n + 1 === steps ? config.t1 : t0 + (n + 1) * h;
+                    const bdf = method === "bdf2" && n > 0;
+                    const gamma = method === "cranknicolson" ? 1 / 2 : bdf ? 2 / 3 : 1;
+                    const gh = gamma * h;
+                    if (method === "cranknicolson") {
+                        const fn = f(tn, yn);
+                        for (let i = 0; i < M; i++) c[i] = yn[i] + (h / 2) * fn[i];
+                    } else if (bdf) {
+                        for (let i = 0; i < M; i++) c[i] = (4 / 3) * yn[i] - (1 / 3) * yPrev[i];
+                    } else {
+                        for (let i = 0; i < M; i++) c[i] = yn[i];
+                    }
+                    const z = yn.slice();
+                    let fz = f(tn1, z);
+                    let fresh = false;
+                    const refresh = (): void => {
+                        const A = new Float64Array(M * w);
+                        for (let s = 0; s < M; s++) A[perm[s] * w + kl] = 1;
+                        const zp = z.slice();
+                        for (let g = 0; g < groups.length; g++) {
+                            const group = groups[g];
+                            for (let k = 0; k < group.length; k++) zp[group[k]] = z[group[k]] + perturbation * Math.max(1, Math.abs(z[group[k]]));
+                            const f1 = f(tn1, zp);
+                            for (let k = 0; k < group.length; k++) {
+                                const s = group[k], eps = perturbation * Math.max(1, Math.abs(z[s])), col = perm[s];
+                                zp[s] = z[s];
+                                if (!neighbors) {
+                                    for (let r = 0; r < M; r++) {
+                                        const v = (f1[r] - fz[r]) / eps;
+                                        if (v !== 0) A[perm[r] * w + col - perm[r] + kl] -= gh * v;
+                                    }
+                                    continue;
+                                }
+                                const near = neighbors[s % N];
+                                for (let psi = 0; psi < F; psi++) {
+                                    for (let q = 0; q < near.length; q++) {
+                                        const r = psi * N + near[q], row = perm[r];
+                                        const v = (f1[r] - fz[r]) / eps;
+                                        if (v !== 0) A[row * w + col - row + kl] -= gh * v;
+                                    }
+                                }
+                            }
+                        }
+                        for (let k = 0; k < M; k++) {
+                            const lim = Math.min(M - 1, k + kl), last = Math.min(M - 1, k + kl + ku);
+                            let p = k, big = Math.abs(A[k * w + kl]);
+                            for (let i = k + 1; i <= lim; i++) {
+                                const v = Math.abs(A[i * w + k - i + kl]);
+                                if (v > big) {
+                                    big = v;
+                                    p = i;
+                                }
+                            }
+                            if (A[p * w + k - p + kl] === 0) throw new Error(`Chalkboard.diff.solve: The linearized equations of an implicit step are singular at time ${tn1}.`);
+                            piv[k] = p;
+                            const rk = k * w - k + kl;
+                            if (p !== k) {
+                                const rp = p * w - p + kl;
+                                for (let j = k; j <= last; j++) {
+                                    const swap = A[rk + j];
+                                    A[rk + j] = A[rp + j];
+                                    A[rp + j] = swap;
+                                }
+                            }
+                            const pivot = A[rk + k];
+                            for (let i = k + 1; i <= lim; i++) {
+                                const ri = i * w - i + kl;
+                                const l = A[ri + k] / pivot;
+                                A[ri + k] = l;
+                                if (l !== 0) for (let j = k + 1; j <= last; j++) A[ri + j] -= l * A[rk + j];
+                            }
+                        }
+                        a = A;
+                        bandGamma = gamma;
+                        fresh = true;
+                    };
+                    if (a.length === 0 || gamma !== bandGamma || lastIterations > 4) refresh();
+                    let prev = Infinity, failures = 0, iterations = 0, converged = false, stale = true;
+                    while (iterations < 25) {
+                        iterations++;
+                        if (stale) for (let s = 0; s < M; s++) G[s] = z[s] - c[s] - gh * fz[s];
+                        for (let s = 0; s < M; s++) b[perm[s]] = -G[s];
+                        for (let k = 0; k < M; k++) {
+                            const p = piv[k];
+                            if (p !== k) {
+                                const swap = b[k];
+                                b[k] = b[p];
+                                b[p] = swap;
+                            }
+                            const lim = Math.min(M - 1, k + kl);
+                            for (let i = k + 1; i <= lim; i++) b[i] -= a[i * w - i + kl + k] * b[k];
+                        }
+                        for (let k = M - 1; k >= 0; k--) {
+                            const rk = k * w - k + kl, last = Math.min(M - 1, k + kl + ku);
+                            let sum = b[k];
+                            for (let j = k + 1; j <= last; j++) sum -= a[rk + j] * b[j];
+                            b[k] = sum / a[rk + k];
+                        }
+                        let size = 0, finite = true;
+                        for (let s = 0; s < M; s++) {
+                            delta[s] = b[perm[s]];
+                            const v = Math.abs(delta[s]);
+                            if (!Number.isFinite(v)) finite = false;
+                            else if (v > size) size = v;
+                        }
+                        if (!finite) break;
+                        if (size > 0.5 * prev) {
+                            failures++;
+                            if (fresh && failures >= 2) break;
+                            refresh();
+                            prev = Infinity;
+                            stale = false;
+                            continue;
+                        }
+                        let scale = 0;
+                        for (let s = 0; s < M; s++) {
+                            z[s] += delta[s];
+                            scale = Math.max(scale, Math.abs(z[s]));
+                        }
+                        fresh = false;
+                        prev = size;
+                        if (size <= 1e-10 * (1 + scale)) {
+                            converged = true;
+                            break;
+                        }
+                        fz = f(tn1, z);
+                        stale = true;
+                    }
+                    if (!converged) throw new Error(`Chalkboard.diff.solve: Newton's method did not converge at time ${tn1}; a smaller step size may be needed.`);
+                    lastIterations = iterations;
+                    yPrev = yn;
+                    yn = z;
+                    if (n + 1 === target) {
+                        t.push(tn1);
+                        y.push(z);
+                        frame++;
+                        target = Math.round(frame * steps / (frames - 1));
+                    }
+                }
+            } else {
+                let yi = y[0];
+                let frame = 1;
+                let target = Math.round(steps / (frames - 1));
+                for (let i = 0; i < steps; i++) {
+                    yi = stepper(f, t0 + i * h, yi, h);
+                    if (i + 1 === target) {
+                        t.push(i + 1 === steps ? config.t1 : t0 + (i + 1) * h);
+                        y.push(yi);
+                        frame++;
+                        target = Math.round(frame * steps / (frames - 1));
+                    }
                 }
             }
             const result: { t: number[]; y: number[][]; yObj?: {[key: string]: number}[]; grid?: { x: number[]; y?: number[] } } = { t, y };
@@ -1376,327 +1620,7 @@ namespace Chalkboard {
             const maxSteps = config.maxSteps ?? 100000;
             if (!Number.isInteger(maxSteps) || maxSteps < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.maxSteps" must be a positive integer.`);
             if (config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.frames" must be an integer greater than or equal to 2.`);
-            let f: (t: number, y: number[]) => number[];
-            let y0: number[];
-            let keys: string[] | undefined;
-            let grid: { x: number[]; y?: number[] } | undefined;
-            if (diff.type === "pde") {
-                if (config.returnObject) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.returnObject" is not supported for partial differential equations.`);
-                const m = diff.components, order = diff.order, dim = diff.dimension;
-                if (dim !== 1 && dim !== 2) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.dimension" must be 1 or 2.`);
-                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.order" must be 1 or 2.`);
-                if (!Number.isInteger(m) || m < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.components" must be a positive integer.`);
-                const mesh = config.grid as any;
-                if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid" must be an object for partial differential equations.`);
-                const axis = (range: any, count: any, letter: string): void => {
-                    if (!Array.isArray(range) || range.length !== 2 || !Number.isFinite(range[0]) || !Number.isFinite(range[1]) || range[1] <= range[0]) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid.${letter}" must be an array of two finite numbers in increasing order.`);
-                    if (!Number.isInteger(count) || count < 3) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.grid.n${letter}" must be an integer greater than or equal to 3.`);
-                };
-                axis(mesh.x, mesh.nx, "x");
-                if (dim === 2) axis(mesh.y, mesh.ny, "y");
-                const names = dim === 1 ? ["left", "right"] : ["left", "right", "bottom", "top"];
-                const boundary = config.boundary as any;
-                if (boundary !== "periodic" && (boundary === null || typeof boundary !== "object" || Array.isArray(boundary) || names.some((name) => boundary[name] === undefined))) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.boundary" must be "periodic" or an object with properties ${dim === 1 ? `"left" and "right"` : `"left", "right", "bottom", and "top"`}.`);
-                type Side = { type: "periodic" | "dirichlet" | "neumann"; value: any; name: string };
-                const side = (name: string): Side => {
-                    const spec = boundary === "periodic" ? "periodic" : boundary[name];
-                    if (spec === "periodic") return { type: "periodic", value: 0, name };
-                    if (typeof spec === "number" || Array.isArray(spec) || typeof spec === "function") return { type: "dirichlet", value: spec, name };
-                    if (spec !== null && typeof spec === "object" && (spec.type === "dirichlet" || spec.type === "neumann")) return { type: spec.type, value: spec.value ?? 0, name };
-                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.boundary.${name}" must be "periodic", a number, an array, a function, or an object with type "dirichlet" or "neumann".`);
-                };
-                const sides = names.map(side);
-                const left = sides[0], right = sides[1], bottom = sides[2], top = sides[3];
-                const periodicX = left.type === "periodic", periodicY = dim === 2 && bottom.type === "periodic";
-                if (periodicX !== (right.type === "periodic")) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.boundary.left" and "config.boundary.right" must both be periodic or both be non-periodic.`);
-                if (dim === 2 && periodicY !== (top.type === "periodic")) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.boundary.bottom" and "config.boundary.top" must both be periodic or both be non-periodic.`);
-                const fill = (s: Side, t: number, coord: number, out: Float64Array, offset: number = 0): void => {
-                    const v = typeof s.value === "function" ? (dim === 1 ? s.value(t) : s.value(t, coord)) : s.value;
-                    if (typeof v === "number" && Number.isFinite(v)) {
-                        for (let c = 0; c < m; c++) out[offset + c] = v;
-                        return;
-                    }
-                    if (Array.isArray(v) && v.length === m) {
-                        let ok = true;
-                        for (let c = 0; c < m; c++) ok = ok && Number.isFinite(v[c]);
-                        if (ok) {
-                            for (let c = 0; c < m; c++) out[offset + c] = v[c];
-                            return;
-                        }
-                    }
-                    throw new Error(`Chalkboard.diff.solveAdaptive: Value of "config.boundary.${s.name}" must be a finite number, an array of ${m} finite numbers, or a function returning one of them.`);
-                };
-                const ahead = new Float64Array(m), behind = new Float64Array(m);
-                const rate = (s: Side, t: number, coord: number, out: Float64Array): void => {
-                    if (typeof s.value !== "function") {
-                        for (let c = 0; c < m; c++) out[c] = 0;
-                        return;
-                    }
-                    const eps = 1e-6 * Math.max(1, Math.abs(t));
-                    fill(s, t + eps, coord, ahead);
-                    fill(s, t - eps, coord, behind);
-                    for (let c = 0; c < m; c++) out[c] = (ahead[c] - behind[c]) / (2 * eps);
-                };
-                const coords = (lo: number, hi: number, n: number, periodic: boolean): [number[], number] => {
-                    const d = periodic ? (hi - lo) / n : (hi - lo) / (n - 1);
-                    const result: number[] = new Array(n);
-                    for (let i = 0; i < n; i++) result[i] = lo + i * d;
-                    if (!periodic) result[n - 1] = hi;
-                    return [result, d];
-                };
-                const nx: number = mesh.nx, ny: number = dim === 2 ? mesh.ny : 1, N = nx * ny;
-                const [x, dx] = coords(mesh.x[0], mesh.x[1], nx, periodicX);
-                const [yc, dy]: [number[], number] = dim === 2 ? coords(mesh.y[0], mesh.y[1], ny, periodicY) : [[0], 1];
-                const fixed = new Uint8Array(N);
-                const fixedNodes: number[] = [];
-                const fixedSides: { s: Side; coord: number }[][] = [];
-                for (let j = 0; j < ny; j++) {
-                    for (let i = 0; i < nx; i++) {
-                        const on: { s: Side; coord: number }[] = [];
-                        if (i === 0 && left.type === "dirichlet") on.push({ s: left, coord: yc[j] });
-                        if (i === nx - 1 && right.type === "dirichlet") on.push({ s: right, coord: yc[j] });
-                        if (dim === 2 && j === 0 && bottom.type === "dirichlet") on.push({ s: bottom, coord: x[i] });
-                        if (dim === 2 && j === ny - 1 && top.type === "dirichlet") on.push({ s: top, coord: x[i] });
-                        if (on.length === 0) continue;
-                        fixed[j * nx + i] = 1;
-                        fixedNodes.push(j * nx + i);
-                        fixedSides.push(on);
-                    }
-                }
-                const scratch = new Float64Array(m), sum = new Float64Array(m);
-                const average = (q: number, t: number, how: (s: Side, t: number, coord: number, out: Float64Array) => void): void => {
-                    const on = fixedSides[q];
-                    for (let c = 0; c < m; c++) sum[c] = 0;
-                    for (let r = 0; r < on.length; r++) {
-                        how(on[r].s, t, on[r].coord, scratch);
-                        for (let c = 0; c < m; c++) sum[c] += scratch[c];
-                    }
-                    for (let c = 0; c < m; c++) sum[c] /= on.length;
-                };
-                for (let r = 0; r < sides.length; r++) {
-                    if (sides[r].type !== "periodic" && typeof sides[r].value !== "function") fill(sides[r], 0, 0, scratch);
-                }
-                const length = order * m * N;
-                const state: number[] = new Array(length).fill(0);
-                const sampled = (f: any, name: string, offset: number): void => {
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const p = j * nx + i;
-                            const v = dim === 1 ? f(x[i]) : f(x[i], yc[j]);
-                            if (m === 1 && typeof v === "number" && Number.isFinite(v)) {
-                                state[offset + p] = v;
-                                continue;
-                            }
-                            if (!Array.isArray(v) || v.length !== m) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
-                            for (let c = 0; c < m; c++) {
-                                if (!Number.isFinite(v[c])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must return ${m === 1 ? "a finite number" : `an array of ${m} finite numbers`} at every grid node.`);
-                                state[offset + c * N + p] = v[c];
-                            }
-                        }
-                    }
-                };
-                const copied = (arr: any[], name: string, offset: number, size: number): void => {
-                    if (arr.length !== size) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must have length ${size}.`);
-                    for (let i = 0; i < size; i++) {
-                        if (!Number.isFinite(arr[i])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must contain only finite numbers.`);
-                        state[offset + i] = arr[i];
-                    }
-                };
-                const initial = config.y0 as any;
-                if (typeof initial === "function" && order === 1) {
-                    sampled(initial, "config.y0", 0);
-                } else if (Array.isArray(initial)) {
-                    copied(initial, "config.y0", 0, length);
-                } else if (order === 2 && initial !== null && typeof initial === "object" && ("u" in initial) && ("ut" in initial)) {
-                    const parts: [string, number][] = [["u", 0], ["ut", m * N]];
-                    for (let i = 0; i < parts.length; i++) {
-                        const part = initial[parts[i][0]], name = `config.y0.${parts[i][0]}`;
-                        if (typeof part === "function") sampled(part, name, parts[i][1]);
-                        else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
-                        else throw new Error(`Chalkboard.diff.solveAdaptive: Property "${name}" must be a function or an array of length ${m * N}.`);
-                    }
-                } else {
-                    throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
-                }
-                for (let q = 0; q < fixedNodes.length; q++) {
-                    const p = fixedNodes[q];
-                    average(q, t0, fill);
-                    for (let c = 0; c < m; c++) state[c * N + p] = sum[c];
-                    if (order === 2) {
-                        average(q, t0, rate);
-                        for (let c = 0; c < m; c++) state[m * N + c * N + p] = sum[c];
-                    }
-                }
-                const W = nx + 2, pad = dim === 2 ? 1 : 0;
-                const bufs: Float64Array[] = [];
-                for (let c = 0; c < m; c++) bufs.push(new Float64Array(W * (ny + 2 * pad)));
-                const xt: number[] = new Array(W);
-                for (let i = 0; i < W; i++) xt[i] = i === 0 ? (periodicX ? x[nx - 1] : x[0] - dx) : i === W - 1 ? (periodicX ? x[0] : x[nx - 1] + dx) : x[i - 1];
-                const ghostL = new Float64Array(ny * m), ghostR = new Float64Array(ny * m), ghostB = new Float64Array(W * m), ghostT = new Float64Array(W * m);
-                const reflect = (t: number, constants: boolean): void => {
-                    if (left.type === "neumann" && (constants === (typeof left.value !== "function"))) for (let j = 0; j < ny; j++) fill(left, t, yc[j], ghostL, j * m);
-                    if (right.type === "neumann" && (constants === (typeof right.value !== "function"))) for (let j = 0; j < ny; j++) fill(right, t, yc[j], ghostR, j * m);
-                    if (dim === 1) return;
-                    if (bottom.type === "neumann" && (constants === (typeof bottom.value !== "function"))) for (let i = 0; i < W; i++) fill(bottom, t, xt[i], ghostB, i * m);
-                    if (top.type === "neumann" && (constants === (typeof top.value !== "function"))) for (let i = 0; i < W; i++) fill(top, t, xt[i], ghostT, i * m);
-                };
-                reflect(t0, true);
-                const U: number[] = new Array(m).fill(0), UX: number[] = new Array(m).fill(0), UY: number[] = new Array(m).fill(0), UXX: number[] = new Array(m).fill(0), UYY: number[] = new Array(m).fill(0), UXY: number[] = new Array(m).fill(0), UT: number[] = new Array(m).fill(0);
-                const single = diff.rule as (t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => number;
-                const system = diff.rule as (t: number, x: number, u: number[], ux: number[], uxx: number[], ut?: number[]) => number[];
-                const planar = diff.rule as (t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number, uxy: number, ut?: number) => number;
-                const planarSystem = diff.rule as (t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[], uxy: number[], ut?: number[]) => number[];
-                const unstable = `Chalkboard.diff.solveAdaptive: Rule of a partial differential equation must return finite numbers; a smaller step size may be needed for stability.`;
-                const rule = (t: number, y: number[]): number[] => {
-                    const out: number[] = new Array(length);
-                    reflect(t, false);
-                    for (let c = 0; c < m; c++) {
-                        const g = bufs[c], base = c * N;
-                        for (let j = 0; j < ny; j++) {
-                            const row = (j + pad) * W, src = base + j * nx;
-                            for (let i = 0; i < nx; i++) g[row + i + 1] = y[src + i];
-                            if (periodicX) {
-                                g[row] = g[row + nx];
-                                g[row + nx + 1] = g[row + 1];
-                            } else {
-                                if (left.type === "neumann") g[row] = g[row + 2] + 2 * dx * ghostL[j * m + c];
-                                if (right.type === "neumann") g[row + nx + 1] = g[row + nx - 1] + 2 * dx * ghostR[j * m + c];
-                            }
-                        }
-                        if (dim === 2) {
-                            const last = ny * W, beyond = (ny + 1) * W;
-                            if (periodicY) {
-                                for (let i = 0; i < W; i++) {
-                                    g[i] = g[last + i];
-                                    g[beyond + i] = g[W + i];
-                                }
-                            } else {
-                                if (bottom.type === "neumann") for (let i = 0; i < W; i++) g[i] = g[2 * W + i] + 2 * dy * ghostB[i * m + c];
-                                if (top.type === "neumann") for (let i = 0; i < W; i++) g[beyond + i] = g[(ny - 1) * W + i] + 2 * dy * ghostT[i * m + c];
-                            }
-                        }
-                    }
-                    for (let q = 0; q < fixedNodes.length; q++) {
-                        const p = fixedNodes[q];
-                        average(q, t, rate);
-                        for (let c = 0; c < m; c++) {
-                            out[c * N + p] = sum[c];
-                            if (order === 2) out[m * N + c * N + p] = 0;
-                        }
-                    }
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const p = j * nx + i;
-                            if (fixed[p]) continue;
-                            const k = (j + pad) * W + i + 1;
-                            if (m === 1) {
-                                const g = bufs[0];
-                                const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
-                                let r: number;
-                                if (dim === 1) {
-                                    r = order === 1 ? single(t, x[i], u, ux, uxx) : single(t, x[i], u, ux, uxx, y[N + p]);
-                                } else {
-                                    const uy = (g[k + W] - g[k - W]) / (2 * dy), uyy = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy), uxy = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
-                                    r = order === 1 ? planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy) : planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy, y[N + p]);
-                                }
-                                if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `Chalkboard.diff.solveAdaptive: Rule of a partial differential equation with one component must return a number.`);
-                                if (order === 1) {
-                                    out[p] = r;
-                                } else {
-                                    out[p] = y[N + p];
-                                    out[N + p] = r;
-                                }
-                            } else {
-                                for (let c = 0; c < m; c++) {
-                                    const g = bufs[c];
-                                    U[c] = g[k];
-                                    UX[c] = (g[k + 1] - g[k - 1]) / (2 * dx);
-                                    UXX[c] = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
-                                    if (dim === 2) {
-                                        UY[c] = (g[k + W] - g[k - W]) / (2 * dy);
-                                        UYY[c] = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy);
-                                        UXY[c] = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
-                                    }
-                                    if (order === 2) UT[c] = y[m * N + c * N + p];
-                                }
-                                let r: number[];
-                                if (dim === 1) r = order === 1 ? system(t, x[i], U, UX, UXX) : system(t, x[i], U, UX, UXX, UT);
-                                else r = order === 1 ? planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY) : planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY, UT);
-                                if (!Array.isArray(r) || r.length !== m) throw new Error(`Chalkboard.diff.solveAdaptive: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
-                                for (let c = 0; c < m; c++) {
-                                    if (!Number.isFinite(r[c])) throw new Error(unstable);
-                                    if (order === 1) {
-                                        out[c * N + p] = r[c];
-                                    } else {
-                                        out[c * N + p] = UT[c];
-                                        out[m * N + c * N + p] = r[c];
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    return out;
-                };
-                f = rule;
-                y0 = state;
-                grid = dim === 2 ? { x, y: yc } : { x };
-            } else {
-                if (typeof config.y0 === "number" && Number.isFinite(config.y0)) {
-                    if (diff.dimension !== 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" can be a scalar only when property "diff.dimension" is equal to 1.`);
-                    y0 = [config.y0];
-                } else if (Array.isArray(config.y0)) {
-                    if (config.y0.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have length ${diff.dimension}.`);
-                    if (config.y0.length > 0 && !Number.isFinite(config.y0[0]) || config.y0.length > 1 && !Number.isFinite(config.y0[config.y0.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numbers.`);
-                    y0 = config.y0.slice();
-                } else {
-                    if (typeof config.y0 !== "object" || config.y0 === null) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must be a number, number array, or object.`);
-                    const y0obj = config.y0 as any;
-                    if (diff.type === "single" && diff.order === 2) {
-                        if (("y0" in y0obj) && ("dy0" in y0obj)) {
-                            const a = y0obj.y0;
-                            const b = y0obj.dy0;
-                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y0" and "config.y0.dy0" must be finite numbers.`);
-                            y0 = [a, b];
-                            if (config.returnObject) keys = ["y", "dy"];
-                        } else if (("y" in y0obj) && ("dy" in y0obj)) {
-                            const a = y0obj.y;
-                            const b = y0obj.dy;
-                            if (!Number.isFinite(a) || !Number.isFinite(b)) throw new Error(`Chalkboard.diff.solveAdaptive: Properties "config.y0.y" and "config.y0.dy" must be finite numbers.`);
-                            y0 = [a, b];
-                            if (config.returnObject) keys = ["y", "dy"];
-                        } else {
-                            throw new Error(`Chalkboard.diff.solveAdaptive: For second-order scalar, provide initial conditions as { y0, dy0 } or { y, dy }.`);
-                        }
-                    } else if (diff.dimension === 1 && ("y0" in y0obj) && typeof y0obj.y0 === "number" && Number.isFinite(y0obj.y0)) {
-                        y0 = [y0obj.y0];
-                        if (config.returnObject) keys = ["y"];
-                    } else if (diff.dimension === 1 && ("y" in y0obj) && typeof y0obj.y === "number" && Number.isFinite(y0obj.y)) {
-                        y0 = [y0obj.y];
-                        if (config.returnObject) keys = ["y"];
-                    } else if ("y0" in y0obj && Array.isArray(y0obj.y0)) {
-                        const arr = y0obj.y0 as number[];
-                        if (arr.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must have length ${diff.dimension}.`);
-                        if (arr.length > 0 && !Number.isFinite(arr[0]) || arr.length > 1 && !Number.isFinite(arr[arr.length - 1])) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0.y0" must begin and end with finite numbers.`);
-                        y0 = arr.slice();
-                    } else {
-                        keys = Object.keys(config.y0).sort();
-                        if (keys.length !== diff.dimension) throw new Error(`Chalkboard.diff.solveAdaptive: Property "config.y0" must have exactly ${diff.dimension} numeric properties, but it has ${keys.length}.`);
-                        if (keys.length > 0 && !Number.isFinite((config.y0 as any)[keys[0]]) || keys.length > 1 && !Number.isFinite((config.y0 as any)[keys[keys.length - 1]])) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config.y0" must begin and end with finite numeric properties.`);
-                        const arr: number[] = [];
-                        for (let i = 0; i < keys.length; i++) {
-                            const v = (config.y0 as any)[keys[i]];
-                            arr.push(v);
-                        }
-                        y0 = arr;
-                    }
-                }
-                if (config.returnObject && !keys) {
-                    if (diff.type === "single" && diff.order === 2 && diff.dimension === 2) keys = ["y", "dy"];
-                    else if (diff.dimension === 1) keys = ["y"];
-                    else keys = Array.from({ length: diff.dimension }, (_, i) => `y${i + 1}`);
-                }
-                f = diff.rule;
-            }
+            const { rule: f, y0, keys, grid } = $prepare(diff, config, "Chalkboard.diff.solveAdaptive");
             const sign = Math.sign(config.t1 - t0);
             let h = config.h0 ?? (config.t1 - t0) / 100;
             if (!Number.isFinite(h) || h === 0) throw new Error(`Chalkboard.diff.solveAdaptive: "h0" must be a finite non-zero number (or omitted).`);
