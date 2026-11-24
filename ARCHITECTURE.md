@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Monday, November 23, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Tuesday, November 24, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Sunday, November 22, 2026, [**`4cab840`**](https://github.com/Zushah/Chalkboard/commit/4cab840).
+Previous commit: Monday, November 23, 2026, [**`e200c12`**](https://github.com/Zushah/Chalkboard/commit/e200c12).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -180,7 +180,7 @@ The twelve aliases in `./src/Chalkboard.ts` are top-level type names, such as `C
 | `ChalkboardMorphism<T, U>` | `{ struc1, struc2, mapping }` | Explicit domain and codomain structures plus a mapping callback. |
 | `ChalkboardStructureExtension<T, U>` | `{ base, extension, degree, basis, isFinite, isSimple, isAlgebraic }` | Extension metadata; `basis` is an array of `ChalkboardVector` values. |
 | `ChalkboardODE` | `{ rule, order, dimension, type }` | A canonical first-order state system, retaining the input equation's order and category. |
-| `ChalkboardPDE` | `{ rule, order, dimension, components, type }` | A pointwise rule for one or more fields over a spatial domain, with its order in time; solvers discretize it on a grid. |
+| `ChalkboardPDE` | `{ rule, order, dimension, components, type }` | A pointwise rule for one or more fields over a spatial domain, with its order in time, which is zero for a steady state; solvers discretize it on a grid. |
 
 These shapes are transparent but not uniformly serializable: functions, sets, structures, morphisms, and differential equations contain callbacks. JSON output from a parser describes expression data; it is not a serializer for all mathematical objects.
 
@@ -315,7 +315,7 @@ For registration, name handling, and shared symbolic boundaries, see [§1.16. re
 - A scalar `(t, y)` rule becomes an order-one, dimension-one equation returning `[dy]`.
 - A scalar `(t, y, dy)` rule becomes an order-two, dimension-two equation with state `[y, dy]` and derivative `[dy, ddy]`.
 - A system rule with an explicit positive dimension receives and returns the full state array and has type `"system"`.
-- A rule with a configuration object instead of a dimension becomes a partial differential equation of type `"pde"`. The rule receives time, coordinates, and the local field values and spatial derivatives, and returns first or second time derivatives; it is stored as given, so solvers validate its output.
+- A rule with a configuration object instead of a dimension becomes a partial differential equation of type `"pde"`. The rule receives time, coordinates, and the local field values and spatial derivatives, and returns first or second time derivatives, or for a steady state (order 0) an expression to drive to zero; it is stored as given, so solvers validate its output.
 
 Arity matters for scalar classification. System wrappers check output shape and selected finite values, but do not establish all mathematical domain or regularity conditions. In ODE records, `order` retains the original scalar order, while `dimension` describes the first-order state vector used by solvers; a partial differential equation's `dimension` is its number of spatial dimensions.
 
@@ -328,6 +328,8 @@ Model constructors cover growth equations, linear equations, oscillators, pendul
 For partial differential equations, both solvers first discretize the rule with second-order central differences on the configuration's uniform grid. Each side has a fixed value, an outward normal derivative imposed through ghost values, or periodic wrapping. In two dimensions, a node on two fixed-value sides takes their average, and mixed derivatives at corners between derivative sides use boundary values extended one grid step past the corner. Boundary nodes remain in the state, so each stored state maps directly onto the grid, and fixed boundary values follow their time dependence through the state derivative. Explicit stepping is only conditionally stable, since diffusion limits steps to roughly the square of the grid spacing, and fixed-step solving does not choose a stable step.
 
 `solve` also offers implicit methods (backward Euler, Crank–Nicolson, and BDF2) for stiff equations. Each step solves its nonlinear equations with Newton's method, using a finite-difference Jacobian that for partial differential equations is assembled from the grid stencil into a banded matrix, and factorizations are reused while Newton's method converges. Crank–Nicolson is not L-stable, so very stiff or nonsmooth components may oscillate, and banded factorization cost grows quickly with two-dimensional grid size. `solveAdaptive` remains explicit.
+
+For steady-state partial differential equations, `solve` applies Newton's method, with the same Jacobian assembly and banded factorization, to the discretized residual, where fixed-value nodes contribute their difference from the boundary value, and returns a single sample at `t0`. Problems whose solution is unique only up to a constant, such as those with only periodic or derivative boundaries, may fail or return one solution among many. `solveAdaptive` does not accept them.
 
 Initial conditions can be scalar for a one-dimensional state, arrays, supported second-order objects, or keyed objects. Generic keyed states use sorted key order, so property names affect component ordering. Optional object output adds `yObj` while retaining numerical `y` samples. Partial differential equations take functions sampled on the grid or flattened arrays.
 

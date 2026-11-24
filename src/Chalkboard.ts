@@ -65,8 +65,8 @@ type ChalkboardODE = {
 
 /**
  * The type for partial differential equations.
- * @property {Function} rule - Pointwise rule returning the first or second time derivative of the fields from time, coordinates, the field values, and their spatial derivatives
- * @property {number} order - Order of the equation in time (1 or 2)
+ * @property {Function} rule - Pointwise rule returning the first or second time derivative of the fields, or, for a steady state, an expression to drive to zero, from time, coordinates, the field values, and their spatial derivatives
+ * @property {number} order - Order of the equation in time (0 for a steady state, 1, or 2)
  * @property {number} dimension - Number of spatial dimensions
  * @property {number} components - Number of fields
  * @property {"pde"} type - Always "pde"

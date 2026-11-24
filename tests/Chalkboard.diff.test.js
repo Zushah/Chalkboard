@@ -158,23 +158,35 @@ import cb from "@zushah/chalkboard";
 
     const solC = cb.diff.solve(heat2, { t1: 0.001, steps: 1, y0: () => 0, grid: { x: [0, 1], y: [0, 1], nx: 5, ny: 5 }, boundary: { left: 0, right: 0, bottom: 0, top: 1 } });
     assert.deepStrictEqual(cb.diff.snapshot(solC, 0)[4], [0.5, 1, 1, 1, 0.5]);
-}
 
-// diff.solve (implicit methods)
-{
-    const heat = cb.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
-    const exact = (x) => Math.exp(-Math.PI * Math.PI * 0.1) * Math.sin(Math.PI * x);
+    const heat3 = cb.diff.init((t, x, u, ux, uxx) => uxx, { dimension: 1 });
+    const exact3 = (x) => Math.exp(-Math.PI * Math.PI * 0.1) * Math.sin(Math.PI * x);
     const base = { t1: 0.1, y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 201 }, boundary: { left: 0, right: 0 } };
-    const err = (sol) => Math.max(...cb.diff.snapshot(sol, 0.1).map((v, i) => Math.abs(v - exact(sol.grid.x[i]))));
-    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 10, method: "backwardeuler" }, base))) < 2.5e-2);
-    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 10, method: "cranknicolson" }, base))) < 5e-4);
-    assert.ok(err(cb.diff.solve(heat, Object.assign({ steps: 20, method: "bdf2" }, base))) < 6e-4);
-    const step = cb.diff.solve(heat, { t1: 0.05, steps: 5, method: "bdf2", y0: (x) => (x > 0.4 && x < 0.6 ? 1 : 0), grid: { x: [0, 1], nx: 201 }, boundary: { left: 0, right: 0 } });
+    const err3 = (sol) => Math.max(...cb.diff.snapshot(sol, 0.1).map((v, i) => Math.abs(v - exact3(sol.grid.x[i]))));
+    assert.ok(err3(cb.diff.solve(heat3, Object.assign({ steps: 10, method: "backwardeuler" }, base))) < 2.5e-2);
+    assert.ok(err3(cb.diff.solve(heat3, Object.assign({ steps: 10, method: "cranknicolson" }, base))) < 5e-4);
+    assert.ok(err3(cb.diff.solve(heat3, Object.assign({ steps: 20, method: "bdf2" }, base))) < 6e-4);
+    const step = cb.diff.solve(heat3, { t1: 0.05, steps: 5, method: "bdf2", y0: (x) => (x > 0.4 && x < 0.6 ? 1 : 0), grid: { x: [0, 1], nx: 201 }, boundary: { left: 0, right: 0 } });
     assert.ok(Math.min(...step.y[step.y.length - 1]) > -1e-12);
-    const wave = cb.diff.init((t, x, u, ux, uxx, ut) => uxx, { dimension: 1, order: 2 });
-    const solW = cb.diff.solve(wave, { t1: 1, steps: 100, method: "cranknicolson", y0: { u: (x) => Math.sin(2 * Math.PI * x), ut: () => 0 }, grid: { x: [0, 1], nx: 200 }, boundary: "periodic" });
-    assert.ok(Math.abs(Math.max(...cb.diff.snapshot(solW, 1)) - 1) < 1e-3);
+    const wave3 = cb.diff.init((t, x, u, ux, uxx, ut) => uxx, { dimension: 1, order: 2 });
+    const solW3 = cb.diff.solve(wave3, { t1: 1, steps: 100, method: "cranknicolson", y0: { u: (x) => Math.sin(2 * Math.PI * x), ut: () => 0 }, grid: { x: [0, 1], nx: 200 }, boundary: "periodic" });
+    assert.ok(Math.abs(Math.max(...cb.diff.snapshot(solW3, 1)) - 1) < 1e-3);
     const stiff = cb.diff.init((t, y) => [-1000 * y[0] + 999 * y[1], -y[1]], 2);
     const solS = cb.diff.solve(stiff, { t1: 1, y0: [2, 1], steps: 20, method: "bdf2" });
     assert.ok(Math.abs(solS.y[solS.y.length - 1][0] - Math.exp(-1)) < 1e-3);
+
+    const poisson = cb.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy + 2 * Math.PI * Math.PI * Math.sin(Math.PI * x) * Math.sin(Math.PI * y), { dimension: 2, order: 0 });
+    assert.strictEqual(poisson.order, 0);
+    const sol4 = cb.diff.solve(poisson, { grid: { x: [0, 1], y: [0, 1], nx: 41, ny: 41 }, boundary: { left: 0, right: 0, bottom: 0, top: 0 } });
+    assert.strictEqual(sol4.t.length, 1);
+    const U4 = cb.diff.snapshot(sol4, 0);
+    let e3 = 0;
+    for (let j = 0; j < 41; j++) for (let i = 0; i < 41; i++) e3 = Math.max(e3, Math.abs(U4[j][i] - Math.sin(Math.PI * i / 40) * Math.sin(Math.PI * j / 40)));
+    assert.ok(e3 < 1e-3);
+    const laplace = cb.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy, { dimension: 2, order: 0 });
+    const solL = cb.diff.solve(laplace, { grid: { x: [0, 1], y: [0, 1], nx: 41, ny: 41 }, boundary: { left: 0, right: 0, bottom: 0, top: 1 } });
+    assert.ok(Math.abs(cb.diff.snapshot(solL, 0)[20][20] - 0.25) < 1e-12);
+    const bratu = cb.diff.init((t, x, u, ux, uxx) => uxx + Math.exp(u), { dimension: 1, order: 0 });
+    const solB = cb.diff.solve(bratu, { grid: { x: [0, 1], nx: 101 }, boundary: { left: 0, right: 0 } });
+    assert.ok(Math.abs(cb.diff.snapshot(solB, 0)[50] - 0.140539) < 2e-5);
 }

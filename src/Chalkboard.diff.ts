@@ -26,7 +26,7 @@ namespace Chalkboard {
                 if (config.returnObject) throw new Error(`${caller}: Property "config.returnObject" is not supported for partial differential equations.`);
                 const m = diff.components, order = diff.order, dim = diff.dimension;
                 if (dim !== 1 && dim !== 2) throw new Error(`${caller}: Property "diff.dimension" must be 1 or 2.`);
-                if (order !== 1 && order !== 2) throw new Error(`${caller}: Property "diff.order" must be 1 or 2.`);
+                if (order !== 0 && order !== 1 && order !== 2) throw new Error(`${caller}: Property "diff.order" must be 0, 1, or 2.`);
                 if (!Number.isInteger(m) || m < 1) throw new Error(`${caller}: Property "diff.components" must be a positive integer.`);
                 const mesh = config.grid as any;
                 if (mesh === null || typeof mesh !== "object" || Array.isArray(mesh)) throw new Error(`${caller}: Property "config.grid" must be an object for partial differential equations.`);
@@ -118,7 +118,7 @@ namespace Chalkboard {
                 for (let r = 0; r < sides.length; r++) {
                     if (sides[r].type !== "periodic" && typeof sides[r].value !== "function") fill(sides[r], 0, 0, scratch);
                 }
-                const length = order * m * N;
+                const length = (order === 0 ? 1 : order) * m * N;
                 const state: number[] = new Array(length).fill(0);
                 const sampled = (f: any, name: string, offset: number): void => {
                     for (let j = 0; j < ny; j++) {
@@ -145,7 +145,7 @@ namespace Chalkboard {
                     }
                 };
                 const initial = config.y0 as any;
-                if (typeof initial === "function" && order === 1) {
+                if (typeof initial === "function" && order !== 2) {
                     sampled(initial, "config.y0", 0);
                 } else if (Array.isArray(initial)) {
                     copied(initial, "config.y0", 0, length);
@@ -157,8 +157,8 @@ namespace Chalkboard {
                         else if (Array.isArray(part)) copied(part, name, parts[i][1], m * N);
                         else throw new Error(`${caller}: Property "${name}" must be a function or an array of length ${m * N}.`);
                     }
-                } else {
-                    throw new Error(`${caller}: Property "config.y0" must be ${order === 1 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
+                } else if (order !== 0 || initial !== undefined) {
+                    throw new Error(`${caller}: Property "config.y0" must be ${order !== 2 ? `a function or an array of length ${length}` : `an object { u, ut } or an array of length ${length}`} for partial differential equations.`);
                 }
                 for (let q = 0; q < fixedNodes.length; q++) {
                     const p = fixedNodes[q];
@@ -220,9 +220,9 @@ namespace Chalkboard {
                     }
                     for (let q = 0; q < fixedNodes.length; q++) {
                         const p = fixedNodes[q];
-                        average(q, t, rate);
+                        average(q, t, order === 0 ? fill : rate);
                         for (let c = 0; c < m; c++) {
-                            out[c * N + p] = sum[c];
+                            out[c * N + p] = order === 0 ? y[c * N + p] - sum[c] : sum[c];
                             if (order === 2) out[m * N + c * N + p] = 0;
                         }
                     }
@@ -236,13 +236,13 @@ namespace Chalkboard {
                                 const u = g[k], ux = (g[k + 1] - g[k - 1]) / (2 * dx), uxx = (g[k + 1] - 2 * g[k] + g[k - 1]) / (dx * dx);
                                 let r: number;
                                 if (dim === 1) {
-                                    r = order === 1 ? single(t, x[i], u, ux, uxx) : single(t, x[i], u, ux, uxx, y[N + p]);
+                                    r = order !== 2 ? single(t, x[i], u, ux, uxx) : single(t, x[i], u, ux, uxx, y[N + p]);
                                 } else {
                                     const uy = (g[k + W] - g[k - W]) / (2 * dy), uyy = (g[k + W] - 2 * g[k] + g[k - W]) / (dy * dy), uxy = (g[k + W + 1] - g[k + W - 1] - g[k - W + 1] + g[k - W - 1]) / (4 * dx * dy);
-                                    r = order === 1 ? planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy) : planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy, y[N + p]);
+                                    r = order !== 2 ? planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy) : planar(t, x[i], yc[j], u, ux, uy, uxx, uyy, uxy, y[N + p]);
                                 }
                                 if (!Number.isFinite(r)) throw new Error(typeof r === "number" ? unstable : `${caller}: Rule of a partial differential equation with one component must return a number.`);
-                                if (order === 1) {
+                                if (order !== 2) {
                                     out[p] = r;
                                 } else {
                                     out[p] = y[N + p];
@@ -262,12 +262,12 @@ namespace Chalkboard {
                                     if (order === 2) UT[c] = y[m * N + c * N + p];
                                 }
                                 let r: number[];
-                                if (dim === 1) r = order === 1 ? system(t, x[i], U, UX, UXX) : system(t, x[i], U, UX, UXX, UT);
-                                else r = order === 1 ? planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY) : planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY, UT);
+                                if (dim === 1) r = order !== 2 ? system(t, x[i], U, UX, UXX) : system(t, x[i], U, UX, UXX, UT);
+                                else r = order !== 2 ? planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY) : planarSystem(t, x[i], yc[j], U, UX, UY, UXX, UYY, UXY, UT);
                                 if (!Array.isArray(r) || r.length !== m) throw new Error(`${caller}: Rule of a partial differential equation with ${m} components must return an array of length ${m}.`);
                                 for (let c = 0; c < m; c++) {
                                     if (!Number.isFinite(r[c])) throw new Error(unstable);
-                                    if (order === 1) {
+                                    if (order !== 2) {
                                         out[c * N + p] = r[c];
                                     } else {
                                         out[c * N + p] = UT[c];
@@ -279,7 +279,7 @@ namespace Chalkboard {
                     }
                     return out;
                 };
-                return { rule, y0: state, grid: dim === 2 ? { x, y: yc } : { x }, mesh: { nx, ny, fields: order * m, periodicX, periodicY } };
+                return { rule, y0: state, grid: dim === 2 ? { x, y: yc } : { x }, mesh: { nx, ny, fields: length / N, periodicX, periodicY } };
             } else {
                 let y0: number[];
                 let keys: string[] | undefined;
@@ -343,6 +343,168 @@ namespace Chalkboard {
                 }
                 return { rule: diff.rule, y0, keys };
             }
+        };
+
+        /** @ignore */
+        const $layout = (size: number, mesh?: { nx: number; ny: number; fields: number; periodicX: boolean; periodicY: boolean }): { perm: Int32Array; kl: number; ku: number; groups: number[][]; neighbors: number[][] | null } => {
+            const perm = new Int32Array(size);
+            if (!mesh) {
+                const groups: number[][] = [];
+                for (let s = 0; s < size; s++) {
+                    perm[s] = s;
+                    groups.push([s]);
+                }
+                return { perm, kl: size - 1, ku: size - 1, groups, neighbors: null };
+            }
+            const nx = mesh.nx, ny = mesh.ny, F = mesh.fields, N = nx * ny;
+            const fold = (i: number, n: number, periodic: boolean): number => periodic ? (i < Math.ceil(n / 2) ? 2 * i : 2 * (n - 1 - i) + 1) : i;
+            const rank = new Int32Array(N);
+            for (let j = 0; j < ny; j++) {
+                for (let i = 0; i < nx; i++) {
+                    const fi = fold(i, nx, mesh.periodicX), fj = fold(j, ny, mesh.periodicY);
+                    rank[j * nx + i] = ny === 1 || nx <= ny ? fj * nx + fi : fi * ny + fj;
+                }
+            }
+            for (let phi = 0; phi < F; phi++) {
+                for (let p = 0; p < N; p++) perm[phi * N + p] = rank[p] * F + phi;
+            }
+            const neighbors: number[][] = [];
+            const span = ny === 1 ? 0 : 1;
+            let reach = 0;
+            for (let j = 0; j < ny; j++) {
+                for (let i = 0; i < nx; i++) {
+                    const p = j * nx + i;
+                    const near: number[] = [];
+                    for (let dj = -span; dj <= span; dj++) {
+                        let jj = j + dj;
+                        if (jj < 0 || jj >= ny) {
+                            if (!mesh.periodicY) continue;
+                            jj = (jj + ny) % ny;
+                        }
+                        for (let di = -1; di <= 1; di++) {
+                            let ii = i + di;
+                            if (ii < 0 || ii >= nx) {
+                                if (!mesh.periodicX) continue;
+                                ii = (ii + nx) % nx;
+                            }
+                            const q = jj * nx + ii;
+                            if (near.indexOf(q) !== -1) continue;
+                            near.push(q);
+                            reach = Math.max(reach, Math.abs(rank[p] - rank[q]));
+                        }
+                    }
+                    neighbors.push(near);
+                }
+            }
+            const color = new Int32Array(N).fill(-1);
+            const used: number[] = [];
+            const members: number[][] = [];
+            for (let p = 0; p < N; p++) {
+                const near = neighbors[p];
+                for (let k = 0; k < near.length; k++) {
+                    const around = neighbors[near[k]];
+                    for (let r = 0; r < around.length; r++) {
+                        if (color[around[r]] >= 0) used[color[around[r]]] = p;
+                    }
+                }
+                let c = 0;
+                while (used[c] === p) c++;
+                color[p] = c;
+                if (c === members.length) members.push([]);
+                members[c].push(p);
+            }
+            const groups: number[][] = [];
+            for (let c = 0; c < members.length; c++) {
+                for (let phi = 0; phi < F; phi++) groups.push(members[c].map((p) => phi * N + p));
+            }
+            return { perm, kl: reach * F + F - 1, ku: reach * F + F - 1, groups, neighbors };
+        };
+
+        /** @ignore */
+        const $jacobian = (rule: (t: number, y: number[]) => number[], t: number, y: number[], fy: number[], layout: { perm: Int32Array; kl: number; ku: number; groups: number[][]; neighbors: number[][] | null }, alpha: number, beta: number): { a: Float64Array; piv: Int32Array; size: number; kl: number; ku: number; width: number } | null => {
+            const M = y.length, kl = layout.kl, ku = layout.ku, w = 2 * kl + ku + 1;
+            const perm = layout.perm, neighbors = layout.neighbors;
+            const N = neighbors ? neighbors.length : M, F = M / N;
+            const a = new Float64Array(M * w), piv = new Int32Array(M);
+            for (let s = 0; s < M; s++) a[perm[s] * w + kl] = alpha;
+            const yp = y.slice();
+            const perturbation = Math.sqrt(Number.EPSILON);
+            for (let g = 0; g < layout.groups.length; g++) {
+                const group = layout.groups[g];
+                for (let k = 0; k < group.length; k++) yp[group[k]] = y[group[k]] + perturbation * Math.max(1, Math.abs(y[group[k]]));
+                const f1 = rule(t, yp);
+                for (let k = 0; k < group.length; k++) {
+                    const s = group[k], eps = perturbation * Math.max(1, Math.abs(y[s])), col = perm[s];
+                    yp[s] = y[s];
+                    if (!neighbors) {
+                        for (let r = 0; r < M; r++) {
+                            const v = (f1[r] - fy[r]) / eps;
+                            if (v !== 0) a[perm[r] * w + col - perm[r] + kl] -= beta * v;
+                        }
+                        continue;
+                    }
+                    const near = neighbors[s % N];
+                    for (let psi = 0; psi < F; psi++) {
+                        for (let q = 0; q < near.length; q++) {
+                            const r = psi * N + near[q], row = perm[r];
+                            const v = (f1[r] - fy[r]) / eps;
+                            if (v !== 0) a[row * w + col - row + kl] -= beta * v;
+                        }
+                    }
+                }
+            }
+            for (let k = 0; k < M; k++) {
+                const lim = Math.min(M - 1, k + kl), last = Math.min(M - 1, k + kl + ku);
+                let p = k, big = Math.abs(a[k * w + kl]);
+                for (let i = k + 1; i <= lim; i++) {
+                    const v = Math.abs(a[i * w + k - i + kl]);
+                    if (v > big) {
+                        big = v;
+                        p = i;
+                    }
+                }
+                if (a[p * w + k - p + kl] === 0) return null;
+                piv[k] = p;
+                const rk = k * w - k + kl;
+                if (p !== k) {
+                    const rp = p * w - p + kl;
+                    for (let j = k; j <= last; j++) {
+                        const swap = a[rk + j];
+                        a[rk + j] = a[rp + j];
+                        a[rp + j] = swap;
+                    }
+                }
+                const pivot = a[rk + k];
+                for (let i = k + 1; i <= lim; i++) {
+                    const ri = i * w - i + kl;
+                    const l = a[ri + k] / pivot;
+                    a[ri + k] = l;
+                    if (l !== 0) for (let j = k + 1; j <= last; j++) a[ri + j] -= l * a[rk + j];
+                }
+            }
+            return { a, piv, size: M, kl, ku, width: w };
+        };
+
+        /** @ignore */
+        const $backsolve = (band: { a: Float64Array; piv: Int32Array; size: number; kl: number; ku: number; width: number }, b: Float64Array): Float64Array => {
+            const a = band.a, piv = band.piv, M = band.size, kl = band.kl, ku = band.ku, w = band.width;
+            for (let k = 0; k < M; k++) {
+                const p = piv[k];
+                if (p !== k) {
+                    const swap = b[k];
+                    b[k] = b[p];
+                    b[p] = swap;
+                }
+                const lim = Math.min(M - 1, k + kl);
+                for (let i = k + 1; i <= lim; i++) b[i] -= a[i * w - i + kl + k] * b[k];
+            }
+            for (let k = M - 1; k >= 0; k--) {
+                const rk = k * w - k + kl, last = Math.min(M - 1, k + kl + ku);
+                let sum = b[k];
+                for (let j = k + 1; j <= last; j++) sum -= a[rk + j] * b[j];
+                b[k] = sum / a[rk + k];
+            }
+            return b;
         };
 
         /**
@@ -679,10 +841,13 @@ namespace Chalkboard {
          * 
          * // Two-dimensional heat equation: u_t = u_xx + u_yy
          * const pde2 = Chalkboard.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy, { dimension: 2 });
+         * 
+         * // Poisson's equation: u_xx + u_yy + 1 = 0
+         * const pdeSteady = Chalkboard.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy + 1, { dimension: 2, order: 0 });
          */
         export const init = (
             rule: ((t: number, y: number) => number) | ((t: number, y: number, dy: number) => number) | ((t: number, y: number[]) => number[]) | ChalkboardPDE["rule"],
-            config?: number | { dimension: 1 | 2; order?: 1 | 2; components?: number }
+            config?: number | { dimension: 1 | 2; order?: 0 | 1 | 2; components?: number }
         ): ChalkboardODE | ChalkboardPDE => {
             if (typeof rule !== "function") throw new Error(`Chalkboard.diff.init: Parameter "rule" must be a function.`);
             if (config === undefined || typeof config === "number") {
@@ -739,7 +904,7 @@ namespace Chalkboard {
                 const dimension = config.dimension;
                 if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.init: Property "config.dimension" must be 1 or 2.`);
                 const order = config.order ?? 1;
-                if (order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.init: Property "config.order" must be 1 or 2.`);
+                if (order !== 0 && order !== 1 && order !== 2) throw new Error(`Chalkboard.diff.init: Property "config.order" must be 0, 1, or 2.`);
                 const components = config.components ?? 1;
                 if (!Number.isInteger(components) || components < 1) throw new Error(`Chalkboard.diff.init: Property "config.components" must be a positive integer.`);
                 return { rule: rule as ChalkboardPDE["rule"], order, dimension, components, type: "pde" };
@@ -1152,13 +1317,13 @@ namespace Chalkboard {
         };
 
         /**
-         * Solves an ordinary or partial differential equation using an explicit or implicit method with fixed steps.
+         * Solves an ordinary or partial differential equation using an explicit or implicit method with fixed steps, or finds the steady state of a partial differential equation of order 0. A steady state is solved with Newton's method on the discretized equations, where fixed-value nodes must match their boundary values, and the result is a single sample at `t0`; the options `t1`, `h`, `steps`, `method`, and `frames` are ignored. A steady-state problem whose solution is not unique, such as one with only periodic or derivative boundaries, may fail or return one solution among many.
          * @param {ChalkboardODE | ChalkboardPDE} diff - The differential equation to solve.
-         * @param {number} [config.t0=0] - The initial time.
-         * @param {number} config.t1 - The final time.
-         * @param {number} [config.h] - The time step size. Either this or `steps` must be provided.
-         * @param {number} [config.steps] - The number of steps to take. Either this or `h` must be provided.
-         * @param {number | number[] | Object | Function} config.y0 - The initial state. For partial differential equations, a function of position (x, or x and y in two dimensions) sampled at every grid node (returning an array for several fields), a flattened array, or for second-order equations an object `{ u, ut }` of such functions or arrays.
+         * @param {number} [config.t0=0] - The initial time, which for a steady state is the time passed to the rule and the boundary values.
+         * @param {number} config.t1 - The final time (not used for steady states).
+         * @param {number} [config.h] - The time step size. Either this or `steps` must be provided, except for steady states.
+         * @param {number} [config.steps] - The number of steps to take. Either this or `h` must be provided, except for steady states.
+         * @param {number | number[] | Object | Function} config.y0 - The initial state. For partial differential equations, a function of position (x, or x and y in two dimensions) sampled at every grid node (returning an array for several fields), a flattened array, or for second-order equations an object `{ u, ut }` of such functions or arrays. For steady states, it is an optional initial guess for Newton's method, given as for first-order equations, which defaults to zeros.
          * @param {{ x: number[]; nx: number; y?: number[]; ny?: number }} [config.grid] - The uniform grid of a partial differential equation: the interval `x: [a, b]` and the number of nodes `nx` (at least 3), plus `y: [c, d]` and `ny` in two dimensions. A periodic axis leaves out the repeated endpoint.
          * @param {string | Object} [config.boundary] - The boundary conditions of a partial differential equation: "periodic" or `{ left, right }`, plus `bottom` and `top` in two dimensions, where each side is "periodic", a fixed value (a number, an array with one value per field, or a function of time, which in two dimensions also receives y on the left and right and x on the bottom and top), or `{ type: "dirichlet" | "neumann", value }` with "neumann" prescribing the outward normal derivative. Both sides of an axis are periodic or neither is, and a node on two fixed-value sides takes their average.
          * @param {"euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2"} [config.method="rk4"] - The integration method to use: "euler", "midpoint", "heun", "ralston", "rk4", "backwardeuler", "cranknicolson", or "bdf2". The implicit methods ("backwardeuler", "cranknicolson", and "bdf2") apply Newton's method at every step and suit stiff problems, where explicit methods need very small steps. Crank–Nicolson may oscillate on very stiff or nonsmooth problems, where backward Euler and BDF2 do not. The cost of the implicit methods grows quickly with the size of two-dimensional grids.
@@ -1207,15 +1372,22 @@ namespace Chalkboard {
          *     boundary: { left: 0, right: 0 },
          *     method: "bdf2"
          * });
+         * 
+         * // Solve Poisson's equation u_xx + u_yy + 1 = 0 with fixed sides:
+         * const poisson = Chalkboard.diff.init((t, x, y, u, ux, uy, uxx, uyy) => uxx + uyy + 1, { dimension: 2, order: 0 });
+         * const solPoisson = Chalkboard.diff.solve(poisson, {
+         *     grid: { x: [0, 1], y: [0, 1], nx: 41, ny: 41 },
+         *     boundary: { left: 0, right: 0, bottom: 0, top: 0 }
+         * });
          */
         export const solve = (
             diff: ChalkboardODE | ChalkboardPDE,
             config: {
                 t0?: number;
-                t1: number;
+                t1?: number;
                 h?: number;
                 steps?: number;
-                y0: number | number[] | Record<string, any> | ((x: number, y: number) => number | number[]);
+                y0?: number | number[] | Record<string, any> | ((x: number, y: number) => number | number[]);
                 method?: "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2";
                 returnObject?: boolean;
                 grid?: { x: number[]; nx: number; y?: number[]; ny?: number };
@@ -1227,25 +1399,89 @@ namespace Chalkboard {
             if (typeof diff.rule !== "function") throw new Error(`Chalkboard.diff.solve: "diff.rule" must be a function.`);
             if (!Number.isInteger(diff.dimension) || diff.dimension < 1) throw new Error(`Chalkboard.diff.solve: Property "diff.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null) throw new Error(`Chalkboard.diff.solve: Parameter "config" must be an object.`);
-            if (typeof config.t1 !== "number" || !Number.isFinite(config.t1)) throw new Error(`Chalkboard.diff.solve: "config.t1" must be a finite number.`);
+            const steady = diff.type === "pde" && diff.order === 0;
+            if (!steady && (typeof config.t1 !== "number" || !Number.isFinite(config.t1))) throw new Error(`Chalkboard.diff.solve: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
             if (!Number.isFinite(t0)) throw new Error(`Chalkboard.diff.solve: "config.t0" must be a finite number.`);
-            if (config.t1 === t0) throw new Error(`Chalkboard.diff.solve: "config.t1" must be different from "config.t0".`);
+            if (!steady && config.t1 === t0) throw new Error(`Chalkboard.diff.solve: "config.t1" must be different from "config.t0".`);
             const method: "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2" = (config.method ?? "rk4").toLowerCase() as "euler" | "midpoint" | "heun" | "ralston" | "rk4" | "backwardeuler" | "cranknicolson" | "bdf2";
-            if (["euler", "midpoint", "heun", "ralston", "rk4", "backwardeuler", "cranknicolson", "bdf2"].indexOf(method) === -1) throw new Error(`Chalkboard.diff.solve: Unknown method.`);
-            if (config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solve: Property "config.frames" must be an integer greater than or equal to 2.`);
+            if (!steady && ["euler", "midpoint", "heun", "ralston", "rk4", "backwardeuler", "cranknicolson", "bdf2"].indexOf(method) === -1) throw new Error(`Chalkboard.diff.solve: Unknown method.`);
+            if (!steady && config.frames !== undefined && (!Number.isInteger(config.frames) || config.frames < 2)) throw new Error(`Chalkboard.diff.solve: Property "config.frames" must be an integer greater than or equal to 2.`);
             const { rule: f, y0, keys, grid, mesh } = $prepare(diff, config, "Chalkboard.diff.solve");
+            if (steady) {
+                const M = y0.length;
+                const layout = $layout(M, mesh);
+                const perm = layout.perm;
+                const singular = `Chalkboard.diff.solve: The linearized equations are singular; a steady-state problem may need a fixed-value boundary or a term that fixes the solution's level.`;
+                const largest = (v: number[]): number => {
+                    let result = 0;
+                    for (let i = 0; i < v.length; i++) result = Math.max(result, Math.abs(v[i]));
+                    return result;
+                };
+                const b = new Float64Array(M);
+                const delta: number[] = new Array(M);
+                let u = y0.slice();
+                let r = f(t0, u);
+                let band = $jacobian(f, t0, u, r, layout, 0, -1);
+                if (!band) throw new Error(singular);
+                let fresh = true, prev = Infinity, converged = false;
+                for (let iteration = 0; iteration < 50 && !converged; iteration++) {
+                    for (let s = 0; s < M; s++) b[perm[s]] = -r[s];
+                    $backsolve(band, b);
+                    let size = 0, finite = true;
+                    for (let s = 0; s < M; s++) {
+                        delta[s] = b[perm[s]];
+                        const v = Math.abs(delta[s]);
+                        if (!Number.isFinite(v)) finite = false;
+                        else if (v > size) size = v;
+                    }
+                    if (!finite) break;
+                    if (size > 0.5 * prev && !fresh) {
+                        band = $jacobian(f, t0, u, r, layout, 0, -1);
+                        if (!band) throw new Error(singular);
+                        fresh = true;
+                        prev = Infinity;
+                        continue;
+                    }
+                    const residual = largest(r), tolerance = 1e-10 * (1 + largest(u));
+                    let lambda = 1, trial: number[] = u, trialResidual: number[] = r, failure: unknown = null, accepted = false;
+                    for (let halving = 0; halving <= 12; halving++) {
+                        trial = new Array(M);
+                        for (let s = 0; s < M; s++) trial[s] = u[s] + lambda * delta[s];
+                        failure = null;
+                        try {
+                            trialResidual = f(t0, trial);
+                        } catch (error) {
+                            failure = error;
+                        }
+                        if (failure === null && (largest(trialResidual) < residual || lambda * size <= tolerance)) {
+                            accepted = true;
+                            break;
+                        }
+                        if (halving < 12) lambda /= 2;
+                    }
+                    if (!accepted && failure !== null) throw failure;
+                    u = trial;
+                    r = trialResidual;
+                    prev = size;
+                    fresh = false;
+                    if (lambda * size <= 1e-10 * (1 + largest(u))) converged = true;
+                }
+                if (!converged) throw new Error(`Chalkboard.diff.solve: Newton's method did not converge for the steady-state problem; it may be singular or need a better initial guess in "config.y0".`);
+                return { t: [t0], y: [u], grid };
+            }
+            const t1 = config.t1 as number;
             let h: number;
             let steps: number;
             if (typeof config.h === "number") {
                 if (typeof config.h !== "number" || !Number.isFinite(config.h) || config.h === 0) throw new Error(`Chalkboard.diff.solve: "config.h" must be a finite non-zero number.`);
                 h = config.h;
-                steps = Math.max(1, Math.floor(Math.abs((config.t1 - t0) / h)));
-                h = (config.t1 - t0) / steps;
+                steps = Math.max(1, Math.floor(Math.abs((t1 - t0) / h)));
+                h = (t1 - t0) / steps;
             } else if (typeof config.steps === "number") {
                 if (!Number.isInteger(config.steps) || config.steps < 1) throw new Error(`Chalkboard.diff.solve: "config.steps" must be an integer greater than or equal to 1.`);
                 steps = config.steps;
-                h = (config.t1 - t0) / steps;
+                h = (t1 - t0) / steps;
             } else {
                 throw new Error(`Chalkboard.diff.solve: Provide either "config.h" or "config.steps".`);
             }
@@ -1288,92 +1524,18 @@ namespace Chalkboard {
                 };
             })();
             if (method === "backwardeuler" || method === "cranknicolson" || method === "bdf2") {
-                const M = y0.length, N = mesh ? mesh.nx * mesh.ny : M, F = mesh ? mesh.fields : 1;
-                const perm = new Int32Array(M);
-                const groups: number[][] = [];
-                let neighbors: number[][] | null = null;
-                let kl = M - 1;
-                if (!mesh) {
-                    for (let s = 0; s < M; s++) {
-                        perm[s] = s;
-                        groups.push([s]);
-                    }
-                } else {
-                    const nx = mesh.nx, ny = mesh.ny;
-                    const fold = (i: number, n: number, periodic: boolean): number => periodic ? (i < Math.ceil(n / 2) ? 2 * i : 2 * (n - 1 - i) + 1) : i;
-                    const rank = new Int32Array(N);
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const fi = fold(i, nx, mesh.periodicX), fj = fold(j, ny, mesh.periodicY);
-                            rank[j * nx + i] = ny === 1 || nx <= ny ? fj * nx + fi : fi * ny + fj;
-                        }
-                    }
-                    for (let phi = 0; phi < F; phi++) {
-                        for (let p = 0; p < N; p++) perm[phi * N + p] = rank[p] * F + phi;
-                    }
-                    const stencils: number[][] = [];
-                    const span = ny === 1 ? 0 : 1;
-                    let reach = 0;
-                    for (let j = 0; j < ny; j++) {
-                        for (let i = 0; i < nx; i++) {
-                            const p = j * nx + i;
-                            const near: number[] = [];
-                            for (let dj = -span; dj <= span; dj++) {
-                                let jj = j + dj;
-                                if (jj < 0 || jj >= ny) {
-                                    if (!mesh.periodicY) continue;
-                                    jj = (jj + ny) % ny;
-                                }
-                                for (let di = -1; di <= 1; di++) {
-                                    let ii = i + di;
-                                    if (ii < 0 || ii >= nx) {
-                                        if (!mesh.periodicX) continue;
-                                        ii = (ii + nx) % nx;
-                                    }
-                                    const q = jj * nx + ii;
-                                    if (near.indexOf(q) !== -1) continue;
-                                    near.push(q);
-                                    reach = Math.max(reach, Math.abs(rank[p] - rank[q]));
-                                }
-                            }
-                            stencils.push(near);
-                        }
-                    }
-                    const color = new Int32Array(N).fill(-1);
-                    const used: number[] = [];
-                    const members: number[][] = [];
-                    for (let p = 0; p < N; p++) {
-                        const near = stencils[p];
-                        for (let k = 0; k < near.length; k++) {
-                            const around = stencils[near[k]];
-                            for (let r = 0; r < around.length; r++) {
-                                if (color[around[r]] >= 0) used[color[around[r]]] = p;
-                            }
-                        }
-                        let c = 0;
-                        while (used[c] === p) c++;
-                        color[p] = c;
-                        if (c === members.length) members.push([]);
-                        members[c].push(p);
-                    }
-                    for (let c = 0; c < members.length; c++) {
-                        for (let phi = 0; phi < F; phi++) groups.push(members[c].map((p) => phi * N + p));
-                    }
-                    neighbors = stencils;
-                    kl = reach * F + F - 1;
-                }
-                const ku = kl, w = 2 * kl + ku + 1;
-                const piv = new Int32Array(M);
+                const M = y0.length;
+                const layout = $layout(M, mesh);
+                const perm = layout.perm;
                 const b = new Float64Array(M);
                 const c: number[] = new Array(M), G: number[] = new Array(M), delta: number[] = new Array(M);
-                const perturbation = Math.sqrt(Number.EPSILON);
-                let a = new Float64Array(0);
+                let band: { a: Float64Array; piv: Int32Array; size: number; kl: number; ku: number; width: number } | null = null;
                 let bandGamma = NaN, lastIterations = 0;
                 let yn = y0.slice(), yPrev = y0;
                 let frame = 1;
                 let target = Math.round(steps / (frames - 1));
                 for (let n = 0; n < steps; n++) {
-                    const tn = t0 + n * h, tn1 = n + 1 === steps ? config.t1 : t0 + (n + 1) * h;
+                    const tn = t0 + n * h, tn1 = n + 1 === steps ? t1 : t0 + (n + 1) * h;
                     const bdf = method === "bdf2" && n > 0;
                     const gamma = method === "cranknicolson" ? 1 / 2 : bdf ? 2 / 3 : 1;
                     const gh = gamma * h;
@@ -1389,88 +1551,18 @@ namespace Chalkboard {
                     let fz = f(tn1, z);
                     let fresh = false;
                     const refresh = (): void => {
-                        const A = new Float64Array(M * w);
-                        for (let s = 0; s < M; s++) A[perm[s] * w + kl] = 1;
-                        const zp = z.slice();
-                        for (let g = 0; g < groups.length; g++) {
-                            const group = groups[g];
-                            for (let k = 0; k < group.length; k++) zp[group[k]] = z[group[k]] + perturbation * Math.max(1, Math.abs(z[group[k]]));
-                            const f1 = f(tn1, zp);
-                            for (let k = 0; k < group.length; k++) {
-                                const s = group[k], eps = perturbation * Math.max(1, Math.abs(z[s])), col = perm[s];
-                                zp[s] = z[s];
-                                if (!neighbors) {
-                                    for (let r = 0; r < M; r++) {
-                                        const v = (f1[r] - fz[r]) / eps;
-                                        if (v !== 0) A[perm[r] * w + col - perm[r] + kl] -= gh * v;
-                                    }
-                                    continue;
-                                }
-                                const near = neighbors[s % N];
-                                for (let psi = 0; psi < F; psi++) {
-                                    for (let q = 0; q < near.length; q++) {
-                                        const r = psi * N + near[q], row = perm[r];
-                                        const v = (f1[r] - fz[r]) / eps;
-                                        if (v !== 0) A[row * w + col - row + kl] -= gh * v;
-                                    }
-                                }
-                            }
-                        }
-                        for (let k = 0; k < M; k++) {
-                            const lim = Math.min(M - 1, k + kl), last = Math.min(M - 1, k + kl + ku);
-                            let p = k, big = Math.abs(A[k * w + kl]);
-                            for (let i = k + 1; i <= lim; i++) {
-                                const v = Math.abs(A[i * w + k - i + kl]);
-                                if (v > big) {
-                                    big = v;
-                                    p = i;
-                                }
-                            }
-                            if (A[p * w + k - p + kl] === 0) throw new Error(`Chalkboard.diff.solve: The linearized equations of an implicit step are singular at time ${tn1}.`);
-                            piv[k] = p;
-                            const rk = k * w - k + kl;
-                            if (p !== k) {
-                                const rp = p * w - p + kl;
-                                for (let j = k; j <= last; j++) {
-                                    const swap = A[rk + j];
-                                    A[rk + j] = A[rp + j];
-                                    A[rp + j] = swap;
-                                }
-                            }
-                            const pivot = A[rk + k];
-                            for (let i = k + 1; i <= lim; i++) {
-                                const ri = i * w - i + kl;
-                                const l = A[ri + k] / pivot;
-                                A[ri + k] = l;
-                                if (l !== 0) for (let j = k + 1; j <= last; j++) A[ri + j] -= l * A[rk + j];
-                            }
-                        }
-                        a = A;
+                        band = $jacobian(f, tn1, z, fz, layout, 1, gh);
+                        if (!band) throw new Error(`Chalkboard.diff.solve: The linearized equations of an implicit step are singular at time ${tn1}.`);
                         bandGamma = gamma;
                         fresh = true;
                     };
-                    if (a.length === 0 || gamma !== bandGamma || lastIterations > 4) refresh();
+                    if (!band || gamma !== bandGamma || lastIterations > 4) refresh();
                     let prev = Infinity, failures = 0, iterations = 0, converged = false, stale = true;
                     while (iterations < 25) {
                         iterations++;
                         if (stale) for (let s = 0; s < M; s++) G[s] = z[s] - c[s] - gh * fz[s];
                         for (let s = 0; s < M; s++) b[perm[s]] = -G[s];
-                        for (let k = 0; k < M; k++) {
-                            const p = piv[k];
-                            if (p !== k) {
-                                const swap = b[k];
-                                b[k] = b[p];
-                                b[p] = swap;
-                            }
-                            const lim = Math.min(M - 1, k + kl);
-                            for (let i = k + 1; i <= lim; i++) b[i] -= a[i * w - i + kl + k] * b[k];
-                        }
-                        for (let k = M - 1; k >= 0; k--) {
-                            const rk = k * w - k + kl, last = Math.min(M - 1, k + kl + ku);
-                            let sum = b[k];
-                            for (let j = k + 1; j <= last; j++) sum -= a[rk + j] * b[j];
-                            b[k] = sum / a[rk + k];
-                        }
+                        $backsolve(band!, b);
                         let size = 0, finite = true;
                         for (let s = 0; s < M; s++) {
                             delta[s] = b[perm[s]];
@@ -1519,7 +1611,7 @@ namespace Chalkboard {
                 for (let i = 0; i < steps; i++) {
                     yi = stepper(f, t0 + i * h, yi, h);
                     if (i + 1 === target) {
-                        t.push(i + 1 === steps ? config.t1 : t0 + (i + 1) * h);
+                        t.push(i + 1 === steps ? t1 : t0 + (i + 1) * h);
                         y.push(yi);
                         frame++;
                         target = Math.round(frame * steps / (frames - 1));
@@ -1609,6 +1701,7 @@ namespace Chalkboard {
             if (typeof diff.rule !== "function") throw new Error(`Chalkboard.diff.solveAdaptive: "diff.rule" must be a function.`);
             if (!Number.isInteger(diff.dimension) || diff.dimension < 1) throw new Error(`Chalkboard.diff.solveAdaptive: Property "diff.dimension" must be a positive integer.`);
             if (typeof config !== "object" || config === null) throw new Error(`Chalkboard.diff.solveAdaptive: Parameter "config" must be an object.`);
+            if (diff.type === "pde" && diff.order === 0) throw new Error(`Chalkboard.diff.solveAdaptive: Steady-state partial differential equations must be solved with Chalkboard.diff.solve.`);
             if (typeof config.t1 !== "number" || !Number.isFinite(config.t1)) throw new Error(`Chalkboard.diff.solveAdaptive: "config.t1" must be a finite number.`);
             const t0 = config.t0 ?? 0;
             if (!Number.isFinite(t0)) throw new Error(`Chalkboard.diff.solveAdaptive: "config.t0" must be a finite number.`);
