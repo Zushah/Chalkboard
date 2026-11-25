@@ -508,6 +508,44 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines the advection equation: u_t = -v·∇u. Here v·∇u is v·u_x in one dimension and v_x·u_x + v_y·u_y in two.
+         * @param {number | number[]} [velocity=1] - Velocity v, a number, or in two dimensions an array [v_x, v_y] (a number applies to both axes)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.advection(0.5);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 1, h: 0.0025, y0: (x) => Math.sin(2 * Math.PI * x), grid: { x: [0, 1], nx: 200 }, boundary: "periodic" }); // Shifts the wave by 0.5
+         */
+        export const advection = (velocity: number | [number, number] = 1, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.advection: Parameter "dimension" must be 1 or 2.`);
+            if (dimension === 1 && !Number.isFinite(velocity)) throw new Error(`Chalkboard.diff.advection: Parameter "velocity" must be a finite number.`);
+            if (dimension === 2 && !Number.isFinite(velocity) && !(Array.isArray(velocity) && velocity.length === 2 && Number.isFinite(velocity[0]) && Number.isFinite(velocity[1]))) throw new Error(`Chalkboard.diff.advection: Parameter "velocity" must be a finite number or an array of two finite numbers.`);
+            const vx = typeof velocity === "number" ? velocity : velocity[0], vy = typeof velocity === "number" ? velocity : velocity[1];
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => -vx * ux, { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => -vx * ux - vy * uy, { dimension: 2 }) as ChalkboardPDE;
+        };
+
+        /**
+         * Defines the advection–diffusion equation: u_t = -v·∇u + D∇²u. Here v·∇u is v·u_x in one dimension and v_x·u_x + v_y·u_y in two, and ∇²u is u_xx in one dimension and u_xx + u_yy in two.
+         * @param {number | number[]} [velocity=1] - Velocity v, a number, or in two dimensions an array [v_x, v_y] (a number applies to both axes)
+         * @param {number} [diffusivity=1] - Diffusivity D (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.advectionDiffusion(1, 0.01);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 1, steps: 200, method: "cranknicolson", y0: (x) => Math.sin(2 * Math.PI * x), grid: { x: [0, 1], nx: 200 }, boundary: "periodic" }); // Carries the wave once around while it decays
+         */
+        export const advectionDiffusion = (velocity: number | [number, number] = 1, diffusivity: number = 1, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.advectionDiffusion: Parameter "dimension" must be 1 or 2.`);
+            if (dimension === 1 && !Number.isFinite(velocity)) throw new Error(`Chalkboard.diff.advectionDiffusion: Parameter "velocity" must be a finite number.`);
+            if (dimension === 2 && !Number.isFinite(velocity) && !(Array.isArray(velocity) && velocity.length === 2 && Number.isFinite(velocity[0]) && Number.isFinite(velocity[1]))) throw new Error(`Chalkboard.diff.advectionDiffusion: Parameter "velocity" must be a finite number or an array of two finite numbers.`);
+            if (!Number.isFinite(diffusivity) || diffusivity < 0) throw new Error(`Chalkboard.diff.advectionDiffusion: Parameter "diffusivity" must be a finite number greater than or equal to 0.`);
+            const vx = typeof velocity === "number" ? velocity : velocity[0], vy = typeof velocity === "number" ? velocity : velocity[1];
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => -vx * ux + diffusivity * uxx, { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => -vx * ux - vy * uy + diffusivity * (uxx + uyy), { dimension: 2 }) as ChalkboardPDE;
+        };
+
+        /**
          * Samples a solution at a time using linear interpolation between the nearest grid points, with times that may be ascending or descending. (No extrapolation as it clamps to endpoints.)
          * @param {{ t: number[]; y: number[][] }} sol - The solution.
          * @param {number} time - The time to sample at.
@@ -550,7 +588,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Bernoulli(1, 1, 2);
-         * const derivative = ode.rule(0, [2]); // Evaluates the Bernoulli equation
+         * const sol = Chalkboard.diff.solve(ode, { t1: 1, steps: 100, y0: 0.5 }); // Follows y = 1/(1 + e^t), reaching about 0.2689 at t = 1
          */
         export const Bernoulli = (p: number | ((t: number) => number), q: number | ((t: number) => number), n: number): ChalkboardODE => {
             if (!Number.isFinite(n)) throw new Error(`Chalkboard.diff.Bernoulli: Parameter "n" must be a finite number.`);
@@ -565,7 +603,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.BesselI(0);
-         * const derivative = ode.rule(1, [1, 0]); // Evaluates the modified Bessel equation
+         * const sol = Chalkboard.diff.solve(ode, { t0: 1, t1: 2, steps: 100, y0: { y0: 1.266066, dy0: 0.565159 } }); // Follows I₀(t) from t = 1, reaching about 2.2796 at t = 2
          */
         export const BesselI = (nu: number = 0): ChalkboardODE => {
             if (!Number.isFinite(nu)) throw new Error(`Chalkboard.diff.BesselI: Parameter "nu" must be a finite number.`);
@@ -582,7 +620,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.BesselJ(0);
-         * const derivative = ode.rule(1, [1, 0]); // Evaluates Bessel's equation
+         * const sol = Chalkboard.diff.solve(ode, { t0: 1, t1: 2.404826, steps: 200, y0: { y0: 0.765198, dy0: -0.440051 } }); // Follows J₀(t) from t = 1 to its first zero near t = 2.4048
          */
         export const BesselJ = (nu: number = 0): ChalkboardODE => {
             if (!Number.isFinite(nu)) throw new Error(`Chalkboard.diff.BesselJ: Parameter "nu" must be a finite number.`);
@@ -675,7 +713,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Duffing(0.2, -1, 1, 0.3, 1.2);
-         * const acceleration = ode.rule(0, [1, 0]); // Evaluates a Duffing oscillator
+         * const sol = Chalkboard.diff.solve(ode, { t1: 100, steps: 10000, y0: { y0: 1, dy0: 0 } }); // Jumps chaotically between the wells around x = -1 and x = 1
          */
         export const Duffing = (delta: number, alpha: number, beta: number, gamma: number, omega: number): ChalkboardODE => {
             if (!Number.isFinite(delta) || !Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(omega)) throw new Error(`Chalkboard.diff.Duffing: Parameters "delta", "alpha", "beta", "gamma", and "omega" must be finite numbers.`);
@@ -754,7 +792,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.exponential(-2);
-         * const derivative = ode.rule(0, [3]); // Returns [-6]
+         * const sol = Chalkboard.diff.solve(ode, { t1: 1, steps: 100, y0: 3 }); // Decays to 3e^(-2) ≈ 0.4060 at t = 1
          */
         export const exponential = (k: number = 1): ChalkboardODE => {
             if (!Number.isFinite(k)) throw new Error(`Chalkboard.diff.exponential: Parameter "k" must be a finite number.`);
@@ -768,7 +806,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Gompertz(1, 100);
-         * const derivative = ode.rule(0, [10]); // Evaluates Gompertz growth
+         * const sol = Chalkboard.diff.solve(ode, { t1: 5, steps: 500, y0: 10 }); // Grows toward the carrying capacity, reaching about 98.46 at t = 5
          */
         export const Gompertz = (a: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(a)) throw new Error(`Chalkboard.diff.Gompertz: Parameter "a" must be a finite number.`);
@@ -782,7 +820,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.harmonic(2);
-         * const acceleration = ode.rule(0, [3, 0]); // Returns [0, -12]
+         * const sol = Chalkboard.diff.solve(ode, { t1: Math.PI, steps: 200, y0: { y0: 1, dy0: 0 } }); // Follows y = cos(2t) for one period, returning to y = 1
          */
         export const harmonic = (w: number = 1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonic: Parameter "w" must be a finite number greater than or equal to 0.`);
@@ -796,7 +834,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.harmonicDamped(2, 0.1);
-         * const acceleration = ode.rule(0, [3, 4]); // Evaluates damped harmonic motion
+         * const sol = Chalkboard.diff.solve(ode, { t1: 10, steps: 1000, y0: { y0: 1, dy0: 0 } }); // Oscillates with an amplitude that decays like e^(-0.2t)
          */
         export const harmonicDamped = (w: number = 1, zeta: number = 0.1): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicDamped: Parameter "w" must be a finite number greater than or equal to 0.`);
@@ -811,14 +849,30 @@ namespace Chalkboard {
          * @param {(t: number) => number} F - Forcing term
          * @returns {ChalkboardODE}
          * @example
-         * const ode = Chalkboard.diff.harmonicForced(2, 0.1, (t) => Math.cos(t));
-         * const acceleration = ode.rule(0, [3, 4]); // Evaluates forced harmonic motion
+         * const ode = Chalkboard.diff.harmonicForced(2, 0.1, (t) => Math.cos(2 * t));
+         * const sol = Chalkboard.diff.solve(ode, { t1: 60, steps: 6000, y0: { y0: 0, dy0: 0 } }); // Builds up to a resonant oscillation with amplitude 1.25
          */
         export const harmonicForced = (w: number, zeta: number, F: (t: number) => number): ChalkboardODE => {
             if (!Number.isFinite(w) || w < 0) throw new Error(`Chalkboard.diff.harmonicForced: Parameter "w" must be a finite number greater than or equal to 0.`);
             if (!Number.isFinite(zeta) || zeta < 0) throw new Error(`Chalkboard.diff.harmonicForced: Parameter "zeta" must be a finite number greater than or equal to 0.`);
             if (typeof F !== "function") throw new Error(`Chalkboard.diff.harmonicForced: Parameter "F" must be a function.`);
             return Chalkboard.diff.init((t: number, y: number, dy: number) => F(t) - 2 * zeta * w * dy - (w * w) * y) as ChalkboardODE;
+        };
+
+        /**
+         * Defines the heat equation: u_t = α∇²u. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two.
+         * @param {number} [diffusivity=1] - Diffusivity α (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.heat(0.5);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 0.1, steps: 20, method: "cranknicolson", y0: (x) => Math.sin(Math.PI * x), grid: { x: [0, 1], nx: 101 }, boundary: { left: 0, right: 0 } }); // Decays like exp(-0.5π²t)sin(πx)
+         */
+        export const heat = (diffusivity: number = 1, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.heat: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(diffusivity) || diffusivity < 0) throw new Error(`Chalkboard.diff.heat: Parameter "diffusivity" must be a finite number greater than or equal to 0.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => diffusivity * uxx, { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => diffusivity * (uxx + uyy), { dimension: 2 }) as ChalkboardPDE;
         };
 
         /**
@@ -918,7 +972,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Kepler2D(1);
-         * const derivative = ode.rule(0, [1, 0, 0, 1]); // Evaluates a circular-orbit state
+         * const sol = Chalkboard.diff.solve(ode, { t1: 2 * Math.PI, steps: 1000, y0: [1, 0, 0, 1] }); // Completes one circular orbit, returning to [1, 0, 0, 1]
          */
         export const Kepler2D = (mu: number = 1): ChalkboardODE => {
             if (!Number.isFinite(mu) || mu < 0) throw new Error(`Chalkboard.diff.Kepler2D: Parameter "mu" must be a finite non-negative number.`);
@@ -940,7 +994,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Kepler3D(1);
-         * const derivative = ode.rule(0, [1, 0, 0, 0, 1, 0]); // Evaluates a three-dimensional orbit state
+         * const sol = Chalkboard.diff.solve(ode, { t1: 2 * Math.PI, steps: 1000, y0: [1, 0, 0, 0, 0.8, 0.6] }); // Completes one inclined circular orbit, returning to its initial state
          */
         export const Kepler3D = (mu: number = 1): ChalkboardODE => {
             if (!Number.isFinite(mu) || mu < 0) throw new Error(`Chalkboard.diff.Kepler3D: Parameter "mu" must be a finite non-negative number.`);
@@ -959,13 +1013,27 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines Laplace's equation as a steady state: ∇²u = 0. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two.
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.Laplace();
+         * const sol = Chalkboard.diff.solve(pde, { grid: { x: [0, 2], nx: 21 }, boundary: { left: 1, right: 3 } }); // Returns the line u = 1 + x
+         */
+        export const Laplace = (dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.Laplace: Parameter "dimension" must be 1 or 2.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => uxx, { dimension: 1, order: 0 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => uxx + uyy, { dimension: 2, order: 0 }) as ChalkboardPDE;
+        };
+
+        /**
          * Defines a first-order linear scalar ODE: y' = a(t)y + b(t).
          * @param {((t: number) => number) | number} a - Coefficient a(t) or constant a.
          * @param {((t: number) => number) | number} b - Coefficient b(t) or constant b.
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.linear1(-2, 1);
-         * const derivative = ode.rule(0, [3]); // Returns [-5]
+         * const sol = Chalkboard.diff.solve(ode, { t1: 5, steps: 100, y0: 0 }); // Approaches the equilibrium y = 1/2
          */
         export const linear1 = (a: ((t: number) => number) | number, b: ((t: number) => number) | number): ChalkboardODE => {
             if ((!Number.isFinite(a)) && typeof a !== "function") throw new Error(`Chalkboard.diff.linear1: Parameter "a" must be a finite number or a function.`);
@@ -983,7 +1051,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.linear2(-1, -4, 0);
-         * const derivative = ode.rule(0, [3, 2]); // Evaluates a second-order linear equation
+         * const sol = Chalkboard.diff.solve(ode, { t1: 10, steps: 1000, y0: { y0: 1, dy0: 0 } }); // Oscillates while decaying toward y = 0
          */
         export const linear2 = (a: ((t: number) => number) | number, b: ((t: number) => number) | number, c: ((t: number) => number) | number): ChalkboardODE => {
             if ((!Number.isFinite(a)) && typeof a !== "function") throw new Error(`Chalkboard.diff.linear2: Parameter "a" must be a finite number or a function.`);
@@ -1002,7 +1070,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.logistic(1, 100);
-         * const derivative = ode.rule(0, [50]); // Returns [25]
+         * const sol = Chalkboard.diff.solve(ode, { t1: 10, steps: 1000, y0: 10 }); // Follows the S-shaped curve y = 100/(1 + 9e^(-t)) toward 100
          */
         export const logistic = (r: number = 1, K: number = 1): ChalkboardODE => {
             if (!Number.isFinite(r)) throw new Error(`Chalkboard.diff.logistic: Parameter "r" must be a finite number.`);
@@ -1018,7 +1086,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.Lorenz();
-         * const derivative = ode.rule(0, [1, 1, 1]); // Evaluates the Lorenz system
+         * const sol = Chalkboard.diff.solve(ode, { t1: 50, steps: 5000, y0: [1, 1, 1] }); // Traces the butterfly-shaped Lorenz attractor
          */
         export const Lorenz = (sigma: number = 10, rho: number = 28, beta: number = 8 / 3): ChalkboardODE => {
             if (!Number.isFinite(sigma) || !Number.isFinite(rho) || !Number.isFinite(beta)) throw new Error(`Chalkboard.diff.Lorenz: Parameters "sigma", "rho", and "beta" must be finite numbers.`);
@@ -1041,7 +1109,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.LotkaVolterra(1.5, 1, 3, 1);
-         * const derivative = ode.rule(0, [10, 5]); // Evaluates predator-prey dynamics
+         * const sol = Chalkboard.diff.solve(ode, { t1: 20, steps: 2000, y0: [10, 5] }); // Cycles around the equilibrium (3, 1.5) as prey and predators rise and fall
          */
         export const LotkaVolterra = (alpha: number = 1, beta: number = 1, gamma: number = 1, delta: number = 1): ChalkboardODE => {
             if (!Number.isFinite(alpha) || !Number.isFinite(beta) || !Number.isFinite(gamma) || !Number.isFinite(delta)) throw new Error(`Chalkboard.diff.LotkaVolterra: Parameters "alpha", "beta", "gamma", and "delta" must be finite numbers.`);
@@ -1059,7 +1127,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.massSpringDamper(2, 0.5, 8);
-         * const acceleration = ode.rule(0, [1, 0]); // Evaluates a mass-spring-damper system
+         * const sol = Chalkboard.diff.solve(ode, { t1: 20, steps: 2000, y0: { y0: 1, dy0: 0 } }); // Oscillates at an angular frequency near 2 while decaying like e^(-0.125t)
          */
         export const massSpringDamper = (m: number, c: number, k: number): ChalkboardODE => {
             if (!Number.isFinite(m) || m === 0) throw new Error(`Chalkboard.diff.massSpringDamper: Parameter "m" must be finite and non-zero.`);
@@ -1077,7 +1145,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.pendulum({ L: 2, g: 9.81 });
-         * const acceleration = ode.rule(0, [Chalkboard.PI(1 / 2), 0]); // Evaluates a simple pendulum
+         * const sol = Chalkboard.diff.solve(ode, { t1: 10, steps: 1000, y0: { y0: Chalkboard.PI(1 / 2), dy0: 0 } }); // Swings between θ = -π/2 and θ = π/2
          */
         export const pendulum = (params: { g?: number; L?: number; b?: number; tau?: (t: number) => number; } = {}): ChalkboardODE => {
             if (params === null || typeof params !== "object" || Array.isArray(params)) throw new Error(`Chalkboard.diff.pendulum: Parameter "params" must be an object.`);
@@ -1102,7 +1170,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.pendulumDrag({ L: 2, g: 9.81, c: 0.1 });
-         * const acceleration = ode.rule(0, [Chalkboard.PI(1 / 2), 1]); // Includes quadratic drag
+         * const sol = Chalkboard.diff.solve(ode, { t1: 10, steps: 1000, y0: { y0: Chalkboard.PI(1 / 2), dy0: 0 } }); // Swings with an amplitude that shrinks under quadratic drag
          */
         export const pendulumDrag = (params: { g?: number; L?: number; b?: number; c?: number; tau?: (t: number) => number; } = {}): ChalkboardODE => {
             if (params === null || typeof params !== "object" || Array.isArray(params)) throw new Error(`Chalkboard.diff.pendulumDrag: Parameter "params" must be an object.`);
@@ -1130,7 +1198,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.pendulumDriven(0.5, 1.2, 2 / 3);
-         * const acceleration = ode.rule(0, [0, 0]); // Evaluates a driven pendulum
+         * const sol = Chalkboard.diff.solve(ode, { t1: 100, steps: 10000, y0: { y0: 0, dy0: 0 } }); // Moves chaotically, sometimes swinging over the top
          */
         export const pendulumDriven = (q: number = 0.5, A: number = 1.2, Omega: number = 2 / 3): ChalkboardODE => {
             if (!Number.isFinite(q) || !Number.isFinite(A) || !Number.isFinite(Omega)) throw new Error(`Chalkboard.diff.pendulumDriven: Parameters "q", "A", and "Omega" must be finite numbers.`);
@@ -1163,6 +1231,23 @@ namespace Chalkboard {
                 result.push([row[i], row[j]]);
             }
             return result;
+        };
+
+        /**
+         * Defines Poisson's equation as a steady state: ∇²u = f. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. The source f is on the right-hand side, so a negative source gives a positive solution with zero boundaries: Poisson(-2) on [0, 1] with zero ends has the solution x(1 - x).
+         * @param {number | ((x: number, y: number) => number)} [source=0] - Source f, a constant or a function of position (called with x in one dimension and with x and y in two)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.Poisson(-2);
+         * const sol = Chalkboard.diff.solve(pde, { grid: { x: [0, 1], nx: 11 }, boundary: { left: 0, right: 0 } }); // Returns u = x(1 - x)
+         */
+        export const Poisson = (source: number | ((x: number, y: number) => number) = 0, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.Poisson: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(source) && typeof source !== "function") throw new Error(`Chalkboard.diff.Poisson: Parameter "source" must be a finite number or a function.`);
+            const f = typeof source === "number" ? ((x: number, y?: number) => source) : (source as (x: number, y?: number) => number);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => uxx - f(x), { dimension: 1, order: 0 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => uxx + uyy - f(x, y), { dimension: 2, order: 0 }) as ChalkboardPDE;
         };
 
         /**
@@ -1223,7 +1308,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.separable((t) => t, (y) => y);
-         * const derivative = ode.rule(2, [3]); // Returns [6]
+         * const sol = Chalkboard.diff.solve(ode, { t1: 2, steps: 100, y0: 1 }); // Follows y = e^(t²/2), reaching e² at t = 2
          */
         export const separable = (f: (t: number) => number, g: (y: number) => number): ChalkboardODE => {
             if (typeof f !== "function" || typeof g !== "function") throw new Error(`Chalkboard.diff.separable: Parameters "f" and "g" must be functions.`);
@@ -1238,7 +1323,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.SEIR(0.8, 0.2, 0.1);
-         * const derivative = ode.rule(0, [0.99, 0.01, 0, 0]); // Evaluates an SEIR state
+         * const sol = Chalkboard.diff.solve(ode, { t1: 100, steps: 1000, y0: [0.99, 0.01, 0, 0] }); // Runs an outbreak in which the four compartments always sum to 1
          */
         export const SEIR = (beta: number = 1, sigma: number = 1, gamma: number = 1): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(sigma) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SEIR: Parameters "beta", "sigma", and "gamma" must be finite numbers.`);
@@ -1261,7 +1346,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.SIR(0.8, 0.1);
-         * const derivative = ode.rule(0, [0.99, 0.01, 0]); // Evaluates an SIR state
+         * const sol = Chalkboard.diff.solve(ode, { t1: 50, steps: 500, y0: [0.99, 0.01, 0] }); // Runs an outbreak in which about 62% are infected at the peak
          */
         export const SIR = (beta: number = 1, gamma: number = 1): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SIR: Parameters "beta" and "gamma" must be finite numbers.`);
@@ -1278,7 +1363,7 @@ namespace Chalkboard {
          * @returns {ChalkboardODE}
          * @example
          * const ode = Chalkboard.diff.SIS(0.8, 0.1);
-         * const derivative = ode.rule(0, [0.01]); // Evaluates an SIS state
+         * const sol = Chalkboard.diff.solve(ode, { t1: 50, steps: 500, y0: 0.01 }); // Approaches the endemic level 1 - γ/β = 0.875
          */
         export const SIS = (beta: number = 1, gamma: number = 0.5): ChalkboardODE => {
             if (!Number.isFinite(beta) || !Number.isFinite(gamma)) throw new Error(`Chalkboard.diff.SIS: Parameters "beta" and "gamma" must be finite numbers.`);
@@ -1848,6 +1933,25 @@ namespace Chalkboard {
             const result: number[] = [];
             for (let i = 0; i < sol.y.length; i++) result.push(sol.y[i][0]);
             return result;
+        };
+
+        /**
+         * Defines the wave equation with optional damping: u_tt = c²∇²u - γu_t. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two.
+         * @param {number} [speed=1] - Wave speed c (must be greater than or equal to 0)
+         * @param {number} [damping=0] - Damping coefficient γ (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.wave(2);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 1, steps: 200, method: "cranknicolson", y0: { u: (x) => Math.sin(Math.PI * x), ut: () => 0 }, grid: { x: [0, 1], nx: 101 }, boundary: { left: 0, right: 0 } }); // Returns to the initial standing wave after one period
+         */
+        export const wave = (speed: number = 1, damping: number = 0, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.wave: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(speed) || speed < 0) throw new Error(`Chalkboard.diff.wave: Parameter "speed" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(damping) || damping < 0) throw new Error(`Chalkboard.diff.wave: Parameter "damping" must be a finite number greater than or equal to 0.`);
+            const c2 = speed * speed;
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number, ut?: number) => c2 * uxx - damping * ut!, { dimension: 1, order: 2 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number, uxy: number, ut?: number) => c2 * (uxx + uyy) - damping * ut!, { dimension: 2, order: 2 }) as ChalkboardPDE;
         };
     }
 }
