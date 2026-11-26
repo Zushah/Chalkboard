@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Wednesday, November 25, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Thursday, November 26, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Tuesday, November 24, 2026, [**`49feccc`**](https://github.com/Zushah/Chalkboard/commit/49feccc).
+Previous commit: Wednesday, November 25, 2026, [**`061f318`**](https://github.com/Zushah/Chalkboard/commit/061f318).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -319,7 +319,7 @@ For registration, name handling, and shared symbolic boundaries, see [§1.16. re
 
 Arity matters for scalar classification. System wrappers check output shape and selected finite values, but do not establish all mathematical domain or regularity conditions. In ODE records, `order` retains the original scalar order, while `dimension` describes the first-order state vector used by solvers; a partial differential equation's `dimension` is its number of spatial dimensions.
 
-Model constructors cover growth equations, linear equations, oscillators, pendulums, Bessel equations, Kepler motion, Lorenz and population systems, and compartment models such as SIR and SEIR. Partial differential equation models cover the heat, wave, advection, advection–diffusion, Laplace, and Poisson equations in one or two spatial dimensions, with the dimension as their last parameter. They produce the same records as `init` rather than special solver subclasses, and their coefficients, including position-dependent sources, are fixed when the record is built. Singular model terms, such as division by time in Bessel equations, remain the caller's domain concern.
+Model constructors cover growth equations, linear equations, oscillators, pendulums, Bessel equations, Kepler motion, Lorenz and population systems, and compartment models such as SIR and SEIR. Partial differential equation models cover the heat, wave, advection, advection–diffusion, Laplace, and Poisson equations, as well as nonlinear transport, reaction–diffusion, and wave equations such as Burgers', Gray–Scott, and nonlinear Schrödinger equations, in one or two spatial dimensions, with the dimension as their last parameter. Complex fields are split into real and imaginary component fields. They produce the same records as `init` rather than special solver subclasses, and their coefficients, including position-dependent sources, are fixed when the record is built. Singular model terms, such as division by time in Bessel equations, remain the caller's domain concern.
 
 `solve` provides Euler, midpoint, Heun, Ralston, and default RK4 stepping. Configuration supplies an interval and initial state plus a step size or step count. If `h` is supplied it takes precedence; the implementation derives a step count and adjusts the actual step to cover the interval. The explicit methods advance numeric arrays through shared sequence operations.
 

@@ -546,6 +546,23 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines the Allen–Cahn equation: u_t = ε²∇²u + u - u³. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. The phases u = -1 and u = 1 are separated by interfaces of width about ε.
+         * @param {number} [epsilon=0.05] - Interface width ε (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.AllenCahn(0.05);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 5, steps: 50, method: "bdf2", y0: (x) => Math.tanh(x / (Math.SQRT2 * 0.05)), grid: { x: [-1, 1], nx: 201 }, boundary: { left: { type: "neumann", value: 0 }, right: { type: "neumann", value: 0 } } }); // Keeps the stationary kink tanh(x/(√2ε)) in place
+         */
+        export const AllenCahn = (epsilon: number = 0.05, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.AllenCahn: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(epsilon) || epsilon < 0) throw new Error(`Chalkboard.diff.AllenCahn: Parameter "epsilon" must be a finite number greater than or equal to 0.`);
+            const e2 = epsilon * epsilon;
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => e2 * uxx + u - u * u * u, { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => e2 * (uxx + uyy) + u - u * u * u, { dimension: 2 }) as ChalkboardPDE;
+        };
+
+        /**
          * Samples a solution at a time using linear interpolation between the nearest grid points, with times that may be ascending or descending. (No extrapolation as it clamps to endpoints.)
          * @param {{ t: number[]; y: number[][] }} sol - The solution.
          * @param {number} time - The time to sample at.
@@ -581,7 +598,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Bernoulli equation: y' + p(t)y = q(t)y^n. Equivalent: y' = -p(t)y + q(t)y^n.
+         * Defines the Bernoulli equation: y' + p(t)y = q(t)y^n. Equivalent: y' = -p(t)y + q(t)y^n.
          * @param {number | ((t: number) => number)} p - p or p(t)
          * @param {number | ((t: number) => number)} q - q or q(t)
          * @param {number} n - Exponent
@@ -598,7 +615,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a modified Bessel equation of order ν: x²y'' + xy' - (x² + ν²)y = 0. Equivalent: y'' = -(1/x)y' + (1 + (ν²/x²))y. Note: singular at x=0. Start from x>0.
+         * Defines the modified Bessel equation of order ν: x²y'' + xy' - (x² + ν²)y = 0. Equivalent: y'' = -(1/x)y' + (1 + (ν²/x²))y. Note: singular at x=0. Start from x>0.
          * @param {number} nu - Order ν
          * @returns {ChalkboardODE}
          * @example
@@ -615,7 +632,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Bessel equation of order ν: x²y'' + xy' + (x² - ν²)y = 0. Equivalent: y'' = -(1/x)y' - (1 - (ν²/x²))y. Note: singular at x=0. Start from x>0.
+         * Defines the Bessel equation of order ν: x²y'' + xy' + (x² - ν²)y = 0. Equivalent: y'' = -(1/x)y' - (1 - (ν²/x²))y. Note: singular at x=0. Start from x>0.
          * @param {number} nu - Order ν
          * @returns {ChalkboardODE}
          * @example
@@ -630,6 +647,25 @@ namespace Chalkboard {
                 const term = 1 - (nu * nu) / (x * x);
                 return -(1 / x) * dy - term * y;
             }) as ChalkboardODE;
+        };
+
+        /**
+         * Defines the Burgers equation: u_t = -u·u_x + νu_xx in one dimension. In two dimensions it is the two-field velocity form for (u, v): u_t = -u·u_x - v·u_y + ν∇²u and v_t = -u·v_x - v·v_y + ν∇²v, where ∇² is u_xx + u_yy.
+         * @param {number} [viscosity=0.01] - Viscosity ν (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.Burgers(0.05);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 2, steps: 100, method: "bdf2", y0: (x) => 0.5 - 0.5 * Math.tanh(5 * x), grid: { x: [-2, 3], nx: 501 }, boundary: { left: 1, right: 0 } }); // Carries the front 0.5 - 0.5tanh(5(x - t/2)) to the right at speed 1/2
+         */
+        export const Burgers = (viscosity: number = 0.01, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.Burgers: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(viscosity) || viscosity < 0) throw new Error(`Chalkboard.diff.Burgers: Parameter "viscosity" must be a finite number greater than or equal to 0.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => -u * ux + viscosity * uxx, { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[]) => [
+                -u[0] * ux[0] - u[1] * uy[0] + viscosity * (uxx[0] + uyy[0]),
+                -u[0] * ux[1] - u[1] * uy[1] + viscosity * (uxx[1] + uyy[1])
+            ], { dimension: 2, components: 2 }) as ChalkboardPDE;
         };
 
         /**
@@ -704,7 +740,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Duffing equation: x'' + δx' + αx + βx^3 = γcos(ωt). Equivalent: x'' = -δx' - αx - βx^3 + γcos(ωt).
+         * Defines the Duffing equation: x'' + δx' + αx + βx^3 = γcos(ωt). Equivalent: x'' = -δx' - αx - βx^3 + γcos(ωt).
          * @param {number} delta - δ
          * @param {number} alpha - α
          * @param {number} beta - β
@@ -787,7 +823,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines an exponential growth/decay equation: y' = ky
+         * Defines the exponential growth/decay equation: y' = ky
          * @param {number} k - Rate
          * @returns {ChalkboardODE}
          * @example
@@ -800,7 +836,53 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Gompertz equation: y' = ayln(K/y).
+         * Defines the Fisher–KPP equation: u_t = D∇²u + ru(1 - u). Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. Fronts invading the state u = 0 travel at the speed 2√(Dr).
+         * @param {number} [diffusivity=1] - Diffusivity D (must be greater than or equal to 0)
+         * @param {number} [rate=1] - Growth rate r
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.FisherKPP();
+         * const sol = Chalkboard.diff.solve(pde, { t1: 30, steps: 300, method: "bdf2", y0: (x) => (x < 5 ? 1 : 0), grid: { x: [0, 120], nx: 1201 }, boundary: { left: { type: "neumann", value: 0 }, right: { type: "neumann", value: 0 } } }); // Spreads a front whose speed approaches 2
+         */
+        export const FisherKPP = (diffusivity: number = 1, rate: number = 1, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.FisherKPP: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(diffusivity) || diffusivity < 0) throw new Error(`Chalkboard.diff.FisherKPP: Parameter "diffusivity" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(rate)) throw new Error(`Chalkboard.diff.FisherKPP: Parameter "rate" must be a finite number.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => diffusivity * uxx + rate * u * (1 - u), { dimension: 1 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => diffusivity * (uxx + uyy) + rate * u * (1 - u), { dimension: 2 }) as ChalkboardPDE;
+        };
+
+        /**
+         * Defines the FitzHugh–Nagumo equations for an excitable medium with fields (v, w): v_t = D∇²v + v - v³/3 - w and w_t = ε(v + a - bw). Here ∇²v is v_xx in one dimension and v_xx + v_yy in two. Only v diffuses, and w is a slow recovery variable.
+         * @param {number} [diffusivity=1] - Diffusivity D of v (must be greater than or equal to 0)
+         * @param {number} [a=0.7] - Offset a
+         * @param {number} [b=0.8] - Recovery coefficient b
+         * @param {number} [epsilon=0.08] - Time-scale ratio ε (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.FitzHughNagumo();
+         * const sol = Chalkboard.diff.solve(pde, { t1: 40, steps: 400, method: "bdf2", y0: (x) => [x < 5 ? 1.5 : -1.2, -0.62], grid: { x: [0, 100], nx: 501 }, boundary: { left: { type: "neumann", value: 0 }, right: { type: "neumann", value: 0 } } }); // Sends a pulse to the right at a speed of about 0.8
+         */
+        export const FitzHughNagumo = (diffusivity: number = 1, a: number = 0.7, b: number = 0.8, epsilon: number = 0.08, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.FitzHughNagumo: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(diffusivity) || diffusivity < 0) throw new Error(`Chalkboard.diff.FitzHughNagumo: Parameter "diffusivity" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(a)) throw new Error(`Chalkboard.diff.FitzHughNagumo: Parameter "a" must be a finite number.`);
+            if (!Number.isFinite(b)) throw new Error(`Chalkboard.diff.FitzHughNagumo: Parameter "b" must be a finite number.`);
+            if (!Number.isFinite(epsilon) || epsilon < 0) throw new Error(`Chalkboard.diff.FitzHughNagumo: Parameter "epsilon" must be a finite number greater than or equal to 0.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number[], ux: number[], uxx: number[]) => [
+                diffusivity * uxx[0] + u[0] - u[0] * u[0] * u[0] / 3 - u[1],
+                epsilon * (u[0] + a - b * u[1])
+            ], { dimension: 1, components: 2 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[]) => [
+                diffusivity * (uxx[0] + uyy[0]) + u[0] - u[0] * u[0] * u[0] / 3 - u[1],
+                epsilon * (u[0] + a - b * u[1])
+            ], { dimension: 2, components: 2 }) as ChalkboardPDE;
+        };
+
+        /**
+         * Defines the Gompertz equation: y' = ayln(K/y).
          * @param {number} a - Growth rate
          * @param {number} K - Carrying capacity (K > 0)
          * @returns {ChalkboardODE}
@@ -815,7 +897,36 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines an undamped harmonic oscillator: y'' + (w²)y = 0. Equivalent: y'' = -(w²)y.
+         * Defines the Gray–Scott reaction–diffusion equations with fields (u, v): u_t = D_u∇²u - uv² + F(1 - u) and v_t = D_v∇²v + uv² - (F + k)v. Here ∇² is the second derivative in x in one dimension and the sum of the second derivatives in x and y in two. The default diffusivities are the classic values for a domain about 2.5 units wide, so they should be scaled with the square of the domain's width.
+         * @param {number} [feed=0.04] - Feed rate F
+         * @param {number} [kill=0.06] - Kill rate k
+         * @param {number} [diffusivityU=2e-5] - Diffusivity D_u of u (must be greater than or equal to 0)
+         * @param {number} [diffusivityV=1e-5] - Diffusivity D_v of v (must be greater than or equal to 0)
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.GrayScott();
+         * const sol = Chalkboard.diff.solve(pde, { t1: 2000, steps: 2000, method: "bdf2", y0: (x) => (Math.abs(x - 0.5) < 0.05 ? [0.5, 0.25] : [1, 0]), grid: { x: [0, 1], nx: 201 }, boundary: "periodic" }); // Splits a central spot into a row of peaks in v
+         */
+        export const GrayScott = (feed: number = 0.04, kill: number = 0.06, diffusivityU: number = 2e-5, diffusivityV: number = 1e-5, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.GrayScott: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(feed)) throw new Error(`Chalkboard.diff.GrayScott: Parameter "feed" must be a finite number.`);
+            if (!Number.isFinite(kill)) throw new Error(`Chalkboard.diff.GrayScott: Parameter "kill" must be a finite number.`);
+            if (!Number.isFinite(diffusivityU) || diffusivityU < 0) throw new Error(`Chalkboard.diff.GrayScott: Parameter "diffusivityU" must be a finite number greater than or equal to 0.`);
+            if (!Number.isFinite(diffusivityV) || diffusivityV < 0) throw new Error(`Chalkboard.diff.GrayScott: Parameter "diffusivityV" must be a finite number greater than or equal to 0.`);
+            const removal = feed + kill;
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number[], ux: number[], uxx: number[]) => {
+                const uvv = u[0] * u[1] * u[1];
+                return [diffusivityU * uxx[0] - uvv + feed * (1 - u[0]), diffusivityV * uxx[1] + uvv - removal * u[1]];
+            }, { dimension: 1, components: 2 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[]) => {
+                const uvv = u[0] * u[1] * u[1];
+                return [diffusivityU * (uxx[0] + uyy[0]) - uvv + feed * (1 - u[0]), diffusivityV * (uxx[1] + uyy[1]) + uvv - removal * u[1]];
+            }, { dimension: 2, components: 2 }) as ChalkboardPDE;
+        };
+
+        /**
+         * Defines the undamped harmonic oscillator: y'' + (w²)y = 0. Equivalent: y'' = -(w²)y.
          * @param {number} w - Angular frequency (must be greater than or equal to 0)
          * @returns {ChalkboardODE}
          * @example
@@ -828,7 +939,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a damped harmonic oscillator: y'' + (2ζω)y' + (ω²)y = 0. Equivalent: y'' = -(2ζω)y' - (ω²)y.
+         * Defines the damped harmonic oscillator: y'' + (2ζω)y' + (ω²)y = 0. Equivalent: y'' = -(2ζω)y' - (ω²)y.
          * @param {number} w - Angular frequency (must be greater than or equal to 0)
          * @param {number} zeta - Damping ratio (must be greater than or equal to 0)
          * @returns {ChalkboardODE}
@@ -843,7 +954,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a forced harmonic oscillator: y'' + (2ζω)y' + (ω²)y = F(t). Equivalent: y'' = F(t) - (2ζω)y' - (ω²)y.
+         * Defines the forced harmonic oscillator: y'' + (2ζω)y' + (ω²)y = F(t). Equivalent: y'' = F(t) - (2ζω)y' - (ω²)y.
          * @param {number} w - Angular frequency (must be greater than or equal to 0)
          * @param {number} zeta - Damping ratio (must be greater than or equal to 0)
          * @param {(t: number) => number} F - Forcing term
@@ -967,7 +1078,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Kepler two-body problem in 2D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, vx, vy].
+         * Defines the Kepler two-body problem in 2D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, vx, vy].
          * @param {number} [mu=1] - Gravitational parameter μ = G(M+m)
          * @returns {ChalkboardODE}
          * @example
@@ -989,7 +1100,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Kepler two-body problem in 3D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, z, vx, vy, vz].
+         * Defines the Kepler two-body problem in 3D (inverse-square central force). Unit mass: r'' = -μr / |r|^3. State: [x, y, z, vx, vy, vz].
          * @param {number} [mu=1] - Gravitational parameter μ = G(M+m)
          * @returns {ChalkboardODE}
          * @example
@@ -1013,7 +1124,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines Laplace's equation as a steady state: ∇²u = 0. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two.
+         * Defines the Laplace equation as a steady state: ∇²u = 0. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two.
          * @param {1 | 2} [dimension=1] - Number of spatial dimensions
          * @returns {ChalkboardPDE}
          * @example
@@ -1027,7 +1138,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a first-order linear scalar ODE: y' = a(t)y + b(t).
+         * Defines the first-order linear scalar ODE: y' = a(t)y + b(t).
          * @param {((t: number) => number) | number} a - Coefficient a(t) or constant a.
          * @param {((t: number) => number) | number} b - Coefficient b(t) or constant b.
          * @returns {ChalkboardODE}
@@ -1044,7 +1155,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a second-order linear scalar ODE: y'' = a(t)y' + b(t)y + c(t).
+         * Defines the second-order linear scalar ODE: y'' = a(t)y' + b(t)y + c(t).
          * @param {((t: number) => number) | number} a - Coefficient a(t) or constant a.
          * @param {((t: number) => number) | number} b - Coefficient b(t) or constant b.
          * @param {((t: number) => number) | number} c - Coefficient c(t) or constant c.
@@ -1064,7 +1175,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a logistic growth model: y' = ry(1 - y/K).
+         * Defines the logistic growth model: y' = ry(1 - y/K).
          * @param {number} r - Growth rate
          * @param {number} K - Carrying capacity (non-zero)
          * @returns {ChalkboardODE}
@@ -1079,7 +1190,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Lorenz attractor: x' = σ(y - x), y' = x(ρ - z) - y, z' = xy - βz, state: [x, y, z].
+         * Defines the Lorenz attractor: x' = σ(y - x), y' = x(ρ - z) - y, z' = xy - βz, state: [x, y, z].
          * @param {number} [sigma=10] - σ, Prandtl number
          * @param {number} [rho=28] - ρ, Rayleigh number
          * @param {number} [beta=8/3] - β, geometric factor
@@ -1101,7 +1212,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a Lotka–Volterra predator-prey model: x' = αx - βxy, y' = δxy - γy.
+         * Defines the Lotka–Volterra predator-prey model: x' = αx - βxy, y' = δxy - γy.
          * @param {number} alpha - Prey growth rate
          * @param {number} beta - Predation rate
          * @param {number} gamma - Predator death rate
@@ -1120,7 +1231,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a mass-spring-damper system: mx'' + cx' + kx = 0. Equivalent: x'' = -(c/m)x' - (k/m)x.
+         * Defines the mass-spring-damper system: mx'' + cx' + kx = 0. Equivalent: x'' = -(c/m)x' - (k/m)x.
          * @param {number} m - Mass (non-zero)
          * @param {number} c - Damping
          * @param {number} k - Spring constant
@@ -1137,7 +1248,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a pendulum (nonlinear) with optional damping and external torque: θ'' + (b)θ' + (g/L)sin(θ) = τ(t). Equivalent: θ'' = τ(t) - bθ' - (g/L)sin(θ).
+         * Defines the pendulum (nonlinear) with optional damping and external torque: θ'' + (b)θ' + (g/L)sin(θ) = τ(t). Equivalent: θ'' = τ(t) - bθ' - (g/L)sin(θ).
          * @param {number} [params.g=9.81] - Gravity (greater than or equal to 0)
          * @param {number} [params.L=1] - Length (non-zero)
          * @param {number} [params.b=0] - Damping coefficient
@@ -1161,7 +1272,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a pendulum with linear (viscous) and quadratic (turbulent-ish) drag: θ'' + bθ' + c|θ'|θ' + (g/L)sin(θ) = τ(t). Equivalent: θ'' = τ(t) - bθ' - c|θ'|θ' - (g/L)sin(θ).
+         * Defines the pendulum with linear (viscous) and quadratic (turbulent-ish) drag: θ'' + bθ' + c|θ'|θ' + (g/L)sin(θ) = τ(t). Equivalent: θ'' = τ(t) - bθ' - c|θ'|θ' - (g/L)sin(θ).
          * @param {number} [params.g=9.81] - Gravity (greater than or equal to 0)
          * @param {number} [params.L=1] - Length (non-zero)
          * @param {number} [params.b=0] - Linear damping coefficient
@@ -1191,7 +1302,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a driven damped pendulum in a common parameterization: θ'' + qθ' + sin(θ) = Acos(Ωt). Equivalent: θ'' = Acos(Ωt) - qθ' - sin(θ). This is the dimensionless form (g/L scaled out).
+         * Defines the driven damped pendulum in a common parameterization: θ'' + qθ' + sin(θ) = Acos(Ωt). Equivalent: θ'' = Acos(Ωt) - qθ' - sin(θ). This is the dimensionless form (g/L scaled out).
          * @param {number} [q=0.5] - Damping
          * @param {number} [A=1.2] - Drive amplitude
          * @param {number} [Omega=2/3] - Drive frequency
@@ -1234,7 +1345,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines Poisson's equation as a steady state: ∇²u = f. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. The source f is on the right-hand side, so a negative source gives a positive solution with zero boundaries: Poisson(-2) on [0, 1] with zero ends has the solution x(1 - x).
+         * Defines the Poisson equation as a steady state: ∇²u = f. Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. The source f is on the right-hand side, so a negative source gives a positive solution with zero boundaries: Poisson(-2) on [0, 1] with zero ends has the solution x(1 - x).
          * @param {number | ((x: number, y: number) => number)} [source=0] - Source f, a constant or a function of position (called with x in one dimension and with x and y in two)
          * @param {1 | 2} [dimension=1] - Number of spatial dimensions
          * @returns {ChalkboardPDE}
@@ -1302,6 +1413,31 @@ namespace Chalkboard {
         };
 
         /**
+         * Defines the nonlinear Schrödinger equation: iψ_t = -½∇²ψ + Vψ + g|ψ|²ψ, with ħ = m = 1. Here ∇² is the second derivative in x in one dimension and the sum of the second derivatives in x and y in two. The complex field ψ is split into the fields p = Re ψ and q = Im ψ, so with W = V + g(p² + q²) the equations are p_t = -½∇²q + Wq and q_t = ½∇²p - Wp. A negative nonlinearity is focusing and supports bright solitons, a positive one is defocusing, and 0 gives the linear equation.
+         * @param {number | ((x: number, y: number) => number)} [potential=0] - Potential V, a constant or a function of position (called with x in one dimension and with x and y in two)
+         * @param {number} [nonlinearity=0] - Nonlinearity g
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.Schrodinger(0, -1);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 2, steps: 200, method: "cranknicolson", y0: (x) => [1 / Math.cosh(x), 0], grid: { x: [-15, 15], nx: 601 }, boundary: { left: 0, right: 0 } }); // Keeps the soliton |ψ| = sech(x) in shape while its phase advances by t/2
+         */
+        export const Schrodinger = (potential: number | ((x: number, y: number) => number) = 0, nonlinearity: number = 0, dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.Schrodinger: Parameter "dimension" must be 1 or 2.`);
+            if (!Number.isFinite(potential) && typeof potential !== "function") throw new Error(`Chalkboard.diff.Schrodinger: Parameter "potential" must be a finite number or a function.`);
+            if (!Number.isFinite(nonlinearity)) throw new Error(`Chalkboard.diff.Schrodinger: Parameter "nonlinearity" must be a finite number.`);
+            const V = typeof potential === "number" ? ((x: number, y?: number) => potential) : (potential as (x: number, y?: number) => number);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number[], ux: number[], uxx: number[]) => {
+                const W = V(x) + nonlinearity * (u[0] * u[0] + u[1] * u[1]);
+                return [-0.5 * uxx[1] + W * u[1], 0.5 * uxx[0] - W * u[0]];
+            }, { dimension: 1, components: 2 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number[], ux: number[], uy: number[], uxx: number[], uyy: number[]) => {
+                const W = V(x, y) + nonlinearity * (u[0] * u[0] + u[1] * u[1]);
+                return [-0.5 * (uxx[1] + uyy[1]) + W * u[1], 0.5 * (uxx[0] + uyy[0]) - W * u[0]];
+            }, { dimension: 2, components: 2 }) as ChalkboardPDE;
+        };
+
+        /**
          * Defines a separable ODE: y' = f(t)g(y)
          * @param {(t: number) => number} f - f(t)
          * @param {(y: number) => number} g - g(y)
@@ -1316,7 +1452,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a SEIR epidemic model: S' = -βSI, E' = βSI - σE, I' = σE - γI, R' = γI.
+         * Defines the SEIR epidemic model: S' = -βSI, E' = βSI - σE, I' = σE - γI, R' = γI.
          * @param {number} beta - Infection rate
          * @param {number} sigma - Incubation rate
          * @param {number} gamma - Recovery rate
@@ -1340,7 +1476,22 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a SIR epidemic model: S' = -βSI, I' = βSI - γI, R' = γI.
+         * Defines the sine-Gordon equation: u_tt = ∇²u - sin(u). Here ∇²u is u_xx in one dimension and u_xx + u_yy in two. In one dimension, its kinks 4atan(exp(γ(x - vt))) with γ = 1/√(1 - v²) travel at any speed v below 1.
+         * @param {1 | 2} [dimension=1] - Number of spatial dimensions
+         * @returns {ChalkboardPDE}
+         * @example
+         * const pde = Chalkboard.diff.sineGordon();
+         * const g = 1 / Math.sqrt(0.75);
+         * const sol = Chalkboard.diff.solve(pde, { t1: 10, steps: 500, method: "cranknicolson", y0: { u: (x) => 4 * Math.atan(Math.exp(g * x)), ut: (x) => -g / Math.cosh(g * x) }, grid: { x: [-20, 20], nx: 801 }, boundary: { left: 0, right: 2 * Math.PI } }); // Moves the kink to x = 5 at speed 1/2
+         */
+        export const sineGordon = (dimension: 1 | 2 = 1): ChalkboardPDE => {
+            if (dimension !== 1 && dimension !== 2) throw new Error(`Chalkboard.diff.sineGordon: Parameter "dimension" must be 1 or 2.`);
+            if (dimension === 1) return Chalkboard.diff.init((t: number, x: number, u: number, ux: number, uxx: number) => uxx - Math.sin(u), { dimension: 1, order: 2 }) as ChalkboardPDE;
+            return Chalkboard.diff.init((t: number, x: number, y: number, u: number, ux: number, uy: number, uxx: number, uyy: number) => uxx + uyy - Math.sin(u), { dimension: 2, order: 2 }) as ChalkboardPDE;
+        };
+
+        /**
+         * Defines the SIR epidemic model: S' = -βSI, I' = βSI - γI, R' = γI.
          * @param {number} beta - Infection rate
          * @param {number} gamma - Recovery rate
          * @returns {ChalkboardODE}
@@ -1357,7 +1508,7 @@ namespace Chalkboard {
         };
 
         /**
-         * Defines a SIS epidemic model with total population normalized to 1: S + I = 1, I' = βI(1 - I) - γI.
+         * Defines the SIS epidemic model with total population normalized to 1: S + I = 1, I' = βI(1 - I) - γI.
          * @param {number} beta - Infection rate
          * @param {number} gamma - Recovery rate
          * @returns {ChalkboardODE}

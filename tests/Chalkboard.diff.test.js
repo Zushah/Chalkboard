@@ -103,6 +103,25 @@ import cb from "@zushah/chalkboard";
     assert.deepStrictEqual([cb.diff.heat(), cb.diff.wave(), cb.diff.advection(), cb.diff.advectionDiffusion(), cb.diff.Laplace(), cb.diff.Poisson()].map((pde) => pde.order), [1, 2, 1, 1, 0, 0]);
 }
 
+// diff.AllenCahn, diff.Burgers, diff.FisherKPP, diff.FitzHughNagumo, diff.GrayScott, diff.Schrodinger, diff.sineGordon
+{
+    assert.strictEqual(cb.diff.Burgers(0.5).rule(0, 0, 2, 3, 4), -4);
+    assert.deepStrictEqual(cb.diff.Burgers(0.5, 2).rule(0, 0, 0, [1, 2], [3, 4], [5, 6], [7, 8], [9, 10]), [-5, -7]);
+    assert.strictEqual(cb.diff.FisherKPP(2, 3).rule(0, 0, 0.5, 0, 1), 2.75);
+    assert.strictEqual(cb.diff.FisherKPP(2, 3, 2).rule(0, 0, 0, 0.5, 0, 0, 1, 1), 4.75);
+    assert.strictEqual(cb.diff.AllenCahn(0.5).rule(0, 0, 2, 0, 4), -5);
+    assert.strictEqual(cb.diff.AllenCahn(0.5, 2).rule(0, 0, 0, 2, 0, 0, 4, 4), -4);
+    assert.deepStrictEqual(cb.diff.GrayScott(0.5, 0.25, 2, 1).rule(0, 0, [1, 2], [0, 0], [3, 4]), [2, 6.5]);
+    assert.deepStrictEqual(cb.diff.GrayScott(0.5, 0.25, 2, 1, 2).rule(0, 0, 0, [1, 2], [0, 0], [0, 0], [3, 4], [1, 1]), [4, 7.5]);
+    assert.deepStrictEqual(cb.diff.FitzHughNagumo(2, 0.5, 0.25, 0.5).rule(0, 0, [3, 1], [0, 0], [1, 0]), [-5, 1.625]);
+    assert.deepStrictEqual(cb.diff.FitzHughNagumo(2, 0.5, 0.25, 0.5, 2).rule(0, 0, 0, [3, 1], [0, 0], [0, 0], [1, 0], [1, 0]), [-3, 1.625]);
+    assert.deepStrictEqual(cb.diff.Schrodinger(2, 1).rule(0, 0, [1, 2], [0, 0], [4, 6]), [11, -5]);
+    assert.deepStrictEqual(cb.diff.Schrodinger((x, y) => x + y, 0, 2).rule(0, 1, 2, [1, 2], [0, 0], [0, 0], [4, 6], [2, 2]), [2, 0]);
+    assert.strictEqual(cb.diff.sineGordon().rule(0, 0, Math.PI / 2, 0, 3), 2);
+    assert.strictEqual(cb.diff.sineGordon(2).rule(0, 0, 0, Math.PI / 2, 0, 0, 1, 2), 2);
+    assert.deepStrictEqual([cb.diff.Burgers(), cb.diff.Burgers(0.01, 2), cb.diff.FisherKPP(), cb.diff.AllenCahn(), cb.diff.GrayScott(), cb.diff.FitzHughNagumo(), cb.diff.Schrodinger(), cb.diff.sineGordon()].map((pde) => [pde.order, pde.components]), [[1, 1], [1, 2], [1, 1], [1, 1], [1, 2], [1, 2], [1, 2], [2, 1]]);
+}
+
 // diff.solve, diff.solveAdaptive, diff.error, diff.snapshot
 {
     const final = (sol) => sol.y[sol.y.length - 1];
