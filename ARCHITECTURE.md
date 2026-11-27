@@ -1,8 +1,8 @@
 # Chalkboard Architecture
 
-Latest commit: Thursday, November 26, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
+Latest commit: Friday, November 27, 2026, [**`current`**](https://github.com/Zushah/Chalkboard/commit/HEAD).
 
-Previous commit: Wednesday, November 25, 2026, [**`061f318`**](https://github.com/Zushah/Chalkboard/commit/061f318).
+Previous commit: Thursday, November 26, 2026, [**`bf171aa`**](https://github.com/Zushah/Chalkboard/commit/bf171aa).
 
 Latest release: Monday, November 2, 2026, [**`v3.1.0`**](https://github.com/Zushah/Chalkboard/releases/tag/v3.1.0).
 
@@ -122,6 +122,7 @@ flowchart TB
         NUMB --> TRIG
         PLOT --> CALC
         PLOT --> COMP
+        PLOT --> DIFF
         PLOT --> REAL
         PLOT --> STAT
         PLOT --> TRIG
@@ -204,7 +205,7 @@ Shapes also overlap. A matrix is structurally a tensor and can represent a row o
 
 `APPLY` handles complex and quaternion components, object-form vectors, arrays interpreted as matrices or recursive tensors, scalars, and finite sets or structures. Applying it to a finite set or structure returns an array of mapped elements; it does not reconstruct operations or a membership predicate. An unenumerated set cannot be mapped this way. Its shape dispatcher does not implement every input coercion accepted by `vect`, including typed-array and string vector inputs.
 
-Configuration is shared across callers of the same namespace object. `vect.modeConfig` and `bool.modeConfig` retain their own mutable output modes. `CONTEXT` and `REGISTRY` are directly visible mutable state. There is no per-consumer configuration object that isolates these choices automatically.
+Configuration is shared across callers of the same namespace object. `vect.modeConfig` and `bool.modeConfig` retain their own mutable output modes. `plot.colorpaletteConfig` retains the plotting palette and the colors it has assigned. `CONTEXT` and `REGISTRY` are directly visible mutable state. There is no per-consumer configuration object that isolates these choices automatically.
 
 ### 1.5. Composition and dependency direction
 
@@ -215,7 +216,7 @@ The strongest boundaries are representation contracts rather than a strict hiera
 - `stat.regression` uses matrix operations and returns a real function record that other function consumers can evaluate or plot.
 - `comp.parse` delegates real subexpressions to `real.parse`.
 - `abal` uses scalar and structured arithmetic from other namespaces and provides set/structure interpretations of their data.
-- `plot` consumes mathematical functions, coordinates, matrices, statistics, calculus results, and sampled ODE solutions.
+- `plot` consumes mathematical functions, coordinates, matrices, statistics, calculus results, and sampled differential equations solutions.
 
 This is not a directed acyclic dependency graph. `real` and `numb` call each other; vector and matrix operations and conversions cross in both directions; `stat`, `matr`, `tens`, and `abal` have reciprocal uses. A namespace's apparent subject-level position does not establish initialization order or independence.
 
@@ -378,6 +379,8 @@ The private configuration helper derives a default origin from the canvas center
 
 An explicit `config.context` is normally the direct context boundary. Otherwise the helper resolves `Chalkboard.CONTEXT` as a JavaScript expression through `Function`. The expression must be accessible in that evaluation scope; a module-local `const ctx` is not automatically such a binding. A restrictive Content Security Policy can also affect this lookup. `xyplane` and `rOplane` additionally consult the default context for canvas dimensions even when an explicit context is supplied. `geom.line3D` has its own default-context lookup.
 
+Colors come from explicit styles, color maps, or a color palette. Built-in color maps are fixed lists of evenly spaced stops interpolated linearly in RGB, and custom maps and palettes are lists of `#rrggbb` or `rgb()` strings; `colormap` and `colorpalette` return color strings for any caller. Plots that accept a color map color each segment, point, or arrow by a chosen variable over a range that defaults to the plotted values' extent, so an animation that needs stable colors must fix the range. `colorpaletteConfig` sets the namespace's shared palette, which is off by default. While it is set, a plot without an explicit style takes the next palette color the first time it sees its input objects and keeps that color while those objects are reused, and objects can be assigned colors in order; inputs recreated for every frame receive new colors.
+
 The major drawing paths consume different mathematical objects:
 
 | Plot family | Input and behavior |
@@ -389,8 +392,9 @@ The major drawing paths consume different mathematical objects:
 | Matrices | A planar visualization using the first two rows/columns and vector drawing; not arbitrary matrix rendering. |
 | Statistical plots | Numeric samples, point pairs, or bins built through statistical helpers. |
 | `ode` | Existing `{ t, y }` solution samples, drawing a component against time or a phase pair selected by `phase`, `i`, and `j`. |
+| `pde` | Partial differential equation solutions at one time, as a profile in one dimension or a heat map of grid cells in two. |
 
-Complex domain coloring samples tiles and maps argument and magnitude to color. Real function drawing uses finite sampling and discontinuity heuristics. Expensive callbacks can be evaluated repeatedly for drawing and for returned data. Support for a shared three- or four-dimensional function type does not imply a three-dimensional surface renderer.
+Complex domain coloring samples tiles and by default maps the argument through a cyclic color map and the magnitude to lightness, from black at zeros to white at poles and non-finite values; argument-only and magnitude-only colorings are options. Real function drawing uses finite sampling and discontinuity heuristics. Expensive callbacks can be evaluated repeatedly for drawing and for returned data. Support for a shared three- or four-dimensional function type does not imply a three-dimensional surface renderer.
 
 Return values are operation-specific. Curves often return paired arrays, statistical bar/line plots can return bins, and matrix plotting returns its input matrix. Some function paths return sampled parameter/value pairs using a different scale treatment from the coordinates used for drawing. Do not assume every plot returns a uniform series schema or exact screen-to-data correspondence.
 
